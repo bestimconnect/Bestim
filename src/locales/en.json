@@ -1,6 +1,134 @@
 {
   "back": "Back",
-  "tabs": { "home": "Home", "vehicles": "Vehicles", "capture": "Log", "reminders": "Reminders", "account": "Account" },
-  "language": { "title": "Choose your language", "ar": "العربية", "en": "English" },
-  "welcome": { "title": "Welcome to Bestim" }
+  "tabs": {
+    "home": "Home",
+    "vehicles": "Vehicles",
+    "capture": "Log",
+    "reminders": "Reminders",
+    "account": "Account"
+  },
+  "language": {
+    "title": "Let's start with your language",
+    "ar": "العربية",
+    "en": "English",
+    "body": "Your journey is easier when details are clear.",
+    "arRegion": "مصر والخليج",
+    "enRegion": "English",
+    "cta": "Let's start"
+  },
+  "welcome": {
+    "title": "Welcome to Bestim"
+  },
+  "auth": {
+    "welcome": {
+      "title": "Your car deserves your care.",
+      "subtitle": "Log maintenance, track schedules, and know where your money goes. Step by step.",
+      "primaryCta": "Add your first vehicle",
+      "secondaryCta": "I have an account"
+    },
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Welcome back. Sign in to keep up with your car.",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Create your account to start tracking your car's maintenance.",
+      "fullName": "Full name",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "subtitle": "Enter your email and we'll send you a link to reset your password.",
+      "email": "Email",
+      "submit": "Send reset link"
+    },
+    "verifyEmail": {
+      "title": "Check your email",
+      "subtitle": "We sent you a link by email. Open it to continue setup.",
+      "subtitleWithEmail": "We sent a link to {{email}}. Open it to continue setup.",
+      "backToLogin": "Go to sign in"
+    },
+    "profileSetup": {
+      "title": "Your profile",
+      "subtitle": "Add a photo and your name to show on your account.",
+      "fullName": "Full name",
+      "submit": "Continue"
+    },
+    "common": {
+      "or": "or",
+      "google": "Continue with Google",
+      "apple": "Continue with Apple",
+      "errors": {
+        "email": "Enter a valid email address",
+        "passwordMin": "Password must be at least 6 characters",
+        "fullNameRequired": "Enter your full name"
+      }
+    }
+  },
+  "onboarding": {
+    "tour": {
+      "next": "Next",
+      "done": "Let's start with your car",
+      "skip": "Skip the tour",
+      "voice": {
+        "title": "Say it out loud.\nWe'll organize it.",
+        "body": "Tell us what you did, then review the details before we save it to your vehicle's log."
+      },
+      "reminders": {
+        "title": "Today's step.\nPeace of mind on schedule.",
+        "body": "Know your upcoming maintenance, its date, and how it's calculated.",
+        "cardLabel": "Your next schedule"
+      },
+      "history": {
+        "title": "Every maintenance\ntells a part.",
+        "body": "Keep your car's history. The original stays saved, and edits appear alongside it.",
+        "cardLabel": "Record saved",
+        "cardSubLabel": "Every step has a date"
+      }
+    },
+    "addVehicle": {
+      "info": {
+        "header": "Your first vehicle",
+        "title": "Tell us about your vehicle",
+        "make": "Make",
+        "model": "Model",
+        "year": "Year",
+        "required": "This field is required",
+        "yearInvalid": "Enter a valid year",
+        "cta": "Next: Odometer reading"
+      },
+      "odometer": {
+        "header": "Odometer reading",
+        "title": "This is where we start calculating",
+        "label": "Current odometer reading",
+        "body": "This reading will help us calculate your upcoming maintenance schedule.",
+        "unit": {
+          "km": "km",
+          "mi": "mi"
+        },
+        "invalid": "Enter a valid number",
+        "equipmentTitle": "Using equipment?",
+        "equipmentBody": "Choose operating hours instead of kilometers.",
+        "cta": "Next: First maintenance"
+      },
+      "firstLog": {
+        "header": "First record",
+        "title": "What was your last maintenance?",
+        "body": "One record is enough to start scheduling.",
+        "cost": "Cost (optional)",
+        "finish": "Finish setup",
+        "skip": "Skip this step"
+      }
+    }
+  }
 }

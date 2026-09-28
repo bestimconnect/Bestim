@@ -19,7 +19,7 @@ export function Button({ title, variant = 'primary', loading, disabled, classNam
     <Pressable
       accessibilityRole="button"
       disabled={disabled || loading}
-      className={`h-14 flex-row items-center justify-center rounded-field px-6 active:opacity-80 ${s.box} ${disabled ? 'opacity-50' : ''} ${className}`}
+      className={`h-[52px] flex-row items-center justify-center rounded-field px-6 active:opacity-80 ${s.box} ${disabled ? 'opacity-50' : ''} ${className}`}
       style={{ boxShadow: s.shadow }}
       {...rest}>
       {loading ? <ActivityIndicator color="#222E29" /> : <Text variant="label" className={s.text}>{title}</Text>}

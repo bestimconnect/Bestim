@@ -1,7 +1,7 @@
 # Figma screen map
 
 File key `69ivy8SOlNYxeSTUxM00Km`, page `02 · Screens v1` (77:9330).
-Read it via the claude.ai Figma connector (account shaadygamal@gmail.com). The figma plugin MCP account (sga@) has no access.
+Read it via the claude.ai Figma connector (account shaadygamal@gmail.com). **Starter plan = 20 MCP reads/month.** Prefer `docs/figma-metadata.xml` (full layer tree with sizes + all text, pulled 2026-09-28) and PNG exports in `docs/figma/` over MCP calls.
 Components frames: ar-light 167:56782, ar-dark 167:60605, en-light 167:64428, en-dark 167:68251.
 
 | # | Screen | ar-light | ar-dark | en-light | en-dark |
