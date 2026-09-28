@@ -336,6 +336,17 @@ email_optional = false
 
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
 # You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.
+
+# Native Google Sign-In (src/lib/auth.ts). Web + iOS client IDs; the secret comes from .env at push time.
+[auth.external.google]
+enabled = true
+client_id = "142425271367-l588g25ulra7t5iur3ru3meqsvv6hk23.apps.googleusercontent.com,142425271367-lhncgl8hjfvvrffsjb3qqrml0c13ua48.apps.googleusercontent.com"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+redirect_uri = ""
+url = ""
+# Native iOS Google Sign-In tokens carry a nonce Supabase can't verify.
+skip_nonce_check = true
+email_optional = false
 [auth.web3.solana]
 enabled = false
 
