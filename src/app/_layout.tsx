@@ -43,7 +43,7 @@ function App() {
       return data;
     },
   });
-  // Guests (no session) may browse; signed-in users finish onboarding first.
+  // ponytail: signed-out users always land on welcome; add a `guest` flag when guest browsing (screen 36) ships.
   const ready = fontsLoaded && hydrated && session !== undefined && (!userId || !profile.isPending);
 
   useEffect(() => useSettings.persist.onFinishHydration(() => setHydrated(true)), []);
@@ -52,10 +52,11 @@ function App() {
     if (!language) router.replace('/language');
     else {
       applyLanguage(language);
-      if (profile.data && !profile.data.onboarding_completed) router.replace('/tour-voice');
+      if (!userId) router.replace('/welcome');
+      else if (profile.data && !profile.data.onboarding_completed) router.replace('/tour-voice');
     }
     SplashScreen.hideAsync();
-  }, [ready, language, profile.data]);
+  }, [ready, language, userId, profile.data]);
 
   if (!ready) return null;
   return (
