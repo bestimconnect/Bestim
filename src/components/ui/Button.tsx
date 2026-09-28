@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, type PressableProps } from 'react-native';
 
 import { shadows } from '@/lib/theme';
@@ -11,18 +12,25 @@ const styles = {
   danger: { box: 'bg-danger', text: 'text-[#FFFFFF]', shadow: undefined },
 };
 
-type Props = PressableProps & { title: string; variant?: keyof typeof styles; loading?: boolean; className?: string };
+type Props = PressableProps & { title: string; variant?: keyof typeof styles; loading?: boolean; icon?: ReactNode; className?: string };
 
-export function Button({ title, variant = 'primary', loading, disabled, className = '', ...rest }: Props) {
+export function Button({ title, variant = 'primary', loading, icon, disabled, className = '', ...rest }: Props) {
   const s = styles[variant];
   return (
     <Pressable
       accessibilityRole="button"
       disabled={disabled || loading}
-      className={`h-[52px] flex-row items-center justify-center rounded-field px-6 active:opacity-80 ${s.box} ${disabled ? 'opacity-50' : ''} ${className}`}
+      className={`h-[52px] flex-row items-center justify-center gap-2 rounded-field px-6 active:opacity-80 ${s.box} ${disabled ? 'opacity-50' : ''} ${className}`}
       style={{ boxShadow: s.shadow }}
       {...rest}>
-      {loading ? <ActivityIndicator color="#222E29" /> : <Text variant="label" className={s.text}>{title}</Text>}
+      {loading ? (
+        <ActivityIndicator color="#222E29" />
+      ) : (
+        <>
+          {icon}
+          <Text variant="label" className={s.text}>{title}</Text>
+        </>
+      )}
     </Pressable>
   );
 }

@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 import { signInWithApple, signInWithGoogle } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
-import { Button, Divider, Field, Header, Note, Text } from '@/components/ui';
+import { AppleIcon, Button, Divider, Field, Header, Note, Text, GoogleIcon } from '@/components/ui';
 
 // Screen 31 — Create account, Figma 167:57037 (ar-light) / 167:64683 (en-light).
 const schema = (t: (k: string) => string) =>
@@ -45,9 +45,9 @@ export default function RegisterScreen() {
     else router.push({ pathname: '/verify-email', params: { email } });
   };
 
-  const social = async (fn: () => Promise<never>) => {
+  const social = async (fn: () => Promise<boolean>) => {
     try {
-      await fn();
+      if (await fn()) router.replace('/');
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
@@ -130,9 +130,9 @@ export default function RegisterScreen() {
 
         <Divider label={t('auth.common.or')} />
         <View className="flex-row gap-2.5">
-          <Button title={t('auth.common.google')} variant="secondary" className="flex-1" onPress={() => social(signInWithGoogle)} />
+          <Button title={t('auth.common.google')} icon={<GoogleIcon />} variant="secondary" className="flex-1" onPress={() => social(signInWithGoogle)} />
           {Platform.OS === 'ios' ? (
-            <Button title={t('auth.common.apple')} variant="secondary" className="flex-1" onPress={() => social(signInWithApple)} />
+            <Button title={t('auth.common.apple')} icon={<AppleIcon />} variant="secondary" className="flex-1" onPress={() => social(signInWithApple)} />
           ) : null}
         </View>
 
