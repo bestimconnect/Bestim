@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import { Pressable, View } from 'react-native';
+import { TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { Button, Field, Header, Note, Progress, Text } from '@/components/ui';
+import { Button, Choice, Header, Progress, Text } from '@/components/ui';
 import { useVehicleDraft } from '@/stores/vehicleDraft';
 
 const schema = z.object({ odometer: z.string().regex(/^\d+$/) });
@@ -26,40 +27,50 @@ export default function AddOdometerScreen() {
   };
 
   return (
-    <View className="flex-1 gap-5 bg-paper p-6">
-      <Header title={t('onboarding.addVehicle.odometer.header')} />
-      <Progress step={2} total={3} />
-      <Text variant="title">{t('onboarding.addVehicle.odometer.title')}</Text>
-      <View className="flex-row gap-2">
-        {(['km', 'mi'] as const).map((unit) => (
-          <Pressable
-            key={unit}
-            accessibilityRole="button"
-            accessibilityState={{ selected: draft.odometerUnit === unit }}
-            onPress={() => draft.set({ odometerUnit: unit })}
-            className={`h-11 flex-1 items-center justify-center rounded-field border ${draft.odometerUnit === unit ? 'border-lime bg-mint' : 'border-line bg-white'}`}>
-            <Text variant="label">{t(`onboarding.addVehicle.odometer.unit.${unit}`)}</Text>
-          </Pressable>
-        ))}
-      </View>
-      <Controller
-        control={control}
-        name="odometer"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <Field
-            label={t('onboarding.addVehicle.odometer.label')}
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            keyboardType="number-pad"
-            error={errors.odometer ? t('onboarding.addVehicle.odometer.invalid') : undefined}
+    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
+      <View className="flex-1 gap-5 p-6">
+        <Header title={t('onboarding.addVehicle.odometer.header')} />
+        <Progress step={2} total={3} />
+        <Text variant="title">{t('onboarding.addVehicle.odometer.title')}</Text>
+        <Choice
+          value={draft.odometerUnit}
+          onChange={(v) => draft.set({ odometerUnit: v })}
+          options={(['km', 'h'] as const).map((unit) => ({ value: unit, label: t(`onboarding.addVehicle.odometer.unitName.${unit}`) }))}
+        />
+        <View className="gap-1 rounded-item bg-lime p-4">
+          <Text variant="caption" className="text-[#222E29]" style={{ opacity: 0.7 }}>
+            {t('onboarding.addVehicle.odometer.label')}
+          </Text>
+          <Controller
+            control={control}
+            name="odometer"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                keyboardType="number-pad"
+                className="p-0 text-number text-[#222E29]"
+                style={{ fontFamily: 'Poppins_700Bold' }}
+              />
+            )}
           />
-        )}
-      />
-      <Text variant="caption" className="text-muted">{t('onboarding.addVehicle.odometer.body')}</Text>
-      <Note tone="info" text={`${t('onboarding.addVehicle.odometer.equipmentTitle')} ${t('onboarding.addVehicle.odometer.equipmentBody')}`} />
-      <View className="flex-1" />
-      <Button title={t('onboarding.addVehicle.odometer.cta')} onPress={handleSubmit(onSubmit)} />
-    </View>
+          {errors.odometer ? (
+            <Text variant="caption" className="text-[#222E29]">{t('onboarding.addVehicle.odometer.invalid')}</Text>
+          ) : (
+            <Text variant="caption" className="text-[#222E29]" style={{ opacity: 0.7 }}>
+              {t(`onboarding.addVehicle.odometer.unit.${draft.odometerUnit}`)}
+            </Text>
+          )}
+        </View>
+        <Text variant="caption" className="text-muted">{t('onboarding.addVehicle.odometer.body')}</Text>
+        <View className="gap-1 rounded-field bg-sky p-4">
+          <Text variant="label">{t('onboarding.addVehicle.odometer.equipmentTitle')}</Text>
+          <Text variant="caption" className="text-muted">{t('onboarding.addVehicle.odometer.equipmentBody')}</Text>
+        </View>
+        <View className="flex-1" />
+        <Button title={t('onboarding.addVehicle.odometer.cta')} onPress={handleSubmit(onSubmit)} />
+      </View>
+    </SafeAreaView>
   );
 }

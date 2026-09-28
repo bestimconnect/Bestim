@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Hero } from '@/components/Hero';
@@ -16,10 +17,10 @@ export default function WelcomeScreen() {
           <Text className="text-muted">{t('auth.welcome.subtitle')}</Text>
         </View>
       </Hero>
-      <View className="gap-2.5 px-6 pt-[30px]">
+      <SafeAreaView edges={['bottom']} className="gap-2.5 px-6 pt-[30px]">
         <Button title={t('auth.welcome.primaryCta')} onPress={() => router.push('/register')} />
         <Button title={t('auth.welcome.secondaryCta')} variant="secondary" onPress={() => router.push('/login')} />
-      </View>
+      </SafeAreaView>
     </View>
   );
 }

@@ -28,51 +28,62 @@
     },
     "login": {
       "title": "Sign in",
-      "subtitle": "Welcome back. Sign in to keep up with your car.",
+      "subtitle": "Enter your email and password.",
       "email": "Email",
       "password": "Password",
       "forgotPassword": "Forgot password?",
       "submit": "Sign in",
       "noAccount": "Don't have an account?",
-      "createAccount": "Create account"
+      "createAccount": "Create one",
+      "heading": "Welcome back",
+      "continueAsGuest": "Continue as guest"
     },
     "register": {
       "title": "Create account",
-      "subtitle": "Create your account to start tracking your car's maintenance.",
+      "subtitle": "Create an account to save your data and track your vehicle maintenance.",
       "fullName": "Full name",
       "email": "Email",
       "password": "Password",
       "submit": "Create account",
       "haveAccount": "Already have an account?",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "heading": "Start your journey",
+      "confirmPassword": "Confirm password"
     },
     "forgotPassword": {
       "title": "Forgot password",
-      "subtitle": "Enter your email and we'll send you a link to reset your password.",
+      "subtitle": "Enter your email and we'll send you a reset link.",
       "email": "Email",
-      "submit": "Send reset link"
+      "submit": "Send reset link",
+      "heading": "Forgot your password?"
     },
     "verifyEmail": {
       "title": "Check your email",
-      "subtitle": "We sent you a link by email. Open it to continue setup.",
-      "subtitleWithEmail": "We sent a link to {{email}}. Open it to continue setup.",
-      "backToLogin": "Go to sign in"
+      "subtitle": "We sent a reset link to your email.",
+      "subtitleWithEmail": "We sent a reset link to\n{{email}}",
+      "backToLogin": "Go to sign in",
+      "resendTitle": "Didn't receive the email?",
+      "resendBody": "Check your spam folder, or try again in a minute."
     },
     "profileSetup": {
       "title": "Your profile",
-      "subtitle": "Add a photo and your name to show on your account.",
-      "fullName": "Full name",
-      "submit": "Continue"
+      "subtitle": "This name will appear in your profile and shared records.",
+      "fullName": "Your name",
+      "submit": "Create my account",
+      "heading": "Let's get to know you",
+      "addPhoto": "Add photo\nOptional"
     },
     "common": {
-      "or": "or",
-      "google": "Continue with Google",
-      "apple": "Continue with Apple",
+      "or": "or continue with",
+      "google": "Google",
+      "apple": "Apple",
       "errors": {
         "email": "Enter a valid email address",
         "passwordMin": "Password must be at least 6 characters",
-        "fullNameRequired": "Enter your full name"
-      }
+        "fullNameRequired": "Enter your full name",
+        "passwordMismatch": "Passwords do not match"
+      },
+      "backToLogin": "Back to sign in"
     }
   },
   "onboarding": {
@@ -105,7 +116,14 @@
         "year": "Year",
         "required": "This field is required",
         "yearInvalid": "Enter a valid year",
-        "cta": "Next: Odometer reading"
+        "cta": "Next: Odometer reading",
+        "nickname": "Your nickname for it",
+        "type": {
+          "car": "Car",
+          "motorcycle": "Motorcycle",
+          "pickup": "Pickup",
+          "equipment": "Equipment"
+        }
       },
       "odometer": {
         "header": "Odometer reading",
@@ -114,20 +132,24 @@
         "body": "This reading will help us calculate your upcoming maintenance schedule.",
         "unit": {
           "km": "km",
-          "mi": "mi"
+          "h": "hrs"
         },
         "invalid": "Enter a valid number",
         "equipmentTitle": "Using equipment?",
         "equipmentBody": "Choose operating hours instead of kilometers.",
-        "cta": "Next: First maintenance"
+        "cta": "Next: First maintenance",
+        "unitName": {
+          "km": "Kilometers",
+          "h": "Operating hours"
+        }
       },
       "firstLog": {
         "header": "First record",
         "title": "What was your last maintenance?",
         "body": "One record is enough to start scheduling.",
         "cost": "Cost (optional)",
-        "finish": "Finish setup",
-        "skip": "Skip this step"
+        "finish": "Log by voice",
+        "skip": "Log later"
       }
     }
   }

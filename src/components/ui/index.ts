@@ -1,5 +1,6 @@
 export * from './Button';
 export * from './Card';
+export * from './Choice';
 export * from './Divider';
 export * from './Field';
 export * from './Header';

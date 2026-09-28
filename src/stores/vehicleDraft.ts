@@ -1,11 +1,16 @@
 import { create } from 'zustand';
 
+export const VEHICLE_TYPES = ['car', 'motorcycle', 'pickup', 'equipment'] as const;
+export type VehicleType = (typeof VEHICLE_TYPES)[number];
+
 type VehicleDraft = {
+  nickname: string;
+  vehicleType: VehicleType;
   make: string;
   model: string;
   year: number | null;
   currentOdometer: number | null;
-  odometerUnit: 'km' | 'mi';
+  odometerUnit: 'km' | 'h'; // 'h' = operating hours (equipment)
   serviceTypeId: string | null;
   serviceCost: number | null;
   serviceDate: string | null; // ISO date, defaults to today when omitted
@@ -14,6 +19,8 @@ type VehicleDraft = {
 };
 
 const initial = {
+  nickname: '',
+  vehicleType: 'car' as const,
   make: '',
   model: '',
   year: null,

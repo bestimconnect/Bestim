@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Platform, Pressable, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
@@ -10,8 +11,7 @@ import { signInWithApple, signInWithGoogle } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { Button, Divider, Field, Header, Note, Text } from '@/components/ui';
 
-// Screen 30 — Sign in (Figma design context unavailable this session: figma MCP hit the Starter
-// plan rate limit. Built from docs/BESTIM-TECH-PLAN.md §6 and the conventions in language.tsx.)
+// Screen 30 — Sign in, Figma 167:56978 (ar-light) / 167:64624 (en-light).
 const schema = (t: (k: string) => string) =>
   z.object({
     email: z.string().email(t('auth.common.errors.email')),
@@ -47,65 +47,74 @@ export default function LoginScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-paper" contentContainerClassName="pb-10" keyboardShouldPersistTaps="handled">
-      <View className="px-6 pt-3">
-        <Header title={t('auth.login.title')} />
-      </View>
-      <View className="gap-3.5 px-6 pt-2">
-        <Text className="text-muted">{t('auth.login.subtitle')}</Text>
-
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Field
-              label={t('auth.login.email')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={errors.email?.message}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Field
-              label={t('auth.login.password')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={errors.password?.message}
-              secureTextEntry
-              autoComplete="password"
-            />
-          )}
-        />
-        <Pressable onPress={() => router.push('/forgot-password')} className="self-end">
-          <Text variant="label" className="text-teal">{t('auth.login.forgotPassword')}</Text>
-        </Pressable>
-
-        {error ? <Note text={error} tone="warning" /> : null}
-
-        <Button title={t('auth.login.submit')} loading={loading} onPress={handleSubmit(onSubmit)} />
-
-        <Divider label={t('auth.common.or')} />
-        <Button title={t('auth.common.google')} variant="secondary" onPress={() => social(signInWithGoogle)} />
-        {Platform.OS === 'ios' ? (
-          <Button title={t('auth.common.apple')} variant="secondary" onPress={() => social(signInWithApple)} />
-        ) : null}
-
-        <View className="flex-row justify-center gap-1.5 pt-2">
-          <Text className="text-muted">{t('auth.login.noAccount')}</Text>
-          <Pressable onPress={() => router.push('/register')}>
-            <Text variant="label" className="text-teal">{t('auth.login.createAccount')}</Text>
-          </Pressable>
+    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
+      <ScrollView className="flex-1" contentContainerClassName="pb-10" keyboardShouldPersistTaps="handled">
+        <View className="px-6 pt-3">
+          <Header title={t('auth.login.title')} />
         </View>
-      </View>
-    </ScrollView>
+        <View className="gap-3.5 px-6 pt-2">
+          <Text variant="title">{t('auth.login.heading')}</Text>
+          <Text className="text-muted">{t('auth.login.subtitle')}</Text>
+
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Field
+                label={t('auth.login.email')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.email?.message}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Field
+                label={t('auth.login.password')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.password?.message}
+                secureTextEntry
+                autoComplete="password"
+              />
+            )}
+          />
+          <Pressable onPress={() => router.push('/forgot-password')} className="self-end">
+            <Text variant="label" className="text-teal">{t('auth.login.forgotPassword')}</Text>
+          </Pressable>
+
+          {error ? <Note text={error} tone="warning" /> : null}
+
+          <Button title={t('auth.login.submit')} loading={loading} onPress={handleSubmit(onSubmit)} />
+
+          <Divider label={t('auth.common.or')} />
+          <View className="flex-row gap-2.5">
+            <Button title={t('auth.common.google')} variant="secondary" className="flex-1" onPress={() => social(signInWithGoogle)} />
+            {Platform.OS === 'ios' ? (
+              <Button title={t('auth.common.apple')} variant="secondary" className="flex-1" onPress={() => social(signInWithApple)} />
+            ) : null}
+          </View>
+
+          <View className="flex-row justify-center gap-1.5 pt-2">
+            <Text className="text-muted">{t('auth.login.noAccount')}</Text>
+            <Pressable onPress={() => router.push('/register')}>
+              <Text variant="label" className="text-teal">{t('auth.login.createAccount')}</Text>
+            </Pressable>
+          </View>
+
+          {/* ponytail: guest browsing (screen 36) isn't wired up yet — see src/app/_layout.tsx — so
+              this lands back on welcome like any other signed-out route. */}
+          <Button title={t('auth.login.continueAsGuest')} variant="secondary" onPress={() => router.replace('/')} />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

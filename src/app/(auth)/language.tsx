@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { Hero } from '@/components/Hero';
+import { fromLeft, Hero } from '@/components/Hero';
 import { Button, Item, Text } from '@/components/ui';
 import { applyLanguage } from '@/lib/i18n';
 import { useSettings, type Language } from '@/stores/settingsStore';
@@ -43,7 +43,7 @@ export default function LanguageScreen() {
       <Hero>
         <Image
           source={require('@/assets/images/illustration-gauge.svg')}
-          style={{ position: 'absolute', left: 80, top: 110, width: 342, height: 180 }}
+          style={{ position: 'absolute', top: 110, width: 342, height: 180, ...fromLeft(80) }}
         />
       </Hero>
       <View className="gap-3.5 px-6 pt-[30px]">

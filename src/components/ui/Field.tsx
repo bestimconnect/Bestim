@@ -4,20 +4,19 @@ import { TextInput, View, type TextInputProps } from 'react-native';
 import { shadows, useColors } from '@/lib/theme';
 import { Text } from './Text';
 
-type Props = TextInputProps & { label: string; error?: string };
+type Props = TextInputProps & { label: string; error?: string; className?: string };
 
-export const Field = forwardRef<TextInput, Props>(function Field({ label, error, ...rest }, ref) {
+/** Figma `fresh/field`: label sits inside the white box, above the value. `className` sizes the outer wrapper (e.g. `flex-1` for a side-by-side row). */
+export const Field = forwardRef<TextInput, Props>(function Field({ label, error, className = '', ...rest }, ref) {
   const c = useColors();
   return (
-    <View className="gap-2">
-      <Text variant="label">{label}</Text>
-      <TextInput
-        ref={ref}
-        placeholderTextColor={c.muted}
-        className={`h-14 rounded-field border bg-white px-4 text-body text-ink ${error ? 'border-danger' : 'border-line'}`}
-        style={{ boxShadow: shadows.field, textAlign: 'auto' }}
-        {...rest}
-      />
+    <View className={`gap-2 ${className}`}>
+      <View
+        className={`rounded-field border bg-white px-4 pb-3 pt-2.5 ${error ? 'border-danger' : 'border-line'}`}
+        style={{ boxShadow: shadows.field }}>
+        <Text variant="caption" className="text-muted">{label}</Text>
+        <TextInput ref={ref} placeholderTextColor={c.muted} className="p-0 text-body text-ink" style={{ textAlign: 'auto' }} {...rest} />
+      </View>
       {error ? <Text variant="caption" className="text-danger">{error}</Text> : null}
     </View>
   );

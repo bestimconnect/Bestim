@@ -438,11 +438,13 @@ export type Database = {
           is_primary: boolean
           make: string
           model: string
+          nickname: string | null
           odometer_unit: string
           photo_url: string | null
           plate_number: string | null
           updated_at: string
           user_id: string
+          vehicle_type: string
           vin: string | null
           year: number
         }
@@ -454,11 +456,13 @@ export type Database = {
           is_primary?: boolean
           make: string
           model: string
+          nickname?: string | null
           odometer_unit?: string
           photo_url?: string | null
           plate_number?: string | null
           updated_at?: string
           user_id?: string
+          vehicle_type?: string
           vin?: string | null
           year: number
         }
@@ -470,11 +474,13 @@ export type Database = {
           is_primary?: boolean
           make?: string
           model?: string
+          nickname?: string | null
           odometer_unit?: string
           photo_url?: string | null
           plate_number?: string | null
           updated_at?: string
           user_id?: string
+          vehicle_type?: string
           vin?: string | null
           year?: number
         }
