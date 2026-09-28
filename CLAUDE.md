@@ -12,6 +12,7 @@ Spec: `docs/BESTIM-TECH-PLAN.md`.
 
 ## Session rules
 - Run every session with `/ponytail:ponytail ultra`.
+- Product/design questions go to a **PM subagent** that decides; log each decision in `docs/decisions.md`. Ask the user only about credentials, accounts, money, irreversible actions, or scope (like starting a new phase).
 - Delegate to cheaper models when quality holds: Opus = architecture, schema/RLS, auth, review. Sonnet subagents = screens/components from Figma once patterns exist. Haiku = mechanical work (i18n strings, repetitive files).
 
 ## Conventions (deviations from the spec are deliberate)
