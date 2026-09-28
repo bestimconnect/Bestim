@@ -2,7 +2,13 @@
 
 # Bestim
 
-Spec: `docs/BESTIM-TECH-PLAN.md`. Figma screen → node map: `docs/figma-screens.md` (read Figma via the claude.ai Figma connector, not the figma plugin MCP).
+Spec: `docs/BESTIM-TECH-PLAN.md`.
+
+## Design source: `screens/` (use this, NOT the Figma MCP)
+- PNG exports: `screens/<arabic|english> <light|dark> screens/Bestim/انطلاقة جديدة/<NN>/<name>.png`, where NN = the screen ID from spec §9. The component sheets are in `screens/components <light|dark> arabic/…/Components/fresh/<component>/…png` and `screens/english <light|dark> components/…`.
+- Arabic light is the primary reference. Check dark for colors and English for copy/LTR.
+- Exact sizes, positions and all text strings: `docs/figma-metadata.xml` (the full Figma layer tree). Node IDs are in `docs/figma-screens.md`.
+- Figma MCP (Starter plan, 20 reads/month): only as a last resort.
 
 ## Session rules
 - Run every session with `/ponytail:ponytail ultra`.
