@@ -32,11 +32,15 @@ export default function AddOdometerScreen() {
         <Header title={t('onboarding.addVehicle.odometer.header')} />
         <Progress step={2} total={3} />
         <Text variant="title">{t('onboarding.addVehicle.odometer.title')}</Text>
-        <Choice
-          value={draft.odometerUnit}
-          onChange={(v) => draft.set({ odometerUnit: v })}
-          options={(['km', 'h'] as const).map((unit) => ({ value: unit, label: t(`onboarding.addVehicle.odometer.unitName.${unit}`) }))}
-        />
+        {/* Design keeps km/hours in a fixed order in both languages (docs/decisions.md Q5) —
+            Choice's own flex-row would otherwise mirror under RTL, so force ltr here only. */}
+        <View style={{ direction: 'ltr' }}>
+          <Choice
+            value={draft.odometerUnit}
+            onChange={(v) => draft.set({ odometerUnit: v })}
+            options={(['km', 'h'] as const).map((unit) => ({ value: unit, label: t(`onboarding.addVehicle.odometer.unitName.${unit}`) }))}
+          />
+        </View>
         <View className="gap-1 rounded-item bg-lime p-4">
           <Text variant="caption" className="text-[#222E29]" style={{ opacity: 0.7 }}>
             {t('onboarding.addVehicle.odometer.label')}

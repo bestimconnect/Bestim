@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import * as Icons from 'lucide-react-native';
-import { Wrench, type LucideIcon } from 'lucide-react-native';
+import { Disc, Droplets, Wrench } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,14 +9,17 @@ import { useTranslation } from 'react-i18next';
 import { Button, Field, Header, Item, Note, Progress, Text } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
 import { useVehicleDraft } from '@/stores/vehicleDraft';
-import type { Tables } from '@/types/database';
 
 // Screen 05 — Add vehicle / First log, Figma 167:57486 (ar-light) / 167:65132 (en-light).
-// ponytail: the design groups items into 3 broad categories (Engine oil / Brakes / Tires &
-// battery); this still lists the full `service_types` catalogue (18 rows) as before — regrouping
-// would change the query/data shape beyond this task's CTA fix (issue #4), so it's left as-is.
+// Design shows 3 buckets, each mapped to one service_types row by name_en (docs/decisions.md Q3).
+const BUCKETS = [
+  { name_en: 'Oil Change', key: 'oil', icon: Droplets },
+  { name_en: 'Brake Pad Replacement', key: 'brakes', icon: Disc },
+  { name_en: 'General Repair', key: 'tiresBattery', icon: Wrench },
+] as const;
+
 export default function FirstLogScreen() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const draft = useVehicleDraft();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +32,11 @@ export default function FirstLogScreen() {
       return data;
     },
   });
+
+  const buckets = BUCKETS.map((b) => ({
+    ...b,
+    serviceType: serviceTypes.data?.find((s) => s.name_en === b.name_en),
+  })).filter((b) => b.serviceType);
 
   const createdVehicle = useRef<{ id: string } | null>(null);
   const finish = useMutation({
@@ -63,11 +70,11 @@ export default function FirstLogScreen() {
       }
 
       if (!skipLog && d.serviceTypeId) {
-        const serviceType = serviceTypes.data?.find((s) => s.id === d.serviceTypeId);
+        const bucket = buckets.find((b) => b.serviceType?.id === d.serviceTypeId);
         const { error: logError } = await supabase.from('maintenance_logs').insert({
           vehicle_id: vehicle.id,
           service_type_id: d.serviceTypeId,
-          title: serviceType ? (i18n.language === 'ar' ? serviceType.name_ar : serviceType.name_en) : '',
+          title: bucket ? t(`onboarding.addVehicle.firstLog.buckets.${bucket.key}.label`) : '',
           odometer_reading: d.currentOdometer,
           cost: d.serviceCost ?? undefined,
           service_date: d.serviceDate ?? undefined,
@@ -91,8 +98,8 @@ export default function FirstLogScreen() {
     onError: (e: Error) => setError(e.message),
   });
 
-  const selectService = (item: Tables<'service_types'>) => {
-    draft.set({ serviceTypeId: draft.serviceTypeId === item.id ? null : item.id });
+  const selectService = (id: string) => {
+    draft.set({ serviceTypeId: draft.serviceTypeId === id ? null : id });
   };
 
   // "Log it later" finishes onboarding without a log. "Log it by voice" runs the same finish
@@ -109,15 +116,16 @@ export default function FirstLogScreen() {
         <Text className="text-muted">{t('onboarding.addVehicle.firstLog.body')}</Text>
         {error ? <Note tone="warning" text={error} /> : null}
         <FlatList
-          data={serviceTypes.data ?? []}
-          keyExtractor={(item) => item.id}
+          data={buckets}
+          keyExtractor={(b) => b.key}
           contentContainerClassName="gap-2.5"
-          renderItem={({ item }) => (
+          renderItem={({ item: b }) => (
             <Item
-              icon={(Icons as unknown as Record<string, LucideIcon>)[item.icon] ?? Wrench}
-              title={i18n.language === 'ar' ? item.name_ar : item.name_en}
-              tone={draft.serviceTypeId === item.id ? 'mint' : 'paper'}
-              onPress={() => selectService(item)}
+              icon={b.icon}
+              title={t(`onboarding.addVehicle.firstLog.buckets.${b.key}.label`)}
+              subtitle={t(`onboarding.addVehicle.firstLog.buckets.${b.key}.subtitle`)}
+              tone={draft.serviceTypeId === b.serviceType?.id ? 'mint' : 'paper'}
+              onPress={() => selectService(b.serviceType!.id)}
             />
           )}
         />

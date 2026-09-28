@@ -36,7 +36,9 @@
       "noAccount": "Don't have an account?",
       "createAccount": "Create one",
       "heading": "Welcome back",
-      "continueAsGuest": "Continue as guest"
+      "continueAsGuest": "Continue as guest",
+      "passwordUpdated": "Password updated. You can sign in now.",
+      "linkExpired": "This link has expired. Please request a new one."
     },
     "register": {
       "title": "Create account",
@@ -56,6 +58,14 @@
       "email": "Email",
       "submit": "Send reset link",
       "heading": "Forgot your password?"
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "heading": "New password",
+      "subtitle": "Choose a new password for your account.",
+      "password": "New password",
+      "confirmPassword": "Confirm password",
+      "submit": "Save password"
     },
     "verifyEmail": {
       "title": "Check your email",
@@ -149,7 +159,12 @@
         "body": "One record is enough to start scheduling.",
         "cost": "Cost (optional)",
         "finish": "Log by voice",
-        "skip": "Log later"
+        "skip": "Log later",
+        "buckets": {
+          "oil": { "label": "Engine oil", "subtitle": "Oil or filter change" },
+          "brakes": { "label": "Brakes", "subtitle": "Inspection or replacement" },
+          "tiresBattery": { "label": "Tires & battery", "subtitle": "Or any other maintenance" }
+        }
       }
     }
   }

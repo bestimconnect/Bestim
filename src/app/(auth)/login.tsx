@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Platform, Pressable, ScrollView, View } from 'react-native';
@@ -22,6 +22,7 @@ type Form = z.infer<ReturnType<typeof schema>>;
 
 export default function LoginScreen() {
   const { t } = useTranslation();
+  const { notice } = useLocalSearchParams<{ notice?: string }>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { control, handleSubmit, formState: { errors } } = useForm<Form>({
@@ -55,6 +56,9 @@ export default function LoginScreen() {
         <View className="gap-3.5 px-6 pt-2">
           <Text variant="title">{t('auth.login.heading')}</Text>
           <Text className="text-muted">{t('auth.login.subtitle')}</Text>
+
+          {notice === 'passwordUpdated' ? <Note text={t('auth.login.passwordUpdated')} tone="success" /> : null}
+          {notice === 'linkExpired' ? <Note text={t('auth.login.linkExpired')} tone="warning" /> : null}
 
           <Controller
             control={control}
@@ -110,9 +114,7 @@ export default function LoginScreen() {
             </Pressable>
           </View>
 
-          {/* ponytail: guest browsing (screen 36) isn't wired up yet — see src/app/_layout.tsx — so
-              this lands back on welcome like any other signed-out route. */}
-          <Button title={t('auth.login.continueAsGuest')} variant="secondary" onPress={() => router.replace('/')} />
+          {/* auth.login.continueAsGuest is kept for guest home (screen 36, Phase 3) — button returns then. */}
         </View>
       </ScrollView>
     </SafeAreaView>

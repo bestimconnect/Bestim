@@ -4,6 +4,7 @@ import { Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins'
 import { Tajawal_400Regular, Tajawal_700Bold } from '@expo-google-fonts/tajawal';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
+import { useURL } from 'expo-linking';
 import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -11,7 +12,7 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 import { applyLanguage } from '@/lib/i18n';
-import { useSession } from '@/lib/session';
+import { sessionFromUrl, useSession } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 import { themeVars, useScheme } from '@/lib/theme';
 import { useSettings } from '@/stores/settingsStore';
@@ -47,6 +48,15 @@ function App() {
   const ready = fontsLoaded && hydrated && session !== undefined && (!userId || !profile.isPending);
 
   useEffect(() => useSettings.persist.onFinishHydration(() => setHydrated(true)), []);
+
+  // Email links (confirm sign-up / reset password). Sign-up needs nothing more: the gate below routes new users to the tour.
+  const url = useURL();
+  useEffect(() => {
+    if (!ready || !url?.includes('#')) return;
+    sessionFromUrl(url)
+      .then((type) => type === 'recovery' && router.replace('/reset-password'))
+      .catch(() => router.replace({ pathname: '/login', params: { notice: 'linkExpired' } }));
+  }, [ready, url]);
   useEffect(() => {
     if (!ready) return;
     if (!language) router.replace('/language');

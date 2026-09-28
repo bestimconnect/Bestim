@@ -9,7 +9,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/images/icon.png",
-      "bundleIdentifier": "com.anonymous.Bestim"
+      "bundleIdentifier": "com.bestim.app"
     },
     "android": {
       "adaptiveIcon": {
