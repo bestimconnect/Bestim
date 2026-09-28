@@ -41,6 +41,12 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 - Figma MCP is on the Starter plan (20 reads/month, used up). Design source = `screens/` PNG exports + `docs/figma-metadata.xml`.
 - iOS simulator dev build: `npx expo run:ios --device "iPhone 16"` (needs `LANG=en_US.UTF-8` for CocoaPods). It needs macOS + Xcode, so a cloud session can't run it. The founder verifies on their Mac.
 
+## Cloud sessions (Claude Code on the web)
+- The environment variables hold only the public `EXPO_PUBLIC_*` values (Supabase URL + anon key, Google web/iOS client IDs). The setup script writes them to `.env`: `printenv | grep '^EXPO_PUBLIC_' > .env && npm ci`.
+- Network is set to Custom and allows `*.supabase.co`, `api.supabase.com`, `docs.expo.dev`.
+- **Migrations:** the cloud session writes the SQL file and pushes it. The founder runs `supabase db push` + `npm run types` on the Mac. There's no Supabase access token in the cloud.
+- There's no simulator in the cloud. The founder pulls and runs `npx expo start` on the Mac to review.
+
 ## How work is organized
 - ponytail **ultra** every session.
 - Opus = architecture, schema/RLS, auth, review. Sonnet subagents = screens from the PNGs. Haiku = mechanical work.
