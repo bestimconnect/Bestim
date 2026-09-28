@@ -2,14 +2,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Platform, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { signInWithApple, signInWithGoogle } from '@/lib/auth';
+import { signInWithGoogle } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
-import { AppleIcon, Button, Divider, Field, Header, Note, Text, GoogleIcon } from '@/components/ui';
+import { Button, Divider, Field, Header, Note, Text, GoogleIcon } from '@/components/ui';
 
 // Screen 31 — Create account, Figma 167:57037 (ar-light) / 167:64683 (en-light).
 const schema = (t: (k: string) => string) =>
@@ -131,9 +131,6 @@ export default function RegisterScreen() {
         <Divider label={t('auth.common.or')} />
         <View className="flex-row gap-2.5">
           <Button title={t('auth.common.google')} icon={<GoogleIcon />} variant="secondary" className="flex-1" onPress={() => social(signInWithGoogle)} />
-          {Platform.OS === 'ios' ? (
-            <Button title={t('auth.common.apple')} icon={<AppleIcon />} variant="secondary" className="flex-1" onPress={() => social(signInWithApple)} />
-          ) : null}
         </View>
 
         <View className="flex-row justify-center gap-1.5 pt-2">

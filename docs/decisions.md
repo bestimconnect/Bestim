@@ -92,3 +92,11 @@ Navigation on success: `/reset-password` → `/login` (signed out, success note)
 - `src/app/(onboarding)/add-odometer.tsx` currently passes `options={['km','h'].map(...)}` straight into the shared `Choice` component, which lays out with `flex-row` — under RTL that auto-mirrors, so today this screen silently mirrors in AR, contradicting the design.
 - Fix at the call site only (don't change `Choice`'s default RTL-mirroring behavior — other screens rely on it): wrap this one `Choice` instance in a container with an explicit `style={{ flexDirection: 'row' }}` (or add an opt-out `mirror={false}` prop to `Choice` if a second screen ever needs the same override).
 - No copy change; order stays `['km', 'h']` (Kilometers, Operating hours) in both languages.
+
+---
+
+### Q6: Sign in with Apple — deferred (founder decision, 2026-09-28)
+
+**Decision:** Ship Google-only social login for now; the founder will add Apple later.
+**Why:** Founder's call. Note App Store Review Guideline 4.8 generally requires Sign in with Apple (or an equivalent privacy-focused login) when an iOS app offers Google login, so add it back before App Store submission.
+**Spec for dev:** A complete implementation exists in commit `1450452` (`signInWithApple` in src/lib/auth.ts, `AppleIcon` in BrandIcons.tsx, the login/register buttons). Restore it with `npx expo install expo-apple-authentication`, gate `ios.usesAppleSignIn` + `appleTeamId` on `APPLE_TEAM_ID` in app.config.js, and enable `[auth.external.apple]` (client_id `com.bestim.app`) in supabase/config.toml.

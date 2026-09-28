@@ -86,7 +86,6 @@
     "common": {
       "or": "or continue with",
       "google": "Google",
-      "apple": "Apple",
       "errors": {
         "email": "Enter a valid email address",
         "passwordMin": "Password must be at least 6 characters",
@@ -161,9 +160,18 @@
         "finish": "Log by voice",
         "skip": "Log later",
         "buckets": {
-          "oil": { "label": "Engine oil", "subtitle": "Oil or filter change" },
-          "brakes": { "label": "Brakes", "subtitle": "Inspection or replacement" },
-          "tiresBattery": { "label": "Tires & battery", "subtitle": "Or any other maintenance" }
+          "oil": {
+            "label": "Engine oil",
+            "subtitle": "Oil or filter change"
+          },
+          "brakes": {
+            "label": "Brakes",
+            "subtitle": "Inspection or replacement"
+          },
+          "tiresBattery": {
+            "label": "Tires & battery",
+            "subtitle": "Or any other maintenance"
+          }
         }
       }
     }
