@@ -1,0 +1,6 @@
+{
+  "back": "Back",
+  "tabs": { "home": "Home", "vehicles": "Vehicles", "capture": "Log", "reminders": "Reminders", "account": "Account" },
+  "language": { "title": "Choose your language", "ar": "العربية", "en": "English" },
+  "welcome": { "title": "Welcome to Bestim" }
+}

@@ -1,0 +1,6 @@
+{
+  "back": "رجوع",
+  "tabs": { "home": "الرئيسية", "vehicles": "سياراتي", "capture": "سجّل", "reminders": "المواعيد", "account": "حسابي" },
+  "language": { "title": "اختر لغتك", "ar": "العربية", "en": "English" },
+  "welcome": { "title": "مرحباً بك في بستيم" }
+}
