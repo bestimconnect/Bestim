@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { I18nManager, Platform } from 'react-native';
+import { DevSettings, I18nManager, Platform } from 'react-native';
 import * as Updates from 'expo-updates';
 
 import ar from '@/locales/ar.json';
@@ -22,7 +22,8 @@ export function applyLanguage(lng: Language) {
   if (Platform.OS !== 'web' && I18nManager.isRTL !== rtl) {
     I18nManager.allowRTL(rtl);
     I18nManager.forceRTL(rtl);
-    Updates.reloadAsync().catch(() => {});
+    // reloadAsync can fail in dev-client builds; DevSettings.reload is the dev fallback.
+    Updates.reloadAsync().catch(() => DevSettings.reload());
   }
 }
 

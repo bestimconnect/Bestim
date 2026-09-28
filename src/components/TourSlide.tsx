@@ -1,8 +1,8 @@
-import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useLightStatusBar, Wordmark } from '@/components/Hero';
 import { Button, Text } from '@/components/ui';
 
 const TOTAL_STEPS = 3;
@@ -20,16 +20,12 @@ type Props = {
 
 /** Shared layout for the 3 onboarding tour screens (Figma 33/34/35): ink background, hero illustration, step copy + progress. */
 export function TourSlide({ step, title, body, cta, skip, onNext, onSkip, illustration }: Props) {
+  useLightStatusBar();
   return (
     <View className="flex-1 bg-ink">
+      <Wordmark />
       <SafeAreaView className="flex-1">
-        <Image
-          source={require('@/assets/images/logo-word-inverse.png')}
-          contentFit="contain"
-          style={{ width: 120, height: 34, marginLeft: 24, marginTop: 12 }}
-          accessibilityLabel="Bestim"
-        />
-        <View className="mx-6 mt-6 h-[200px] items-center justify-center">{illustration}</View>
+        <View className="mx-6 mt-[72px] h-[200px] items-center justify-center">{illustration}</View>
         <View className="flex-1" />
         <View className="gap-3.5 p-6">
           <Text variant="caption" className="text-right text-lime">{`0${step} / 0${TOTAL_STEPS}`}</Text>
