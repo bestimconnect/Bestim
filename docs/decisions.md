@@ -118,3 +118,11 @@ Navigation on success: `/reset-password` → `/login` (signed out, success note)
 - No change to `src/app/(auth)/profile-setup.tsx` — it already updates `profiles.full_name` and does `router.replace('/tour-voice')` on success, which is exactly the next hop once the gate gets here.
 - No change to `register.tsx` — keep the full name field; that's what lets most email sign-ups skip screen 32 entirely.
 - Photo upload stays UI-only per the existing `ponytail` comment in profile-setup.tsx (no image picker dependency yet) — unchanged by this decision.
+
+---
+
+### Q8: App flow order (founder decision, 2026-09-28)
+
+**Decision:** Splash → Language (01) → Tour (33→34→35) → Welcome (02) → Sign in (30) / Create account (31) → Your profile (32, only if full_name is empty) → Add vehicle (03→04→05) → Home.
+**Why:** Founder's call. Show what the app does before asking for an account; add the car after sign-up.
+**Spec for dev:** The tour is pre-auth and runs once per device (`settingsStore.tourSeen`, set by `endTour()` in src/components/TourSlide.tsx). `profiles.onboarding_completed` now means "first vehicle added" and is set by first-log. The gate in src/app/_layout.tsx: no language → /language; signed out → /tour-voice until the tour is seen, then /welcome; no name → /profile-setup; onboarding not completed → /add-vehicle.

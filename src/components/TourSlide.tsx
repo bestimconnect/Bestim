@@ -2,10 +2,19 @@ import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { router } from 'expo-router';
+
 import { useLightStatusBar, Wordmark } from '@/components/Hero';
+import { useSettings } from '@/stores/settingsStore';
 import { Button, Text } from '@/components/ui';
 
 const TOTAL_STEPS = 3;
+
+/** Last tour step or skip: the tour runs before sign-in, then Welcome (sign in / create account). */
+export function endTour() {
+  useSettings.getState().finishTour();
+  router.replace('/welcome');
+}
 
 type Props = {
   step: 1 | 2 | 3;

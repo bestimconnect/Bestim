@@ -33,6 +33,7 @@ function App() {
   const [fontsLoaded] = useFonts({ Tajawal_400Regular, Tajawal_700Bold, Poppins_400Regular, Poppins_700Bold });
   const [hydrated, setHydrated] = useState(useSettings.persist.hasHydrated());
   const language = useSettings((s) => s.language);
+  const tourSeen = useSettings((s) => s.tourSeen);
   const session = useSession();
   const userId = session?.user.id;
   const profile = useQuery({
@@ -62,12 +63,13 @@ function App() {
     if (!language) router.replace('/language');
     else {
       applyLanguage(language);
-      if (!userId) router.replace('/welcome');
+      // Flow: language → tour → welcome/auth → profile (if no name) → add vehicle → home.
+      if (!userId) router.replace(tourSeen ? '/welcome' : '/tour-voice');
       else if (profile.data && !profile.data.full_name.trim()) router.replace('/profile-setup'); // decisions.md Q7
-      else if (profile.data && !profile.data.onboarding_completed) router.replace('/tour-voice');
+      else if (profile.data && !profile.data.onboarding_completed) router.replace('/add-vehicle');
     }
     SplashScreen.hideAsync();
-  }, [ready, language, userId, profile.data]);
+  }, [ready, language, tourSeen, userId, profile.data]);
 
   if (!ready) return null;
   return (

@@ -3,7 +3,7 @@ import { Bell, CalendarCheck } from 'lucide-react-native';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { TourSlide } from '@/components/TourSlide';
+import { endTour, TourSlide } from '@/components/TourSlide';
 import { Text } from '@/components/ui';
 import { useColors } from '@/lib/theme';
 
@@ -42,7 +42,7 @@ export default function TourRemindersScreen() {
       cta={t('onboarding.tour.next')}
       skip={t('onboarding.tour.skip')}
       onNext={() => router.push('/tour-history')}
-      onSkip={() => router.replace('/add-vehicle')}
+      onSkip={() => endTour()}
       illustration={<ReminderIllustration />}
     />
   );

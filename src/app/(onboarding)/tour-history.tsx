@@ -1,9 +1,8 @@
-import { router } from 'expo-router';
 import { BadgeCheck } from 'lucide-react-native';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { TourSlide } from '@/components/TourSlide';
+import { endTour, TourSlide } from '@/components/TourSlide';
 import { Text } from '@/components/ui';
 import { useColors } from '@/lib/theme';
 
@@ -38,7 +37,7 @@ export default function TourHistoryScreen() {
       title={t('onboarding.tour.history.title')}
       body={t('onboarding.tour.history.body')}
       cta={t('onboarding.tour.done')}
-      onNext={() => router.replace('/add-vehicle')}
+      onNext={() => endTour()}
       illustration={<HistoryIllustration />}
     />
   );

@@ -35,7 +35,7 @@ export default function ProfileSetupScreen() {
     const { error } = await supabase.from('profiles').update({ full_name: fullName }).eq('id', session.user.id);
     setLoading(false);
     if (error) setError(error.message);
-    else router.replace('/tour-voice');
+    else router.replace('/add-vehicle');
   };
 
   return (

@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { TourSlide } from '@/components/TourSlide';
+import { endTour, TourSlide } from '@/components/TourSlide';
 
 // Figma bar heights (167:57244..57256), laid out via flex so RTL mirrors correctly.
 const BAR_HEIGHTS = [22, 48, 74, 100, 58, 134, 86, 52, 118, 80, 42, 24];
@@ -28,7 +28,7 @@ export default function TourVoiceScreen() {
       cta={t('onboarding.tour.next')}
       skip={t('onboarding.tour.skip')}
       onNext={() => router.push('/tour-reminders')}
-      onSkip={() => router.replace('/add-vehicle')}
+      onSkip={() => endTour()}
       illustration={<VoiceIllustration />}
     />
   );
