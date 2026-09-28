@@ -2,7 +2,7 @@
 
 # Bestim
 
-Spec: `docs/BESTIM-TECH-PLAN.md`.
+**Start here:** `docs/PROGRESS.md` (phase status, flow, gotchas). Spec: `docs/BESTIM-TECH-PLAN.md`. Decisions: `docs/decisions.md`.
 
 ## Design source: `screens/` (use this, NOT the Figma MCP)
 - PNG exports: `screens/<arabic|english> <light|dark> screens/Bestim/انطلاقة جديدة/<NN>/<name>.png`, where NN = the screen ID from spec §9. The component sheets are in `screens/components <light|dark> arabic/…/Components/fresh/<component>/…png` and `screens/english <light|dark> components/…`.
