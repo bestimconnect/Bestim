@@ -2,7 +2,7 @@
 
 # Bestim
 
-Spec: `docs/BESTIM-TECH-PLAN.md`. Figma: https://www.figma.com/design/69ivy8SOlNYxeSTUxM00Km/Bestim
+Spec: `docs/BESTIM-TECH-PLAN.md`. Figma screen → node map: `docs/figma-screens.md` (read Figma via the claude.ai Figma connector, not the figma plugin MCP).
 
 ## Session rules
 - Run every session with `/ponytail:ponytail ultra`.
@@ -21,3 +21,7 @@ Spec: `docs/BESTIM-TECH-PLAN.md`. Figma: https://www.figma.com/design/69ivy8SOlN
 
 ## Supabase
 Schema changes only through migrations: `supabase migration new <name>` → edit SQL → `supabase db push` → `npm run types`.
+
+## Reviewing in the simulator
+- Xcode dev build on the **iPhone 16** simulator: `npx expo run:ios --device "iPhone 16"` (first time or after native deps change). Otherwise `npx expo start` and press `i`.
+- `ios/` and `android/` are generated. Never edit them; they're git-ignored.
