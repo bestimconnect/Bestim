@@ -63,6 +63,7 @@ function App() {
     else {
       applyLanguage(language);
       if (!userId) router.replace('/welcome');
+      else if (profile.data && !profile.data.full_name.trim()) router.replace('/profile-setup'); // decisions.md Q7
       else if (profile.data && !profile.data.onboarding_completed) router.replace('/tour-voice');
     }
     SplashScreen.hideAsync();

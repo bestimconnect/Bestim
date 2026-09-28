@@ -100,3 +100,21 @@ Navigation on success: `/reset-password` → `/login` (signed out, success note)
 **Decision:** Ship Google-only social login for now; the founder will add Apple later.
 **Why:** Founder's call. Note App Store Review Guideline 4.8 generally requires Sign in with Apple (or an equivalent privacy-focused login) when an iOS app offers Google login, so add it back before App Store submission.
 **Spec for dev:** A complete implementation exists in commit `1450452` (`signInWithApple` in src/lib/auth.ts, `AppleIcon` in BrandIcons.tsx, the login/register buttons). Restore it with `npx expo install expo-apple-authentication`, gate `ios.usesAppleSignIn` + `appleTeamId` on `APPLE_TEAM_ID` in app.config.js, and enable `[auth.external.apple]` (client_id `com.bestim.app`) in supabase/config.toml.
+
+---
+
+### Q7: Screen 32 "Your profile" — where it belongs in the flow
+
+**Decision:** Screen 32 is a universal post-auth gate, not a sign-up step. The root gate in `src/app/_layout.tsx` sends any signed-in user whose `profiles.full_name` is empty to `/profile-setup` first; only once a name is on file does it move on to the existing `onboarding_completed` check (→ `/tour-voice`). `register.tsx` keeps its full name field as-is.
+
+**Why:** Email sign-up (31) already collects full name and the `handle_new_user` trigger writes it to `profiles.full_name`, so an email user who filled the field out correctly has nothing left for screen 32 to do — inserting it unconditionally after sign-up would be a redundant tap before they even reach their inbox. Google sign-in is the actual gap: `full_name` comes from Google's metadata and can be empty or a name the user doesn't want stored. Gating on the data (`full_name` empty) rather than the signup method handles both paths with one check, covers the edge case of an email user who's cleared their metadata name, and needs no change to register.tsx or the email-confirmation flow from Q2. This is the smallest change: one extra branch in the gate that's already doing this kind of redirect, reusing profile-setup.tsx exactly as built (it already writes `full_name` and routes to `/tour-voice` on submit).
+
+**Spec for dev:**
+- `src/app/_layout.tsx`, in the `ready` effect: change
+  `else if (profile.data && !profile.data.onboarding_completed) router.replace('/tour-voice');`
+  to check name first:
+  `else if (profile.data && !profile.data.full_name) router.replace('/profile-setup');`
+  `else if (profile.data && !profile.data.onboarding_completed) router.replace('/tour-voice');`
+- No change to `src/app/(auth)/profile-setup.tsx` — it already updates `profiles.full_name` and does `router.replace('/tour-voice')` on success, which is exactly the next hop once the gate gets here.
+- No change to `register.tsx` — keep the full name field; that's what lets most email sign-ups skip screen 32 entirely.
+- Photo upload stays UI-only per the existing `ponytail` comment in profile-setup.tsx (no image picker dependency yet) — unchanged by this decision.
