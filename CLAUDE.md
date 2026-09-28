@@ -17,6 +17,7 @@ Spec: `docs/BESTIM-TECH-PLAN.md`.
 ## Conventions (deviations from the spec are deliberate)
 - Code lives in `src/` (Expo SDK 57 template). Routes in `src/app/`.
 - Colors: `src/lib/palette.js` is the single source. Tailwind classes (`bg-paper`, `text-ink`) resolve to CSS vars set per theme in `_layout.tsx`. No `dark:` prefixes. For icon colors use `useColors()`.
+- Theme = the user's setting (`settingsStore.theme`, default light, changed in Account settings), NOT the OS appearance. `(auth)` and `(onboarding)` are always light (`useScheme()` in src/lib/theme.ts).
 - Text on lime/danger is fixed hex (ink/white invert in dark mode).
 - Shadows: `style={{ boxShadow: shadows.x }}` from `src/lib/theme.ts`.
 - Always render text with `components/ui/Text` (picks Tajawal/Poppins by language).

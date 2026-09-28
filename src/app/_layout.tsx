@@ -8,12 +8,12 @@ import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { useColorScheme, View } from 'react-native';
+import { View } from 'react-native';
 
 import { applyLanguage } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
-import { themeVars } from '@/lib/theme';
+import { themeVars, useScheme } from '@/lib/theme';
 import { useSettings } from '@/stores/settingsStore';
 
 SplashScreen.preventAutoHideAsync();
@@ -28,7 +28,7 @@ export default function RootLayout() {
 }
 
 function App() {
-  const scheme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const scheme = useScheme();
   const [fontsLoaded] = useFonts({ Tajawal_400Regular, Tajawal_700Bold, Poppins_400Regular, Poppins_700Bold });
   const [hydrated, setHydrated] = useState(useSettings.persist.hasHydrated());
   const language = useSettings((s) => s.language);

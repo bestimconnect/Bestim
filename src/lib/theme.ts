@@ -1,5 +1,7 @@
-import { useColorScheme } from 'react-native';
+import { useSegments } from 'expo-router';
 import { vars } from 'nativewind';
+
+import { useSettings, type Theme } from '@/stores/settingsStore';
 
 import { palette } from './palette';
 
@@ -8,9 +10,16 @@ export type Colors = typeof palette.light;
 const toVars = (p: Colors) => vars(Object.fromEntries(Object.entries(p).map(([k, v]) => [`--${k}`, v])));
 export const themeVars = { light: toVars(palette.light), dark: toVars(palette.dark) };
 
+/** Active theme: the user's choice inside the app; auth + onboarding are always light. */
+export function useScheme(): Theme {
+  const theme = useSettings((s) => s.theme);
+  const group = useSegments()[0];
+  return group === '(auth)' || group === '(onboarding)' ? 'light' : theme;
+}
+
 /** Raw hex colors for props that don't take className (icons, placeholderTextColor). */
 export function useColors(): Colors {
-  return useColorScheme() === 'dark' ? palette.dark : palette.light;
+  return palette[useScheme()];
 }
 
 // RN >= 0.76 supports CSS boxShadow strings natively.
