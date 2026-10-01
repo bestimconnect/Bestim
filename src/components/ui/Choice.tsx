@@ -5,9 +5,20 @@ import { Text } from './Text';
 type Option<T extends string> = { value: T; label: string };
 
 /** Figma `fresh/choice`: rounded-full segmented control, selected pill dark with light text. */
-export function Choice<T extends string>({ value, options, onChange }: { value: T; options: Option<T>[]; onChange: (v: T) => void }) {
+/** `className` overrides the track colour, e.g. `bg-line` on paper screens (09, 10). */
+export function Choice<T extends string>({
+  value,
+  options,
+  onChange,
+  className = 'bg-paper',
+}: {
+  value: T;
+  options: Option<T>[];
+  onChange: (v: T) => void;
+  className?: string;
+}) {
   return (
-    <View className="h-11 flex-row items-center gap-1 rounded-nav bg-paper p-1">
+    <View className={`h-11 flex-row items-center gap-1 rounded-nav p-1 ${className}`}>
       {options.map((o) => (
         <Pressable
           key={o.value}

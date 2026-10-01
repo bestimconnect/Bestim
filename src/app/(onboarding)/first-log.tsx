@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Disc, Droplets, Wrench } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { FlatList, View } from 'react-native';
@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button, Field, Header, Item, Note, Progress, Text } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
+import { useSettings } from '@/stores/settingsStore';
 import { useVehicleDraft } from '@/stores/vehicleDraft';
 
 // Screen 05 — Add vehicle / First log, Figma 167:57486 (ar-light) / 167:65132 (en-light).
@@ -20,6 +21,8 @@ const BUCKETS = [
 
 export default function FirstLogScreen() {
   const { t } = useTranslation();
+  const { mode } = useLocalSearchParams<{ mode?: 'extra' }>(); // 'extra' = adding another vehicle from screen 08
+  const extra = mode === 'extra';
   const draft = useVehicleDraft();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +64,7 @@ export default function FirstLogScreen() {
             odometer_unit: d.odometerUnit,
             nickname: d.nickname || null,
             vehicle_type: d.vehicleType,
-            is_primary: true,
+            is_primary: !extra,
           })
           .select()
           .single();
@@ -83,17 +86,25 @@ export default function FirstLogScreen() {
         if (logError) throw logError;
       }
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ onboarding_completed: true })
-        .eq('id', userId);
-      if (profileError) throw profileError;
+      if (!extra) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ onboarding_completed: true })
+          .eq('id', userId);
+        if (profileError) throw profileError;
+      }
+      return vehicle.id;
     },
-    onSuccess: () => {
+    onSuccess: (vehicleId) => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+      queryClient.invalidateQueries({ queryKey: ['logs'] });
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
+      useSettings.getState().setCurrentVehicle(vehicleId);
       draft.reset();
-      router.replace('/');
+      if (extra) router.dismissTo('/vehicles');
+      else router.replace('/');
+      if (voiceNext.current) router.push('/capture/voice');
     },
     onError: (e: Error) => setError(e.message),
   });
@@ -104,8 +115,15 @@ export default function FirstLogScreen() {
 
   // "Log it later" finishes onboarding without a log. "Log it by voice" runs the same finish
   // (logging whatever is selected here, if anything), then hands off to the voice capture flow.
-  const logLater = () => finish.mutate(true);
-  const logByVoice = () => finish.mutate(false, { onSuccess: () => router.replace('/capture') });
+  const voiceNext = useRef(false);
+  const logLater = () => {
+    voiceNext.current = false;
+    finish.mutate(true);
+  };
+  const logByVoice = () => {
+    voiceNext.current = true;
+    finish.mutate(false);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>

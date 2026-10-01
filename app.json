@@ -35,7 +35,24 @@
           "imageWidth": 140
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Bestim uses the microphone so you can log maintenance by voice.",
+          "speechRecognitionPermission": "Bestim turns what you say into a maintenance record.",
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox"
+          ]
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Bestim attaches receipt photos to your maintenance records.",
+          "cameraPermission": "Bestim takes receipt photos for your maintenance records."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

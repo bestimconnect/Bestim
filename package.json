@@ -20,9 +20,11 @@
     "expo-glass-effect": "~57.0.4",
     "expo-haptics": "~57.0.3",
     "expo-image": "~57.0.5",
+    "expo-image-picker": "~57.0.20",
     "expo-linking": "~57.0.11",
     "expo-localization": "~57.0.2",
     "expo-router": "~57.0.23",
+    "expo-speech-recognition": "^57.1.0",
     "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
     "expo-symbols": "~57.0.3",
@@ -62,7 +64,8 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "types": "supabase gen types typescript --linked > src/types/database.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check": "for f in src/lib/*.check.ts; do node --experimental-strip-types --no-warnings $f || exit 1; done"
   },
   "private": true
 }

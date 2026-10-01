@@ -39,7 +39,14 @@ export default function RegisterScreen() {
   const onSubmit = async ({ fullName, email, password }: Form) => {
     setLoading(true);
     setError(null);
-    const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
+    // A guest (anonymous account, decisions Q17) upgrades in place: same user id, so their data stays.
+    const { data } = await supabase.auth.getUser();
+    const { error } = data.user?.is_anonymous
+      ? await supabase.auth.updateUser({ email, password, data: { full_name: fullName } }).then(async (r) => {
+          if (!r.error) await supabase.from('profiles').update({ full_name: fullName }).eq('id', data.user!.id);
+          return r;
+        })
+      : await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
     setLoading(false);
     if (error) setError(error.message);
     else router.push({ pathname: '/verify-email', params: { email } });

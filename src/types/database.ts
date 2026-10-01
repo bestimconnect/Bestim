@@ -47,6 +47,7 @@ export type Database = {
           currency: string
           description: string | null
           expense_date: string
+          from_log: boolean
           id: string
           log_id: string | null
           receipt_url: string | null
@@ -60,6 +61,7 @@ export type Database = {
           currency?: string
           description?: string | null
           expense_date?: string
+          from_log?: boolean
           id?: string
           log_id?: string | null
           receipt_url?: string | null
@@ -73,6 +75,7 @@ export type Database = {
           currency?: string
           description?: string | null
           expense_date?: string
+          from_log?: boolean
           id?: string
           log_id?: string | null
           receipt_url?: string | null
@@ -158,6 +161,8 @@ export type Database = {
           currency: string
           description: string | null
           id: string
+          interval_km: number | null
+          interval_months: number | null
           location: string | null
           odometer_reading: number | null
           parts_replaced: Json
@@ -178,6 +183,8 @@ export type Database = {
           currency?: string
           description?: string | null
           id?: string
+          interval_km?: number | null
+          interval_months?: number | null
           location?: string | null
           odometer_reading?: number | null
           parts_replaced?: Json
@@ -198,6 +205,8 @@ export type Database = {
           currency?: string
           description?: string | null
           id?: string
+          interval_km?: number | null
+          interval_months?: number | null
           location?: string | null
           odometer_reading?: number | null
           parts_replaced?: Json
@@ -440,6 +449,7 @@ export type Database = {
           model: string
           nickname: string | null
           odometer_unit: string
+          odometer_updated_at: string
           photo_url: string | null
           plate_number: string | null
           updated_at: string
@@ -458,6 +468,7 @@ export type Database = {
           model: string
           nickname?: string | null
           odometer_unit?: string
+          odometer_updated_at?: string
           photo_url?: string | null
           plate_number?: string | null
           updated_at?: string
@@ -476,6 +487,7 @@ export type Database = {
           model?: string
           nickname?: string | null
           odometer_unit?: string
+          odometer_updated_at?: string
           photo_url?: string | null
           plate_number?: string | null
           updated_at?: string
@@ -499,6 +511,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      correct_log: {
+        Args: { changes: Json; log_id: string; reason: string }
+        Returns: undefined
+      }
       get_share: {
         Args: { token: string }
         Returns: {

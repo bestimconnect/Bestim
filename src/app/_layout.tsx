@@ -45,7 +45,6 @@ function App() {
       return data;
     },
   });
-  // ponytail: signed-out users always land on welcome; add a `guest` flag when guest browsing (screen 36) ships.
   const ready = fontsLoaded && hydrated && session !== undefined && (!userId || !profile.isPending);
 
   useEffect(() => useSettings.persist.onFinishHydration(() => setHydrated(true)), []);
@@ -64,18 +63,22 @@ function App() {
     else {
       applyLanguage(language);
       // Flow: language → tour → welcome/auth → profile (if no name) → add vehicle → home.
+      // Guests (anonymous accounts, Q17) have no name and skip the profile step.
       if (!userId) router.replace(tourSeen ? '/welcome' : '/tour-voice');
-      else if (profile.data && !profile.data.full_name.trim()) router.replace('/profile-setup'); // decisions.md Q7
+      else if (profile.data && !profile.data.full_name.trim() && !session?.user.is_anonymous) router.replace('/profile-setup'); // Q7
       else if (profile.data && !profile.data.onboarding_completed) router.replace('/add-vehicle');
     }
     SplashScreen.hideAsync();
-  }, [ready, language, tourSeen, userId, profile.data]);
+  }, [ready, language, tourSeen, userId, profile.data, session?.user.is_anonymous]);
 
   if (!ready) return null;
   return (
     <View className="flex-1 bg-paper" style={themeVars[scheme]}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="capture/index" options={{ presentation: 'formSheet', sheetAllowedDetents: 'fitToContents', sheetCornerRadius: 32, contentStyle: themeVars[scheme] }} />
+        <Stack.Screen name="feature-gate" options={{ presentation: 'modal' }} />
+      </Stack>
     </View>
   );
 }

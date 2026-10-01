@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,6 +20,7 @@ type FormValues = z.infer<typeof schema>;
 // Screen 03 — Add vehicle / Info, Figma 167:57360 (ar-light) / 167:65006 (en-light).
 export default function AddVehicleInfoScreen() {
   const { t } = useTranslation();
+  const { mode } = useLocalSearchParams<{ mode?: 'extra' }>(); // 'extra' = adding another vehicle from screen 08
   const draft = useVehicleDraft();
   const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -28,7 +29,7 @@ export default function AddVehicleInfoScreen() {
 
   const onSubmit = (values: FormValues) => {
     draft.set({ make: values.make, model: values.model, year: Number(values.year) });
-    router.push('/add-odometer');
+    router.push({ pathname: '/add-odometer', params: { mode } });
   };
 
   return (

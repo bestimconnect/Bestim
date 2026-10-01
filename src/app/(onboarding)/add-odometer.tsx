@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +15,7 @@ type FormValues = z.infer<typeof schema>;
 // Screen 04 — Add vehicle / Odometer, Figma 167:57431 (ar-light) / 167:65077 (en-light).
 export default function AddOdometerScreen() {
   const { t } = useTranslation();
+  const { mode } = useLocalSearchParams<{ mode?: 'extra' }>(); // 'extra' = adding another vehicle from screen 08
   const draft = useVehicleDraft();
   const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -23,7 +24,7 @@ export default function AddOdometerScreen() {
 
   const onSubmit = (values: FormValues) => {
     draft.set({ currentOdometer: Number(values.odometer) });
-    router.push('/first-log');
+    router.push({ pathname: '/first-log', params: { mode } });
   };
 
   return (

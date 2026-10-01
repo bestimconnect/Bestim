@@ -6,6 +6,7 @@ export * from './Divider';
 export * from './Field';
 export * from './Header';
 export * from './Item';
+export * from './Metric';
 export * from './Note';
 export * from './Progress';
 export * from './Text';

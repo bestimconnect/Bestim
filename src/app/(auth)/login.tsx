@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { signInWithGoogle } from '@/lib/auth';
+import { continueAsGuest, signInWithGoogle } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { Button, Divider, Field, Header, Note, Text, GoogleIcon } from '@/components/ui';
 
@@ -111,7 +111,7 @@ export default function LoginScreen() {
             </Pressable>
           </View>
 
-          {/* auth.login.continueAsGuest is kept for guest home (screen 36, Phase 3) — button returns then. */}
+          <Button title={t('auth.login.continueAsGuest')} variant="secondary" onPress={() => social(async () => (await continueAsGuest(), true))} />
         </View>
       </ScrollView>
     </SafeAreaView>

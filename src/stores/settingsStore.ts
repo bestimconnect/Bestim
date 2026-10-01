@@ -9,9 +9,11 @@ type Settings = {
   language: Language | null; // null until the user picks on the language screen
   theme: Theme; // chosen in Account settings; first-run flows are always light
   tourSeen: boolean; // the 3-screen tour runs once per device, before sign-in
+  currentVehicleId: string | null; // Home's vehicle + the one new logs go to; null = the primary vehicle
   setLanguage: (l: Language) => void;
   setTheme: (t: Theme) => void;
   finishTour: () => void;
+  setCurrentVehicle: (id: string | null) => void;
 };
 
 export const useSettings = create<Settings>()(
@@ -20,9 +22,11 @@ export const useSettings = create<Settings>()(
       language: null,
       theme: 'light',
       tourSeen: false,
+      currentVehicleId: null,
       setLanguage: (language) => set({ language }),
       setTheme: (theme) => set({ theme }),
       finishTour: () => set({ tourSeen: true }),
+      setCurrentVehicle: (currentVehicleId) => set({ currentVehicleId }),
     }),
     { name: 'settings', storage: createJSONStorage(() => AsyncStorage) },
   ),
