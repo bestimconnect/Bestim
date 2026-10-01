@@ -1,6 +1,8 @@
 @AGENTS.md
 
-# Bestim
+# Bestim (mobile app)
+
+**Shared briefing for all Bestim projects (product, brand, backend, accounts, updates):** `../CLAUDE.md`. Add a dated line to `../docs/UPDATES.md` when something changes that the other projects care about.
 
 **Start here:** `docs/PROGRESS.md` (phase status, flow, gotchas). Spec: `docs/BESTIM-TECH-PLAN.md`. Decisions: `docs/decisions.md`.
 

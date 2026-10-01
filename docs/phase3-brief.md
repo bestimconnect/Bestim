@@ -1,6 +1,6 @@
 # Phase 3 screen brief (for screen-builder agents)
 
-Repo: /Users/shadygamal/Bestim (Expo SDK 57, Expo Router, NativeWind v4, TanStack Query v5, zustand, i18next). Read `CLAUDE.md`, `docs/decisions.md` (Q9–Q19 are the Phase 3 product decisions, and they are binding), and `/Users/shadygamal/.claude/plans/snoopy-knitting-meteor.md` (the plan).
+Repo: bestim-app (Expo SDK 57, Expo Router, NativeWind v4, TanStack Query v5, zustand, i18next). Read `CLAUDE.md`, `docs/decisions.md` (Q9–Q19 are the Phase 3 product decisions, and they are binding), and `/Users/shadygamal/.claude/plans/snoopy-knitting-meteor.md` (the plan).
 
 ## Design source
 - PNG (primary): `screens/arabic light screens/Bestim/انطلاقة جديدة/<NN>/…png`. English: `screens/english light screens/Bestim/…/<NN>/`. Dark: `screens/arabic dark screens/…`. Look at the PNGs with the Read tool and match layout, spacing, sizes, colors and copy closely.
