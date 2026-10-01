@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Bestim",
-    "slug": "Bestim",
+    "slug": "bestim",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -58,6 +58,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "cc85a709-e5b5-4a8a-b127-9253a5366010"
+      }
+    },
+    "owner": "bestim-connect"
   }
 }
