@@ -10,3 +10,4 @@ export * from './Metric';
 export * from './Note';
 export * from './Progress';
 export * from './Text';
+export * from './Toggle';

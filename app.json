@@ -52,7 +52,8 @@
           "photosPermission": "Bestim attaches receipt photos to your maintenance records.",
           "cameraPermission": "Bestim takes receipt photos for your maintenance records."
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,

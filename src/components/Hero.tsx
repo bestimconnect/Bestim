@@ -4,16 +4,19 @@ import { setStatusBarStyle } from 'expo-status-bar';
 import { type ReactNode, useCallback } from 'react';
 import { I18nManager, View } from 'react-native';
 
+import { useScheme } from '@/lib/theme';
+
 /** Absolute offset from the PHYSICAL left edge. RN mirrors `left` in RTL, but the design keeps hero art in place. */
 export const fromLeft = (x: number) => (I18nManager.isRTL ? { right: x } : { left: x });
 
-/** Light status bar while a screen on an ink background is focused (these live in always-light flows). */
+/** Light status bar while a screen with a dark header is focused; leaving restores the theme's own style. */
 export function useLightStatusBar() {
+  const dark = useScheme() === 'dark';
   useFocusEffect(
     useCallback(() => {
       setStatusBarStyle('light');
-      return () => setStatusBarStyle('dark');
-    }, []),
+      return () => setStatusBarStyle(dark ? 'light' : 'dark');
+    }, [dark]),
   );
 }
 

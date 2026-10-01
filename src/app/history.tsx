@@ -1,15 +1,18 @@
 import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
+import { useMutationState } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { BadgeCheck } from 'lucide-react-native';
 import * as Icons from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { Button, Choice, Header, Item, Text } from '@/components/ui';
 import { useCurrentVehicle, useVehicleLogs, type Log } from '@/lib/queries';
+import { SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
 import { shadows, useColors } from '@/lib/theme';
 
 // Screens 10 + 39 — Maintenance log / empty state. Figma: docs/figma-screens.md (10, 39).
@@ -25,17 +28,17 @@ type Category = keyof typeof CATEGORIES;
 export default function HistoryScreen() {
   const { t, i18n } = useTranslation();
   const c = useColors();
-  const p = useLocalSearchParams<{ vehicleId?: string; category?: Category; saved?: string }>();
+  const p = useLocalSearchParams<{ vehicleId?: string; category?: Category }>();
   const { vehicle: current } = useCurrentVehicle();
   const vehicleId = p.vehicleId ?? current?.id;
   const logs = useVehicleLogs(vehicleId);
+  const onShowSaved = useShowSavedAction();
   const [category, setCategory] = useState<Category>(p.category && p.category in CATEGORIES ? p.category : 'all');
-  const [toast, setToast] = useState(p.saved === '1');
-  useEffect(() => {
-    if (!toast) return;
-    const id = setTimeout(() => setToast(false), 2500);
-    return () => clearTimeout(id);
-  }, [toast]);
+  // Q45: logs written offline wait in the mutation queue until they sync.
+  const queued = useMutationState({
+    filters: { mutationKey: SAVE_LOG_KEY, status: 'pending' },
+    select: (m) => m.state.variables as SaveLogInput,
+  }).filter((v) => v.vehicleId === vehicleId);
 
   const names = CATEGORIES[category];
   const rows = (logs.data ?? []).filter((l) => !names || (names as readonly string[]).includes(l.service_types?.name_en ?? ''));
@@ -46,9 +49,10 @@ export default function HistoryScreen() {
     if (last?.month === month) last.items.push(l);
     else groups.push({ month, items: [l] });
   }
-  const empty = logs.isSuccess && logs.data.length === 0;
+  const empty = logs.isSuccess && logs.data.length === 0 && !queued.length;
   const add = () => router.push('/capture');
 
+  if (logs.isError && !logs.data) return <ErrorState onRetry={logs.refetch} retrying={logs.isRefetching} onShowSaved={onShowSaved} />;
   return (
     <SafeAreaView className="flex-1 bg-paper px-6">
       <Header title={t('history.header')} />
@@ -78,7 +82,13 @@ export default function HistoryScreen() {
               onChange={setCategory}
               options={(Object.keys(CATEGORIES) as Category[]).map((k) => ({ value: k, label: t(`history.${k}`) }))}
             />
-            {groups.length === 0 && logs.isSuccess ? (
+            {queued.map((q, i) => (
+              <View key={i} className="gap-1.5">
+                <Text variant="caption" className="text-muted">{t('feedback.pending')}</Text>
+                <Item icon={Icons.Clock} title={q.title} subtitle={`${(q.odometer ?? 0).toLocaleString('en-US')} · ${q.serviceDate}`} chevron={false} />
+              </View>
+            ))}
+            {groups.length === 0 && !queued.length && logs.isSuccess ? (
               <Text variant="body" className="mt-6 text-center text-muted">{t('history.emptyCategory')}</Text>
             ) : null}
             {groups.map((g) => (
@@ -113,11 +123,6 @@ export default function HistoryScreen() {
           </View>
         </>
       )}
-      {toast ? (
-        <View className="absolute inset-x-6 top-20 items-center rounded-field bg-ink p-3">
-          <Text variant="caption" className="text-paper">{t('history.saved')}</Text>
-        </View>
-      ) : null}
     </SafeAreaView>
   );
 }

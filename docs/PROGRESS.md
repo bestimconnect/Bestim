@@ -1,6 +1,6 @@
 # Bestim: Build Progress
 
-Updated 2026-09-29. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
+Updated 2026-10-01. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
 
 ## Phase status
 
@@ -10,13 +10,14 @@ Updated 2026-09-29. Read this first in any new session. The spec is `docs/BESTIM
 | 2 · Auth & onboarding | Screens 01, 02, 03–05, 30–35, 49, 50 + reset password; email + Google login | ✅ Done (Apple deferred: decisions Q6) |
 | 3 · Core features | Home (06/07/36), vehicles (08/09), parts (11/12), capture (13–17), history (10/18/19/20/39), feature gate (37), guest mode | ✅ Done |
 | 4 · Reminders & expenses | Reminders (21/22/38), update odometer (25), expenses (23/24/40) | ✅ Done |
-| 5 · Account & polish | Account (26/27/28/41/42), feedback (43–48), push, offline, QA | ⏭ Next |
+| 5 · Account & polish | Account (26), notification prefs (28), export (27), share/receive (41/42), feedback (43–48), on-device reminders, offline, delete vehicle/account | ✅ Built (QA gaps below) |
+| 6 · Release | Needs the Apple Developer account: Sign in with Apple, server push, TestFlight, Android Google key, universal links, store submission, partner's voice function | ⏭ Next |
 
 ## App flow (decisions Q8)
 Splash → Language (01) → Tour 33→34→35 (once per device, `settingsStore.tourSeen`) → Welcome (02) → Sign in (30) / Create account (31) → Your profile (32, only if `profiles.full_name` is empty) → Add vehicle 03→04→05 → Home (tabs).
 The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "first vehicle added".
 
-## What exists (Phases 1–4)
+## What exists (Phases 1–5)
 - **UI kit** (`src/components/ui/`): Text, Button, Field, Card, Item, Header, Note, Divider, Progress, Choice (`className` for the track), Metric, GoogleIcon. Also `Hero`, `TourSlide`, `TabBar`, `PartMetric` in `src/components/`.
 - **Data hooks** (`src/lib/queries.ts`): vehicles, current vehicle, logs, log, service types, parts (`useVehicleParts` + `needsAttention`), snoozes, expenses, `useIsGuest`. Part status math: `src/lib/parts.ts` (pure, checked by `npm run check`). Voice parser mock: `src/lib/voice.ts` (swap point `USE_MOCK` in `capture/voice.tsx`).
 - **Flow stores:** `settingsStore` (language, theme, tourSeen, currentVehicleId), `vehicleDraft` (onboarding / `?mode=extra` add vehicle), `logDraft` (capture → review → save, and corrections).
@@ -30,14 +31,27 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
   - private `receipts` storage bucket;
   - `vehicles.odometer_updated_at`.
 - **Auth:** email/password, Google, anonymous (guest), email-link deep links, reset password.
-- **Theme:** the user setting (default light; the switch comes with Account in Phase 5). Auth + first-run onboarding are always light.
+- **Theme:** the user setting (Account → Dark mode). Auth + first-run onboarding are always light. **The dark theme is our own palette, not Figma's** (decisions Q50): `bg-paper` < `bg-white` < `bg-panel`; `bg-sheet` for sheets/modals.
+- **Phase 5:**
+  - Account (theme, language, sign out, delete account);
+  - on-device reminders (`src/lib/reminderPlan.ts` rules + `src/lib/notifications.ts`);
+  - export PDF/CSV/JSON (`src/lib/export.ts`);
+  - share by QR/link + receive (`accept_share` copies the vehicle and history);
+  - success screens, permission screen, delete vehicle;
+  - offline: cached data is persisted and a log saved offline is queued (`src/lib/queryClient.ts`, `src/lib/saveLog.ts`);
+  - `Toast`, pull-to-refresh (`useRefresh`).
+- **Checks:** `npm run check` runs 5 checks (parts, voice, export, reminder rules, and locales: every label used in code must exist in both languages).
 
-## Open items (not blocking Phase 3)
-- Sign in with Apple: add before App Store submission (decisions Q6 has the restore steps).
-- Google on Android needs an Android OAuth client + SHA-1 from the first EAS build.
-- Voice backend (partner's Edge Function) isn't ready: `processVoiceLog` is mocked (`src/lib/voice.ts`). Speech recognition needs a real iPhone (the simulator shows a dev text box instead).
-- Push notifications for due reminders: Phase 5.
-- Not visually reviewed yet: English/LTR for the Phase 3–4 screens (strings are complete in both languages).
+## Open items
+- **Not verified yet (QA):**
+  - English/LTR layout of the Phase 3–5 screens;
+  - light mode of the Phase 5 screens (they were reviewed in dark);
+  - tapping through: voice → save, receipt photo, correction, add expense, export share sheet, share → receive → accept, delete vehicle/account, offline queue, scheduled notifications list.
+  - The database rules behind these were tested on the live DB.
+- A red error with no message appears when the success screen is deep-linked straight into the permission modal (not a user path). Cause unknown.
+- Privacy policy URL (`EXPO_PUBLIC_PRIVACY_URL`) is not set, so the Account footer link is hidden.
+- Android test build: `eas.json` is ready (profile `preview` = APK). Needs the founder's Expo login, then `npx eas-cli init` and `npx eas-cli build -p android --profile preview`. Google sign-in won't work on Android until the Android OAuth client exists.
+- **Phase 6 (after the Apple Developer account):** Sign in with Apple (decisions Q6), server push (APNs + a scheduled Edge Function; on-device stays as fallback), TestFlight build, Android Google client + SHA-1, universal links for share links, store submission, the partner's `process-voice-log` function (`USE_MOCK` in `capture/voice.tsx`).
 
 ## Environment & gotchas (learned the hard way)
 - `.env` is **git-ignored** and holds EXPO_PUBLIC_SUPABASE_URL/ANON_KEY, EXPO_PUBLIC_GOOGLE_WEB/IOS_CLIENT_ID and SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET. A new machine or cloud session must recreate it.
@@ -52,6 +66,10 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 - Image picker plugin: don't set `microphonePermission: false`; it deletes the mic key that speech recognition needs, and iOS kills the app.
 - RN `TextInput` doesn't flip `textAlign: 'left'` in RTL. Use `I18nManager.isRTL ? 'right' : 'left'`.
 - Reviewing on the simulator: deep links (`xcrun simctl openurl booted "bestim://reminders"`) are more reliable than taps after many hot reloads.
+- **Query data must be plain JSON** (no Map/Set/Date): the cache is persisted to disk for offline use. Bump the key in `src/lib/queryClient.ts` when a query's shape changes.
+- **Local dates only:** `toLocaleDateString('en-CA')` or date-fns `format`; `toISOString().slice(0,10)` is UTC and is a day off in Egypt.
+- Screen builders write text to `src/locales/pending/`; until it's merged the screen shows raw keys. Merge before showing the founder.
+- Changing `src/lib/palette.js` (Tailwind colors) needs Metro restarted with `--clear`.
 - Dev-client quirks (not bugs): it can replay the last deep link on reload, and the dev-menu intro sheet reappears after reloads.
 - Figma MCP is on the Starter plan (20 reads/month, used up). Design source = `screens/` PNG exports + `docs/figma-metadata.xml`.
 - iOS simulator dev build: `npx expo run:ios --device "iPhone 16"` (needs `LANG=en_US.UTF-8` for CocoaPods). It needs macOS + Xcode, so a cloud session can't run it. The founder verifies on their Mac.
@@ -68,9 +86,8 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 - Product questions go to a **PM subagent** that decides and logs in `docs/decisions.md`. Ask the founder only about credentials, accounts, money, or scope.
 - GitHub: `bestimconnect/Bestim` on `main`, pushed as **Shady110**.
 
-## Phase 5 kickoff checklist
-1. Account & settings (26) replaces `src/app/(tabs)/account/index.tsx` and keeps the Expenses row. The theme switch lives here (`settingsStore.setTheme`), plus language (`applyLanguage`) and sign out.
-2. Notification prefs (28) + push for reminders due soon (expo-notifications needs a native rebuild).
-3. Export (27), share/receive history (41/42): `get_share(token)` already exists.
-4. Feedback sheets (43–48), offline banner + offline manual logs.
-5. The screen-builder brief pattern: `docs/phase3-brief.md` + `docs/phase4-brief.md`. PM decisions continue at Q33.
+## Phase 6 kickoff checklist
+1. Finish the QA list under "Open items" first (English pass, light mode of Phase 5, tap-through flows).
+2. Android APK for testers (steps under "Open items").
+3. With the Apple Developer account: restore Apple sign-in (Q6), EAS iOS build → TestFlight, push keys.
+4. Briefs for screen builders: `docs/phase3-brief.md`, `phase4-brief.md`, `phase5-brief.md`. PM decisions continue at Q51.

@@ -223,7 +223,8 @@
       "capture": "Add a record",
       "reminders": "Reminders",
       "account": "Account",
-      "expenses": "Expenses"
+      "expenses": "Expenses",
+      "receive": "Receive vehicle history"
     },
     "heading": "All the details, in your account",
     "body": "Create an account to keep your maintenance history and track parts and expenses.",
@@ -529,5 +530,214 @@
     "noLink": "No link",
     "linkHint": "Added as an extra cost for this record.",
     "save": "Save expense"
+  },
+  "notify": {
+    "soonTitle": "{{part}} is coming up",
+    "soonDate": "Due {{date}}. Book in time.",
+    "soonKm": "{{km}} {{unit}} left. Book in time.",
+    "overdueTitle": "{{part}} needs attention",
+    "overdueBody": "It's past its date. Log the service once it's done.",
+    "odometerTitle": "Update your odometer",
+    "odometerBody": "{{vehicle}}: last reading {{n}} days ago.",
+    "weeklyTitle": "Your weekly summary",
+    "weeklyBody": "See what's coming up for your vehicles."
+  },
+  "account": {
+    "myAccount": "My account",
+    "subtitle": "Your account is ready for the next step",
+    "language": "Language",
+    "languageName": "English",
+    "currency": "Currency",
+    "currencyName": "EGP",
+    "expensesSub": "Review your total expenses",
+    "notifications": "Notifications",
+    "notificationsSub": "Choose what suits you",
+    "export": "Export your history",
+    "exportSub": "PDF, CSV or JSON",
+    "share": "Share vehicle history",
+    "shareSub": "Move the history to the new owner",
+    "dark": "Dark mode",
+    "darkSub": "Easier on the eyes at night",
+    "signOut": "Sign out",
+    "signOutTitle": "Sign out?",
+    "signOutBody": "You'll need to sign in again.",
+    "cancel": "Cancel",
+    "switch": "Switch",
+    "switchTitle": "Switch to Arabic?",
+    "switchBody": "Bestim will restart to apply the language.",
+    "privacy": "Privacy",
+    "version": "Bestim {{v}}",
+    "deleteVehicle": "Delete vehicle data",
+    "deleteAccount": "Delete my account"
+  },
+  "notifPrefs": {
+    "title": "Notifications",
+    "heading": "Alerts your way",
+    "dueSoon": "Maintenance coming up",
+    "dueSoonSub": "When the due date is near",
+    "overdue": "Overdue maintenance",
+    "overdueSub": "When the due date has passed",
+    "odometer": "Odometer update",
+    "odometerSub": "Every two weeks",
+    "weekly": "Weekly summary",
+    "weeklySub": "Friday morning",
+    "quiet": "Quiet hours",
+    "quietOpts": [
+      "10 PM to 8 AM",
+      "11 PM to 10 AM",
+      "12 AM to 12 PM",
+      "No quiet hours"
+    ],
+    "footnote": "We alert you when the state changes, with no daily repeat for the same reminder.",
+    "save": "Save my preferences",
+    "saved": "Preferences saved",
+    "bannerOff": "Notifications are off for Bestim on this device.",
+    "bannerAction": "Turn on notifications"
+  },
+  "export": {
+    "header": "Export history",
+    "title": "Share what you choose",
+    "logs": {
+      "title": "Maintenance logs",
+      "sub": "Always included"
+    },
+    "costs": {
+      "title": "Costs",
+      "sub": "Amounts and currencies"
+    },
+    "workshops": {
+      "title": "Receipts and workshop names",
+      "sub": "Verification details"
+    },
+    "identifiers": {
+      "title": "Plate and VIN",
+      "sub": "Private information"
+    },
+    "notes": {
+      "title": "My personal notes",
+      "sub": "Private information"
+    },
+    "footnote": "The recipient sees how many items were left out, not their content.",
+    "prepare": "Prepare the file",
+    "empty": "No records to export yet.",
+    "error": "We couldn't prepare the file. Try again.",
+    "file": {
+      "title": "Bestim · Maintenance log",
+      "date": "Date",
+      "service": "Service",
+      "odometer": "Odometer",
+      "cost": "Cost",
+      "workshop": "Workshop",
+      "receipt": "Receipt",
+      "notes": "Notes",
+      "status": "Status",
+      "plate": "Plate",
+      "vin": "VIN",
+      "attached": "Attached",
+      "unverified": "Unverified",
+      "excluded": "The owner excluded {{n}} items (their content isn't shown)."
+    }
+  },
+  "share": {
+    "header": "Share vehicle history",
+    "title": "Its history goes with it",
+    "body": "Share the logs, reminders and parts with the new owner.",
+    "qr": "QR code",
+    "linkTab": "Share link",
+    "sub": "{{n}} maintenance records · {{m}} dates",
+    "note": "Sharing the vehicle's history only. This doesn't transfer legal ownership of the car.",
+    "prepare": "Prepare the share",
+    "send": "Share link",
+    "valid": "Valid for 7 days.",
+    "empty": "Add at least one record to share.",
+    "error": "We couldn't prepare the share. Try again.",
+    "message": "I shared the maintenance history of {{vehicle}} on Bestim: {{link}}",
+    "received": "Received a link?",
+    "paste": "Paste the share link",
+    "continue": "Continue"
+  },
+  "receive": {
+    "header": "Receive vehicle history",
+    "title": "A vehicle history is waiting",
+    "sub": "{{n}} maintenance records",
+    "by": "Shared by",
+    "fallbackName": "A Bestim user",
+    "body": "Review the details before adding this history to your account.",
+    "accept": "Accept the history",
+    "decline": "Decline",
+    "invalidTitle": "This link isn't valid",
+    "invalidBody": "It may have expired or been used already. Ask the sender to share again.",
+    "own": "This is your own share. Open the link on the other person's phone.",
+    "retryTitle": "Shall we try again?",
+    "retryBody": "We couldn't load your data right now.",
+    "retry": "Try again",
+    "home": "To Home"
+  },
+  "feedback": {
+    "error": {
+      "title": "Shall we try again?",
+      "body": "We couldn't load your data right now. Your saved records are still there.",
+      "retry": "Try again",
+      "saved": "View what's saved on this device"
+    },
+    "offline": {
+      "bannerTitle": "You're offline now",
+      "bannerBody": "You can write a new record. We'll sync it when you're back online.",
+      "title": "We continue where you are",
+      "vehicleSub": "Last data saved on this device",
+      "cardLabel": "Last saved reading",
+      "cardNote": "{{unit}} · check your connection to update schedules",
+      "write": "Write a new record",
+      "voice": "Voice recording needs a connection.",
+      "voiceSheet": "Voice recording needs a connection."
+    },
+    "pending": "Waiting to sync",
+    "success": {
+      "logTitle": "Great step, {{name}}!",
+      "logTitleNoName": "Great step!",
+      "logBody": "We saved the record and updated your next maintenance date.",
+      "logBodyPlain": "We saved the record.",
+      "reviewBody": "We saved the record. The reading looks unusual, so it's marked for review.",
+      "offlineBody": "Saved on this device. We'll sync it when you're back online.",
+      "noPhoto": "The receipt photo needs a connection, so it wasn't attached.",
+      "nextTitle": "Your next date",
+      "nextBoth": "At {{km}} {{unit}} or after {{m}} months",
+      "nextKm": "At {{km}} {{unit}}",
+      "nextDate": "On {{date}}",
+      "vehicleTitle": "Your vehicle is with us",
+      "vehicleBody": "Next step? Log your last service and we'll arrange its reminders.",
+      "home": "To Home",
+      "another": "Add another record",
+      "firstService": "Log my first service"
+    },
+    "notify": {
+      "title": "Let us remind you on time",
+      "body": "We'll notify you when maintenance is near or overdue. You can change your preferences anytime.",
+      "enable": "Turn on notifications",
+      "later": "Later"
+    },
+    "delete": {
+      "export": "Export first",
+      "confirm": "Delete permanently"
+    },
+    "deleteVehicle": {
+      "header": "Delete vehicle data",
+      "title": "Delete vehicle from your account?",
+      "body": "Its records and schedules will be deleted. You cannot recover them.",
+      "keep": "Keep vehicle",
+      "error": "We couldn't delete the vehicle. Try again."
+    },
+    "deleteAccount": {
+      "header": "Delete account",
+      "title": "Delete your account permanently?",
+      "body": "Your account and all your vehicles, records, reminders and expenses will be deleted. You won't be able to get them back.",
+      "keep": "Keep my account",
+      "error": "We couldn't delete your account. Try again."
+    }
+  },
+  "toast": {
+    "vehicleDeleted": "Vehicle deleted",
+    "accountDeleted": "Your account was deleted",
+    "photoOffline": "Photos need a connection."
   }
 }

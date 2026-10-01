@@ -31,7 +31,7 @@ export const shadows = {
   card: '0 4px 16px rgba(0,0,0,0.06)',
   soft: '0 4px 8px rgba(0,0,0,0.06)', // Figma items
   elevated: '0 8px 24px -2px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.04)',
-  glow: '0 6px 8px rgba(211,245,61,0.35)', // Figma primary button
+  glow: '0 4px 12px rgba(211,245,61,0.18)', // primary button; softer than Figma's (founder, 2026-10-01)
   nav: '0 -4px 20px -2px rgba(0,0,0,0.16)',
   field: 'inset 0 1px 3px rgba(0,0,0,0.05)',
 } as const;

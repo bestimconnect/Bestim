@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, Field, Header, Item, Note, Text } from '@/components/ui';
 import { useCurrentVehicle, useIsGuest, useVehicle, useVehicleLogs } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
+import { shadows } from '@/lib/theme';
 
 // Screen 24 — Add expense (167:67164); decisions Q26, Q28, Q29, Q31.
 const cats = ['maintenance', 'fuel', 'parts', 'insurance', 'registration', 'other'] as const;
@@ -78,7 +79,7 @@ export default function AddExpense() {
           ))}
         </ScrollView>
         {/* The whole card focuses the amount, not just the digits. */}
-        <Pressable onPress={() => amountRef.current?.focus()} className="gap-1 rounded-metric bg-lime p-5" style={{ boxShadow: '0 8px 24px rgba(216,244,58,0.35)' }}>
+        <Pressable onPress={() => amountRef.current?.focus()} className="gap-1 rounded-metric bg-lime p-5" style={{ boxShadow: shadows.glow }}>
           <Text variant="caption" className="text-[#222E29]">{t('expenses.amount')}</Text>
           <TextInput
             ref={amountRef}
@@ -132,8 +133,10 @@ export default function AddExpense() {
           </View>
         ) : null}
         {error ? <Note tone="warning" text={error} /> : null}
-        <Button title={t('expenses.save')} onPress={() => save.mutate()} disabled={!valid} loading={save.isPending} />
       </ScrollView>
+      <View className="px-6 pb-4 pt-2">
+        <Button title={t('expenses.save')} onPress={() => save.mutate()} disabled={!valid} loading={save.isPending} />
+      </View>
     </SafeAreaView>
   );
 }

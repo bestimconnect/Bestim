@@ -27,7 +27,7 @@ const initial = () => ({
   title: '',
   odometer: null,
   cost: null,
-  serviceDate: new Date().toISOString().slice(0, 10),
+  serviceDate: new Date().toLocaleDateString('en-CA'),
   location: '',
   source: 'manual' as const,
   transcript: null,

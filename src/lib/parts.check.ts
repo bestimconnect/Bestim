@@ -20,6 +20,8 @@ assert.equal(late.state, 'overdue');
 assert.equal(partStatus({ ...base, lastReading: 134000, intervalKm: 5000, intervalMonths: 3 })!.state, 'overdue');
 // 12 days left → soon.
 assert.equal(partStatus({ ...base, lastDate: '2026-04-11', lastReading: null, intervalKm: 5000, intervalMonths: 6 })!.remainingDays, 12);
+// The due date is a local calendar date (no UTC shift).
+assert.equal(partStatus({ ...base, lastDate: '2026-04-20', lastReading: null, intervalKm: null, intervalMonths: 6 })!.dueDate, '2026-10-20');
 // Far from due → ok. Hours use the 50 h threshold.
 assert.equal(partStatus({ ...base, lastReading: 134000, intervalKm: 10000, intervalMonths: 12 })!.state, 'ok');
 assert.equal(partStatus({ ...base, unit: 'h', odometer: 1240, lastReading: 1200, intervalKm: 80, intervalMonths: null })!.state, 'soon');

@@ -4,6 +4,8 @@ import { I18nManager, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { useRefresh } from '@/components/Refresh';
+import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { Button, Header, Text } from '@/components/ui';
 import { useExpenses, useIsGuest, useVehicles } from '@/lib/queries';
 import { useColors } from '@/lib/theme';
@@ -19,13 +21,17 @@ const rows = [
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
 
 export default function Expenses() {
+  const refresh = useRefresh();
   const { t } = useTranslation();
   const c = useColors();
   const guest = useIsGuest();
-  const expenses = useExpenses().data ?? [];
+  const query = useExpenses();
+  const expenses = query.data ?? [];
+  const onShowSaved = useShowSavedAction();
   const vehicleCount = useVehicles().data?.length ?? 0;
   if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'expenses' } }} />;
 
+  if (query.isError && !query.data) return <ErrorState onRetry={query.refetch} retrying={query.isRefetching} onShowSaved={onShowSaved} />;
   const now = new Date();
   const year = now.getFullYear();
   const thisYear = expenses.filter((e) => e.expense_date.startsWith(String(year)));
@@ -41,7 +47,7 @@ export default function Expenses() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
-      <ScrollView contentContainerClassName="gap-5 px-6 pt-2 pb-[120px] grow">
+      <ScrollView refreshControl={refresh} contentContainerClassName="gap-5 px-6 pt-2 pb-[120px] grow">
         <Header
           title={t('expenses.title')}
           right={
@@ -65,10 +71,10 @@ export default function Expenses() {
           </View>
         ) : (
           <>
-            <View className="gap-1 rounded-metric bg-ink p-5">
-              <Text variant="caption" className="text-paper">{t('expenses.total', { year })}</Text>
-              <Text variant="number" className="text-paper" numberOfLines={1}>{fmt(total)}</Text>
-              <Text variant="caption" className="text-paper">
+            <View className="gap-1 rounded-metric bg-panel p-5">
+              <Text variant="caption" className="text-onpanel">{t('expenses.total', { year })}</Text>
+              <Text variant="number" className="text-onpanel" numberOfLines={1}>{fmt(total)}</Text>
+              <Text variant="caption" className="text-onpanel">
                 {vehicleCount === 1 ? t('expenses.captionOne') : t('expenses.caption', { count: vehicleCount })}
               </Text>
             </View>

@@ -18,7 +18,7 @@ export default function FeatureGateScreen() {
   const title = car ? vehicle.model : t(`gate.title.${feature ?? 'account'}`);
 
   return (
-    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 rounded-t-screen border-t border-line bg-sheet" edges={['top', 'bottom']}>
       <View className="flex-1 gap-4 p-6">
         <Header title={title} />
         {car ? <Item icon={Car} title={`${vehicle.make} ${vehicle.model}`} subtitle={String(vehicle.year)} chevron={false} disabled /> : null}

@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Text } from '@/components/ui';
+import { useOnline } from '@/lib/online';
 import { useCurrentVehicle } from '@/lib/queries';
 import { shadows, useColors } from '@/lib/theme';
 import { useLogDraft } from '@/stores/logDraft';
@@ -15,6 +16,7 @@ export default function CaptureSheet() {
   const c = useColors();
   const { bottom } = useSafeAreaInsets();
   const { vehicle } = useCurrentVehicle();
+  const online = useOnline();
 
   const pick = (source: 'voice' | 'manual') => {
     useLogDraft.getState().reset({ vehicleId: vehicle?.id ?? null, source });
@@ -24,7 +26,7 @@ export default function CaptureSheet() {
   };
 
   return (
-    <View className="gap-5 bg-paper px-6 pt-6" style={{ paddingBottom: bottom + 16 }}>
+    <View className="gap-5 rounded-t-screen border-t border-line bg-sheet px-6 pt-6" style={{ paddingBottom: bottom + 16 }}>
       <View className="h-11 flex-row items-center justify-between">
         <Text variant="heading">{t('capture.newRecord')}</Text>
         <Pressable accessibilityRole="button" onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white">
@@ -40,10 +42,11 @@ export default function CaptureSheet() {
         <Pressable
           accessibilityRole="button"
           onPress={() => pick('voice')}
-          className="h-[152px] flex-1 items-center justify-center gap-2 rounded-item bg-ink active:opacity-80">
+          disabled={!online}
+          className={`h-[152px] flex-1 items-center justify-center gap-2 rounded-item bg-panel active:opacity-80 ${online ? '' : 'opacity-50'}`}>
           <Mic size={26} color="#D3F53D" />
-          <Text variant="label" className="text-paper">{t('capture.index.voice')}</Text>
-          <Text variant="caption" className="text-muted">{t('capture.index.voiceSub')}</Text>
+          <Text variant="label" className="text-onpanel">{t('capture.index.voice')}</Text>
+          <Text variant="caption" className="px-2 text-center text-muted">{t(online ? 'capture.index.voiceSub' : 'feedback.offline.voiceSheet')}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"

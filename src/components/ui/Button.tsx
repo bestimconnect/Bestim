@@ -8,7 +8,7 @@ import { Text } from './Text';
 const styles = {
   primary: { box: 'bg-lime', text: 'text-[#222E29]', shadow: shadows.glow },
   secondary: { box: 'bg-white border border-line', text: 'text-ink', shadow: undefined },
-  dark: { box: 'bg-ink', text: 'text-paper', shadow: undefined },
+  dark: { box: 'bg-panel', text: 'text-onpanel', shadow: undefined },
   danger: { box: 'bg-danger', text: 'text-[#FFFFFF]', shadow: undefined },
 };
 

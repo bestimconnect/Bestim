@@ -21,7 +21,7 @@ export function Text({ variant = 'body', className = '', ...rest }: Props) {
   const latin = 'latin' in v || i18n.language === 'en';
   const family = `${latin ? 'Poppins' : 'Tajawal'}_${v.bold ? '700Bold' : '400Regular'}`;
   // NativeWind resolves conflicting classes by stylesheet order, not className order, so only default to ink when no color is given.
-  const color = /(^|\s)text-(ink|muted|teal|paper|white|lime|danger|coral|\[#)/.test(className) ? '' : 'text-ink';
+  const color = /(^|\s)text-(ink|muted|teal|paper|white|lime|danger|coral|onpanel|\[#)/.test(className) ? '' : 'text-ink';
   return (
     <RNText
       className={`${v.size} ${color} text-left ${className}`}

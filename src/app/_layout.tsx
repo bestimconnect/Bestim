@@ -2,29 +2,36 @@ import '@/global.css';
 
 import { Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { Tajawal_400Regular, Tajawal_700Bold } from '@expo-google-fonts/tajawal';
-import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
 import { useURL } from 'expo-linking';
+import { useLastNotificationResponse } from 'expo-notifications';
 import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
+import { Toast } from '@/components/Toast';
 import { applyLanguage } from '@/lib/i18n';
+import { syncNotifications } from '@/lib/notifications';
+import { DAY, persister, queryClient } from '@/lib/queryClient';
 import { sessionFromUrl, useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
+import { useProfile } from '@/lib/queries';
+import { palette } from '@/lib/palette';
 import { themeVars, useScheme } from '@/lib/theme';
 import { useSettings } from '@/stores/settingsStore';
 
 SplashScreen.preventAutoHideAsync();
-const queryClient = new QueryClient();
 
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister, maxAge: 7 * DAY }}
+      onSuccess={() => queryClient.resumePausedMutations()}>
       <App />
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
 
@@ -34,17 +41,10 @@ function App() {
   const [hydrated, setHydrated] = useState(useSettings.persist.hasHydrated());
   const language = useSettings((s) => s.language);
   const tourSeen = useSettings((s) => s.tourSeen);
+  const pendingShareToken = useSettings((s) => s.pendingShareToken);
   const session = useSession();
   const userId = session?.user.id;
-  const profile = useQuery({
-    queryKey: ['profile', userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId!).single();
-      if (error) throw error;
-      return data;
-    },
-  });
+  const profile = useProfile();
   const ready = fontsLoaded && hydrated && session !== undefined && (!userId || !profile.isPending);
 
   useEffect(() => useSettings.persist.onFinishHydration(() => setHydrated(true)), []);
@@ -57,6 +57,27 @@ function App() {
       .then((type) => type === 'recovery' && router.replace('/reset-password'))
       .catch(() => router.replace({ pathname: '/login', params: { notice: 'linkExpired' } }));
   }, [ready, url]);
+  // A share link opened while signed out (or as a guest) waits here until there's a full account (Q44).
+  const shareToken = url?.match(/receive\?token=([\w-]+)/)?.[1];
+  const fullAccount = !!userId && !session?.user.is_anonymous;
+  useEffect(() => {
+    if (ready && shareToken && !fullAccount) useSettings.getState().set({ pendingShareToken: shareToken });
+  }, [ready, shareToken, fullAccount]);
+  useEffect(() => {
+    if (!ready || !fullAccount || !pendingShareToken || !profile.data?.onboarding_completed) return;
+    useSettings.getState().set({ pendingShareToken: null });
+    router.push({ pathname: '/receive', params: { token: pendingShareToken } });
+  }, [ready, fullAccount, pendingShareToken, profile.data?.onboarding_completed]);
+
+  // Reminders: schedule once the user is known; a tapped notification opens its screen (Q37).
+  useEffect(() => {
+    if (ready && userId) syncNotifications();
+  }, [ready, userId]);
+  const tapped = useLastNotificationResponse()?.notification.request.content.data?.url;
+  useEffect(() => {
+    if (ready && userId && typeof tapped === 'string') router.push(tapped as never);
+  }, [ready, userId, tapped]);
+
   useEffect(() => {
     if (!ready) return;
     if (!language) router.replace('/language');
@@ -76,9 +97,11 @@ function App() {
     <View className="flex-1 bg-paper" style={themeVars[scheme]}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="capture/index" options={{ presentation: 'formSheet', sheetAllowedDetents: 'fitToContents', sheetCornerRadius: 32, contentStyle: themeVars[scheme] }} />
+        <Stack.Screen name="capture/index" options={{ presentation: 'formSheet', sheetAllowedDetents: 'fitToContents', sheetCornerRadius: 32, contentStyle: [themeVars[scheme], { backgroundColor: palette[scheme].sheet }] }} />
         <Stack.Screen name="feature-gate" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="notify-permission" options={{ presentation: 'modal' }} />
       </Stack>
+      <Toast />
     </View>
   );
 }

@@ -24,7 +24,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
   const { bottom } = useSafeAreaInsets();
   return (
     <View
-      className="absolute inset-x-4 h-[68px] flex-row items-center rounded-nav bg-ink px-2"
+      className="absolute inset-x-4 h-[68px] flex-row items-center rounded-nav border border-line bg-panel px-2"
       style={{ bottom: Math.max(bottom, 16), boxShadow: shadows.nav }}>
       {state.routes.map((route, i) => {
         const focused = state.index === i;

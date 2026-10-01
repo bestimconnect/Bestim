@@ -31,3 +31,15 @@ export async function signInWithGoogle(): Promise<boolean> {
   if (error) throw error;
   return true;
 }
+
+/** Sign out and drop everything cached for this user (Q33/Q48). Language, theme and the tour flag stay. */
+export async function signOut() {
+  const { queryClient } = await import('./queryClient');
+  const { syncNotifications } = await import('./notifications');
+  const { useSettings } = await import('@/stores/settingsStore');
+  await supabase.auth.signOut();
+  queryClient.clear();
+  useSettings.getState().setCurrentVehicle(null);
+  useSettings.getState().set({ pendingShareToken: null });
+  syncNotifications(); // no user → cancels every scheduled reminder
+}

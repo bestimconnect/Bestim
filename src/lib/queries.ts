@@ -22,6 +22,20 @@ export function useIsGuest() {
   return !!useSession()?.user.is_anonymous;
 }
 
+/** The signed-in user's profile row. Key ['profile', userId]. */
+export function useProfile() {
+  const userId = useSession()?.user.id;
+  return useQuery({
+    queryKey: ['profile', userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId!).single();
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 export function useVehicles() {
   return useQuery({
     queryKey: ['vehicles'],
@@ -98,7 +112,7 @@ export function useSnoozes(vehicleId: string | undefined) {
     queryKey: ['snoozes', vehicleId],
     enabled: !!vehicleId,
     queryFn: async () => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = new Date().toLocaleDateString('en-CA');
       const { data, error } = await supabase
         .from('reminders')
         .select('service_type_id, due_date')
@@ -106,7 +120,8 @@ export function useSnoozes(vehicleId: string | undefined) {
         .eq('status', 'dismissed')
         .gt('due_date', today);
       if (error) throw error;
-      return new Map(data.map((r) => [r.service_type_id, r.due_date]));
+      // A plain object, not a Map: query data is persisted as JSON for offline use (src/lib/queryClient.ts).
+      return Object.fromEntries(data.map((r) => [r.service_type_id, r.due_date])) as Record<string, string | null>;
     },
   });
 }
@@ -128,7 +143,7 @@ export function useVehicleParts(vehicle: Vehicle | null | undefined) {
         intervalKm: log.interval_km ?? st.default_interval_km,
         intervalMonths: log.interval_months ?? st.default_interval_months,
       });
-      if (status) parts.push({ serviceType: st, log, status, snoozedUntil: snoozes.data?.get(st.id) ?? null });
+      if (status) parts.push({ serviceType: st, log, status, snoozedUntil: snoozes.data?.[st.id] ?? null });
     }
   parts.sort((a, b) => a.status.urgency - b.status.urgency);
   return { ...logs, parts };

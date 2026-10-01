@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Field, Header, Item, Note, Text } from '@/components/ui';
+import { useOnline } from '@/lib/online';
 import { useLog, useServiceTypes } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { useLogDraft } from '@/stores/logDraft';
@@ -16,6 +17,7 @@ import { useLogDraft } from '@/stores/logDraft';
 const num = (s: string) => (s.trim() && !isNaN(Number(s)) ? Number(s) : null);
 
 export default function Manual() {
+  const online = useOnline(); // Q45: a photo needs a connection
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const { notice, logId } = useLocalSearchParams<{ notice?: string; logId?: string }>();
@@ -139,18 +141,22 @@ export default function Manual() {
             icon={Camera}
             tone="sky"
             title={t('capture.manual.attach')}
-            subtitle={t(d.photoUri ? 'capture.manual.attached' : 'capture.manual.attachSub')}
+            subtitle={t(!online ? 'toast.photoOffline' : d.photoUri ? 'capture.manual.attached' : 'capture.manual.attachSub')}
             onPress={attach}
+            disabled={!online}
+            style={{ opacity: online ? 1 : 0.5 }}
           />
         )}
         {error ? <Note tone="warning" text={error} /> : null}
+      </ScrollView>
+      <View className="px-6 pb-4 pt-2">
         <Button
           title={t(correcting ? 'capture.manual.saveCorrection' : 'capture.manual.review')}
           onPress={submit}
           disabled={!valid}
           loading={correct.isPending}
         />
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }

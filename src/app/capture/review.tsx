@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { onlineManager, useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router } from 'expo-router';
@@ -9,8 +9,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Header, Item, Note, Text } from '@/components/ui';
+import { shouldAskNotifications } from '@/lib/notifications';
 import { useServiceTypes } from '@/lib/queries';
-import { supabase } from '@/lib/supabase';
+import { SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
 import { useLogDraft } from '@/stores/logDraft';
 
 // Screen 15 — Review before saving, PNG 15/مراجعة قبل الحفظ.
@@ -27,7 +28,6 @@ function Row({ label, value, teal }: { label: string; value: string; teal?: bool
 
 export default function Review() {
   const { t, i18n } = useTranslation();
-  const queryClient = useQueryClient();
   const d = useLogDraft();
   const serviceType = useServiceTypes().data?.find((s) => s.id === d.serviceTypeId);
   const [error, setError] = useState<string | null>(null);
@@ -41,44 +41,54 @@ export default function Review() {
   const date = format(new Date(`${d.serviceDate}T00:00:00`), 'd MMMM yyyy', { locale: i18n.language === 'ar' ? ar : enUS });
   const voice = d.source === 'voice';
 
-  const save = useMutation({
-    mutationFn: async () => {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-      const photos: string[] = [];
-      if (d.photoUri) {
-        const path = `${userData.user.id}/${Date.now()}.jpg`;
-        const body = await (await fetch(d.photoUri)).arrayBuffer();
-        const { error: upError } = await supabase.storage.from('receipts').upload(path, body, { contentType: 'image/jpeg' });
-        if (upError) throw upError;
-        photos.push(path);
-      }
-      const { error: insertError } = await supabase.from('maintenance_logs').insert({
-        vehicle_id: d.vehicleId!,
-        service_type_id: d.serviceTypeId,
-        title: d.title,
-        odometer_reading: d.odometer,
-        cost: d.cost,
-        service_date: d.serviceDate,
-        location: d.location || null,
-        source: d.source,
-        voice_transcript: d.transcript,
-        parts_replaced: d.parts,
-        interval_km: d.intervalKm,
-        photos,
-      });
-      if (insertError) throw insertError;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vehicles'] });
-      queryClient.invalidateQueries({ queryKey: ['logs'] });
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      const vehicleId = d.vehicleId!;
-      router.dismissAll();
-      router.push({ pathname: '/history', params: { vehicleId, saved: '1' } }); // Q19.5: history shows the toast
-    },
-    onError: (e: Error) => setError(e.message),
-  });
+  // Shared mutation (src/lib/saveLog.ts): offline it pauses, is persisted, and is sent on reconnect (Q45).
+  const save = useMutation<{ id: string; status: string }, Error, SaveLogInput>({ mutationKey: SAVE_LOG_KEY });
+
+  // Q39: ask for notifications once, after the first saved log; then the success screen (Q40).
+  const done = async (offline: boolean, params: Record<string, string>) => {
+    const ask = await shouldAskNotifications();
+    const p: Record<string, string> = {
+      kind: 'log',
+      vehicleId: d.vehicleId!,
+      ...(d.serviceTypeId ? { serviceTypeId: d.serviceTypeId } : {}),
+      ...(d.odometer != null ? { odo: String(d.odometer) } : {}),
+      ...(intervalKm != null ? { km: String(intervalKm) } : {}),
+      ...(months != null ? { months: String(months) } : {}),
+      date: d.serviceDate,
+      ...(offline ? { offline: '1' } : {}),
+      ...(offline && d.photoUri ? { nophoto: '1' } : {}),
+      ...params,
+    };
+    router.dismissAll();
+    router.push({ pathname: ask ? '/notify-permission' : '/success', params: p });
+  };
+
+  const confirm = () => {
+    setError(null);
+    const input: SaveLogInput = {
+      vehicleId: d.vehicleId!,
+      serviceTypeId: d.serviceTypeId,
+      title: d.title,
+      odometer: d.odometer,
+      cost: d.cost,
+      serviceDate: d.serviceDate,
+      location: d.location,
+      source: d.source,
+      transcript: d.transcript,
+      parts: d.parts,
+      intervalKm: d.intervalKm,
+      photoUri: d.photoUri,
+    };
+    if (!onlineManager.isOnline()) {
+      save.mutate({ ...input, photoUri: null }); // Q45: a receipt photo needs a connection
+      done(true, {});
+      return;
+    }
+    save.mutate(input, {
+      onSuccess: (log) => done(false, log.status === 'needs_review' ? { review: '1' } : {}),
+      onError: (e) => setError(e.message),
+    });
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
@@ -112,7 +122,7 @@ export default function Review() {
           </View>
         ) : null}
         {error ? <Note tone="warning" text={error} /> : null}
-        <Button title={t('capture.review.confirm')} onPress={() => save.mutate()} loading={save.isPending} />
+        <Button title={t('capture.review.confirm')} onPress={confirm} loading={save.isPending} />
       </ScrollView>
     </SafeAreaView>
   );

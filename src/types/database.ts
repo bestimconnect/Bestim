@@ -253,6 +253,7 @@ export type Database = {
           full_name: string
           id: string
           language: string
+          notification_prefs: Json
           notifications_enabled: boolean
           onboarding_completed: boolean
           updated_at: string
@@ -264,6 +265,7 @@ export type Database = {
           full_name?: string
           id: string
           language?: string
+          notification_prefs?: Json
           notifications_enabled?: boolean
           onboarding_completed?: boolean
           updated_at?: string
@@ -275,6 +277,7 @@ export type Database = {
           full_name?: string
           id?: string
           language?: string
+          notification_prefs?: Json
           notifications_enabled?: boolean
           onboarding_completed?: boolean
           updated_at?: string
@@ -511,17 +514,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_share: { Args: { token: string }; Returns: string }
       correct_log: {
         Args: { changes: Json; log_id: string; reason: string }
         Returns: undefined
       }
+      delete_my_account: { Args: never; Returns: undefined }
       get_share: {
         Args: { token: string }
         Returns: {
           expires_at: string
           includes_expenses: boolean
-          status: string
+          log_count: number
+          make: string
+          model: string
+          nickname: string
+          own: boolean
+          shared_by_name: string
           vehicle_id: string
+          vehicle_type: string
+          year: number
         }[]
       }
       owns_log: { Args: { l: string }; Returns: boolean }

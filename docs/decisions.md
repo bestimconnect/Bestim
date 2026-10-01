@@ -1,6 +1,6 @@
 # Product decisions log
 
-Decisions for Bestim made on the founder's behalf while they're away. Scope: Phases 1+2 (auth + onboarding) are closed; Phase 3 (home, guest home screen 36, vehicles, logs, voice) and Phase 4 (reminders tab 21/22/38, expenses 23/24/40) are in scope, per `docs/BESTIM-TECH-PLAN.md` and the phase plans. Phase 5 (account) is still out of scope.
+Decisions for Bestim made on the founder's behalf while they're away. Scope: Phases 1+2 (auth + onboarding) are closed; Phase 3 (home, guest home screen 36, vehicles, logs, voice) and Phase 4 (reminders tab 21/22/38, expenses 23/24/40) are in scope, per `docs/BESTIM-TECH-PLAN.md` and the phase plans. Phase 5 (account, notifications, export/share, success/offline/error screens, QA; Q33+) is now in scope. Phase 6 (needs the Apple Developer account: Sign in with Apple, server push, TestFlight, store submission, universal links) is not.
 
 Format: one entry per decision — **Q**, **Decision**, **Why**, **Spec for dev**. Append new entries below; don't edit past ones except to mark them superseded.
 
@@ -471,3 +471,321 @@ Body and buttons as Q17.
 
 **Why:** The design nests 23 under Account, which doesn't exist until Phase 5; a single placeholder row plus the two natural tap targets keeps it reachable and needs no navigation rework later.
 
+
+
+## 2026-10-01 (Phase 5)
+
+Founder rules in force: theme (light/dark) is the user's choice in Account settings (default light); notifications are on-device (local scheduled) in this phase. Designs checked: AR light PNGs of 26, 27, 28, 41-48 (and the EN metadata strings).
+
+### Q33: Account (26): theme switch, sign out, delete account, privacy
+
+**Decision:** Keep 26 exactly as designed (name header, Language + Currency cards, rows Expenses / Notifications / Export / Share, footer). Add after "Share Vehicle History":
+1. **Dark mode** row: same row style, icon `Moon`, **trailing `Toggle`** instead of a chevron; flipping it applies instantly (`settingsStore.theme` light/dark). No sheet, no "system" option (founder rule).
+2. **Sign out** row: icon `LogOut`, no chevron, no subtitle. Tap opens a native `Alert` (below). On confirm: cancel all scheduled notifications, `supabase.auth.signOut()`, reset `currentVehicleId`, clear the query cache + persisted cache, then the root gate sends the user to `/welcome`.
+3. **Delete account**: a second small **danger text link** under the footer line (same style as "Delete vehicle data"; the design's footer keeps its two items, this one sits on its own line below, start-aligned). Opens `/delete-account` (Q34).
+4. **Privacy** (footer): opens `process.env.EXPO_PUBLIC_PRIVACY_URL` with `expo-web-browser`. If that variable is unset, render only "Bestim 1.0" (no dead link). The founder must supply the URL before store submission (Phase 6).
+5. Name header: avatar + `profiles.full_name` + the subtitle from the design; not tappable (no profile editing this phase).
+6. Rows' subtitles come from the PNG: Expenses "Review your total expenses", Notifications "Choose what suits you", Export "PDF, CSV or JSON", Share "Move the history to the new owner".
+
+**Why:** The two rows with a toggle/no chevron read clearly as "settings" vs "navigation", and a toggle is the least code for a two-state choice. Sign-out is frequent and harmless so it's a row; account deletion is rare and destructive so it is a quiet link, matching how the designer treated "delete vehicle data".
+
+| Element | AR | EN |
+|---|---|---|
+| Dark mode title / subtitle | الوضع الداكن / مريح للعين في الليل | Dark mode / Easier on the eyes at night |
+| Sign out | تسجيل الخروج | Sign out |
+| Sign-out alert title / body | تسجيل الخروج؟ / ستحتاج إلى تسجيل الدخول مرة أخرى. | Sign out? / You'll need to sign in again. |
+| Alert buttons | إلغاء / تسجيل الخروج | Cancel / Sign out |
+| Delete account link | حذف حسابي | Delete my account |
+
+---
+
+### Q34: Delete account flow
+
+**Decision:** New root route `delete-account.tsx` that **reuses the 46 layout** (header "Delete account", red trash circle, title, body, a secondary "Export first" button, the lime "Keep my account" and the red "Delete permanently"). "Export first" opens `/account/export` (Q42). "Keep my account" goes back. "Delete permanently": best-effort remove the user's receipt photos from storage (list the `{userId}/` folder), call `delete_my_account()`, then sign out locally (clear stores and caches, cancel notifications). The gate lands on `/welcome` and a toast "Your account was deleted" shows there. On failure: stay on the screen with an inline error and a retry (the button).
+
+**Why:** Account deletion is an App Store requirement and must be reachable in-app; the second red button on 46 is already the "are you sure" step, so no typed confirmation.
+
+| Element | AR | EN |
+|---|---|---|
+| Header | حذف الحساب | Delete account |
+| Title | حذف حسابك نهائياً؟ | Delete your account permanently? |
+| Body | ستُحذف حسابك وكل سياراتك وسجلاتها ومواعيدها ومصاريفها. لن تتمكن من استرجاعها بعد الحذف. | Your account and all your vehicles, records, reminders and expenses will be deleted. You won't be able to get them back. |
+| Buttons | صدّر السجل أولاً / احتفظ بحسابي / حذف نهائي | Export first / Keep my account / Delete permanently |
+| Toast on welcome | تم حذف حسابك | Your account was deleted |
+| Error | تعذّر حذف الحساب. حاول مرة أخرى. | We couldn't delete your account. Try again. |
+
+---
+
+### Q35: Language and currency cards on 26
+
+**Decision:**
+- **Language** card is tappable and switches AR↔EN (two languages, no list). It opens a native `Alert` (below). On confirm: save to `settingsStore.language` and (best effort) `profiles.language`, set `I18nManager.forceRTL(lang === 'ar')`, then reload the app (`expo-updates` `reloadAsync()`; `DevSettings.reload()` in dev). The reload lands on the Account tab. The card shows the current language name as in the design ("العربية" / "Arabic"); when tapped there is no chevron.
+- **Currency** card: **read-only EGP** ("جنيه مصري" / "EGP"), not tappable, no chevron. (Q19.4 stands; the `profiles.currency` column is untouched.)
+
+**Why:** The reload is unavoidable for the RTL flip, so tell the user in the dialog and make it cheap to cancel. Currency has one value in every list and in the DB, so editing would be a control with nothing to choose.
+
+| Element | AR | EN |
+|---|---|---|
+| Alert title | التبديل إلى الإنجليزية؟ | Switch to Arabic? |
+| Alert body | سيُعاد تشغيل التطبيق لتطبيق اللغة. | Bestim will restart to apply the language. |
+| Alert buttons | إلغاء / تبديل | Cancel / Switch |
+
+(The title names the target language: in AR UI "التبديل إلى الإنجليزية؟", in EN UI "Switch to Arabic?".)
+
+---
+
+### Q36: "Delete vehicle data" (26 footer) and 46
+
+**Decision:** Targets the **current vehicle** (Home's state); no picker. 46 shows the vehicle name as a muted line under its title (same pattern as Q29) so the target is never ambiguous; with 2+ vehicles the user switches vehicle on Home first. Hide the link if the user has no vehicles. Route `delete-vehicle.tsx?vehicleId`. Buttons: "Export first" opens `/account/export` (Q42); "Keep vehicle" goes back; "Delete permanently": remove the vehicle's receipt photos from storage, delete the `vehicles` row (cascades logs, reminders, expenses, shares), invalidate all queries. Then: set `currentVehicleId` to the user's most recently created remaining vehicle and `replace('/')` with a toast "Vehicle deleted". **If it was the only vehicle**: `currentVehicleId = null`, `replace('/')`; Home's existing no-vehicle empty state (the `home.empty.*` block, "add vehicle") shows. `profiles.onboarding_completed` stays true (do not replay onboarding). Also cancel/resync notifications.
+
+**Why:** A user with 0 vehicles is a valid state Home already handles; replaying onboarding would feel like a reset, and keeps the gate simple.
+
+| Element | AR | EN |
+|---|---|---|
+| Title (design) | حذف السيارة من حسابك؟ | Delete vehicle from your account? |
+| Muted line | {vehicle name} | {vehicle name} |
+| Toast | تم حذف السيارة | Vehicle deleted |
+
+---
+
+### Q37: Notification toggles to on-device behaviour (28)
+
+**Decision:** `syncReminders` (`src/lib/notifications.ts`) cancels everything and reschedules for the **current vehicle** only (ponytail: all vehicles + km-based timing need server push, Phase 6). It runs on app open/foreground, after a log save, odometer update, snooze, pref change, and vehicle switch. Nothing is scheduled for guests, when OS permission isn't granted, or after sign out. All fire times are 09:00 local unless stated, then pass through quiet hours (Q38). iOS keeps 64 pending notifications: schedule the 60 soonest.
+
+Each notification has a deterministic id `{kind}:{partId}:{target}` (target = due date or km goal). The first computed fire time is stored in `settingsStore.notifyFire` and reused, and a time already in the past is **not** rescheduled, so each state change fires **once** and never repeats daily (the 28 footnote). New log = new target = new notification. Prune stored keys that no longer exist.
+
+| Toggle | Fires | Notes |
+|---|---|---|
+| Due soon (اقتراب موعد الصيانة) | Date-based part: **3 days before** the due date at 09:00 (`DUE_SOON_DAYS = 3`, matches `reminders.notify_before_days`). If that moment has already passed while the part is "soon" (Q10) and no key exists: next 09:00. Km-based part: when, at app open, remaining is <= 1,000 km (50 h) and no key exists: **next 09:00** (an alert while the app is open is pointless). | Skips snoozed parts (Q24) until the snooze date. |
+| Overdue (صيانة متأخرة) | Date-based: the day **after** the due date, 09:00. Km-based: at app open when remaining <= 0 and no key exists: next 09:00. | Once per target. |
+| Odometer (تحديث العداد) | One notification at `odometer_updated_at + 14 days`, 09:00 (if already past: next 09:00), only when the vehicle has at least one part (Q23). Re-planned on every open/odometer update, so effectively "every two weeks of silence". | Id `odometer:{vehicleId}`. |
+| Weekly summary (ملخّص أسبوعي) | **Friday 09:00, repeating weekly** (calendar trigger, weekday 6). Default **off**. | Static text (no counts that go stale). |
+
+Tap behaviour: part notifications open `/reminder` for that part; odometer opens `/update-odometer`; weekly opens Home.
+
+| Notification | AR title | AR body | EN title | EN body |
+|---|---|---|---|---|
+| Due soon | موعد {part} يقترب | موعدها {date}. احجز قبل فوات الوقت. (km: باقي {km} كم) | {part} is coming up | Due {date}. Book in time. (km: {km} km left) |
+| Overdue | {part} تحتاج متابعة | تجاوزت موعدها. سجّل الصيانة بعد إجرائها. | {part} needs attention | It's past its date. Log the service once it's done. |
+| Odometer | حدّث العداد | {vehicle}: آخر قراءة منذ {n} يوماً. | Update your odometer | {vehicle}: last reading {n} days ago. |
+| Weekly | ملخّصك الأسبوعي | تعرّف على مواعيد {vehicle} القادمة. | Your weekly summary | See what's coming up for {vehicle}. |
+
+(`{part}` and the km units follow Q10; the titles for soon/overdue are the Q10 titles.)
+
+**Why:** The Reminders tab computes everything from logs, so scheduling from the same data keeps the app and the phone consistent; the stored-key rule is what delivers "no daily repeat".
+
+---
+
+### Q38: Quiet hours (28), editable in this phase
+
+**Decision:** Editable, with **presets, not steppers**. Tapping the "Quiet hours" card expands an inline list of 4 radio options: "10 PM to 8 AM" (default), "11 PM to 10 AM", "12 AM to 12 PM", "Off". The card shows the current choice. Stored as `quiet_from`/`quiet_to` (hours, 0-24; both `null` = off) in `profiles.notification_prefs`. Rule: a planned fire time inside `[from, to)` moves to `to` of that morning (a 09:00 notification is pushed to 10:00 under "11 PM to 10 AM"); a time at exactly `to` is allowed. Weekly Friday notification applies the same shift. The "Save my preferences" button writes the JSON, shows a toast "Preferences saved" and calls `syncReminders`; no dirty tracking. If the OS permission isn't granted, show a banner on top of 28 (below) with an action that requests the permission (undetermined) or opens iOS Settings (denied).
+
+**Why:** Four fixed choices are the least UI, can't produce an invalid range, and still make the setting real. The default window never touches the 09:00 times, which is expected.
+
+| Element | AR | EN |
+|---|---|---|
+| Options | 10 مساءً إلى 8 صباحاً / 11 مساءً إلى 10 صباحاً / 12 صباحاً إلى 12 ظهراً / بدون ساعات هدوء | 10 PM to 8 AM / 11 PM to 10 AM / 12 AM to 12 PM / No quiet hours |
+| Toast | تم حفظ التفضيلات | Preferences saved |
+| Banner | التنبيهات متوقفة لـ Bestim على هذا الجهاز. | Notifications are off for Bestim on this device. |
+| Banner action | فعّل التنبيهات | Turn on notifications |
+
+---
+
+### Q39: Notification permission (45)
+
+**Decision:** Shown **once**, immediately after the **first log the user ever saves**, before the success screen 43, and only if `!settingsStore.notifyAsked`, the user isn't a guest and the OS permission is undetermined. Entry points that count: onboarding first log (05) with a service chosen, manual entry, voice review. It does not appear after "Log it later" (the 44 case) or for guests. Flow: set `notifyAsked = true` the moment 45 shows; "Turn on notifications" calls `requestPermissionsAsync()`, then continues to 43 whatever the answer; "Later" continues to 43 without asking the OS. **Later never re-prompts automatically**; the user's way back is the banner on 28 (Q38). If a guest registers later, their next log shows 45 (flag still false). After permission is granted, run `syncReminders`.
+
+**Why:** The first log is when "a reminder for your next service" is concrete, which is the best moment to ask. One automatic ask avoids nagging, and iOS only allows the system dialog once anyway.
+
+| Element | AR | EN |
+|---|---|---|
+| Strings | per 45 PNG (title "دعنا نذكّرك في وقتها", buttons "فعّل التنبيهات" / "لاحقاً") | "Let us remind you on time", "Turn on notifications" / "Later" |
+
+---
+
+### Q40: Log saved (43)
+
+**Decision:** Route `success.tsx?kind=log&vehicleId&logId`; replaces the toast-to-history hop of Q19.5 for saves from 15 (and from onboarding's 05 when a log was chosen). The odometer-only save from 25 keeps going to Home with a toast. Buttons: **"To Home"** = `dismissAll` then `replace('/')`; **"Add another record"** = `replace('/capture')` (the same capture chooser the + opens). Back gesture is disabled (go to Home).
+- Title uses the first name: "Great step, {name}!" (no name: "Great step!"); body "We saved the record and updated your next maintenance date."
+- **"Your next date" row** (shown only if the log's service type has an interval, from the log's `interval_km`/`interval_months`, else the type defaults): subtitle "At {odometer+interval_km} {unit} or after {interval_months} months"; km only: "At {n} {unit}"; months only: "On {date}" (service date + months). Tap opens `/reminder` for that part. No interval: hide the row and use the body "We saved the record."
+- Log with `status = needs_review` (Q20): body becomes "We saved the record. The reading looks unusual, so it's marked for review."
+- Saved offline (Q45): hide the row; body "Saved on this device. We'll sync it when you're back online."
+
+| Element | AR | EN |
+|---|---|---|
+| Title | خطوة رائعة، {name}! / خطوة رائعة! | Great step, {name}! / Great step! |
+| Body | حفظنا السجل، وحدّثنا موعد الصيانة القادم. / حفظنا السجل. | We saved the record and updated your next maintenance date. / We saved the record. |
+| Review body | حفظنا السجل. القراءة تبدو غير معتادة، لذا وُضع عليه علامة للمراجعة. | We saved the record. The reading looks unusual, so it's marked for review. |
+| Row title | موعدك القادم | Your next date |
+| Row subtitle | عند {n} كم أو بعد {m} شهراً / عند {n} كم / في {date} | At {n} km or after {m} months / At {n} km / On {date} |
+| Offline body | حُفظ على جهازك. سنزامنه عند عودة الإنترنت. | Saved on this device. We'll sync it when you're back online. |
+| Buttons | إلى الرئيسية / أضف سجلاً آخر | To Home / Add another record |
+
+---
+
+### Q41: Vehicle added (44)
+
+**Decision:** Route `success.tsx?kind=vehicle&vehicleId`. Shown after add-vehicle (05 finish) **only when no log was saved** ("Log it later" or nothing chosen); when a log was saved the user gets 43 (after 45 if due) instead. Applies to both the first vehicle and extra vehicles (`mode=extra`). The new vehicle is already the current one. Buttons: **"Log my first service"** = `replace('/capture')`; **"To Home"** = `replace('/')` (for an extra vehicle `dismissAll` then Home tab). For a **guest** (Q17: capture is gated) hide the primary button and show only "To Home" as the primary-styled button. The "log by voice" path (05's "Log it by voice") skips 44 and goes straight to voice capture as today.
+
+**Why:** 44's own body says "next step: log your last service", which is wrong after a log was just saved.
+
+| Element | AR | EN |
+|---|---|---|
+| Title / body | per 44 PNG ("سيارتك أصبحت معنا") | Your vehicle is with us / Next step? Log your last service and we'll arrange its reminders. |
+| Buttons | أسجّل أول صيانة / إلى الرئيسية | Log my first service / To Home |
+
+---
+
+### Q42: Export (27)
+
+**Decision:**
+- **Scope:** the current vehicle only (name as a muted line under the title when the user has 2+ vehicles; no picker). Format segments PDF (default) / CSV / JSON. With 0 logs the button is disabled with a muted note "No records to export yet."
+- **Toggles** (defaults as in the PNG: costs on, receipts on, plate off, notes off; "Maintenance logs" on and locked):
+
+| Toggle | Included when on | Excluded when off |
+|---|---|---|
+| Maintenance logs (always) | date, service title, odometer + unit, status needs_review as "Unverified" | n/a |
+| Costs | `cost` + `currency` per log, total row (PDF), `total_cost` (JSON) | cost/currency columns and totals |
+| Receipts & workshop names | `location` (workshop) and a "Receipt attached" yes/no flag (from `photos`) | both columns. Images are never exported this phase |
+| Plate & VIN | vehicle `plate_number`, `vin` in the vehicle header | both |
+| My notes | log `description` | the column. `voice_transcript` and correction reasons are **never** exported |
+
+- **Excluded-items line (the 27 footnote):** `N` = the number of data points actually withheld = for each OFF toggle, the count of logs that have a value in the withheld fields (cost, location or photo, description) plus 1 each for plate and VIN when set. If N = 0 the line is omitted. Text: AR "استبعد المالك {N} عنصراً دون عرض محتواها." / EN "The owner excluded {N} items (their content isn't shown)." In PDF: footer line; in CSV: a last row `excluded_items,{N}`; in JSON: top-level `"excluded_items": N`.
+- **File name:** `Bestim_{make}_{model}_{YYYY-MM-DD}.{pdf|csv|json}`, spaces to `_`, keep Unicode letters/digits, strip everything else.
+- **Language:** the app language for PDF and CSV headers/labels; JSON keys are fixed English. CSV is UTF-8 **with BOM** (Excel and Arabic). Numbers in Western digits, dates ISO `YYYY-MM-DD` in CSV/JSON, localized short date in PDF.
+- **PDF layout** (HTML via `expo-print`, `dir=rtl` in AR, system font): title "Bestim · Maintenance log"; vehicle block (name, year, current odometer + unit, optional plate/VIN, generated date); table, newest first: Date | Service | Odometer | [Cost] | [Workshop] | [Receipt] | [Notes]; total row if costs on; excluded-items line; footer "Generated by Bestim".
+- "Prepare the file" builds the file, then opens the share sheet (`expo-sharing`). Progress state on the button; error toast on failure.
+
+| Element | AR | EN |
+|---|---|---|
+| PDF title | Bestim · سجل الصيانة | Bestim · Maintenance log |
+| Columns | التاريخ / الخدمة / العداد / التكلفة / الورشة / الفاتورة / ملاحظات | Date / Service / Odometer / Cost / Workshop / Receipt / Notes |
+| Receipt flag | مرفق / لا | Attached / No |
+| Total / Unverified | الإجمالي / غير موثّق | Total / Unverified |
+| Empty note | لا توجد سجلات للتصدير بعد. | No records to export yet. |
+| Footer | أُنشئ بواسطة Bestim | Generated by Bestim |
+
+**Why:** Costs, workshops and notes are what a seller may not want to show; plate/VIN identify the car. The recipient seeing "N withheld" is what makes the file trustworthy without leaking content.
+
+---
+
+### Q43: Share vehicle history (41)
+
+**Decision:**
+- **Segments** "QR code" / "Share link" only choose the first view of the result; both encode the same `bestim://receive?token={share_token}`.
+- **Vehicle picker:** the card defaults to the current vehicle; tapping opens a simple list modal when the user has 2+ vehicles (chevron hidden with 1). Subtitle "{n} maintenance records · {m} reminders" (m = computed parts, Q10).
+- **"Prepare share"** inserts a `vehicle_shares` row (`includes_expenses = false`, 7-day expiry); if an unexpired pending share already exists for that vehicle it is reused. Disabled with a note when the vehicle has 0 logs.
+- **After creating**, the form stays; the card region below the picker shows: QR segment = the QR (white card, ~220 pt) + "Valid for 7 days"; link segment = the link text (selectable) + a "Copy link" text button. The lime button becomes **"Share link"** and opens the system share sheet with the message below (works for QR users too).
+- **Cancel/revoke:** not in this phase; the share lapses after 7 days (and becomes unusable once accepted).
+- **Receiver without the app / custom scheme:** `bestim://` links often aren't tappable in chat apps; until universal links (Phase 6), 41 has a small text link "Received a link?" that opens `/receive` without a token (a paste field, Q44).
+
+| Element | AR | EN |
+|---|---|---|
+| Segments | رمز QR / رابط مشاركة | QR code / Share link |
+| Validity | صالح لمدة 7 أيام. | Valid for 7 days. |
+| Buttons | جهّز المشاركة / شارك الرابط / نسخ الرابط | Prepare share / Share link / Copy link |
+| Share message | شاركتُ معك تاريخ صيانة {vehicle} على Bestim: {link} | I shared the maintenance history of {vehicle} on Bestim: {link} |
+| Copied toast | تم نسخ الرابط | Link copied |
+| Empty note | أضف سجلاً واحداً على الأقل للمشاركة. | Add at least one record to share. |
+| Paste link | وصلك رابط؟ | Received a link? |
+
+---
+
+### Q44: Receive vehicle history (42)
+
+**Decision:**
+- **Accept ("Accept the history")** calls `accept_share(token)`: creates a **new vehicle** in the receiver's account with copies of: make, model, year, color, nickname, vehicle type, odometer + unit, and all logs (title, description, service type, odometer, cost, currency, date, location, status, intervals). **Not copied:** plate, VIN, photo, receipt photos, voice transcripts, correction history, expenses (shares have `includes_expenses = false`). The vehicle is primary only if the receiver has none. The owner keeps theirs; the share becomes `accepted`. **No per-log "received" marker** (kept simple). After accept: set it as the current vehicle, invalidate queries, `replace('/')` with toast "Added to your vehicles".
+- **Decline:** no server call; `replace('/')` (the share stays valid until expiry). If the receiver has no account state to return to, the root gate decides.
+- **Signed-out receiver:** the deep link stores `settingsStore.pendingShareToken`; the gate runs sign-in/onboarding as usual and then opens `/receive?token=` instead of Home. **Guest receiver:** `feature-gate?feature=receive` (Q47); "Create my account" links the account and the pending token is kept.
+- **No token** (opened from the paste link): a text field + "Continue", which extracts the `token` query value from the pasted link.
+- **Invalid, expired, already used, or your own share:** replace the content with the 48-style state: icon `CloudOff`-like muted circle, title, body, and one button "To Home". Network failure (not a bad token): normal 48 with retry (Q46).
+- Header, card and layout per the 42 PNG; "Shared by" shows the sharer's profile name ("A Bestim user" when empty). Buttons "Accept the history" / "Decline".
+
+| Element | AR | EN |
+|---|---|---|
+| Accept / Decline | أقبل السجل / رفض | Accept the history / Decline |
+| Toast | أُضيفت إلى سياراتك | Added to your vehicles |
+| Invalid title / body | هذا الرابط غير صالح | This link isn't valid |
+| | قد يكون انتهت صلاحيته أو استُخدم من قبل. اطلب من المرسل مشاركة جديدة. | It may have expired or been used already. Ask the sender to share again. |
+| Own share | هذه مشاركتك. افتح الرابط على هاتف الشخص الآخر. | This is your own share. Open the link on the other person's phone. |
+| Sharer fallback | مستخدم Bestim | A Bestim user |
+| Paste field label / button | الصق رابط المشاركة / متابعة | Paste the share link / Continue |
+| Guest gate title | استلام سجل سيارة | Receive vehicle history |
+
+---
+
+### Q45: Offline (47) and writing offline
+
+**Decision:**
+- **When:** Home shows the 47 variant when `onlineManager` says offline (netinfo) **and** cached data exists. It replaces the priority section with: the blue banner, the vehicle row with subtitle "Last data saved on this device", the dark card "Last saved reading" (cached odometer + unit + "check your connection to update schedules"), the lime button and the voice caption. Back online, Home returns to normal automatically. Offline with no cache: 48 (Q46).
+- **"Write a new record"** goes to **manual entry (16)** directly, not the capture chooser. The mutation is queued (persisted); the UI shows 43's offline body (Q40). On reconnect the queue flushes, queries refetch, toast "Synced".
+- **Pending state in history (10):** an optimistic row in the logs cache flagged `pending`, with a muted "Waiting to sync" tag in place of the status label; it is replaced on sync.
+- **Voice offline:** the + capture chooser keeps the voice option visible but disabled with the caption "Voice recording needs a connection."; manual stays enabled.
+- **Not available offline** (kept simple): receipt photos (attach control disabled with "Photos need a connection."), corrections, odometer update, expenses, export prep of uncached data, share, account actions. Their save buttons show a toast "You're offline. Try again when you're connected." Read-only screens render from the persisted cache.
+
+| Element | AR | EN |
+|---|---|---|
+| Banner | أنت غير متصل الآن / يمكنك كتابة سجل جديد. سنزامنه عند عودة الإنترنت. | You're offline now / You can write a new record. We'll sync it when you're back online. |
+| Vehicle row subtitle | آخر بيانات محفوظة على الجهاز | Last data saved on this device |
+| Card label | آخر قراءة محفوظة | Last saved reading |
+| Card footnote | {unit} · راجع الاتصال لتحديث المواعيد | {unit} · check your connection to update schedules |
+| Button / caption | اكتب سجلاً جديداً / التسجيل الصوتي يحتاج إلى اتصال. | Write a new record / Voice recording needs a connection. |
+| Pending tag | بانتظار المزامنة | Waiting to sync |
+| Synced toast | تمت المزامنة | Synced |
+| Photos note | الصور تحتاج إلى اتصال. | Photos need a connection. |
+| Offline toast | أنت غير متصل. حاول مرة أخرى عند عودة الاتصال. | You're offline. Try again when you're connected. |
+
+---
+
+### Q46: Data load error (48)
+
+**Decision:** `ErrorState` replaces a screen's content when its **main query fails and there is no cached data** for it: Home, vehicles list, vehicle detail (09), history (10), reminders (21), expenses (23), receive (42). A failure with cached data shows the cached data silently (no banner). Forms and write actions never use it (they use an inline error/toast). **"Try again"** refetches the failed queries (spinner on the button). **"View what's saved on this device"** is shown only when the persisted cache holds the user's vehicles: it sets an in-memory `showSaved` flag and `replace('/')`, where Home renders the 47 variant from cache (cleared on the next successful fetch or app restart); otherwise the button is hidden.
+
+| Element | AR | EN |
+|---|---|---|
+| Strings | per 48 PNG ("نحاول مرة أخرى؟", "حاول مرة أخرى", "عرض المحفوظ على الجهاز") | Shall we try again? / We couldn't load your data right now. Your saved records are still there. / Try again / View what's saved on this device |
+
+---
+
+### Q47: Guests and the Phase 5 screens
+
+**Decision:** Reachable by a guest: 43 and 44 (they finish onboarding, Q17), 47 and 48 (Home). Never shown to a guest: 45 (Q39). Gated (`isAnonymous` → `replace` to `feature-gate`, as Q31, one line per screen, because deep links bypass the tab gate): 26 (already via the account tab), 27, 28, 41, 46, delete-account (all `feature=account`), and 42 (`feature=receive`). Add `receive` to the gate features. No notifications are scheduled for guests.
+
+| Feature | AR title | EN title |
+|---|---|---|
+| receive | استلام سجل سيارة | Receive vehicle history |
+
+Body and buttons as Q17.
+
+---
+
+### Q48: Other gaps the devs will hit
+
+**Decision / Spec for dev:**
+1. **Account name header** with an empty `full_name`: show the localized "My account" / "حسابي" in its place.
+2. **Theme and language are device-level** (`settingsStore`), kept across sign-out; auth and onboarding stay light (existing rule). The language alert/reload keeps the user on Account.
+3. **Sign out / delete account** also reset `notifyFire`, `pendingShareToken`, `currentVehicleId`; keep `notifyAsked`, `tourSeen`, `language`, `theme`.
+4. **Snoozing a part** (Q24) cancels its notifications and re-plans at the snooze date; "I did the service" gets new keys through the new log.
+5. **Notification permission revoked in iOS Settings:** `syncReminders` checks the permission on each run and does nothing; 28 shows the Q38 banner.
+6. **Tapping a notification for a part that no longer exists** (vehicle deleted, log corrected): open Home.
+7. **Export and 46/Delete-account "Export first"** use the current vehicle; on return the user lands back on the confirmation screen (plain `push`).
+8. **Toast strings** all go through the existing toast helper; none stay on screen over the success screens.
+9. **Privacy URL and store listing details** are pending from the founder (Phase 6 item); the code reads `EXPO_PUBLIC_PRIVACY_URL` only.
+
+---
+
+### Q49: Phase 5 as built (refines Q37, Q44)
+
+**Decision:**
+- **Notifications cover all the user's vehicles**, not only the current one (Q37 said current only). The scheduler loads every vehicle's logs itself, so there's no reason to drop the second car's reminders. Fire-once memory lives in AsyncStorage (`notifySent`), not `settingsStore`.
+- **A received share keeps the correction trail and each log's status** (Q44 said corrections aren't copied). Screen 19's footnote says corrections show when a vehicle's history is shared, and that is the point of a trustworthy history. Plate, VIN, voice transcripts and receipt photos are not copied. Costs and other expenses are copied only when the share has `includes_expenses` (default off; there's no toggle on 41 in this phase).
+
+**Spec for dev:** `src/lib/reminderPlan.ts` (pure rules + check), `src/lib/notifications.ts` (scheduling), `accept_share` in `supabase/migrations/20261001100000_share_privacy.sql`.
+
+---
+
+### Q50: Dark theme is our own design (founder, 2026-10-01)
+
+**Decision:** Ignore the Figma dark screens. They invert the hero, the tab bar and the dark cards to white, which the founder rejected ("looks horrible"). Our dark theme keeps dark surfaces dark in three depth steps: page `paper` #0E1411, cards `white` #171F1B, brand panels `panel` #212E27 (hero, tab bar, dark cards, dark button). Text is light (`ink` #F2F5F3, `muted` #93A39A), lime stays the accent, teal is brightened (#3ECFC0), and the tinted badges/notes use deep tints.
+
+**Spec for dev:** `src/lib/palette.js`. New tokens `panel` / `onpanel` (same role in both themes). Use `bg-panel` + `text-onpanel` for any dark brand surface; never `bg-ink` for a surface (ink is the text color and flips). `useLightStatusBar()` restores the theme's status-bar style on blur.

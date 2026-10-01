@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Field, Header, Item, Note, Progress, Text } from '@/components/ui';
+import { shouldAskNotifications } from '@/lib/notifications';
 import { supabase } from '@/lib/supabase';
 import { useSettings } from '@/stores/settingsStore';
 import { useVehicleDraft } from '@/stores/vehicleDraft';
@@ -93,18 +94,25 @@ export default function FirstLogScreen() {
           .eq('id', userId);
         if (profileError) throw profileError;
       }
-      return vehicle.id;
+      return { id: vehicle.id, logged: !skipLog && !!d.serviceTypeId, serviceTypeId: d.serviceTypeId };
     },
-    onSuccess: (vehicleId) => {
+    onSuccess: ({ id: vehicleId, logged, serviceTypeId }) => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       queryClient.invalidateQueries({ queryKey: ['logs'] });
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       useSettings.getState().setCurrentVehicle(vehicleId);
       draft.reset();
+      // Q41: no log saved with the vehicle → "Your vehicle is with us" (44); the voice path goes straight to capture.
+      // A log saved with the vehicle gets the same ending as any log: permission once (45), then success (43).
       if (extra) router.dismissTo('/vehicles');
       else router.replace('/');
       if (voiceNext.current) router.push('/capture/voice');
+      else if (logged)
+        shouldAskNotifications().then((ask) =>
+          router.push({ pathname: ask ? '/notify-permission' : '/success', params: { kind: 'log', vehicleId, ...(serviceTypeId ? { serviceTypeId } : {}) } }),
+        );
+      else router.push({ pathname: '/success', params: { kind: 'vehicle', vehicleId } });
     },
     onError: (e: Error) => setError(e.message),
   });

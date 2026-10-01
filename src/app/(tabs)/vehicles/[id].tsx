@@ -6,10 +6,12 @@ import { I18nManager, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { useRefresh } from '@/components/Refresh';
 import { useLightStatusBar } from '@/components/Hero';
 import { Choice, Item, Metric, Text } from '@/components/ui';
+import { ErrorState } from '@/components/ErrorState';
 import { needsAttention, useExpenses, useVehicle, useVehicleParts, type Part } from '@/lib/queries';
-import { useColors, useScheme } from '@/lib/theme';
+import { useColors } from '@/lib/theme';
 
 // Screen 09 — Vehicle detail, Figma ar-light 09/تفاصيل السيارة (segments per decisions Q15, links Q16).
 type Tab = 'overview' | 'log' | 'reminders';
@@ -18,16 +20,17 @@ const typeIcons = { car: CarFront, motorcycle: Bike, pickup: Truck, equipment: C
 const icon = (name?: string) => (Icons as any)[name ?? ''] ?? Icons.Wrench;
 
 export default function VehicleDetail() {
+  const refresh = useRefresh();
   useLightStatusBar();
   const { t, i18n } = useTranslation();
   const c = useColors();
-  const dark = useScheme() === 'dark';
   const insets = useSafeAreaInsets();
   const { id, tab } = useLocalSearchParams<{ id: string; tab?: Tab }>();
   const [seg, setSeg] = useState<Tab>(tab ?? 'overview');
-  const { vehicle } = useVehicle(id);
+  const { vehicle, isError, data: all, refetch, isRefetching } = useVehicle(id);
   const { data: logs, parts } = useVehicleParts(vehicle);
   const expenses = useExpenses().data ?? [];
+  if (isError && !all) return <ErrorState onRetry={refetch} retrying={isRefetching} />;
   if (!vehicle) return <View className="flex-1 bg-paper" />;
 
   const unit = t(`vehicles.unit.${vehicle.odometer_unit}`);
@@ -57,19 +60,19 @@ export default function VehicleDetail() {
   const empty = <Text variant="body" className="text-muted">{t('vehicles.emptyParts')}</Text>;
 
   return (
-    <ScrollView className="flex-1 bg-paper" contentContainerClassName="pb-[120px]">
-      <View className="gap-4 rounded-b-[28px] bg-ink px-6 pb-6" style={{ paddingTop: insets.top + 8 }}>
+    <ScrollView refreshControl={refresh} className="flex-1 bg-paper" contentContainerClassName="pb-[120px]">
+      <View className="gap-4 rounded-b-[28px] bg-panel px-6 pb-6" style={{ paddingTop: insets.top + 8 }}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('back')}
           onPress={router.back}
-          className="h-11 w-11 items-center justify-center rounded-full bg-paper/20">
-          <Back size={22} color={c.paper} />
+          className="h-11 w-11 items-center justify-center rounded-full bg-[#FFFFFF26]">
+          <Back size={22} color={c.onpanel} />
         </Pressable>
         <View className="flex-row items-center gap-3">
           <View className="flex-1 gap-1">
-            <Text variant="title" className="text-paper">{vehicle.nickname || `${vehicle.make} ${vehicle.model}`}</Text>
-            <Text variant="caption" className="text-paper/60">
+            <Text variant="title" className="text-onpanel">{vehicle.nickname || `${vehicle.make} ${vehicle.model}`}</Text>
+            <Text variant="caption" className="text-onpanel" style={{ opacity: 0.6 }}>
               {vehicle.year} · {t(`vehicles.type.${vehicle.vehicle_type}`)}
             </Text>
           </View>
@@ -81,7 +84,7 @@ export default function VehicleDetail() {
           <Metric
             className="flex-1"
             size="small"
-            tone={dark ? 'white' : 'glass'}
+            tone="glass"
             label={t('vehicles.odometer', { unit })}
             value={n(vehicle.current_odometer)}
           />

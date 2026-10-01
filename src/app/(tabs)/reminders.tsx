@@ -9,6 +9,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 
+import { useRefresh } from '@/components/Refresh';
+import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { Button, Choice, Item, Text } from '@/components/ui';
 import { needsAttention, useCurrentVehicle, useIsGuest, useVehicleParts, useVehicles, type Part } from '@/lib/queries';
 import { shadows, useColors } from '@/lib/theme';
@@ -46,7 +48,7 @@ function Empty() {
           <Text variant="label">{t('reminders.empty.card')}</Text>
           <CalendarCheck size={40} color={c.teal} style={{ marginTop: 10 }} />
         </View>
-        <View className="absolute h-11 w-11 items-center justify-center rounded-full bg-ink" style={{ marginTop: 108, marginStart: 130 }}>
+        <View className="absolute h-11 w-11 items-center justify-center rounded-full bg-panel" style={{ marginTop: 108, marginStart: 130 }}>
           <Bell size={22} color={c.lime} />
         </View>
       </View>
@@ -59,6 +61,7 @@ function Empty() {
 
 // Screen 21 — Reminders; ar-light 21/مواعيد الصيانة.png
 export default function RemindersScreen() {
+  const refresh = useRefresh();
   const { t, i18n } = useTranslation();
   const c = useColors();
   const insets = useSafeAreaInsets();
@@ -66,10 +69,12 @@ export default function RemindersScreen() {
   const { vehicle } = useCurrentVehicle();
   const vehicles = useVehicles().data ?? [];
   const setCurrent = useSettings((s) => s.setCurrentVehicle);
-  const { parts } = useVehicleParts(vehicle);
+  const { parts, isError, data, refetch, isRefetching } = useVehicleParts(vehicle);
+  const onShowSaved = useShowSavedAction();
   const [seg, setSeg] = useState<'attention' | 'all'>('attention');
   if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'reminders' } }} />;
 
+  if (isError && !data) return <ErrorState onRetry={refetch} retrying={isRefetching} onShowSaved={onShowSaved} />;
   const unit = vehicle?.odometer_unit ?? 'km';
   const name = vehicle ? `${vehicle.make} ${vehicle.model}` : '';
   const staleDays = vehicle ? differenceInCalendarDays(new Date(), parseISO(vehicle.odometer_updated_at)) : 0;
@@ -87,7 +92,7 @@ export default function RemindersScreen() {
     Alert.alert(t('home.switchVehicle'), undefined, vehicles.map((v) => ({ text: `${v.make} ${v.model} · ${v.year}`, onPress: () => setCurrent(v.id) })));
 
   return (
-    <ScrollView className="flex-1 bg-paper" contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 120 }}>
+    <ScrollView refreshControl={refresh} className="flex-1 bg-paper" contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 120 }}>
       <View className="gap-4 px-6">
         <Text variant="heading" className="h-11 text-center leading-[44px]">{t('tabs.reminders')}</Text>
         {!vehicle || !parts.length ? (

@@ -1,4 +1,4 @@
-import { addMonths, differenceInCalendarDays, parseISO } from 'date-fns';
+import { addMonths, differenceInCalendarDays, format, parseISO } from 'date-fns';
 
 // Part = a service type the vehicle has a log for. Its status comes from the latest log + the interval
 // (the log's own interval, else the service type default). Thresholds: decisions.md Q10.
@@ -59,7 +59,7 @@ export function partStatus(p: PartInput): PartStatus | null {
     remainingKm,
     remainingDays,
     dueOdometer,
-    dueDate: due ? due.toISOString().slice(0, 10) : null,
+    dueDate: due ? format(due, 'yyyy-MM-dd') : null, // local date; toISOString() would shift a day east of UTC
     urgency: Math.min(...fractions),
   };
 }

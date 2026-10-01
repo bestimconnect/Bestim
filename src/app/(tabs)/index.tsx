@@ -1,20 +1,22 @@
-import { useQuery } from '@tanstack/react-query';
 import { differenceInCalendarDays, format, parseISO, startOfMonth, subMonths } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router } from 'expo-router';
 import * as Icons from 'lucide-react-native';
 import { Bell, Car, ChevronLeft, ChevronRight, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
+import { useEffect } from 'react';
 import { Alert, I18nManager, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 
+import { useRefresh } from '@/components/Refresh';
+import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { useLightStatusBar } from '@/components/Hero';
+import { OfflineHome } from '@/components/OfflineHome';
 import { Button, Item, Metric, Text } from '@/components/ui';
-import { needsAttention, useCurrentVehicle, useExpenses, useIsGuest, useVehicleParts, useVehicles, type Part, type Vehicle } from '@/lib/queries';
-import { useSession } from '@/lib/session';
-import { supabase } from '@/lib/supabase';
-import { useColors, useScheme } from '@/lib/theme';
+import { needsAttention, useCurrentVehicle, useExpenses, useIsGuest, useVehicleParts, useVehicles, type Part, type Vehicle, useProfile } from '@/lib/queries';
+import { useOnline, useShowSaved } from '@/lib/online';
+import { useColors } from '@/lib/theme';
 import { useSettings } from '@/stores/settingsStore';
 
 const num = (n: number) => Math.abs(Math.round(n)).toLocaleString('en-US');
@@ -42,16 +44,7 @@ function subtitle(t: TFunction, lang: string, p: Part, unit: string) {
 const partName = (lang: string, p: Part) => (lang === 'ar' ? p.serviceType.name_ar : p.serviceType.name_en);
 
 function useFirstName() {
-  const userId = useSession()?.user.id;
-  const { data } = useQuery({
-    queryKey: ['profile', userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId!).single();
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data } = useProfile();
   return data?.full_name?.trim().split(/\s+/)[0] ?? '';
 }
 
@@ -72,9 +65,9 @@ function Bell_() {
 
 // Screen 06 — Home / Today; ar-light 06/الرئيسية/سيارتي اليوم.png
 function Today({ vehicle }: { vehicle: Vehicle }) {
+  const refresh = useRefresh();
   const { t, i18n } = useTranslation();
   const c = useColors();
-  const scheme = useScheme();
   const insets = useSafeAreaInsets();
   const name = useFirstName();
   const vehicles = useVehicles().data ?? [];
@@ -98,20 +91,20 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
     Alert.alert(t('home.switchVehicle'), undefined, vehicles.map((v) => ({ text: `${v.make} ${v.model} · ${v.year}`, onPress: () => setCurrent(v.id) })));
 
   return (
-    <ScrollView className="flex-1 bg-paper" contentContainerStyle={{ paddingBottom: 120 }}>
-      {scheme === 'light' ? <LightBar /> : null}
-      <View className="gap-5 rounded-b-[28px] bg-ink px-6 pb-6" style={{ paddingTop: insets.top + 16 }}>
+    <ScrollView refreshControl={refresh} className="flex-1 bg-paper" contentContainerStyle={{ paddingBottom: 120 }}>
+      <LightBar />
+      <View className="gap-5 rounded-b-[28px] bg-panel px-6 pb-6" style={{ paddingTop: insets.top + 16 }}>
         <View className="flex-row items-center gap-3">
           <View className="flex-1 gap-0.5">
-            <Text variant="caption" className="text-paper" style={{ opacity: 0.7 }}>
+            <Text variant="caption" className="text-onpanel" style={{ opacity: 0.7 }}>
               {t(new Date().getHours() < 12 ? 'home.greetingMorning' : 'home.greetingEvening', { name })}
             </Text>
-            <Text variant="heading" className="text-paper">{t('home.title')}</Text>
+            <Text variant="heading" className="text-onpanel">{t('home.title')}</Text>
           </View>
           <Bell_ />
         </View>
         <Pressable onPress={pick} disabled={vehicles.length < 2} className="flex-row items-center gap-2">
-          <Text variant="label" className="flex-1 text-paper">{`${vehicle.make} ${vehicle.model} · ${vehicle.year}`}</Text>
+          <Text variant="label" className="flex-1 text-onpanel">{`${vehicle.make} ${vehicle.model} · ${vehicle.year}`}</Text>
           {vehicles.length > 1 ? <Chevron size={18} color={c.lime} /> : null}
         </Pressable>
         <Metric
@@ -180,12 +173,13 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
 
 // Screen 07 — Home / Empty; ar-light 07/الرئيسية/البداية.png
 function Empty() {
+  const refresh = useRefresh();
   const { t } = useTranslation();
   const c = useColors();
   const insets = useSafeAreaInsets();
   const name = useFirstName();
   return (
-    <ScrollView className="flex-1 bg-paper" contentContainerStyle={{ paddingBottom: 120, paddingTop: insets.top + 16 }}>
+    <ScrollView refreshControl={refresh} className="flex-1 bg-paper" contentContainerStyle={{ paddingBottom: 120, paddingTop: insets.top + 16 }}>
       <View className="gap-6 px-6">
         <View className="flex-row items-center gap-3">
           <View className="flex-1 gap-0.5">
@@ -196,7 +190,7 @@ function Empty() {
         </View>
         <View className="h-[200px] items-center justify-center self-center">
           <View className="h-[200px] w-[200px] items-center justify-center rounded-full border-[6px] border-line">
-            <View className="h-[120px] w-[120px] items-center justify-center rounded-full bg-ink">
+            <View className="h-[120px] w-[120px] items-center justify-center rounded-full bg-panel">
               <Car size={56} color={c.lime} />
             </View>
           </View>
@@ -214,12 +208,13 @@ function Empty() {
 
 // Screen 36 — Home / Guest; ar-light 36/الرئيسية/زائر.png
 function Guest({ vehicle }: { vehicle: Vehicle | null }) {
+  const refresh = useRefresh();
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const { parts } = useVehicleParts(vehicle);
   const gate = (feature: string) => router.push({ pathname: '/feature-gate', params: { feature, vehicleId: vehicle?.id } });
   return (
-    <ScrollView className="flex-1 bg-paper" contentContainerStyle={{ paddingBottom: 120, paddingTop: insets.top + 16 }}>
+    <ScrollView refreshControl={refresh} className="flex-1 bg-paper" contentContainerStyle={{ paddingBottom: 120, paddingTop: insets.top + 16 }}>
       <View className="gap-4 px-6">
         <View className="gap-1 rounded-field bg-sky p-4">
           <Text variant="label">{t('home.guest.welcomeTitle')}</Text>
@@ -254,8 +249,16 @@ function Guest({ vehicle }: { vehicle: Vehicle | null }) {
 
 export default function HomeScreen() {
   const guest = useIsGuest();
-  const { vehicle, isPending } = useCurrentVehicle();
+  const { vehicle, isPending, isError, data, dataUpdatedAt, refetch, isRefetching } = useCurrentVehicle();
+  const online = useOnline();
+  const showSaved = useShowSaved((s) => s.since);
+  const onShowSaved = useShowSavedAction();
+  useEffect(() => {
+    if (showSaved && online && dataUpdatedAt > showSaved) useShowSaved.getState().set(null); // Q46: cleared by the next successful fetch
+  }, [showSaved, dataUpdatedAt, online]);
   if (guest) return <Guest vehicle={vehicle} />;
+  if (isError && !data) return <ErrorState onRetry={refetch} retrying={isRefetching} onShowSaved={onShowSaved} />;
   if (isPending) return <View className="flex-1 bg-paper" />;
+  if (vehicle && (!online || showSaved != null)) return <OfflineHome vehicle={vehicle} />; // Q45 / Q46
   return vehicle ? <Today vehicle={vehicle} /> : <Empty />;
 }
