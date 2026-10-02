@@ -42,6 +42,24 @@ const toLatinDigits = (s: string) => s.replace(/[٠-٩]/g, (d) => String('٠١٢
 // Arabic joins "و" (and) / "ب" (for) onto the next word: "و1200", "بـ1200".
 const stripPrefix = (w: string) => w.replace(/^(وبـ|وب|بـ|و|ب)(?=\d)/, '');
 
+/** The reading in a spoken phrase on the update-odometer screen: "العداد ١٣٤٬٥٥٠", "134 550 km", "125 ألف و300". */
+// ponytail: digits only (the recognizer writes numbers as digits); numbers spelled as words need the partner's function.
+export function parseReading(transcript: string): number | null {
+  const text = toLatinDigits(transcript).replace(/(\d)[,٬ ](?=\d{3}(\D|$))/g, '$1');
+  const words = text.split(/[^\d\p{L}]+/u).filter(Boolean).map(stripPrefix);
+  let best: number | null = null;
+  for (let i = 0; i < words.length; i++) {
+    if (!/^\d+$/.test(words[i])) continue;
+    let value = Number(words[i]);
+    if (THOUSAND.test(words[i + 1] ?? '')) {
+      const rest = words.slice(i + 2).find((w) => !/^(و|and)$/i.test(w)) ?? '';
+      value = value * 1000 + (/^\d{1,3}$/.test(rest) ? Number(rest) : 0);
+    }
+    if (best == null || value > best) best = value;
+  }
+  return best;
+}
+
 export function parseTranscript(transcript: string): VoiceResult {
   const text = toLatinDigits(transcript).replace(/(\d)[,٬](\d{3})/g, '$1$2').replace(/[«»"،,.؟?!]/g, ' ');
   const words = text.split(/\s+/).filter(Boolean).map(stripPrefix);

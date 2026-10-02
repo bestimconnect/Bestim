@@ -1,7 +1,7 @@
 // Run: node --experimental-strip-types src/lib/voice.check.ts
 import assert from 'node:assert/strict';
 
-import { parseTranscript } from './voice.ts';
+import { parseReading, parseTranscript } from './voice.ts';
 
 // Design 14/15.
 let r = parseTranscript('غيّرت زيت المحرك عند 125 ألف ودفعت 1200 جنيه');
@@ -31,5 +31,11 @@ r = parseTranscript('مرحبا');
 assert.equal(r.service_type, null);
 assert.equal(r.odometer, null);
 assert.equal(r.cost, null);
+
+// Update-odometer by voice (decisions Q53).
+assert.equal(parseReading('العداد ١٣٤٬٥٥٠'), 134550);
+assert.equal(parseReading('134 550 km'), 134550);
+assert.equal(parseReading('125 ألف و300'), 125300);
+assert.equal(parseReading('one hundred thousand'), null);
 
 console.log('voice ok');

@@ -2,11 +2,15 @@ import { addMonths, format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { CalendarCheck, Car, Check, Sparkles } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
+import { useEffect } from 'react';
 import { View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Item, Text } from '@/components/ui';
+import { Button, Item, Rise, Text } from '@/components/ui';
+import { POP } from '@/lib/motion';
 import { useIsGuest, useVehicle, useProfile } from '@/lib/queries';
 import { useColors } from '@/lib/theme';
 import { useLogDraft } from '@/stores/logDraft';
@@ -32,6 +36,11 @@ export default function Success() {
   const guest = useIsGuest();
   const { vehicle } = useVehicle(p.vehicleId);
   const first = useProfile().data?.full_name?.trim().split(/\s+/)[0];
+
+  // The one place with a celebration (decisions Q57): the badge pops, the lines rise, one success vibration.
+  useEffect(() => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  }, []);
 
   const home = () => {
     router.dismissAll();
@@ -70,11 +79,11 @@ export default function Success() {
       <Stack.Screen options={{ gestureEnabled: false }} />
       <View className="flex-1 justify-center gap-6">
         {isLog ? (
-          <View className="h-20 w-20 items-center justify-center self-center rounded-full bg-mint">
+          <Animated.View entering={POP} className="h-20 w-20 items-center justify-center self-center rounded-full bg-mint">
             <Check size={36} color={c.teal} />
-          </View>
+          </Animated.View>
         ) : (
-          <View className="h-[200px] items-center justify-center self-center">
+          <Animated.View entering={POP} className="h-[200px] items-center justify-center self-center">
             <View className="h-[200px] w-[200px] items-center justify-center rounded-full border-[6px] border-line">
               <View className="h-[120px] w-[120px] items-center justify-center rounded-full bg-panel">
                 <Car size={56} color={c.lime} />
@@ -83,19 +92,23 @@ export default function Success() {
             <View className="absolute end-2 top-2 h-8 w-8 items-center justify-center rounded-full bg-lime">
               <Sparkles size={16} color="#222E29" />
             </View>
-          </View>
+          </Animated.View>
         )}
+        <Rise index={1}>
         <Text variant="title" className="text-center">
           {isLog ? t(first ? 'feedback.success.logTitle' : 'feedback.success.logTitleNoName', { name: first }) : t('feedback.success.vehicleTitle')}
         </Text>
-        <Text variant="body" className="text-center text-muted">{body}</Text>
+        </Rise>
+        <Rise index={2}><Text variant="body" className="text-center text-muted">{body}</Text></Rise>
         {next ? (
+          <Rise index={3}>
           <Item
             icon={CalendarCheck}
             title={t('feedback.success.nextTitle')}
             subtitle={next}
             onPress={() => p.vehicleId && p.serviceTypeId && router.push({ pathname: '/reminder', params: { vehicleId: p.vehicleId, serviceTypeId: p.serviceTypeId } })}
           />
+          </Rise>
         ) : null}
       </View>
       <View className="gap-2 pb-4">

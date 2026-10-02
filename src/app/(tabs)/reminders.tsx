@@ -4,14 +4,16 @@ import { Redirect, router } from 'expo-router';
 import * as Icons from 'lucide-react-native';
 import { Bell, CalendarCheck, ChevronDown, Gauge, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
+
+import { pickVehicle } from '@/lib/sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 
 import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
-import { Button, Choice, Item, Text } from '@/components/ui';
+import { Button, Choice, Item, Text, Rise } from '@/components/ui';
 import { needsAttention, useCurrentVehicle, useIsGuest, useVehicleParts, useVehicles, type Part } from '@/lib/queries';
 import { shadows, useColors } from '@/lib/theme';
 import { useSettings } from '@/stores/settingsStore';
@@ -89,7 +91,7 @@ export default function RemindersScreen() {
   const showStale = seg === 'attention' && stale;
 
   const pick = () =>
-    Alert.alert(t('home.switchVehicle'), undefined, vehicles.map((v) => ({ text: `${v.make} ${v.model} · ${v.year}`, onPress: () => setCurrent(v.id) })));
+    pickVehicle(vehicle?.id ?? null, setCurrent);
 
   return (
     <ScrollView refreshControl={refresh} className="flex-1 bg-paper" contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 120 }}>
@@ -122,15 +124,16 @@ export default function RemindersScreen() {
                 onPress={() => router.push('/update-odometer')}
               />
             ) : null}
-            {list.map((p) => (
+            {list.map((p, i) => (
+              <Rise key={p.serviceType.id} index={i}>
               <Item
-                key={p.serviceType.id}
                 icon={iconOf(p.serviceType.icon)}
                 tone={tones[p.status.state]}
                 title={i18n.language === 'ar' ? p.serviceType.name_ar : p.serviceType.name_en}
                 subtitle={subtitle(t, i18n.language, p, unit)}
                 onPress={() => router.push({ pathname: '/reminder', params: { vehicleId: vehicle.id, serviceTypeId: p.serviceType.id } })}
               />
+              </Rise>
             ))}
             {!list.length && !showStale ? <Text variant="body" className="text-muted">{t('reminders.calm')}</Text> : null}
           </>

@@ -8,6 +8,8 @@ export * from './Header';
 export * from './Item';
 export * from './Metric';
 export * from './Note';
+export * from './PressableScale';
 export * from './Progress';
+export * from './Rise';
 export * from './Text';
 export * from './Toggle';

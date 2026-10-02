@@ -789,3 +789,74 @@ Body and buttons as Q17.
 **Decision:** Ignore the Figma dark screens. They invert the hero, the tab bar and the dark cards to white, which the founder rejected ("looks horrible"). Our dark theme keeps dark surfaces dark in three depth steps: page `paper` #0E1411, cards `white` #171F1B, brand panels `panel` #212E27 (hero, tab bar, dark cards, dark button). Text is light (`ink` #F2F5F3, `muted` #93A39A), lime stays the accent, teal is brightened (#3ECFC0), and the tinted badges/notes use deep tints.
 
 **Spec for dev:** `src/lib/palette.js`. New tokens `panel` / `onpanel` (same role in both themes). Use `bg-panel` + `text-onpanel` for any dark brand surface; never `bg-ink` for a surface (ink is the text color and flips). `useLightStatusBar()` restores the theme's status-bar style on blur.
+
+---
+
+### Q51: Bestim Connect landing page (Shady, 2026-10-02)
+
+**Decision:**
+- **Audience:** companies with many vehicles first (shipping, factories, distribution, equipment, rental, field service), plus one section for workshops.
+- **Pitch:** written as a live product, not "coming soon". The dashboard is not built yet, so its pictures are drawn in code and a company that books a demo is onboarded by hand until it exists.
+- **Main action:** "Book a demo": a short form saved in `connect_leads` (visitors can only add a row) and a WhatsApp button that appears once a business number is set.
+- **Look:** dark hero and navbar, light body, teal and dark blocks; mix of the four Dribbble references Shady shared, in Bestim's ink / lime / teal.
+- **Kept from the consumer site:** no prices or plans, no invented testimonials / customer logos / usage numbers. New: no GPS or live-tracking claims.
+- **Tech:** the future dashboard lives in the same Next.js site as the landing page (`/app`), same Supabase project and auth.
+
+**Spec for dev:** `bestim-connect/README.md`, `bestim-connect/src/dictionaries/`, `supabase/migrations/20261002090000_connect_leads.sql`.
+
+---
+
+### Q52: Vehicle types with pictures (Shady, 2026-10-02)
+
+**Decision:** The add-vehicle step shows a sideways row of picture cards instead of the 4-button switch. Types: sedan, hatchback, SUV, coupe, sports, convertible, pickup, van, motorcycle (scooter picture), equipment (gear icon until artwork exists). Vehicles saved earlier as `car` keep working and show the sedan picture.
+
+**Spec for dev:** pictures in `assets/images/vehicles/` (resized from the 6000px originals in `../Car Types/`), map in `src/lib/vehicleArt.ts`, list in `src/stores/vehicleDraft.ts`, DB rule in `supabase/migrations/20261002100000_vehicle_body_types.sql`. The row is a `FlatList`: a plain horizontal `ScrollView` opens at the far end in Arabic.
+
+---
+
+### Q53: Update-odometer ruler and voice (Shady, 2026-10-02)
+
+**Decision:** Screen 25 gets a ruler under the big number (drag with momentum; 1,000 km per labelled step, reading rounded to 10 km; 100 h steps for hours), the number is still typeable (tapping it starts a fresh number), a "+X km since last update" pill, and a "say it" microphone with an ع / EN switch. Brand lime on the dark panel, not the orange of the reference. The ruler reads left to right in Arabic too, numbers grow to the right (founder, 2026-10-02; `inverted` on the list undoes the RTL mirroring). Saving rules are unchanged (a lower reading still needs a reason and is flagged).
+
+**Spec for dev:** `src/components/OdometerRuler.tsx`, `src/app/update-odometer.tsx`, `parseReading()` in `src/lib/voice.ts` (digits only; spelled-out numbers wait for the partner's function). Voice needs a real phone build. The ruler is not used on onboarding screen 04 (it starts at 0, typing is faster).
+
+---
+
+### Q54: Home refresh (Shady, 2026-10-02)
+
+**Decision:** The hero shows the vehicle's picture, large and centered, between the vehicle name and the odometer card (nothing for equipment). Priority rows are the standard white `Item` cards with a pink (overdue) or amber (soon) badge. (The lime "Log what you did" button was removed the same day: the + in the nav bar already does it, see Q57.) The expenses card gets an icon badge. Guest, empty and offline homes are unchanged.
+
+**Spec for dev:** `src/app/(tabs)/index.tsx` (`Today`).
+
+---
+
+### Q55: No system pop-ups, use a bottom sheet (founder, 2026-10-02)
+
+**Decision:** The grey iOS pop-up (`Alert.alert`) is not used anywhere. Confirmations (switch language, sign out) and short pickers (switch vehicle on Home, Reminders, Share) open our own bottom sheet, in the same frame as the capture sheet (13). One answer shows as a button (red when destructive) above Cancel; several answers show as a list. A plain error message ("couldn't snooze") is a toast.
+
+**Spec for dev:** call `sheet(title, body, actions)` from `src/lib/sheet.ts` (same arguments as `Alert.alert`); it opens the `src/app/sheet.tsx` route. Don't add new `Alert.alert` calls.
+
+---
+
+### Q56: Switching between vehicles (founder, 2026-10-02)
+
+**Decision:**
+- **Home:** swipe the vehicle picture left/right to move to the next vehicle; dots under it show how many there are. The page it settles on becomes the current vehicle (same shared setting as before), with a light vibration.
+- **Sheet:** tapping the vehicle name (Home, Reminders, Share) opens a switch-vehicle bottom sheet: picture, name, year and mileage per vehicle, a lime tick on the current one, a red dot on any vehicle with overdue maintenance, and a last row "Add a vehicle".
+- **My vehicles:** the list and the detail screen show the vehicle picture instead of the small icon (icon stays for equipment).
+- The generic confirm sheet (Q55) no longer shows lists; it is for confirmations only.
+
+**Spec for dev:** `pickVehicle(currentId, onPick)` in `src/lib/sheet.ts` opens `src/app/switch-vehicle.tsx`. The pager lives in `Today` in `src/app/(tabs)/index.tsx`. `Item` takes `image` and `aside`. Don't put a `ScrollView` inside a fit-to-content sheet: it breaks the layout (so the sheet doesn't scroll; fine for a handful of vehicles).
+
+---
+
+### Q57: Motion rules, floating + button (founder, 2026-10-02)
+
+**Decision:** The app moves, at a level between calm and playful: short movements, a light spring on entrances, a real pop only on rare happy moments.
+- **Moves:** press feedback on every button and row (dips to 96%, rows 98%, the + 92%, settles back with a small overshoot); the toast slides in from the top and leaves the same way; the segmented pill, toggle knob, onboarding/tour step bars and Home car dots slide; Home's odometer card and priority list fade in fresh when the vehicle changes; rows rise in 50 ms apart when a screen first opens (Home, My vehicles, Reminders, vehicle detail, switch-vehicle sheet); success screens, tour slides and the empty Home pop/rise, with one success vibration; a ring pulses from the mic while it listens.
+- **Never moves:** tab switching, numbers the user reads or edits (no count-ups), the expenses bars, anything idle or looping for decoration. Screen and sheet transitions stay the system's own.
+- **Nav bar:** the + floats: a 60pt lime circle lifted above the bar, ringed in the bar's colour. The "Log what you did" button on Home is removed (same action).
+- **Reduce Motion** (phone setting) is respected: changes still happen, without the movement.
+
+**Spec for dev:** shared values in `src/lib/motion.ts` (`EASE_OUT`, `BACK_OUT`, `rise()`, `POP`, `SWAP`). Use `PressableScale` (not `Pressable`) for buttons and cards, `Rise` for entering rows (not inside virtualized lists). State changes use Reanimated CSS transitions; their curves must come from `cubicBezier()`, a CSS string throws. CSS transitions don't follow Reduce Motion by themselves: gate them with `useReducedMotion()` as `PressableScale`, `Choice` and `Toggle` do.
+

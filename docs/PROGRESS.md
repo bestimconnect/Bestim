@@ -1,6 +1,6 @@
 # Bestim: Build Progress
 
-Updated 2026-10-01. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
+Updated 2026-10-02. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
 
 ## Phase status
 
@@ -40,6 +40,10 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
   - success screens, permission screen, delete vehicle;
   - offline: cached data is persisted and a log saved offline is queued (`src/lib/queryClient.ts`, `src/lib/saveLog.ts`);
   - `Toast`, pull-to-refresh (`useRefresh`).
+- **2026-10-02 edits (decisions Q52–Q54):** vehicle types with pictures (`src/lib/vehicleArt.ts`), update-odometer ruler + voice (`src/components/OdometerRuler.tsx`), home hero with the vehicle picture. Checked on the simulator in Arabic light, Arabic dark and English dark; English light and the microphone (real phone) are not checked yet.
+- **Motion (Q57):** values in `src/lib/motion.ts`, `PressableScale` and `Rise` in the UI kit, floating + in `TabBar`. Checked on the simulator that every screen renders and the controls land in the right place (Arabic, light; nav bar also dark). Not checked: the feel on a real phone, English, and the phone's Reduce Motion setting.
+- **Vehicle switching (Q56):** swipe the picture on Home, or the switch-vehicle sheet (`pickVehicle()` → `src/app/switch-vehicle.tsx`) from Home, Reminders and Share. Checked on the simulator in Arabic and English, sheet and Home also in dark. Not checked: the sheet opened from Share, and the vibration (real phone).
+- **No system pop-ups (Q55):** confirmations and pickers use `sheet()` from `src/lib/sheet.ts` (route `src/app/sheet.tsx`), never `Alert.alert`. The sign-out button inside the sheet has not been pressed in testing.
 - **Checks:** `npm run check` runs 5 checks (parts, voice, export, reminder rules, and locales: every label used in code must exist in both languages).
 
 ## Open items

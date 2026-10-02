@@ -9,7 +9,7 @@ import { useLastNotificationResponse } from 'expo-notifications';
 import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { type ComponentProps, useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 import { Toast } from '@/components/Toast';
@@ -93,11 +93,20 @@ function App() {
   }, [ready, language, tourSeen, userId, profile.data, session?.user.is_anonymous]);
 
   if (!ready) return null;
+  // Bottom sheets: the capture chooser (13) and the confirm sheet (Q55) and switch vehicle (Q56).
+  const sheetOptions: ComponentProps<typeof Stack.Screen>['options'] = {
+    presentation: 'formSheet',
+    sheetAllowedDetents: 'fitToContents',
+    sheetCornerRadius: 32,
+    contentStyle: [themeVars[scheme], { backgroundColor: palette[scheme].sheet }],
+  };
   return (
     <View className="flex-1 bg-paper" style={themeVars[scheme]}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="capture/index" options={{ presentation: 'formSheet', sheetAllowedDetents: 'fitToContents', sheetCornerRadius: 32, contentStyle: [themeVars[scheme], { backgroundColor: palette[scheme].sheet }] }} />
+        <Stack.Screen name="capture/index" options={sheetOptions} />
+        <Stack.Screen name="sheet" options={sheetOptions} />
+        <Stack.Screen name="switch-vehicle" options={sheetOptions} />
         <Stack.Screen name="feature-gate" options={{ presentation: 'modal' }} />
         <Stack.Screen name="notify-permission" options={{ presentation: 'modal' }} />
       </Stack>

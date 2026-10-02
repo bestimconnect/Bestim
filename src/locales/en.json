@@ -131,8 +131,16 @@
           "car": "Car",
           "motorcycle": "Motorcycle",
           "pickup": "Pickup",
-          "equipment": "Equipment"
-        }
+          "equipment": "Equipment",
+          "sedan": "Sedan",
+          "hatchback": "Hatchback",
+          "suv": "SUV",
+          "coupe": "Coupe",
+          "sports": "Sports car",
+          "convertible": "Convertible",
+          "van": "Van"
+        },
+        "typeLabel": "Vehicle type"
       },
       "odometer": {
         "header": "Odometer reading",
@@ -233,7 +241,6 @@
   },
   "odometer": {
     "header": "Update odometer",
-    "heading": "New reading. Sharper reminders.",
     "label": "New reading",
     "unit": {
       "km": "Kilometers",
@@ -242,14 +249,19 @@
     },
     "last": "Last reading: {{value}} {{unit}} · {{count}} days ago",
     "lastToday": "Last reading: {{value}} {{unit}} · today",
-    "noteTitle": "If the reading is lower",
     "noteBody": "We'll ask for a reason, like a replaced odometer or a corrected reading, before saving.",
     "reason": "Reason",
     "reasonHint": "Write at least 3 characters",
     "cta": "Save reading",
     "logTitle": "Odometer update",
     "invalid": "Enter a valid reading",
-    "error": "Couldn't save, try again."
+    "error": "Couldn't save, try again.",
+    "since": "+{{value}} {{unit}} since last update",
+    "sayIt": "Say it instead",
+    "tapToSpeak": "Tap to speak",
+    "listening": "Listening… tap to stop",
+    "voiceUnavailable": "Voice isn't available here. Type the reading instead.",
+    "notHeard": "Didn't catch a number. Try again."
   },
   "vehicles": {
     "title": "My vehicles",
@@ -259,7 +271,14 @@
       "car": "Car",
       "motorcycle": "Motorcycle",
       "pickup": "Pickup",
-      "equipment": "Equipment"
+      "equipment": "Equipment",
+      "sedan": "Sedan",
+      "hatchback": "Hatchback",
+      "suv": "SUV",
+      "coupe": "Coupe",
+      "sports": "Sports car",
+      "convertible": "Convertible",
+      "van": "Van"
     },
     "unit": {
       "km": "km",

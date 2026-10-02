@@ -1,5 +1,6 @@
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Bike, CarFront, Cog, ChevronLeft, ChevronRight, Truck } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import * as Icons from 'lucide-react-native';
 import { useState } from 'react';
 import { I18nManager, Pressable, ScrollView, View } from 'react-native';
@@ -8,15 +9,15 @@ import { useTranslation } from 'react-i18next';
 
 import { useRefresh } from '@/components/Refresh';
 import { useLightStatusBar } from '@/components/Hero';
-import { Choice, Item, Metric, Text } from '@/components/ui';
+import { Choice, Item, Metric, PressableScale, Rise, Text } from '@/components/ui';
 import { ErrorState } from '@/components/ErrorState';
 import { needsAttention, useExpenses, useVehicle, useVehicleParts, type Part } from '@/lib/queries';
 import { useColors } from '@/lib/theme';
+import { vehicleArt, vehicleIcons } from '@/lib/vehicleArt';
 
 // Screen 09 — Vehicle detail, Figma ar-light 09/تفاصيل السيارة (segments per decisions Q15, links Q16).
 type Tab = 'overview' | 'log' | 'reminders';
 const n = (x: number) => x.toLocaleString('en-US');
-const typeIcons = { car: CarFront, motorcycle: Bike, pickup: Truck, equipment: Cog } as const;
 const icon = (name?: string) => (Icons as any)[name ?? ''] ?? Icons.Wrench;
 
 export default function VehicleDetail() {
@@ -37,7 +38,8 @@ export default function VehicleDetail() {
   const currency = t('vehicles.currency');
   const year = new Date().getFullYear().toString();
   const spent = expenses.filter((e) => e.vehicle_id === vehicle.id && e.expense_date.startsWith(year)).reduce((s, e) => s + e.amount, 0);
-  const TypeIcon = typeIcons[vehicle.vehicle_type as keyof typeof typeIcons] ?? CarFront;
+  const TypeIcon = vehicleIcons[vehicle.vehicle_type];
+  const art = vehicleArt[vehicle.vehicle_type]; // none for equipment
   const Back = I18nManager.isRTL ? ChevronRight : ChevronLeft;
 
   const partItem = (p: Part) => {
@@ -62,13 +64,13 @@ export default function VehicleDetail() {
   return (
     <ScrollView refreshControl={refresh} className="flex-1 bg-paper" contentContainerClassName="pb-[120px]">
       <View className="gap-4 rounded-b-[28px] bg-panel px-6 pb-6" style={{ paddingTop: insets.top + 8 }}>
-        <Pressable
+        <PressableScale
           accessibilityRole="button"
           accessibilityLabel={t('back')}
           onPress={router.back}
           className="h-11 w-11 items-center justify-center rounded-full bg-[#FFFFFF26]">
           <Back size={22} color={c.onpanel} />
-        </Pressable>
+        </PressableScale>
         <View className="flex-row items-center gap-3">
           <View className="flex-1 gap-1">
             <Text variant="title" className="text-onpanel">{vehicle.nickname || `${vehicle.make} ${vehicle.model}`}</Text>
@@ -76,9 +78,13 @@ export default function VehicleDetail() {
               {vehicle.year} · {t(`vehicles.type.${vehicle.vehicle_type}`)}
             </Text>
           </View>
-          <View className="h-14 w-14 items-center justify-center rounded-full bg-lime">
-            <TypeIcon size={26} color="#222E29" />
-          </View>
+          {art ? (
+            <Image source={art} contentFit="contain" style={{ width: 128, height: 64 }} />
+          ) : (
+            <View className="h-14 w-14 items-center justify-center rounded-full bg-lime">
+              <TypeIcon size={26} color="#222E29" />
+            </View>
+          )}
         </View>
         <View className="flex-row gap-3">
           <Metric
@@ -88,9 +94,9 @@ export default function VehicleDetail() {
             label={t('vehicles.odometer', { unit })}
             value={n(vehicle.current_odometer)}
           />
-          <Pressable accessibilityRole="button" onPress={() => router.push('/account/expenses')} className="flex-1 active:opacity-80">
+          <PressableScale accessibilityRole="button" onPress={() => router.push('/account/expenses')} className="flex-1">
             <Metric size="small" label={t('vehicles.yearExpenses')} value={n(spent)} caption={currency} />
-          </Pressable>
+          </PressableScale>
         </View>
       </View>
 
@@ -104,24 +110,25 @@ export default function VehicleDetail() {
         {seg === 'overview' ? (
           <>
             <Text variant="heading">{t(attention.length ? 'vehicles.attention' : 'vehicles.yourParts')}</Text>
-            {overview.length ? overview.map(partItem) : empty}
+            {overview.length ? overview.map((p, i) => <Rise key={p.serviceType.id} index={i}>{partItem(p)}</Rise>) : empty}
           </>
         ) : seg === 'log' ? (
           logs?.length ? (
-            logs.slice(0, 10).map((l) => (
+            logs.slice(0, 10).map((l, i) => (
+              <Rise key={l.id} index={i}>
               <Item
-                key={l.id}
                 icon={icon(l.service_types?.icon)}
                 title={l.title}
                 subtitle={`${l.odometer_reading != null ? `${n(l.odometer_reading)} ${unit}` : '—'}${l.cost != null ? ` · ${n(l.cost)} ${currency}` : ''}`}
                 onPress={() => router.push({ pathname: '/log/[id]', params: { id: l.id } })}
               />
+              </Rise>
             ))
           ) : (
             <Text variant="body" className="text-muted">{t('vehicles.emptyLog')}</Text>
           )
         ) : parts.length ? (
-          parts.map(partItem)
+          parts.map((p, i) => <Rise key={p.serviceType.id} index={i}>{partItem(p)}</Rise>)
         ) : (
           empty
         )}

@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
-import { ActivityIndicator, Pressable, type PressableProps } from 'react-native';
+import { ActivityIndicator, type PressableProps } from 'react-native';
 
 import { shadows } from '@/lib/theme';
+import { PressableScale } from './PressableScale';
 import { Text } from './Text';
 
 // On-lime and on-danger text stay fixed: the ink/white tokens invert in dark mode.
@@ -17,12 +18,12 @@ type Props = PressableProps & { title: string; variant?: keyof typeof styles; lo
 export function Button({ title, variant = 'primary', loading, icon, disabled, className = '', ...rest }: Props) {
   const s = styles[variant];
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       disabled={disabled || loading}
-      className={`h-[52px] flex-row items-center justify-center gap-2 rounded-field px-6 active:opacity-80 ${s.box} ${disabled ? 'opacity-50' : ''} ${className}`}
-      style={{ boxShadow: s.shadow }}
-      {...rest}>
+      className={`h-[52px] flex-row items-center justify-center gap-2 rounded-field px-6 ${s.box} ${disabled ? 'opacity-50' : ''} ${className}`}
+      {...rest}
+      style={{ boxShadow: s.shadow }}>
       {loading ? (
         <ActivityIndicator color="#222E29" />
       ) : (
@@ -31,6 +32,6 @@ export function Button({ title, variant = 'primary', loading, icon, disabled, cl
           <Text variant="label" className={s.text}>{title}</Text>
         </>
       )}
-    </Pressable>
+    </PressableScale>
   );
 }

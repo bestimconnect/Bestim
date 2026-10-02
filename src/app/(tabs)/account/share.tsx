@@ -1,7 +1,9 @@
 import { Redirect, router } from 'expo-router';
 import { Car, Repeat } from 'lucide-react-native';
 import { useState } from 'react';
-import { Alert, I18nManager, ScrollView, Share, View } from 'react-native';
+import { I18nManager, ScrollView, Share, View } from 'react-native';
+
+import { pickVehicle } from '@/lib/sheet';
 import QRCode from 'react-native-qrcode-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -39,7 +41,7 @@ export default function ShareScreen() {
   const empty = logs.isSuccess && count === 0;
   const pick = () =>
     vehicles.data && vehicles.data.length > 1 &&
-    Alert.alert(t('home.switchVehicle'), undefined, vehicles.data.map((v) => ({ text: `${v.make} ${v.model} · ${v.year}`, onPress: () => { setPickedId(v.id); setLink(null); } })));
+    pickVehicle(vehicle?.id ?? null, (id) => { setPickedId(id); setLink(null); });
 
   const prepare = async () => {
     if (!vehicle) return;

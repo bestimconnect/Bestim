@@ -1,13 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
+import { Check } from 'lucide-react-native';
+import { useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { ScrollView, View } from 'react-native';
+import { FlatList, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { Button, Choice, Field, Header, Progress, Text } from '@/components/ui';
-import { useVehicleDraft, VEHICLE_TYPES } from '@/stores/vehicleDraft';
+import { Button, Field, Header, PressableScale, Progress, Text } from '@/components/ui';
+import { shadows, useColors } from '@/lib/theme';
+import { vehicleArt, vehicleIcons } from '@/lib/vehicleArt';
+import { useVehicleDraft, VEHICLE_TYPES, type VehicleType } from '@/stores/vehicleDraft';
 
 const currentYear = new Date().getFullYear();
 const schema = z.object({
@@ -21,7 +26,10 @@ type FormValues = z.infer<typeof schema>;
 export default function AddVehicleInfoScreen() {
   const { t } = useTranslation();
   const { mode } = useLocalSearchParams<{ mode?: 'extra' }>(); // 'extra' = adding another vehicle from screen 08
+  const c = useColors();
   const draft = useVehicleDraft();
+  const types = useRef<FlatList<VehicleType>>(null);
+  const placed = useRef(false);
   const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { make: draft.make, model: draft.model, year: draft.year ? String(draft.year) : '' },
@@ -44,11 +52,50 @@ export default function AddVehicleInfoScreen() {
             value={draft.nickname}
             onChangeText={(v) => draft.set({ nickname: v })}
           />
-          <Choice
-            value={draft.vehicleType}
-            onChange={(v) => draft.set({ vehicleType: v })}
-            options={VEHICLE_TYPES.map((type) => ({ value: type, label: t(`onboarding.addVehicle.info.type.${type}`) }))}
-          />
+          {/* Picture cards per type (decisions Q52); -mx-6 lets the row scroll edge to edge. */}
+          <View className="gap-2">
+            <Text variant="caption" className="text-muted">{t('onboarding.addVehicle.info.typeLabel')}</Text>
+            {/* FlatList, not ScrollView: a plain horizontal ScrollView opens at the far end in Arabic. */}
+            <FlatList
+              ref={types}
+              horizontal
+              data={VEHICLE_TYPES}
+              extraData={draft.vehicleType}
+              keyExtractor={(type) => type}
+              showsHorizontalScrollIndicator={false}
+              className="-mx-6"
+              contentContainerClassName="gap-3 px-6 py-1"
+              onContentSizeChange={() => {
+                if (placed.current) return;
+                placed.current = true;
+                types.current?.scrollToOffset({ offset: 0, animated: false });
+              }}
+              renderItem={({ item: type }) => {
+                const selected = draft.vehicleType === type;
+                const Icon = vehicleIcons[type];
+                return (
+                  <PressableScale
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    onPress={() => draft.set({ vehicleType: type })}
+                    className={`w-[132px] items-center gap-1 rounded-item border-2 bg-white p-2 ${selected ? 'border-ink' : 'border-white'}`}
+                    style={{ boxShadow: shadows.soft }}>
+                    {vehicleArt[type] ? (
+                      <Image source={vehicleArt[type]} contentFit="contain" style={{ width: 112, height: 56 }} />
+                    ) : (
+                      <View className="h-14 items-center justify-center"><Icon size={32} color={c.muted} /></View>
+                    )}
+                    <Text variant="caption" className={selected ? '' : 'text-muted'}>{t(`onboarding.addVehicle.info.type.${type}`)}</Text>
+                    {selected ? (
+                      <View className="absolute end-1.5 top-1.5 h-5 w-5 items-center justify-center rounded-full bg-lime">
+                        <Check size={12} color="#222E29" strokeWidth={3} />
+                      </View>
+                    ) : null}
+                  </PressableScale>
+                );
+              }}
+            />
+          </View>
           <View className="flex-row gap-3">
             <Controller
               control={control}

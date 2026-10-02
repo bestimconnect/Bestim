@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
-export const VEHICLE_TYPES = ['car', 'motorcycle', 'pickup', 'equipment'] as const;
+// Picker order (decisions Q52). The DB also still accepts the older 'car'.
+export const VEHICLE_TYPES = ['sedan', 'hatchback', 'suv', 'coupe', 'sports', 'convertible', 'pickup', 'van', 'motorcycle', 'equipment'] as const;
 export type VehicleType = (typeof VEHICLE_TYPES)[number];
 
 type VehicleDraft = {
@@ -20,7 +21,7 @@ type VehicleDraft = {
 
 const initial = {
   nickname: '',
-  vehicleType: 'car' as const,
+  vehicleType: 'sedan' as VehicleType,
   make: '',
   model: '',
   year: null,

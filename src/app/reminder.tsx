@@ -3,7 +3,7 @@ import { addDays, format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -12,6 +12,7 @@ import { PartMetric } from '@/components/PartMetric';
 import { Button, Header, Text } from '@/components/ui';
 import { useIsGuest, useVehicle, useVehicleParts } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
+import { toast } from '@/components/Toast';
 import { useLogDraft } from '@/stores/logDraft';
 
 // Screen 22 — Reminder detail (Q24); ar-light 22/تفاصيل موعد الصيانة.png
@@ -62,7 +63,7 @@ export default function ReminderScreen() {
       ? { error: e1 }
       : await supabase.from('reminders').insert({ vehicle_id: vehicle.id, service_type_id: st.id, title: name, status: 'dismissed', due_date: until });
     setBusy(false);
-    if (error) return Alert.alert(t('reminders.snoozeFailed'));
+    if (error) return toast(t('reminders.snoozeFailed'));
     qc.invalidateQueries({ queryKey: ['snoozes'] });
     router.back(); // ponytail: no shared toast component yet; Q24 "Snoozed until" toast skipped
   };

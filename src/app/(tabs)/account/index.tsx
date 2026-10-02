@@ -2,15 +2,16 @@ import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { Bell, Download, Moon, Repeat, User, Wallet, LogOut } from 'lucide-react-native';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Item, Text, Toggle } from '@/components/ui';
+import { Item, Text, Toggle, PressableScale } from '@/components/ui';
 import { signOut } from '@/lib/auth';
 import { applyLanguage } from '@/lib/i18n';
 import { useCurrentVehicle, useProfile } from '@/lib/queries';
 import { useSession } from '@/lib/session';
+import { sheet } from '@/lib/sheet';
 import { supabase } from '@/lib/supabase';
 import { shadows, useColors } from '@/lib/theme';
 import { useSettings } from '@/stores/settingsStore';
@@ -27,7 +28,7 @@ export default function AccountScreen() {
   const { data: profile } = useProfile();
 
   const switchLanguage = () =>
-    Alert.alert(t('account.switchTitle'), t('account.switchBody'), [
+    sheet(t('account.switchTitle'), t('account.switchBody'), [
       { text: t('account.cancel'), style: 'cancel' },
       {
         text: t('account.switch'),
@@ -41,7 +42,7 @@ export default function AccountScreen() {
     ]);
 
   const confirmSignOut = () =>
-    Alert.alert(t('account.signOutTitle'), t('account.signOutBody'), [
+    sheet(t('account.signOutTitle'), t('account.signOutBody'), [
       { text: t('account.cancel'), style: 'cancel' },
       { text: t('account.signOut'), style: 'destructive', onPress: () => signOut() },
     ]);
@@ -60,14 +61,14 @@ export default function AccountScreen() {
         </View>
 
         <View className="flex-row gap-3">
-          <Pressable
+          <PressableScale
             accessibilityRole="button"
             onPress={switchLanguage}
-            className="flex-1 gap-1 rounded-item bg-white p-4 active:opacity-80"
+            className="flex-1 gap-1 rounded-item bg-white p-4"
             style={{ boxShadow: shadows.soft }}>
             <Text variant="caption" className="text-muted">{t('account.language')}</Text>
             <Text variant="label">{t('account.languageName')}</Text>
-          </Pressable>
+          </PressableScale>
           <View className="flex-1 gap-1 rounded-item bg-white p-4" style={{ boxShadow: shadows.soft }}>
             <Text variant="caption" className="text-muted">{t('account.currency')}</Text>
             <Text variant="label">{t('account.currencyName')}</Text>

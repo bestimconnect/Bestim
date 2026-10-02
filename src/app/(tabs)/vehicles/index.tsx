@@ -1,16 +1,15 @@
 import { router } from 'expo-router';
-import { Bike, Cog, CarFront, Truck } from 'lucide-react-native';
 import { ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
-import { Button, Header, Item, Text } from '@/components/ui';
+import { Button, Header, Item, Rise, Text } from '@/components/ui';
 import { useVehicles } from '@/lib/queries';
+import { vehicleArt, vehicleIcons } from '@/lib/vehicleArt';
 
 // Screen 08 — My vehicles, Figma ar-light 08/سياراتي ومعداتي.
-const icons = { car: CarFront, motorcycle: Bike, pickup: Truck, equipment: Cog } as const;
 
 export default function VehiclesScreen() {
   const refresh = useRefresh();
@@ -23,15 +22,17 @@ export default function VehiclesScreen() {
       <ScrollView refreshControl={refresh} contentContainerClassName="gap-3 px-6 pb-[120px]">
         <Header title={t('vehicles.title')} back={false} />
         <Text variant="title" className="mb-2">{t('vehicles.heading')}</Text>
-        {vehicles?.map((v) => (
+        {vehicles?.map((v, i) => (
+          <Rise key={v.id} index={i}>
           <Item
-            key={v.id}
-            icon={icons[v.vehicle_type as keyof typeof icons] ?? CarFront}
+            image={vehicleArt[v.vehicle_type]}
+            icon={vehicleIcons[v.vehicle_type]}
             tone={v.is_primary ? 'mint' : 'paper'}
             title={v.nickname || `${v.make} ${v.model}`}
             subtitle={`${v.make} ${v.year} · ${v.current_odometer.toLocaleString('en-US')} ${t(`vehicles.unit.${v.odometer_unit}`)}`}
             onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: v.id } })}
           />
+          </Rise>
         ))}
         <Button
           title={t('vehicles.add')}
