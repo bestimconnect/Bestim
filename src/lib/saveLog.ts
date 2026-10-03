@@ -15,6 +15,7 @@ export type SaveLogInput = {
   transcript: string | null;
   parts: { name: string }[];
   intervalKm: number | null;
+  intervalMonths?: number | null; // only voice sets it ("every 6 months")
   photoUri: string | null;
 };
 
@@ -48,6 +49,7 @@ export async function saveLog(d: SaveLogInput) {
       voice_transcript: d.transcript,
       parts_replaced: d.parts,
       interval_km: d.intervalKm,
+      interval_months: d.intervalMonths ?? null,
       photos,
     })
     .select('id, status')

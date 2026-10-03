@@ -11,6 +11,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { type ComponentProps, useEffect, useState } from 'react';
 import { View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { Toast } from '@/components/Toast';
 import { applyLanguage } from '@/lib/i18n';
@@ -101,6 +102,8 @@ function App() {
     contentStyle: [themeVars[scheme], { backgroundColor: palette[scheme].sheet }],
   };
   return (
+    // Gestures (the odometer ruler) need this root above every screen.
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <View className="flex-1 bg-paper" style={themeVars[scheme]}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
@@ -112,5 +115,6 @@ function App() {
       </Stack>
       <Toast />
     </View>
+    </GestureHandlerRootView>
   );
 }

@@ -12,8 +12,11 @@ import { Button, Field, Header, Item, Note, Text } from '@/components/ui';
 import { useCurrentVehicle, useIsGuest, useVehicle, useVehicleLogs } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { shadows } from '@/lib/theme';
+import { EXPENSE_CATEGORIES, type ExpenseRecord } from '@/lib/voiceRecords';
+import { useVoiceBatch } from '@/stores/voiceBatch';
 
 // Screen 24 — Add expense (167:67164); decisions Q26, Q28, Q29, Q31.
+// With ?batch it edits one expense card of the voice review list and writes back instead of saving (Q69).
 const cats = ['maintenance', 'fuel', 'parts', 'insurance', 'registration', 'other'] as const;
 type Cat = (typeof cats)[number];
 
@@ -21,22 +24,27 @@ export default function AddExpense() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const guest = useIsGuest();
-  const { vehicleId } = useLocalSearchParams<{ vehicleId?: string }>();
+  const { vehicleId, batch } = useLocalSearchParams<{ vehicleId?: string; batch?: string }>();
+  const [card] = useState(() => useVoiceBatch.getState().records.find((r) => r.key === batch && r.kind === 'expense') as ExpenseRecord | undefined);
   const current = useCurrentVehicle().vehicle;
   const picked = useVehicle(vehicleId).vehicle;
   const vehicle = picked ?? current;
   const logs = (useVehicleLogs(vehicle?.id).data ?? []).slice(0, 20);
-  const [category, setCategory] = useState<Cat>('maintenance');
+  const [category, setCategory] = useState<Cat>(card?.category ?? 'maintenance');
   const amountRef = useRef<TextInput>(null);
-  const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(new Date().toLocaleDateString('en-CA'));
-  const [place, setPlace] = useState('');
+  const [amount, setAmount] = useState(card?.amount != null ? String(card.amount) : '');
+  const [date, setDate] = useState(card?.date ?? new Date().toLocaleDateString('en-CA'));
+  const [place, setPlace] = useState(card?.place ?? '');
   const [logId, setLogId] = useState<string | null>(null);
   const [pick, setPick] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const save = useMutation({
     mutationFn: async () => {
+      if (batch) {
+        const patch: Partial<ExpenseRecord> = { category: category as ExpenseRecord['category'], amount: Number(amount), date, place: place.trim() };
+        return useVoiceBatch.getState().update(batch, { ...patch, error: undefined });
+      }
       const { error } = await supabase.from('expenses').insert({
         vehicle_id: vehicle!.id,
         category,
@@ -67,7 +75,7 @@ export default function AddExpense() {
         <Header title={t('expenses.add')} />
         <Text variant="caption" className="text-muted">{vehicleName}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2">
-          {cats.map((k) => (
+          {(batch ? EXPENSE_CATEGORIES : cats).map((k) => (
             <Pressable
               key={k}
               accessibilityRole="button"
@@ -102,13 +110,15 @@ export default function AddExpense() {
           error={dateOk ? undefined : t('expenses.dateError')}
         />
         <Field label={t('expenses.place')} value={place} onChangeText={setPlace} placeholder={t('expenses.optional')} />
-        <Item
-          icon={Link2}
-          tone="sky"
-          title={t('expenses.link')}
-          subtitle={linked ? linked.title : t('expenses.optional')}
-          onPress={() => setPick(!pick)}
-        />
+        {batch ? null : (
+          <Item
+            icon={Link2}
+            tone="sky"
+            title={t('expenses.link')}
+            subtitle={linked ? linked.title : t('expenses.optional')}
+            onPress={() => setPick(!pick)}
+          />
+        )}
         {pick ? (
           <View className="gap-2">
             <Text variant="caption" className="text-muted">{t('expenses.linkPick')} · {t('expenses.linkHint')}</Text>
@@ -135,7 +145,7 @@ export default function AddExpense() {
         {error ? <Note tone="warning" text={error} /> : null}
       </ScrollView>
       <View className="px-6 pb-4 pt-2">
-        <Button title={t('expenses.save')} onPress={() => save.mutate()} disabled={!valid} loading={save.isPending} />
+        <Button title={t(batch ? 'capture.batch.doneEdit' : 'expenses.save')} onPress={() => save.mutate()} disabled={!valid} loading={save.isPending} />
       </View>
     </SafeAreaView>
   );

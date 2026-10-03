@@ -16,7 +16,8 @@ import { useColors } from '@/lib/theme';
 import { useLogDraft } from '@/stores/logDraft';
 
 type Params = {
-  kind?: 'log' | 'vehicle';
+  kind?: 'log' | 'vehicle' | 'batch'; // batch = several records from one voice recording (Q67)
+  count?: string; // batch: how many were saved
   vehicleId?: string;
   serviceTypeId?: string;
   odo?: string; // odometer of the saved log
@@ -46,7 +47,8 @@ export default function Success() {
     router.dismissAll();
     router.replace('/');
   };
-  const isLog = p.kind === 'log';
+  const batch = p.kind === 'batch';
+  const isLog = p.kind === 'log' || batch;
   const offline = p.offline === '1';
 
   // Q40: "Your next date" row, from the interval the log was saved with.
@@ -63,6 +65,9 @@ export default function Success() {
 
   const body = !isLog
     ? t('feedback.success.vehicleBody')
+    : batch
+      ? t(p.count === '1' ? 'capture.batch.successOne' : 'capture.batch.successMany', { count: Number(p.count) }) +
+        (p.review === '1' ? ` ${t('capture.batch.successReview')}` : '')
     : offline
       ? t('feedback.success.offlineBody') + (p.nophoto === '1' ? ` ${t('feedback.success.noPhoto')}` : '')
       : p.review === '1'

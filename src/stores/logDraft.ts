@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
-// One maintenance log in progress: capture (voice or manual) → clarify → review → save.
-// Also used by the correction form (logId set). Not persisted: it only lives for one flow.
+// One maintenance log in progress: manual entry → review → save. Also used by the correction form (logId set)
+// and to edit one card of the voice review list (stores/voiceBatch.ts). Not persisted: it only lives for one flow.
 type LogDraft = {
   logId: string | null; // set when correcting an existing log
   vehicleId: string | null;
@@ -14,7 +14,7 @@ type LogDraft = {
   source: 'manual' | 'voice';
   transcript: string | null;
   parts: { name: string }[];
-  intervalKm: number | null; // screen 17 answer
+  intervalKm: number | null;
   photoUri: string | null; // local receipt photo, uploaded on save
   set: (patch: Partial<Omit<LogDraft, 'set' | 'reset'>>) => void;
   reset: (patch?: Partial<Omit<LogDraft, 'set' | 'reset'>>) => void;

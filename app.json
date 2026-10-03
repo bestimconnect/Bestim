@@ -19,7 +19,10 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.bestim.app"
+      "package": "com.bestim.app",
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "output": "static",
@@ -50,7 +53,7 @@
         "expo-image-picker",
         {
           "photosPermission": "Bestim attaches receipt photos to your maintenance records.",
-          "cameraPermission": "Bestim takes receipt photos for your maintenance records."
+          "cameraPermission": "Bestim uses the camera to read your odometer and to photograph receipts."
         }
       ],
       "expo-notifications"

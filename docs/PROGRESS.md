@@ -11,7 +11,7 @@ Updated 2026-10-02. Read this first in any new session. The spec is `docs/BESTIM
 | 3 · Core features | Home (06/07/36), vehicles (08/09), parts (11/12), capture (13–17), history (10/18/19/20/39), feature gate (37), guest mode | ✅ Done |
 | 4 · Reminders & expenses | Reminders (21/22/38), update odometer (25), expenses (23/24/40) | ✅ Done |
 | 5 · Account & polish | Account (26), notification prefs (28), export (27), share/receive (41/42), feedback (43–48), on-device reminders, offline, delete vehicle/account | ✅ Built (QA gaps below) |
-| 6 · Release | Needs the Apple Developer account: Sign in with Apple, server push, TestFlight, Android Google key, universal links, store submission, partner's voice function | ⏭ Next |
+| 6 · Release | Needs the Apple Developer account: Sign in with Apple, server push, TestFlight, Android Google key, universal links, store submission | ⏭ Next |
 
 ## App flow (decisions Q8)
 Splash → Language (01) → Tour 33→34→35 (once per device, `settingsStore.tourSeen`) → Welcome (02) → Sign in (30) / Create account (31) → Your profile (32, only if `profiles.full_name` is empty) → Add vehicle 03→04→05 → Home (tabs).
@@ -19,7 +19,7 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 
 ## What exists (Phases 1–5)
 - **UI kit** (`src/components/ui/`): Text, Button, Field, Card, Item, Header, Note, Divider, Progress, Choice (`className` for the track), Metric, GoogleIcon. Also `Hero`, `TourSlide`, `TabBar`, `PartMetric` in `src/components/`.
-- **Data hooks** (`src/lib/queries.ts`): vehicles, current vehicle, logs, log, service types, parts (`useVehicleParts` + `needsAttention`), snoozes, expenses, `useIsGuest`. Part status math: `src/lib/parts.ts` (pure, checked by `npm run check`). Voice parser mock: `src/lib/voice.ts` (swap point `USE_MOCK` in `capture/voice.tsx`).
+- **Data hooks** (`src/lib/queries.ts`): vehicles, current vehicle, logs, log, service types, parts (`useVehicleParts` + `needsAttention`), snoozes, expenses, `useIsGuest`. Part status math: `src/lib/parts.ts` (pure, checked by `npm run check`). Voice: see "Voice logging" below.
 - **Flow stores:** `settingsStore` (language, theme, tourSeen, currentVehicleId), `vehicleDraft` (onboarding / `?mode=extra` add vehicle), `logDraft` (capture → review → save, and corrections).
 - **Tabs:** Home, Vehicles (stack: 08 → 09), Reminders (21), Account (Phase 5 placeholder with an Expenses row; stack → 23). The center + opens the capture sheet (13).
 - **Guest mode:** "Continue as guest" = Supabase anonymous user. Guests see Home (36); everything else opens the gate (37). Register/Google upgrade the same user (`updateUser` / `linkIdentity`). A guest can't merge into an account that already exists.
@@ -44,7 +44,21 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 - **Motion (Q57):** values in `src/lib/motion.ts`, `PressableScale` and `Rise` in the UI kit, floating + in `TabBar`. Checked on the simulator that every screen renders and the controls land in the right place (Arabic, light; nav bar also dark). Not checked: the feel on a real phone, English, and the phone's Reduce Motion setting.
 - **Vehicle switching (Q56):** swipe the picture on Home, or the switch-vehicle sheet (`pickVehicle()` → `src/app/switch-vehicle.tsx`) from Home, Reminders and Share. Checked on the simulator in Arabic and English, sheet and Home also in dark. Not checked: the sheet opened from Share, and the vibration (real phone).
 - **No system pop-ups (Q55):** confirmations and pickers use `sheet()` from `src/lib/sheet.ts` (route `src/app/sheet.tsx`), never `Alert.alert`. The sign-out button inside the sheet has not been pressed in testing.
-- **Checks:** `npm run check` runs 5 checks (parts, voice, export, reminder rules, and locales: every label used in code must exist in both languages).
+- **Checks:** `npm run check` runs 6 checks (parts, voice records, odometer scan, export, reminder rules, and locales: every label used in code must exist in both languages).
+- **Update odometer (2026-10-03, decisions Q71–Q72):** three ways to set the reading: voice through + (the voice flow below), the slider, the camera.
+  - Slider: `src/components/OdometerRuler.tsx` (drag with fling, drawn from a shared value) + `src/components/RollingNumber.tsx` (digits roll like a car odometer). One Reanimated shared value in `src/app/update-odometer.tsx` drives both. Typing still works by tapping the number. The page microphone and `src/lib/voice.ts` are gone.
+  - Camera (decisions Q72–Q75): `src/components/OdometerScanner.tsx` reads the live video on the phone, the same way on iPhone and Android (`react-native-vision-camera` v5 + `react-native-vision-camera-ocr-plus`, Google ML Kit on both). Wide camera window, no shutter; only the middle band of the frame is read. `src/lib/odometerScan.ts` picks the number (`pickReading`: at or above the current reading, within a believable jump; `pickOutlier`: otherwise the longest display-like number). Two frames must agree, then the number shows large with "Confirm and save"; a lower reading goes to the page for its reason. Test builds show the raw text read under the window.
+  - Checked on the simulator (Arabic, light): the page renders, dragging rolls the number and moves the ruler, the reading snaps to 10 km, typing sets the value. Not checked: dark theme, English, hours vehicles, a lower reading through the new page, Save.
+  - Camera history: the first version took a picture every second (worked on the founder's iPhone, but too slow); the second took smaller pictures (still too slow); the third is the live reader. **The live reader is not confirmed on a phone yet, and nothing of the camera has run on Android** (no Android tools on this Mac; it needs an EAS build). ML Kit may not build for the iOS simulator on Apple Silicon; not checked yet. If real dashboards read badly (digital displays are the weak spot), the fallback is sending a frame to Gemini (`docs/IDEAS.md`).
+- **Voice logging (2026-10-03, decisions Q58–Q70):** the user speaks freely (Egyptian Arabic, English, or mixed) and gets a list of records: maintenance, expenses, an odometer update, with "next due" intervals when said.
+  - Flow: `capture/voice.tsx` records (the phone's live text is only a preview) → Edge Function `supabase/functions/process-voice-log` (Google Gemini 3.8 Flash hears the recording and returns what was said plus the records, in one call) → `src/lib/voiceRecords.ts` cleans the answer (never trusted as-is) → `capture/review-all.tsx` (a card per record, edit or remove, save all) → `success` with `kind: 'batch'`.
+  - Editing a card reuses the existing forms with a `batch` param (`capture/manual.tsx`, `add-expense.tsx`): they write back to `src/stores/voiceBatch.ts` instead of saving.
+  - Guards in the function: real account only (no guests), 30 recordings per user per day (`voice_usage` table + `bump_voice_usage()`), about 90 seconds per recording, the recording is not kept by us or by Google.
+  - Switching the model: secret `GEMINI_MODEL` (default `gemini-3.8-flash`). Another provider means rewriting `understand()` in that one file; the app does not change.
+  - Model test: `scripts/voice-eval.ts` + `scripts/voice-eval.cases.json` (21 written sentences; real voice notes go in the git-ignored `scripts/voice-eval/`).
+  - **Status (2026-10-03): live.** Migration applied, function deployed, `GEMINI_API_KEY` set. Checked on the iPhone 16 simulator with a typed English sentence (the simulator has no speech recognition): 4 records came back right (oil change with reading, cost and interval; oil filter; fuel; an insurance expense with no amount, blocked until filled), edit an expense card, remove a card, save all, success screen, Home shows the new reading and the month's expenses without double counting. The function refuses callers who are not signed in.
+  - **Not checked yet:** a real recording (needs a phone), Arabic and mixed speech, editing a maintenance card and the odometer card, the daily limit and the guest refusal, a partly failed save, Android, and the written test (`scripts/voice-eval.ts` needs a test account's email and password).
+  - The old keyword parser, the one-question screen (17) and `USE_MOCK` are gone. `src/lib/voice.ts` only keeps `parseReading` for the update-odometer screen.
 
 ## Open items
 - **Not verified yet (QA):**
@@ -55,7 +69,7 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 - A red error with no message appears when the success screen is deep-linked straight into the permission modal (not a user path). Cause unknown.
 - Privacy policy URL (`EXPO_PUBLIC_PRIVACY_URL`) is not set, so the Account footer link is hidden.
 - Android test build: `eas.json` is ready (profile `preview` = APK). Needs the founder's Expo login, then `npx eas-cli init` and `npx eas-cli build -p android --profile preview`. Google sign-in won't work on Android until the Android OAuth client exists.
-- **Phase 6 (after the Apple Developer account):** Sign in with Apple (decisions Q6), server push (APNs + a scheduled Edge Function; on-device stays as fallback), TestFlight build, Android Google client + SHA-1, universal links for share links, store submission, the partner's `process-voice-log` function (`USE_MOCK` in `capture/voice.tsx`).
+- **Phase 6 (after the Apple Developer account):** Sign in with Apple (decisions Q6), server push (APNs + a scheduled Edge Function; on-device stays as fallback), TestFlight build, Android Google client + SHA-1, universal links for share links, store submission.
 
 ## Environment & gotchas (learned the hard way)
 - `.env` is **git-ignored** and holds EXPO_PUBLIC_SUPABASE_URL/ANON_KEY, EXPO_PUBLIC_GOOGLE_WEB/IOS_CLIENT_ID and SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET. A new machine or cloud session must recreate it.
@@ -69,6 +83,10 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 - `router.replace()` from an iOS formSheet only closes the sheet. Use `router.back()` then `router.push()` (see `capture/index.tsx`).
 - Image picker plugin: don't set `microphonePermission: false`; it deletes the mic key that speech recognition needs, and iOS kills the app.
 - RN `TextInput` doesn't flip `textAlign: 'left'` in RTL. Use `I18nManager.isRTL ? 'right' : 'left'`.
+- **Real iPhone with a free Apple ID (until the paid developer account exists):** `PERSONAL_TEAM=1 npx expo prebuild -p ios`, pick the Personal Team once in Xcode (Bestim target → Signing & Capabilities), then `PERSONAL_TEAM=1 npx expo run:ios --device`. The flag (see `app.config.js`) drops the push entitlement and uses `com.bestim.app.dev`, so the real identifier is never claimed by a personal account. Google sign-in does not work in that build; the build expires after 7 days. Run `npx expo prebuild -p ios` without the flag to get the normal project back before a simulator or store build.
+- `expo prebuild` resets the signing team chosen in Xcode. For the free-Apple-ID build, pass it on the command line instead: `xcodebuild … -allowProvisioningUpdates DEVELOPMENT_TEAM=<team id> CODE_SIGN_STYLE=Automatic` (the id is in `codesign -dv` of the last built `Bestim.app`).
+- New native packages (camera, image crop, text reader, added 2026-10-03) need a fresh build on every device and simulator; an old build shows a red "Cannot find native module" screen.
+- `pod install` crashes with "Unicode Normalization not appropriate for ASCII-8BIT" unless the shell has `LANG=en_US.UTF-8`.
 - Reviewing on the simulator: deep links (`xcrun simctl openurl booted "bestim://reminders"`) are more reliable than taps after many hot reloads.
 - **Query data must be plain JSON** (no Map/Set/Date): the cache is persisted to disk for offline use. Bump the key in `src/lib/queryClient.ts` when a query's shape changes.
 - **Local dates only:** `toLocaleDateString('en-CA')` or date-fns `format`; `toISOString().slice(0,10)` is UTC and is a day off in Egypt.

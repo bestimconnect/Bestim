@@ -12,15 +12,18 @@ import { useOnline } from '@/lib/online';
 import { useLog, useServiceTypes } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { useLogDraft } from '@/stores/logDraft';
+import { useVoiceBatch } from '@/stores/voiceBatch';
 
 // Screen 16 — Manual entry, PNG 16/إدخال سجل يدوياً. With ?logId it is the correction form (decisions Q19.1).
+// With ?batch it edits one card of the voice review list and writes back instead of saving (Q69).
+const NOTICES = { micDenied: 'capture.micDenied', aiFailed: 'capture.batch.aiFailed', dailyLimit: 'capture.batch.dailyLimit' } as const;
 const num = (s: string) => (s.trim() && !isNaN(Number(s)) ? Number(s) : null);
 
 export default function Manual() {
   const online = useOnline(); // Q45: a photo needs a connection
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
-  const { notice, logId } = useLocalSearchParams<{ notice?: string; logId?: string }>();
+  const { notice, logId, batch } = useLocalSearchParams<{ notice?: keyof typeof NOTICES; logId?: string; batch?: string }>();
   const d = useLogDraft();
   const types = useServiceTypes().data ?? [];
   const original = useLog(logId).data;
@@ -87,15 +90,26 @@ export default function Manual() {
 
   const submit = () => {
     d.set({ odometer: num(odo), cost: num(cost) });
-    if (correcting) correct.mutate();
-    else router.push('/capture/review');
+    if (correcting) return correct.mutate();
+    if (!batch) return router.push('/capture/review');
+    useVoiceBatch.getState().update(batch, {
+      serviceType: types.find((s) => s.id === d.serviceTypeId)?.name_en ?? null,
+      title: d.title.trim(),
+      odometer: num(odo),
+      cost: num(cost),
+      date: d.serviceDate,
+      location: d.location.trim(),
+      photoUri: d.photoUri,
+      error: undefined,
+    });
+    router.back();
   };
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
       <ScrollView contentContainerClassName="gap-4 p-6" keyboardShouldPersistTaps="handled" className="flex-1">
         <Header title={t(correcting ? 'capture.manual.correctionHeader' : 'capture.newRecord')} />
-        {notice === 'micDenied' ? <Note tone="info" text={t('capture.micDenied')} /> : null}
+        {notice && NOTICES[notice] ? <Note tone="info" text={t(NOTICES[notice])} /> : null}
         <Field label={t('capture.manual.what')} value={d.title} onChangeText={(title) => d.set({ title })} />
         <Pressable onPress={() => setPickType(!pickType)} className="rounded-field border border-line bg-white px-4 py-3">
           <Text variant="caption" className="text-muted">{t('capture.manual.serviceType')}</Text>
@@ -151,7 +165,7 @@ export default function Manual() {
       </ScrollView>
       <View className="px-6 pb-4 pt-2">
         <Button
-          title={t(correcting ? 'capture.manual.saveCorrection' : 'capture.manual.review')}
+          title={t(correcting ? 'capture.manual.saveCorrection' : batch ? 'capture.batch.doneEdit' : 'capture.manual.review')}
           onPress={submit}
           disabled={!valid}
           loading={correct.isPending}

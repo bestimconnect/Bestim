@@ -1,91 +1,73 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { router } from 'expo-router';
-import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
-import { Mic, Square, TrendingUp } from 'lucide-react-native';
-import { useEffect, useRef, useState } from 'react';
-import Animated, { useReducedMotion } from 'react-native-reanimated';
-import { ScrollView, TextInput, View } from 'react-native';
+import { ArrowLeft, ArrowRight, Camera, TrendingUp } from 'lucide-react-native';
+import { useState } from 'react';
+import { I18nManager, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { runOnJS, useAnimatedReaction, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { OdometerRuler } from '@/components/OdometerRuler';
-import { Button, Choice, Field, Header, PressableScale, Text } from '@/components/ui';
+import { OdometerScanner } from '@/components/OdometerScanner';
+import { RollingNumber } from '@/components/RollingNumber';
+import { Button, Field, Header, Item, Text } from '@/components/ui';
+import { easeOut } from '@/lib/motion';
+import { maxJump } from '@/lib/odometerScan';
 import { useCurrentVehicle, type Vehicle } from '@/lib/queries';
-import { EASE_OUT } from '@/lib/motion';
 import { supabase } from '@/lib/supabase';
-import { shadows, useColors } from '@/lib/theme';
-import { parseReading } from '@/lib/voice';
+import { useColors } from '@/lib/theme';
 
-// A soft ring that leaves the mic while it listens: "recording now" (decisions Q57).
-const PULSE = {
-  animationName: { from: { transform: [{ scale: 1 }], opacity: 0.45 }, to: { transform: [{ scale: 1.7 }], opacity: 0 } },
-  animationDuration: '1200ms',
-  animationIterationCount: 'infinite',
-  animationTimingFunction: EASE_OUT,
-} as const;
+const MAX = 9_999_999;
 
-// Screen 25 — Update odometer (decisions Q19.2, ruler + voice Q53).
+// Screen 25 — Update odometer (decisions Q19.2; slider + camera Q71). Voice lives in the + button (Q70).
 function Form({ vehicle }: { vehicle: Vehicle }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const c = useColors();
   const qc = useQueryClient();
-  const [value, setValue] = useState(String(vehicle.current_odometer));
+  const still = useReducedMotion();
+  // One moving value drives the rolling number and the ruler; `reading` is what it currently says, for React.
+  const shown = useSharedValue(vehicle.current_odometer);
+  const [reading, setReading] = useState(vehicle.current_odometer);
+  const [typing, setTyping] = useState<string | null>(null); // the digits being typed; null = the rolling number shows
+  const [scanning, setScanning] = useState(false);
+  const [scanned, setScanned] = useState<number | null>(null); // what the camera read; the note shows while it still stands
   const [reason, setReason] = useState('');
-  const [focused, setFocused] = useState(false);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+
+  useAnimatedReaction(
+    () => Math.round(shown.value),
+    (now, before) => {
+      if (now !== before) runOnJS(setReading)(now);
+    },
+  );
+  /** A typed or scanned value rolls into place (the one screen where a number counts: decisions Q71). */
+  const rollTo = (v: number) => {
+    const to = Math.min(MAX, Math.max(0, v));
+    shown.set(still ? to : withTiming(to, { duration: 900, easing: easeOut }));
+  };
 
   const unit = vehicle.odometer_unit;
   const shortUnit = t(`home.${unit}`);
   const last = vehicle.current_odometer.toLocaleString('en-US');
-  const reading = /^\d+$/.test(value) ? Number(value) : null;
-  const delta = (reading ?? vehicle.current_odometer) - vehicle.current_odometer;
+  const delta = reading - vehicle.current_odometer;
   const lower = delta < 0;
   const days = differenceInCalendarDays(new Date(), parseISO(vehicle.odometer_updated_at));
 
-  // Voice: the recognizer writes what it hears, parseReading picks the number out of it.
-  const [lang, setLang] = useState<'ar' | 'en'>(i18n.language === 'ar' ? 'ar' : 'en');
-  const [listening, setListening] = useState(false);
-  const [voiceNote, setVoiceNote] = useState<'' | 'voiceUnavailable' | 'notHeard'>('');
-  const heard = useRef(false);
-  const still = useReducedMotion();
-  const mic = async () => {
-    if (listening) return ExpoSpeechRecognitionModule.stop();
-    setVoiceNote('');
-    const perm = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
-    if (!perm.granted || !ExpoSpeechRecognitionModule.isRecognitionAvailable()) return setVoiceNote('voiceUnavailable');
-    heard.current = false;
-    ExpoSpeechRecognitionModule.start({ lang: lang === 'ar' ? 'ar-EG' : 'en-US', interimResults: true });
-  };
-  useSpeechRecognitionEvent('start', () => setListening(true));
-  useSpeechRecognitionEvent('end', () => {
-    setListening(false);
-    if (!heard.current) setVoiceNote((n) => n || 'notHeard');
-  });
-  useSpeechRecognitionEvent('result', (e) => {
-    const r = parseReading(e.results[0]?.transcript ?? '');
-    if (r == null) return;
-    heard.current = true;
-    setValue(String(r));
-  });
-  useSpeechRecognitionEvent('error', (e) => {
-    if (e.error !== 'aborted') setVoiceNote(e.error === 'no-speech' ? 'notHeard' : 'voiceUnavailable');
-  });
-  useEffect(() => () => ExpoSpeechRecognitionModule.abort(), []);
-
-  const save = async () => {
-    if (reading == null) return setError(t('odometer.invalid'));
+  /** `value`: the camera's confirmed number saves straight away, before the rolling number has caught up. */
+  const save = async (value = reading) => {
+    const lower = value < vehicle.current_odometer;
     if (lower && reason.trim().length < 3) return setError(t('odometer.reasonHint'));
     setSaving(true);
     setError('');
-    const { error: e1 } = await supabase.from('vehicles').update({ current_odometer: reading }).eq('id', vehicle.id);
+    const { error: e1 } = await supabase.from('vehicles').update({ current_odometer: value }).eq('id', vehicle.id);
     const { error: e2 } = lower
       ? await supabase.from('maintenance_logs').insert({
           vehicle_id: vehicle.id,
           title: t('odometer.logTitle'),
           description: reason.trim(),
-          odometer_reading: reading,
+          odometer_reading: value,
           service_date: format(new Date(), 'yyyy-MM-dd'),
           source: 'manual',
           status: 'needs_review',
@@ -107,70 +89,85 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
           {days > 0 ? t('odometer.last', { value: last, unit: shortUnit, count: days }) : t('odometer.lastToday', { value: last, unit: shortUnit })}
         </Text>
 
-        <View className="gap-4 rounded-metric bg-panel py-5" style={{ boxShadow: shadows.soft }}>
-          <View className="justify-center px-5">
+        <View className="items-center gap-1 pt-4">
+          {typing == null ? (
+            // Tapping the number starts a fresh one: typing is the quiet fallback to the slider and the camera.
+            <Pressable accessibilityRole="button" accessibilityLabel={`${t('odometer.label')}: ${reading.toLocaleString('en-US')}`} onPress={() => setTyping('')}>
+              <RollingNumber shown={shown} count={String(reading).length} />
+            </Pressable>
+          ) : (
             <TextInput
               accessibilityLabel={t('odometer.label')}
-              // Tapping the number starts a fresh one: editing inside a comma-formatted value makes the cursor jump.
-              value={focused ? value : (reading ?? vehicle.current_odometer).toLocaleString('en-US')}
-              onChangeText={(v) => setValue(v.replace(/\D/g, ''))}
-              onFocus={() => {
-                setFocused(true);
-                setValue('');
+              autoFocus
+              value={typing}
+              // Each digit goes straight into the reading (no roll), so Save is right even while the keyboard is still up.
+              onChangeText={(v) => {
+                const digits = v.replace(/\D/g, '');
+                setTyping(digits);
+                if (digits) shown.set(Math.min(MAX, Number(digits)));
               }}
-              onBlur={() => {
-                setFocused(false);
-                if (!value) setValue(String(vehicle.current_odometer));
-              }}
+              onBlur={() => setTyping(null)}
               keyboardType="number-pad"
               maxLength={7}
-              placeholder={last}
-              placeholderTextColor="#F5F7F566"
-              className="p-0 text-number text-onpanel"
-              style={{ fontFamily: 'Poppins_700Bold', textAlign: 'center' }}
+              placeholder={reading.toLocaleString('en-US')}
+              placeholderTextColor={c.line}
+              className="h-[60px] self-stretch p-0 text-ink"
+              style={{ fontFamily: 'Poppins_700Bold', fontSize: 52, textAlign: 'center' }}
             />
-            <Text variant="label" className="absolute end-5 text-onpanel" style={{ opacity: 0.6 }}>{shortUnit}</Text>
-          </View>
-          <OdometerRuler value={reading ?? vehicle.current_odometer} onChange={(v) => setValue(String(v))} segment={unit === 'h' ? 100 : 1000} />
+          )}
+          <Text variant="caption" className="text-muted">{shortUnit}</Text>
         </View>
+
+        <View className="-mx-6">
+          <OdometerRuler shown={shown} segment={unit === 'h' ? 100 : 1000} max={MAX} />
+        </View>
+        {/* The arrows show the gesture, not a reading direction, so they keep their sides in Arabic. */}
+        <View className="items-center justify-center gap-2" style={{ flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row' }}>
+          <ArrowLeft size={14} color={c.muted} />
+          <Text variant="caption" className="text-muted">{t('odometer.swipe')}</Text>
+          <ArrowRight size={14} color={c.muted} />
+        </View>
+
+        {scanned === reading ? <Text variant="caption" className="text-center text-teal">{t('odometer.scan.read')}</Text> : null}
 
         {lower ? (
           <Field label={t('odometer.reason')} value={reason} onChangeText={setReason} placeholder={t('odometer.noteBody')} multiline />
         ) : delta > 0 ? (
-          <View className="flex-row items-center gap-2 self-center rounded-full bg-mint px-4 py-2">
+          <View className="flex-row items-center justify-center gap-2">
             <TrendingUp size={16} color={c.teal} />
             <Text variant="caption" className="text-teal">{t('odometer.since', { value: delta.toLocaleString('en-US'), unit: shortUnit })}</Text>
           </View>
         ) : null}
 
-        <View className="items-center gap-4 rounded-metric bg-white p-4" style={{ boxShadow: shadows.soft }}>
-          <View className="flex-row items-center self-stretch">
-            <Text variant="caption" className="flex-1 text-muted">{t('odometer.sayIt')}</Text>
-            <View className="w-24">
-              <Choice value={lang} onChange={setLang} options={[{ value: 'ar', label: 'ع' }, { value: 'en', label: 'EN' }]} />
-            </View>
-          </View>
-          <View className="items-center justify-center">
-            {listening && !still ? <Animated.View pointerEvents="none" className="absolute h-[72px] w-[72px] rounded-full bg-coral" style={PULSE} /> : null}
-            <PressableScale
-              accessibilityRole="button"
-              accessibilityLabel={t(listening ? 'odometer.listening' : 'odometer.tapToSpeak')}
-              onPress={mic}
-              className={`h-[72px] w-[72px] items-center justify-center rounded-full ${listening ? 'bg-coral' : 'bg-lime'}`}
-              style={listening ? undefined : { boxShadow: shadows.glow }}>
-              {listening ? <Square size={24} color="#222E29" fill="#222E29" /> : <Mic size={28} color="#222E29" />}
-            </PressableScale>
-          </View>
-          <Text variant="caption" className="text-center text-muted">
-            {t(listening ? 'odometer.listening' : voiceNote ? `odometer.${voiceNote}` : 'odometer.tapToSpeak')}
-          </Text>
-        </View>
+        <Item icon={Camera} tone="sky" title={t('odometer.scan.row')} subtitle={t('odometer.scan.rowSub')} onPress={() => setScanning(true)} />
 
         {error ? <Text variant="caption" className="text-danger">{error}</Text> : null}
       </ScrollView>
       <View className="px-6 pb-4 pt-2">
-        <Button title={t('odometer.cta')} onPress={save} loading={saving} disabled={reading == null} />
+        <Button title={t('odometer.cta')} onPress={() => save()} loading={saving} />
       </View>
+      {scanning ? (
+        <OdometerScanner
+          current={vehicle.current_odometer}
+          jump={maxJump(unit, days)}
+          unit={shortUnit}
+          onConfirm={(v) => {
+            setScanning(false);
+            // A lower reading needs its reason first (Q19.2): it lands on the page instead of saving.
+            if (v < vehicle.current_odometer) {
+              setScanned(v);
+              return rollTo(v);
+            }
+            shown.set(v);
+            save(v);
+          }}
+          onType={() => {
+            setScanning(false);
+            setTyping('');
+          }}
+          onClose={() => setScanning(false)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

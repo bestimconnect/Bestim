@@ -860,3 +860,138 @@ Body and buttons as Q17.
 
 **Spec for dev:** shared values in `src/lib/motion.ts` (`EASE_OUT`, `BACK_OUT`, `rise()`, `POP`, `SWAP`). Use `PressableScale` (not `Pressable`) for buttons and cards, `Rise` for entering rows (not inside virtualized lists). State changes use Reanimated CSS transitions; their curves must come from `cubicBezier()`, a CSS string throws. CSS transitions don't follow Reduce Motion by themselves: gate them with `useReducedMotion()` as `PressableScale`, `Choice` and `Toggle` do.
 
+
+---
+
+## Voice logging: free speech to a list of records (2026-10-03)
+
+The user speaks freely; an AI returns a list of records (maintenance, expenses, odometer update) that the user reviews on one screen and saves together. Strings: `capture.batch.*`.
+
+### Q58: Review list screen text (PM, 2026-10-03)
+
+**Decision:** Header "راجع سجلاتك" / "Review your records". Big title "هذا ما فهمناه" / "Here's what we understood". The transcript box is labelled "ما قلته" / "What you said". A small line under the cards says "اضغط على أي سجل لتعديله." The save button shows the count only when there is more than one card: "احفظ السجل" for one, "احفظ الكل (3)" for several.
+**Why:** "Save all (3)" avoids Arabic number grammar (2 / 3-10 / 11+) and tells the user exactly how much will be saved.
+
+### Q59: Card content (PM, 2026-10-03)
+
+**Decision:** Every card has a small kind tag (Maintenance / Expense / Odometer), a title and a one-line subtitle. Parts the AI did not find are left out, never shown as "not mentioned".
+- **Maintenance:** title is the service type. Subtitle is reading · cost · date, for example "48,200 كم · 650 ج.م · اليوم".
+- **Expense:** title is the category (existing `expenses.chip` words). Subtitle is amount · place · date.
+- **Odometer:** title "قراءة العداد". Subtitle is the new reading with its unit.
+- **Vehicle name:** shown next to the kind tag only when the user has more than one vehicle.
+
+**Why:** The card must be readable in one glance. Showing the vehicle only when it can be ambiguous keeps it short.
+
+### Q60: Date not mentioned (PM, 2026-10-03)
+
+**Decision:** Stay silent. The card shows "اليوم" / "Today" in the date position, like any other date. No banner or warning.
+**Why:** Today is the right guess almost every time, the date is visible on the card, and the card opens for editing in one tap.
+
+### Q61: Expense with no amount (PM, 2026-10-03)
+
+**Decision:** The card stays in the list with an amber line: "أضف المبلغ لنتمكن من الحفظ". Tapping opens the add-expense form. The save button is disabled while any such card exists; the same amber line is repeated above the button. The save button never skips a card silently.
+**Why:** Skipping would quietly lose what the user said. Disabled plus a visible reason always has a way out.
+
+### Q62: User removes every card (PM, 2026-10-03)
+
+**Decision:** The same screen shows an empty state with the transcript still visible. Title "لا يوجد ما نحفظه", body "حذفت كل السجلات. سجّل مرة أخرى أو أدخل السجل بنفسك.", buttons "سجّل مرة أخرى" (back to the recorder) and "أدخل يدوياً" (manual entry).
+**Why:** Two clear next steps, no dead end, no new screen.
+
+### Q63: AI understood nothing (PM, 2026-10-03)
+
+**Decision:** An empty list lands on the same empty state as Q62, with the body "لم نفهم أي سجل من كلامك. جرّب مرة أخرى بجملة أوضح، أو أدخله يدوياً." If there is no transcript at all (silence), the recorder's own `capture.voice.noSpeech` message applies instead.
+**Why:** Showing what we heard lets the user see whether the problem was the recording or the sentence.
+
+### Q64: AI call failed (PM, 2026-10-03)
+
+**Decision:** The user goes straight to manual entry with the note "تعذّر فهم التسجيل الآن. أدخل السجل يدوياً." No blame, no mention of servers.
+**Why:** Manual entry is the trustworthy fallback and it already exists. A retry button would loop users on a bad connection.
+
+### Q65: Daily limit reached (PM, 2026-10-03)
+
+**Decision:** Same route as Q64, with the note "وصلت إلى حد التسجيل الصوتي اليوم. أدخل السجل بنفسك، وسيعود التسجيل الصوتي غداً." The number (30 a day) is never shown.
+**Why:** The user is told why and that it is temporary, and logging is never blocked.
+
+**Spec for dev (as built):** the limit is only known when the recording is sent, so the note appears after the user taps done, not before recording.
+
+### Q66: Recording reaches 90 seconds (PM, 2026-10-03)
+
+**Decision:** Auto-stop and continue to the review list. One hint replaces the usual one from 75 seconds: "اقتربت من الحد الأقصى. سننهي التسجيل تلقائياً." No countdown.
+**Why:** Nothing is lost, because the review list is where the user fixes things.
+
+### Q67: Success after saving several records (PM, 2026-10-03)
+
+**Decision:** Reuse the success screen (43) with `kind: 'batch'`. Title is the existing `feedback.success.logTitle`. Body: "حفظنا سجلك." for one, "حفظنا سجلاتك (3)." for several. If any saved reading was flagged as unusual, one more sentence: "إحدى القراءات بدت غير معتادة، لذا وُضعت عليها علامة للمراجعة." Same two buttons.
+**Why:** The user must know about a flag even in a batch, but it is one sentence, not a list.
+
+### Q68: Some cards saved, one failed (PM, 2026-10-03)
+
+**Decision:** Saved cards leave the list, so nothing can be saved twice. Failed cards stay with a red line "لم يُحفظ، حاول مرة أخرى". A note at the top: "حفظنا {{saved}} من {{total}}. تعذّر حفظ الباقي وما زال في القائمة." The save button then saves only what is left.
+**Why:** No lost data and no duplicates. Retry is one tap.
+
+### Q69: Retire the clarify screen, Q18 (PM, 2026-10-03)
+
+**Decision:** Q18's one-question screen (17, interval vs product name) is removed. The AI decides (an oil named by its distance, "زيت 10 آلاف", sets the interval) and the review list is where the user corrects it. Q18's speech-permission fallbacks still apply.
+**Why:** One confirmation point beats a one-question interruption before it.
+
+**Spec for dev:** when a card is opened from the list, the form's main button reads "تم" / "Done" and returns to the list instead of saving.
+
+### Q70: Voice AI, limits and scope (founder, 2026-10-03)
+
+**Decision:**
+- **AI:** Google Gemini 3.8 Flash, bought directly from Google (not through OpenRouter). It hears the recording itself and is the expected best on Egyptian Arabic mixed with English. About 7 cents per user per month at 20 recordings of 30 s (about $70 per 1,000 users). OpenAI (two steps, a misheard word gets carried into the record) and OpenRouter (same prices plus a 5.5% top-up fee) were considered and dropped. Cheaper Gemini models are tried by changing the `GEMINI_MODEL` secret; keep the cheapest that passes the test on real voice notes. The partner developer's function is dropped.
+- **The recording itself is sent** (the phone's live text is only a preview, and the fallback when no recording exists: simulator, Android below 13).
+- **One recording can create:** maintenance records, expenses (fuel, parts, insurance, registration, other; parking counts as other), an odometer update, and the "next due" interval of a logged service. Free reminders ("remind me on 1 December") are a later feature (`docs/IDEAS.md`).
+- **Always review, then save all.** Nothing is saved before the user confirms.
+- **Guards:** real accounts only, 30 recordings per user per day, about 90 seconds each, recordings are not stored.
+- **A spoken reading lower than the vehicle's current one is never written silently:** the odometer card is blocked with "أقل من القراءة الحالية" until the user fixes or removes it (same spirit as Q9). Lowering a reading stays on the update-odometer screen, which asks for a reason.
+- A maintenance cost is never also listed as an expense (the database already turns a log's cost into an expense).
+
+---
+
+## Update odometer: slider and camera (2026-10-03)
+
+### Q71: Update odometer, three ways (Shady, 2026-10-03)
+
+**Decision:** The reading can be set three ways: voice (through the + button, Q70), the slider, and the camera.
+- **Slider:** redrawn light, with a big number that rolls like a car's odometer, following the founder's reference video. It replaces Q53's dark panel and the page's own microphone (voice now lives on the + button).
+- **Rolling number:** this is the one screen where a number counts/rolls. It is an exception to Q57's "no count-ups".
+- **Typing:** tapping the big number still lets the user type.
+- **Camera:** reads the kilometer digits on the phone itself first (free, offline). If real dashboards read badly, Gemini becomes the fallback.
+- **The camera never saves by itself.** Nothing is saved until the user taps "Save reading".
+
+**Spec for dev:** supersedes the ruler and page-microphone parts of Q53. The saving rules (a lower reading needs a reason and is flagged) are unchanged. One Reanimated shared value drives `RollingNumber` and `OdometerRuler`; the app root is wrapped in `GestureHandlerRootView` for the ruler's drag.
+
+### Q72: Camera reading, wording and behaviour (PM, 2026-10-03)
+
+**Decision:**
+- **Row on the page:** "اقرأه بالكاميرا" / "Read with camera", subtitle "Point it at the number under the speedometer."
+- **Scanner:** dark full screen with a wide, short camera window (the shape of an odometer display), one line of hint, torch and close buttons. No shutter button. Only what is inside the window is read.
+- **A number is accepted only if** it is at or above the last saved reading, not unbelievably far above it (1,000 km a day since the last update, at least 5,000 km), and two looks in a row agree. Then the scanner closes and the number rolls into place.
+- **After about 8 seconds with no reading:** the scanner stays open and offers one action, "Type it instead", which closes it and puts the cursor in the number.
+- **Permission denied:** one plain line and a button that opens the phone's settings.
+- **After a successful read:** one line under the ruler, "قرأناه من الكاميرا. راجعه ثم احفظ." It goes away when the user changes the number.
+- **No camera on the device:** one calm line and the "type it" action.
+
+**Why:** Dashboards are dark and digits are easy to misread, so the user must always check before saving. A single way out is clearer than two.
+
+**Spec for dev:** strings under `odometer.scan`; picking the number is `pickReading()` in `src/lib/odometerScan.ts` (checked by `npm run check`).
+
+### Q73: Camera sees a number that doesn't fit the saved reading (dev, 2026-10-04; founder can overrule)
+
+**Decision:** When the camera clearly reads a display-like number (four digits or more, the same in two looks) that is lower than the saved reading or far above it, it no longer ignores it. The scanner pauses and says "قرأنا 205,343، وهو أقل من القراءة المحفوظة (250,500). هل نستخدمه؟" with "استخدم هذا الرقم" and "حاول مرة أخرى". Using it only fills the page; a lower reading still needs a reason there, and nothing is saved before "Save reading".
+**Why:** On the first phone test the camera read nothing, because the test car's saved reading was above every dashboard tried. Silence looks broken; a wrong saved reading is exactly when the user needs the camera.
+
+### Q74: Camera: instant read, big number, confirm saves (Shady, 2026-10-04)
+
+**Decision:** After the first phone test the founder asked for the camera to be fast and to finish on the scanner itself. The first clear number is accepted (no waiting for two looks) and shown large on the scanner with "تأكيد وحفظ" / "Confirm and save" and "حاول مرة أخرى" / "Look again". Confirm saves the reading and leaves the page. This replaces Q72's "rolls into place, then Save" and Q73's "use it?" question: a number that is lower than the saved reading, or far above it, is shown the same way with a one-line note. A lower one still cannot save without a reason, so Confirm puts it on the page and asks for the reason there.
+**Why:** The user is looking at the number when confirming, so the second look and the extra Save tap only added waiting.
+
+**Spec for dev:** pictures are taken at 1920x1080 on iPhone with no pause between looks. Test builds show the timing of each step under the camera window.
+
+### Q75: Camera reads live, on iPhone and Android alike (Shady, 2026-10-04)
+
+**Decision:** The picture-by-picture reader was still too slow, so the camera now reads the video as it streams: the number is picked up while the user is still aiming. A number counts when two frames in a row agree (a fraction of a second), then Q74's big number and "Confirm and save" follow. The same code runs on iPhone and Android; an iPhone-only fast path with a slower Android fallback was rejected. Standing rule from the founder: every feature must work, with the same feel, on both platforms.
+**Why:** "Point and it reads" only feels right when it is instant, and the two platforms must not drift apart.
+
+**Spec for dev:** `react-native-vision-camera` v5 + `react-native-vision-camera-ocr-plus` (Google ML Kit on both platforms, on the device, no cost) replace `expo-camera`, `expo-image-manipulator` and `expo-text-extractor`. Only the middle band of the frame is read (`scanRegion`), matching the window. `pickReading()` / `pickOutlier()` are unchanged.

@@ -43,3 +43,6 @@ example
 /android
 
 .env
+
+# Real voice notes for the voice model test (scripts/voice-eval.ts)
+scripts/voice-eval/

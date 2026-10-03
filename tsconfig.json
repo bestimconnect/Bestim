@@ -20,6 +20,8 @@
     "nativewind-env.d.ts"
   ],
   "exclude": [
-    "**/*.check.ts"
+    "**/*.check.ts",
+    "supabase/functions",
+    "scripts"
   ]
 }
