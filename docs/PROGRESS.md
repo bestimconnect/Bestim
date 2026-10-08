@@ -73,7 +73,7 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 ## Release readiness (2026-10-05, decisions Q76–Q84)
 A full pass for Google Play and Huawei AppGallery. Store texts and form answers: `../docs/store/`. Pictures: `../assets/store/`.
 
-**Done in code (not pushed, not built):**
+**Done in code (merged into `main` 2026-10-08, PR 1; not built). The website side is live on `bestim-eg.com` (privacy text, `/receive`, AppGallery button):**
 - Store rules: Privacy · Terms · Support links in Account and a consent line at sign-up (`src/lib/links.ts`, no env setting any more); AI notice on the voice screen; guests can delete their data from the gate screen; account deletion removes every receipt photo; camera permission text matches what the camera does; Android backups off; unneeded permissions blocked; notification icon and category name.
 - Security: email links use a one-time code tied to the phone (`flowType: 'pkce'`, `src/lib/session.ts`); the cache is cleared whenever the signed-in user changes (`src/lib/queryClient.ts`); passwords 8+; CSV formulas defused; `process-voice-log` hardened.
 - Huawei and older Android: Google button hidden without Google services (`useGoogleAvailable`); voice records directly with `expo-audio` when there is no speech service or on Android 12 and older (`capture/voice.tsx`, sends `audio/aac`); Android back closes the odometer camera.
@@ -82,12 +82,13 @@ A full pass for Google Play and Huawei AppGallery. Store texts and form answers:
 - New build profile `huawei` in `eas.json` (store-signed APK). `production` stays an app bundle for Google.
 
 **Waiting for a go-ahead (live changes):**
-- `supabase db push` for `20261005090000_release_hardening.sql`; deploy `process-voice-log`; apply the password minimum (align `config.toml` with the live project first); `npm run types` (the types file is behind the database).
-- Deploy the website (privacy text, `/receive`, AppGallery button) **before** any build with the new share links goes out.
+- The password minimum (8) on the live project: set it in the Supabase dashboard (Authentication → Sign In / Providers → Email), not with `supabase config push`, which would overwrite every other live auth setting with `config.toml`. The app already asks for 8 on sign-up and reset.
 - Resend account + sender on `bestim-eg.com`, then raise the email limit in Supabase.
 - Google Cloud: Android sign-in entries for `com.bestim.app` (the EAS build key's fingerprint, and Google Play's own key once the app exists there). Daily spending cap on the Gemini key.
 
 **Checked on the iPhone 16 simulator (Arabic, light, 2026-10-08):** the app still opens signed in after the sign-in change; Account shows Privacy · Terms · Support and the links open the live pages in the phone's browser; the agreement line on Create account; the AI notice on the voice screen; a wrong email or password shows the Arabic message, not the server's English. The camera packages build for the simulator.
+
+**Applied to the live project (2026-10-08):** migration `20261005090000_release_hardening.sql` (listed as applied); `process-voice-log` version 2 (refuses callers who are not signed in; a spoken test in the simulator came back with the right record: oil change, 251,500 km, 900 EGP); `src/types/database.ts` regenerated. No test value of `VOICE_DAILY_LIMIT` is set.
 
 **Not verified yet:**
 - English and dark for the screens above; the guest "delete my data" path; the "something went wrong" screen (it only shows on a crash).
