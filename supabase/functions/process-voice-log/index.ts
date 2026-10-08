@@ -8,9 +8,9 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.8-flash';
-const DAILY_LIMIT = Number(Deno.env.get('VOICE_DAILY_LIMIT') ?? 30); // recordings per user per day (Cairo time)
-// What the app sends → what Gemini calls it. The app records WAV; the others are phone voice notes in the model test.
-const AUDIO_MIME: Record<string, string> = { 'audio/wav': 'audio/wav', 'audio/mp4': 'audio/m4a', 'audio/mpeg': 'audio/mp3' };
+const DAILY_LIMIT = Number(Deno.env.get('VOICE_DAILY_LIMIT')) || 30; // recordings per user per day (Cairo time); a bad value must never mean "no limit"
+// What the app sends → what Gemini calls it. The app records WAV, or AAC on phones with no speech service; the others are phone voice notes in the model test.
+const AUDIO_MIME: Record<string, string> = { 'audio/wav': 'audio/wav', 'audio/aac': 'audio/aac', 'audio/mp4': 'audio/m4a', 'audio/mpeg': 'audio/mp3' };
 const MAX_AUDIO_B64 = 4_000_000; // ≈3 MB of audio: about 90 s of 16 kHz mono WAV
 const MAX_TRANSCRIPT = 2000;
 
@@ -104,6 +104,7 @@ async function understand(input: unknown, system: string) {
   const res = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': Deno.env.get('GEMINI_API_KEY')! },
+    signal: AbortSignal.timeout(45_000), // a stuck call must not hold the user on the listening screen
     body: JSON.stringify({
       model: MODEL,
       store: false, // Google must not keep the recording
@@ -121,7 +122,11 @@ async function understand(input: unknown, system: string) {
     .map((c: { type: string; text?: string }) => (c.type === 'text' ? c.text ?? '' : ''))
     .join('');
   if (!answer) throw new Error(`gemini empty answer, status ${out.status}`); // never log the text: it is what the user said
-  return JSON.parse(answer) as { transcript?: string; records?: unknown[] };
+  try {
+    return JSON.parse(answer) as { transcript?: string; records?: unknown[] };
+  } catch {
+    throw new Error('gemini answer is not JSON'); // the parser's own message would quote the user's words into the log
+  }
 }
 
 Deno.serve(async (req) => {
@@ -142,7 +147,7 @@ Deno.serve(async (req) => {
   const vehicleId = typeof body?.vehicle_id === 'string' ? body.vehicle_id : '';
   if (!vehicleId || (!audio && !typed)) return json({ error: 'bad_request' }, 400);
   if (audio.length > MAX_AUDIO_B64) return json({ error: 'too_large' }, 413);
-  if (audio && !AUDIO_MIME[body.mime]) return json({ error: 'bad_request' }, 400);
+  if (audio && !Object.hasOwn(AUDIO_MIME, body.mime)) return json({ error: 'bad_request' }, 400);
 
   // Read with the user's own token, so RLS decides what they may see; own vehicles only (not ones shared with them).
   const [vehicles, services] = await Promise.all([

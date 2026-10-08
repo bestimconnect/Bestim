@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
+import { errorText } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
 import { useColors } from '@/lib/theme';
 import { Button, Field, Header, Note, Text } from '@/components/ui';
@@ -31,7 +32,7 @@ export default function ForgotPasswordScreen() {
     setError(null);
     const { error } = await supabase.auth.resetPasswordForEmail(email);
     setLoading(false);
-    if (error) setError(error.message);
+    if (error) setError(errorText(error));
     else router.push({ pathname: '/verify-email', params: { email } });
   };
 

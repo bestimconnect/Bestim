@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Header, Item, Note, Text } from '@/components/ui';
+import { errorText } from '@/lib/errors';
 import { shouldAskNotifications } from '@/lib/notifications';
 import { useServiceTypes } from '@/lib/queries';
 import { SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
@@ -86,7 +87,7 @@ export default function Review() {
     }
     save.mutate(input, {
       onSuccess: (log) => done(false, log.status === 'needs_review' ? { review: '1' } : {}),
-      onError: (e) => setError(e.message),
+      onError: (e) => setError(errorText(e)),
     });
   };
 

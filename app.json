@@ -22,6 +22,12 @@
       "package": "com.bestim.app",
       "permissions": [
         "android.permission.CAMERA"
+      ],
+      "allowBackup": false,
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ]
     },
     "web": {
@@ -53,10 +59,16 @@
         "expo-image-picker",
         {
           "photosPermission": "Bestim attaches receipt photos to your maintenance records.",
-          "cameraPermission": "Bestim uses the camera to read your odometer and to photograph receipts."
+          "cameraPermission": "Bestim uses the camera to read your odometer."
         }
       ],
-      "expo-notifications"
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#222E29"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

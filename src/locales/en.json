@@ -38,7 +38,7 @@
       "heading": "Welcome back",
       "continueAsGuest": "Continue as guest",
       "passwordUpdated": "Password updated. You can sign in now.",
-      "linkExpired": "This link has expired. Please request a new one."
+      "linkExpired": "This link doesn't work. Open it on the same phone you asked from, or request a new one."
     },
     "register": {
       "title": "Create account",
@@ -50,7 +50,8 @@
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
       "heading": "Start your journey",
-      "confirmPassword": "Confirm password"
+      "confirmPassword": "Confirm password",
+      "consent": "By creating an account you agree to the <terms>Terms</terms> and the <privacy>Privacy Policy</privacy>"
     },
     "forgotPassword": {
       "title": "Forgot password",
@@ -80,15 +81,14 @@
       "subtitle": "This name will appear in your profile and shared records.",
       "fullName": "Your name",
       "submit": "Create my account",
-      "heading": "Let's get to know you",
-      "addPhoto": "Add photo\nOptional"
+      "heading": "Let's get to know you"
     },
     "common": {
       "or": "or continue with",
       "google": "Google",
       "errors": {
         "email": "Enter a valid email address",
-        "passwordMin": "Password must be at least 6 characters",
+        "passwordMin": "Password must be at least 8 characters",
         "fullNameRequired": "Enter your full name",
         "passwordMismatch": "Passwords do not match"
       },
@@ -237,7 +237,8 @@
     "heading": "All the details, in your account",
     "body": "Create an account to keep your maintenance history and track parts and expenses.",
     "create": "Create my account",
-    "keep": "Keep browsing"
+    "keep": "Keep browsing",
+    "deleteGuest": "Delete my guest data"
   },
   "odometer": {
     "header": "Update odometer",
@@ -369,7 +370,9 @@
       "cancel": "Cancel recording",
       "noSpeech": "We didn't catch that. Try again.",
       "manualLink": "Enter manually",
-      "typeHint": "Speech recognition is unavailable, type what you would say"
+      "typeHint": "Speech recognition is unavailable, type what you would say",
+      "aiNotice": "Your recording is sent to an AI service to write your records. We don't keep it.",
+      "noPreview": "We're recording. Your records appear when you tap done."
     },
     "micDenied": "We couldn't use the microphone. Enter the record manually.",
     "batch": {
@@ -595,7 +598,8 @@
     "odometerTitle": "Update your odometer",
     "odometerBody": "{{vehicle}}: last reading {{n}} days ago.",
     "weeklyTitle": "Your weekly summary",
-    "weeklyBody": "See what's coming up for your vehicles."
+    "weeklyBody": "See what's coming up for your vehicles.",
+    "channel": "Maintenance reminders"
   },
   "account": {
     "myAccount": "My account",
@@ -623,7 +627,9 @@
     "privacy": "Privacy",
     "version": "Bestim {{v}}",
     "deleteVehicle": "Delete vehicle data",
-    "deleteAccount": "Delete my account"
+    "deleteAccount": "Delete my account",
+    "terms": "Terms",
+    "support": "Support"
   },
   "notifPrefs": {
     "title": "Notifications",
@@ -647,7 +653,8 @@
     "save": "Save my preferences",
     "saved": "Preferences saved",
     "bannerOff": "Notifications are off for Bestim on this device.",
-    "bannerAction": "Turn on notifications"
+    "bannerAction": "Turn on notifications",
+    "saveError": "We couldn't save your choices. Try again."
   },
   "export": {
     "header": "Export history",
@@ -788,11 +795,34 @@
       "body": "Your account and all your vehicles, records, reminders and expenses will be deleted. You won't be able to get them back.",
       "keep": "Keep my account",
       "error": "We couldn't delete your account. Try again."
+    },
+    "deleteGuest": {
+      "header": "Delete data",
+      "title": "Delete your guest data permanently?",
+      "body": "Your vehicle and its records, reminders and expenses will be deleted. You won't be able to get them back.",
+      "keep": "Keep my data"
     }
   },
   "toast": {
     "vehicleDeleted": "Vehicle deleted",
     "accountDeleted": "Your account was deleted",
-    "photoOffline": "Photos need a connection."
+    "photoOffline": "Photos need a connection.",
+    "guestDeleted": "Your data was deleted"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "No internet connection. Check it and try again.",
+    "invalidLogin": "Wrong email or password.",
+    "emailTaken": "This email already has an account. Sign in instead.",
+    "emailNotConfirmed": "Confirm your email first. Check your inbox.",
+    "tooMany": "Too many attempts. Wait a little and try again.",
+    "weakPassword": "That password is too weak. Use at least 8 characters.",
+    "samePassword": "Choose a password different from your old one.",
+    "google": "Google sign-in didn't work. Try again or use your email."
+  },
+  "errorScreen": {
+    "title": "Something went wrong",
+    "body": "Don't worry, your data is safe. Please try again.",
+    "retry": "Try again"
   }
 }

@@ -4,10 +4,12 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { signInWithGoogle } from '@/lib/auth';
+import { signInWithGoogle, useGoogleAvailable } from '@/lib/auth';
+import { errorText } from '@/lib/errors';
+import { openPage } from '@/lib/links';
 import { supabase } from '@/lib/supabase';
 import { Button, Divider, Field, Header, Note, Text, GoogleIcon } from '@/components/ui';
 
@@ -17,7 +19,7 @@ const schema = (t: (k: string) => string) =>
     .object({
       fullName: z.string().min(1, t('auth.common.errors.fullNameRequired')),
       email: z.string().email(t('auth.common.errors.email')),
-      password: z.string().min(6, t('auth.common.errors.passwordMin')),
+      password: z.string().min(8, t('auth.common.errors.passwordMin')),
       confirmPassword: z.string(),
     })
     .refine((v) => v.password === v.confirmPassword, {
@@ -31,6 +33,7 @@ export default function RegisterScreen() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const google = useGoogleAvailable();
   const { control, handleSubmit, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema(t)),
     defaultValues: { fullName: '', email: '', password: '', confirmPassword: '' },
@@ -48,7 +51,7 @@ export default function RegisterScreen() {
         })
       : await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
     setLoading(false);
-    if (error) setError(error.message);
+    if (error) setError(errorText(error));
     else router.push({ pathname: '/verify-email', params: { email } });
   };
 
@@ -56,7 +59,7 @@ export default function RegisterScreen() {
     try {
       if (await fn()) router.replace('/');
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e, 'errors.google'));
     }
   };
 
@@ -134,11 +137,24 @@ export default function RegisterScreen() {
         {error ? <Note text={error} tone="warning" /> : null}
 
         <Button title={t('auth.register.submit')} loading={loading} onPress={handleSubmit(onSubmit)} />
+        <Text variant="caption" className="text-center text-muted">
+          <Trans
+            i18nKey="auth.register.consent"
+            components={{
+              terms: <Text variant="caption" className="text-teal" accessibilityRole="link" onPress={() => openPage('terms')} />,
+              privacy: <Text variant="caption" className="text-teal" accessibilityRole="link" onPress={() => openPage('privacy')} />,
+            }}
+          />
+        </Text>
 
-        <Divider label={t('auth.common.or')} />
-        <View className="flex-row gap-2.5">
-          <Button title={t('auth.common.google')} icon={<GoogleIcon />} variant="secondary" className="flex-1" onPress={() => social(signInWithGoogle)} />
-        </View>
+        {google ? (
+          <>
+            <Divider label={t('auth.common.or')} />
+            <View className="flex-row gap-2.5">
+              <Button title={t('auth.common.google')} icon={<GoogleIcon />} variant="secondary" className="flex-1" onPress={() => social(signInWithGoogle)} />
+            </View>
+          </>
+        ) : null}
 
         <View className="flex-row justify-center gap-1.5 pt-2">
           <Text className="text-muted">{t('auth.register.haveAccount')}</Text>

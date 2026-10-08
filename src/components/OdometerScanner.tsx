@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { StatusBar } from 'expo-status-bar';
 import { Flashlight, X } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState, type ComponentType } from 'react';
-import { Linking, Pressable, View } from 'react-native';
+import { BackHandler, Linking, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCameraDevice, useCameraPermission, type CameraViewProps } from 'react-native-vision-camera';
 import { Camera, type CameraTypes, type Text as SeenText } from 'react-native-vision-camera-ocr-plus';
@@ -56,6 +56,12 @@ export function OdometerScanner({ current, jump, unit, onConfirm, onType, onClos
     const id = setTimeout(() => setSlow(true), SLOW_AFTER);
     return () => clearTimeout(id);
   }, []);
+
+  // Android's back button closes the camera, not the whole page behind it.
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => (onClose(), true));
+    return () => sub.remove();
+  }, [onClose]);
 
   // Stable on purpose: the frame reader is rebuilt whenever this function changes.
   const onText = useCallback(

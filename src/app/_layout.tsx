@@ -6,14 +6,16 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { useFonts } from 'expo-font';
 import { useURL } from 'expo-linking';
 import { useLastNotificationResponse } from 'expo-notifications';
-import { router, Stack } from 'expo-router';
+import { type ErrorBoundaryProps, router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { type ComponentProps, useEffect, useState } from 'react';
+import { type ComponentProps, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useTranslation } from 'react-i18next';
 
 import { Toast } from '@/components/Toast';
+import { Button, Text } from '@/components/ui';
 import { applyLanguage } from '@/lib/i18n';
 import { syncNotifications } from '@/lib/notifications';
 import { DAY, persister, queryClient } from '@/lib/queryClient';
@@ -24,6 +26,22 @@ import { themeVars, useScheme } from '@/lib/theme';
 import { useSettings } from '@/stores/settingsStore';
 
 SplashScreen.preventAutoHideAsync();
+
+/** Shown instead of a blank screen when a screen crashes (Q81). expo-router picks this export up by name. */
+export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
+  const { t } = useTranslation();
+  const scheme = useScheme();
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
+  return (
+    <View className="flex-1 justify-center gap-4 bg-paper p-6" style={themeVars[scheme]}>
+      <Text variant="title">{t('errorScreen.title')}</Text>
+      <Text className="text-muted">{t('errorScreen.body')}</Text>
+      <Button title={t('errorScreen.retry')} onPress={retry} />
+    </View>
+  );
+}
 
 export default function RootLayout() {
   return (
@@ -52,8 +70,10 @@ function App() {
 
   // Email links (confirm sign-up / reset password). Sign-up needs nothing more: the gate below routes new users to the tour.
   const url = useURL();
+  const handledUrl = useRef<string | null>(null); // a code works once; `ready` flips again right after it signs the user in
   useEffect(() => {
-    if (!ready || !url?.includes('#')) return;
+    if (!ready || !url || handledUrl.current === url || !/[?&#](code|error)=/.test(url)) return;
+    handledUrl.current = url;
     sessionFromUrl(url)
       .then((type) => type === 'recovery' && router.replace('/reset-password'))
       .catch(() => router.replace({ pathname: '/login', params: { notice: 'linkExpired' } }));

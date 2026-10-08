@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 
 import i18n from './i18n';
 import { latestPerType, partStatus, type Unit } from './parts';
@@ -44,6 +45,9 @@ export async function syncNotifications() {
     const user = auth.session?.user;
     await Notifications.cancelAllScheduledNotificationsAsync();
     if (!user || user.is_anonymous || !(await notificationsAllowed())) return;
+    // Android files every reminder under this category in the phone's settings (re-set each sync so the name follows the language).
+    if (Platform.OS === 'android')
+      await Notifications.setNotificationChannelAsync('default', { name: i18n.t('notify.channel'), importance: Notifications.AndroidImportance.DEFAULT });
 
     const today = new Date().toLocaleDateString('en-CA');
     const [profile, vehicles, logs, snoozes] = await Promise.all([

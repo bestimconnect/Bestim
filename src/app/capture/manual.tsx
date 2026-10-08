@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Field, Header, Item, Note, Text } from '@/components/ui';
+import { errorText } from '@/lib/errors';
 import { useOnline } from '@/lib/online';
 import { useLog, useServiceTypes } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
@@ -85,7 +86,7 @@ export default function Manual() {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       router.back();
     },
-    onError: (e: Error) => setError(e.message),
+    onError: (e: Error) => setError(errorText(e)),
   });
 
   const submit = () => {

@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Field, Header, Item, Note, Text } from '@/components/ui';
+import { errorText } from '@/lib/errors';
 import { useCurrentVehicle, useIsGuest, useVehicle, useVehicleLogs } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { shadows } from '@/lib/theme';
@@ -59,7 +60,7 @@ export default function AddExpense() {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       router.back();
     },
-    onError: (e: Error) => setError(e.message),
+    onError: (e: Error) => setError(errorText(e)),
   });
 
   if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'expenses' } }} />;

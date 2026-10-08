@@ -5,6 +5,7 @@ import { Linking, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { toast } from '@/components/Toast';
 import { Button, Header, Note, Text, Toggle } from '@/components/ui';
 import { notificationsAllowed, requestNotifications, syncNotifications } from '@/lib/notifications';
 import { useIsGuest, useProfile } from '@/lib/queries';
@@ -55,7 +56,7 @@ export default function NotificationsScreen() {
     setSaving(true);
     const { error } = await supabase.from('profiles').update({ notification_prefs: p }).eq('id', userId);
     setSaving(false);
-    if (error) return;
+    if (error) return toast(t('notifPrefs.saveError'));
     qc.invalidateQueries({ queryKey: ['profile'] });
     syncNotifications();
     setSaved(true);
