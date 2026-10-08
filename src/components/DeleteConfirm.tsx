@@ -8,9 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { Button, Header, Note, Text } from '@/components/ui';
 
 // Screen 46 layout, PNG 46/تأكيد حذف السيارة — shared by delete-vehicle (Q36) and delete-account (Q34).
-type Props = { header: string; title: string; name?: string; body: string; keep: string; error: string; onDelete: () => Promise<void> };
+type Props = { header: string; title: string; name?: string; body: string; keep: string; error: string; canExport?: boolean; onDelete: () => Promise<void> };
 
-export function DeleteConfirm({ header, title, name, body, keep, error, onDelete }: Props) {
+export function DeleteConfirm({ header, title, name, body, keep, error, canExport = true, onDelete }: Props) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -36,7 +36,7 @@ export function DeleteConfirm({ header, title, name, body, keep, error, onDelete
         <Text variant="title">{title}</Text>
         {name ? <Text variant="label" className="text-muted">{name}</Text> : null}
         <Text variant="body" className="text-muted">{body}</Text>
-        <Button title={t('feedback.delete.export')} variant="secondary" onPress={() => router.push('/account/export')} />
+        {canExport ? <Button title={t('feedback.delete.export')} variant="secondary" onPress={() => router.push('/account/export')} /> : null}
         {failed ? <Note tone="warning" text={error} /> : null}
       </ScrollView>
       <View className="gap-2 px-6 pb-4">

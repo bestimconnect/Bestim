@@ -35,6 +35,12 @@
         "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "142425271367-lhncgl8hjfvvrffsjb3qqrml0c13ua48.apps.googleusercontent.com"
       },
       "autoIncrement": true
+    },
+    "huawei": {
+      "extends": "production",
+      "android": {
+        "buildType": "apk"
+      }
     }
   }
 }

@@ -35,5 +35,7 @@ assert.ok(toCsv(v, logs, none, t).endsWith('6 details left out'));
 
 // HTML escapes user text.
 assert.ok(!toHtml(v, [{ ...logs[0], title: '<script>x</script>' }], all, t).includes('<script>x'));
+// A title that looks like a spreadsheet formula is defused.
+assert.ok(toCsv(v, [{ ...logs[0], title: '=HYPERLINK("http://x")' }], all, t).includes(`"'=HYPERLINK(""http://x"")"`));
 
 console.log('export ok');

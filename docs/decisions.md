@@ -995,3 +995,68 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 **Why:** "Point and it reads" only feels right when it is instant, and the two platforms must not drift apart.
 
 **Spec for dev:** `react-native-vision-camera` v5 + `react-native-vision-camera-ocr-plus` (Google ML Kit on both platforms, on the device, no cost) replace `expo-camera`, `expo-image-manipulator` and `expo-text-extractor`. Only the middle band of the frame is read (`scanRegion`), matching the window. `pickReading()` / `pickOutlier()` are unchanged.
+
+---
+
+## Store release prep: sign-in, privacy, errors (2026-10-05)
+
+### Q76: Google sign-in on phones without Google services (PM, 2026-10-05)
+
+**Decision:** On phones without Google services (Huawei), the "Continue with Google" button is hidden. Email sign-in and "Continue as guest" stay. Huawei ID sign-in goes to `docs/IDEAS.md` for later.
+**Why:** Today the button opens a Google dialog and then an English error. A button that cannot work is worse than no button, and Huawei ID is a large job that is not needed to launch.
+
+**Spec for dev:** check once at startup whether Google services exist; if not, do not render the button (and its "or" divider). Add the Huawei ID idea to `docs/IDEAS.md`.
+
+### Q77: Guests can delete their data (PM, 2026-10-05)
+
+**Decision:** On the "create an account" gate screen (screen 37), a small quiet text link at the bottom: "Delete my guest data". It opens the existing delete-account confirmation screen with guest wording ("Delete your guest data?"). After deleting, the app signs the guest out and returns to the Welcome screen, with a short toast.
+**Why:** A guest's vehicle lives on our servers, and the stores expect every user to be able to remove their data. The Account tab is locked for guests, so the gate screen is the only place they land. A quiet link keeps the main goal (create an account) the loudest thing on screen.
+
+**Spec for dev:** same deletion call as `feedback.deleteAccount`, different strings (`feedback.deleteGuest.*`, `toast.guestDeleted`). The link is shown only to guests.
+
+### Q78: Telling users that voice goes to an AI service (PM, 2026-10-05)
+
+**Decision:** One small muted line on the voice recording screen, under the hint, always visible: no pop-up, no extra tap. It says the recording is sent to an AI service to write the records and is not kept. The full explanation (Google's Gemini, what is sent, what is not stored) goes into the privacy policy.
+**Why:** The user is told before recording without being slowed down. A pop-up would be tapped away without reading; a line that is always there is honest and costs nothing.
+
+**Spec for dev:** string `capture.voice.aiNotice`; the privacy page on the website must name the AI service before release.
+
+### Q79: Voice logging without a built-in speech service (PM, 2026-10-05)
+
+**Decision:** On phones with no built-in speech service (Huawei, Android 12 or older), the phone records the voice and sends it directly; the AI writes the records as usual. Because no words appear while speaking, the screen keeps the same listening animation and shows one calm line in place of the live words: "We're recording. Your records appear when you tap done." The review screen afterwards is identical.
+**Why:** Silent fallback to manual entry took the best feature away from exactly the phones that need it. Saying plainly why no words appear stops people thinking it is broken.
+
+**Spec for dev:** string `capture.voice.noPreview`; no change to the review, limits (Q70) or the "recordings are not stored" rule.
+
+### Q80: Agreement line at sign-up, links in Account (PM, 2026-10-05)
+
+**Decision:** Under the "Create account" button: "By creating an account you agree to the Terms and the Privacy Policy", both names are links to the website pages. No checkbox. In the Account screen footer: Privacy, Terms and Support links, each opening the website page in the app's language.
+**Why:** The stores require the links to be reachable; a checkbox adds a step and a way to fail without adding legal weight over the clear line.
+
+**Spec for dev:** strings `auth.register.consent*`, `account.terms`, `account.support`. The three pages must be live before store review.
+
+### Q81: Friendly error messages (PM, 2026-10-05)
+
+**Decision:** Eleven screens show the server's raw English message to Arabic users. Replace all of it with a fixed set of friendly messages in both languages: generic, network, wrong login, email already used, email not confirmed, too many attempts, weak password, same password, Google sign-in failed. Anything not recognised shows the generic message. Raw server text is never shown on screen. A full-screen "Something went wrong" fallback with a "Try again" button covers crashes.
+**Why:** An English technical line is meaningless to an Arabic-first user and looks broken. Fewer, clearer messages are enough.
+
+**Spec for dev:** one helper turns an error into one of the `errors.*` keys; the raw message goes to the log only. Strings under `errors.*`, `errorScreen.*`, `notifPrefs.saveError`.
+
+### Q82: Password minimum is 8 characters (PM, 2026-10-05)
+
+**Decision:** New passwords need at least 8 characters (was 6). People who already have a shorter password keep it and can sign in; the rule applies when they create or change one.
+**Why:** Security hardening before launch at almost no cost to users.
+
+**Spec for dev:** change the app check and the Supabase minimum password length (in `config.toml`, aligned first because it applies on push). Email links now work only on the phone that requested them and expire; the failure message is `auth.login.linkExpired`.
+
+### Q83: Target age and content rating on the store forms (PM, 2026-10-05)
+
+**Decision:** Declare the target audience as **18 and over** on Google Play, and the equivalent on Huawei AppGallery. Content rating questionnaire: answer "no" to everything (no ads, no purchases, no chat between users, no location, no violence or similar content); data collected is account, vehicles and voice recordings, declared as such.
+**Why:** The app is for people who own and drive vehicles, so adults. Picking an under-18 band would trigger the extra Families requirements for no benefit. The privacy policy says "not directed at children under 13"; that stays true and does not conflict.
+
+### Q84: Share links become normal web links (Shady, 2026-10-05)
+
+**Decision:** Share links are `https://bestim-eg.com/receive?token=...`. They open a small page on the website with an "Open in Bestim" button and store buttons (app not installed yet). This replaces the `bestim://` links, which chat apps do not make tappable. It supersedes the "paste field only until Phase 6" part of Q43; the paste field stays as a backup.
+**Why:** A link people can tap in WhatsApp is the whole point of sharing. Founder approved on 2026-10-05.
+
+**Spec for dev:** the app must handle the web link (Android App Links / iOS Universal Links) as well as `bestim://`; the website page is a `bestim-landing` task. Note it in `docs/UPDATES.md`.

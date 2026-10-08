@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
+
 import { supabase } from './supabase';
 
 // Native Google sign-in → identity token → Supabase session (spec §6). Returns false when the user
@@ -6,6 +9,18 @@ import { supabase } from './supabase';
 export async function continueAsGuest() {
   const { error } = await supabase.auth.signInAnonymously();
   if (error) throw error;
+}
+
+/** False on Android phones without Google services (Huawei): the Google button is hidden there (Q76). */
+export function useGoogleAvailable() {
+  const [available, setAvailable] = useState(Platform.OS !== 'android');
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    import('@react-native-google-signin/google-signin')
+      .then(({ GoogleSignin }) => GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: false }))
+      .then(setAvailable, () => setAvailable(false));
+  }, []);
+  return available;
 }
 
 export async function signInWithGoogle(): Promise<boolean> {
@@ -32,13 +47,11 @@ export async function signInWithGoogle(): Promise<boolean> {
   return true;
 }
 
-/** Sign out and drop everything cached for this user (Q33/Q48). Language, theme and the tour flag stay. */
+/** Sign out; the cache empties itself when the user changes (queryClient.ts). Language, theme and the tour flag stay. */
 export async function signOut() {
-  const { queryClient } = await import('./queryClient');
   const { syncNotifications } = await import('./notifications');
   const { useSettings } = await import('@/stores/settingsStore');
   await supabase.auth.signOut();
-  queryClient.clear();
   useSettings.getState().setCurrentVehicle(null);
   useSettings.getState().set({ pendingShareToken: null });
   syncNotifications(); // no user → cancels every scheduled reminder

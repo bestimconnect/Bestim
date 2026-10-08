@@ -1,6 +1,6 @@
 # Bestim: Build Progress
 
-Updated 2026-10-02. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
+Updated 2026-10-05. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
 
 ## Phase status
 
@@ -67,13 +67,40 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
   - tapping through: voice → save, receipt photo, correction, add expense, export share sheet, share → receive → accept, delete vehicle/account, offline queue, scheduled notifications list.
   - The database rules behind these were tested on the live DB.
 - A red error with no message appears when the success screen is deep-linked straight into the permission modal (not a user path). Cause unknown.
-- Privacy policy URL (`EXPO_PUBLIC_PRIVACY_URL`) is not set, so the Account footer link is hidden.
 - Android test build: `eas.json` is ready (profile `preview` = APK). Needs the founder's Expo login, then `npx eas-cli init` and `npx eas-cli build -p android --profile preview`. Google sign-in won't work on Android until the Android OAuth client exists.
 - **Phase 6 (after the Apple Developer account):** Sign in with Apple (decisions Q6), server push (APNs + a scheduled Edge Function; on-device stays as fallback), TestFlight build, Android Google client + SHA-1, universal links for share links, store submission.
+
+## Release readiness (2026-10-05, decisions Q76–Q84)
+A full pass for Google Play and Huawei AppGallery. Store texts and form answers: `../docs/store/`. Pictures: `../assets/store/`.
+
+**Done in code (not pushed, not built):**
+- Store rules: Privacy · Terms · Support links in Account and a consent line at sign-up (`src/lib/links.ts`, no env setting any more); AI notice on the voice screen; guests can delete their data from the gate screen; account deletion removes every receipt photo; camera permission text matches what the camera does; Android backups off; unneeded permissions blocked; notification icon and category name.
+- Security: email links use a one-time code tied to the phone (`flowType: 'pkce'`, `src/lib/session.ts`); the cache is cleared whenever the signed-in user changes (`src/lib/queryClient.ts`); passwords 8+; CSV formulas defused; `process-voice-log` hardened.
+- Huawei and older Android: Google button hidden without Google services (`useGoogleAvailable`); voice records directly with `expo-audio` when there is no speech service or on Android 12 and older (`capture/voice.tsx`, sends `audio/aac`); Android back closes the odometer camera.
+- Polish: `errorText()` (`src/lib/errors.ts`) instead of raw server messages; root `ErrorBoundary`; dead "add photo" button removed.
+- Share links are `https://bestim-eg.com/receive?token=…` (website page `/receive`).
+- New build profile `huawei` in `eas.json` (store-signed APK). `production` stays an app bundle for Google.
+
+**Waiting for a go-ahead (live changes):**
+- `supabase db push` for `20261005090000_release_hardening.sql`; deploy `process-voice-log`; apply the password minimum (align `config.toml` with the live project first); `npm run types` (the types file is behind the database).
+- Deploy the website (privacy text, `/receive`, AppGallery button) **before** any build with the new share links goes out.
+- Resend account + sender on `bestim-eg.com`, then raise the email limit in Supabase.
+- Google Cloud: Android sign-in entries for `com.bestim.app` (the EAS build key's fingerprint, and Google Play's own key once the app exists there). Daily spending cap on the Gemini key.
+
+**Checked on the iPhone 16 simulator (Arabic, light, 2026-10-08):** the app still opens signed in after the sign-in change; Account shows Privacy · Terms · Support and the links open the live pages in the phone's browser; the agreement line on Create account; the AI notice on the voice screen; a wrong email or password shows the Arabic message, not the server's English. The camera packages build for the simulator.
+
+**Not verified yet:**
+- English and dark for the screens above; the guest "delete my data" path; the "something went wrong" screen (it only shows on a crash).
+- Nothing has run on Android or Huawei. The new direct voice recording has not been heard by the AI yet (format `audio/aac`): first thing to try on the Android phone.
+- The email-link flow end to end (needs the live settings above).
 
 ## Environment & gotchas (learned the hard way)
 - `.env` is **git-ignored** and holds EXPO_PUBLIC_SUPABASE_URL/ANON_KEY, EXPO_PUBLIC_GOOGLE_WEB/IOS_CLIENT_ID and SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET. A new machine or cloud session must recreate it.
 - Supabase project ref `wlepubflnjcguosicuak`. `supabase link` is needed on a new machine. Schema changes go through migrations only.
+- **Email links must be opened on the phone that asked for them** (sign-up, reset password): the link carries a one-time code and the phone holds the other half. A link opened on another phone lands on Sign in with a plain notice.
+- **Website links open in the phone's own browser** (`Linking.openURL`), not the in-app browser sheet: the sheet came up blank on the simulator, and the plain browser behaves the same on iPhone, Android and Huawei.
+- **`ios/` was regenerated for the simulator on 2026-10-05.** For the real iPhone with the free Apple ID, run the `PERSONAL_TEAM=1` steps below again.
+- **`expo-audio` is installed without its config plugin on purpose:** the plugin adds a background-playback service and "foreground service" permissions that Google Play asks to justify. The microphone permission already comes from the speech plugin.
 - **`supabase config push` applies immediately, with no prompt.** Before pushing, make config.toml match the remote (email confirmations on, TOTP MFA on, OTP length 8, max_frequency 1m0s). Load `.env` first (`set -a; . ./.env; set +a`) so the Google secret resolves.
 - **Tailwind font sizes/line heights must be px strings.** A unitless lineHeight is a multiplier and pushes text off-screen.
 - NativeWind resolves conflicting classes by stylesheet order, not className order. That's why `Text` only defaults to `text-ink` when no color class is passed.

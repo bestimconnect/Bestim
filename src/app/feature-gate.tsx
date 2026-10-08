@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { Car, Lock } from 'lucide-react-native';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -32,6 +32,9 @@ export default function FeatureGateScreen() {
         <View className="gap-3">
           <Button title={t('gate.create')} onPress={() => router.replace('/register')} />
           <Button title={t('gate.keep')} variant="secondary" onPress={router.back} />
+          <Pressable accessibilityRole="button" onPress={() => router.replace('/delete-account')} className="self-center py-1">
+            <Text variant="caption" className="text-muted">{t('gate.deleteGuest')}</Text>
+          </Pressable>
         </View>
       </View>
     </SafeAreaView>

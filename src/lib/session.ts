@@ -14,20 +14,21 @@ export function useSession() {
   return session;
 }
 
-export type AuthLinkType = 'signup' | 'recovery' | 'magiclink' | 'invite' | 'email_change' | null;
-
 /**
- * Email links (confirm sign-up, reset password) reopen the app as bestim://…#access_token=…&refresh_token=…&type=…
- * Restores the session from the URL fragment and returns the link type, or null if the URL isn't an auth link.
+ * Email links (confirm sign-up, reset password) reopen the app as bestim://…?code=…
+ * The code is worth nothing without the secret this phone saved when it asked for the email, so a link someone
+ * else crafted (or intercepted) can't sign anyone in. Tokens in a link are never accepted.
+ * Returns 'recovery' for a reset-password link, or null if the URL isn't an auth link.
  */
-export async function sessionFromUrl(url: string): Promise<AuthLinkType> {
-  const params = new URLSearchParams(url.split('#')[1] ?? '');
-  const error = params.get('error_description');
+export async function sessionFromUrl(url: string): Promise<string | null> {
+  // Supabase puts the code in the query and (for a failed link) the error in the query or the fragment.
+  const params = new URLSearchParams(url.replace(/^[^?#]*[?#]?/, '').replace('#', '&'));
+  const error = params.get('error_description') ?? params.get('error');
   if (error) throw new Error(error);
-  const access_token = params.get('access_token');
-  const refresh_token = params.get('refresh_token');
-  if (!access_token || !refresh_token) return null;
-  const { error: setError } = await supabase.auth.setSession({ access_token, refresh_token });
-  if (setError) throw setError;
-  return (params.get('type') as AuthLinkType) ?? null;
+  const code = params.get('code');
+  if (!code) return null;
+  const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+  if (exchangeError) throw exchangeError;
+  // The library returns the link's kind here ('recovery' for a reset link) but leaves it out of its types.
+  return (data as { redirectType?: string | null }).redirectType ?? null;
 }

@@ -79,7 +79,12 @@ export function excludedCount(v: ExportVehicle, logs: ExportLog[], o: ExportOpti
   return n;
 }
 
-const csvCell = (s: string) => (/[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s);
+// Text that starts like a formula (a title or note can come from someone else's shared history) gets a leading
+// apostrophe, so Excel shows it instead of running it.
+const csvCell = (raw: string) => {
+  const s = /^[=+\-@\t\r]/.test(raw) && Number.isNaN(Number(raw)) ? `'${raw}` : raw;
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
 
 export function toCsv(v: ExportVehicle, logs: ExportLog[], o: ExportOptions, t: ExportLabels) {
   const cols = columns(o, t);

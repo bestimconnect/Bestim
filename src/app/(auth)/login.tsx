@@ -7,7 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { continueAsGuest, signInWithGoogle } from '@/lib/auth';
+import { continueAsGuest, signInWithGoogle, useGoogleAvailable } from '@/lib/auth';
+import { errorText } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
 import { Button, Divider, Field, Header, Note, Text, GoogleIcon } from '@/components/ui';
 
@@ -25,6 +26,7 @@ export default function LoginScreen() {
   const { notice } = useLocalSearchParams<{ notice?: string }>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const google = useGoogleAvailable();
   const { control, handleSubmit, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema(t)),
     defaultValues: { email: '', password: '' },
@@ -35,15 +37,15 @@ export default function LoginScreen() {
     setError(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) setError(error.message);
+    if (error) setError(errorText(error));
     else router.replace('/');
   };
 
-  const social = async (fn: () => Promise<boolean>) => {
+  const social = async (fn: () => Promise<boolean>, fallback?: 'errors.google') => {
     try {
       if (await fn()) router.replace('/');
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e, fallback));
     }
   };
 
@@ -99,10 +101,14 @@ export default function LoginScreen() {
 
           <Button title={t('auth.login.submit')} loading={loading} onPress={handleSubmit(onSubmit)} />
 
-          <Divider label={t('auth.common.or')} />
-          <View className="flex-row gap-2.5">
-            <Button title={t('auth.common.google')} icon={<GoogleIcon />} variant="secondary" className="flex-1" onPress={() => social(signInWithGoogle)} />
-          </View>
+          {google ? (
+            <>
+              <Divider label={t('auth.common.or')} />
+              <View className="flex-row gap-2.5">
+                <Button title={t('auth.common.google')} icon={<GoogleIcon />} variant="secondary" className="flex-1" onPress={() => social(signInWithGoogle, 'errors.google')} />
+              </View>
+            </>
+          ) : null}
 
           <View className="flex-row justify-center gap-1.5 pt-2">
             <Text className="text-muted">{t('auth.login.noAccount')}</Text>

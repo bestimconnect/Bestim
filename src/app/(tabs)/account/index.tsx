@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import { Bell, Download, Moon, Repeat, User, Wallet, LogOut } from 'lucide-react-native';
+import { Fragment } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -9,14 +9,13 @@ import { useTranslation } from 'react-i18next';
 import { Item, Text, Toggle, PressableScale } from '@/components/ui';
 import { signOut } from '@/lib/auth';
 import { applyLanguage } from '@/lib/i18n';
+import { openPage } from '@/lib/links';
 import { useCurrentVehicle, useProfile } from '@/lib/queries';
 import { useSession } from '@/lib/session';
 import { sheet } from '@/lib/sheet';
 import { supabase } from '@/lib/supabase';
 import { shadows, useColors } from '@/lib/theme';
 import { useSettings } from '@/stores/settingsStore';
-
-const privacyUrl = process.env.EXPO_PUBLIC_PRIVACY_URL;
 
 // Screen 26 — Account & settings (Q33, Q35, Q36, Q48); Figma 167:59659
 export default function AccountScreen() {
@@ -91,18 +90,18 @@ export default function AccountScreen() {
         </View>
         <Item icon={LogOut} tone="paper" title={t('account.signOut')} chevron={false} onPress={confirmSignOut} />
 
-        <View className="mt-4 flex-row items-center justify-between">
-          <View className="flex-row items-center gap-1">
-            {privacyUrl ? (
-              <>
-                <Pressable accessibilityRole="link" onPress={() => WebBrowser.openBrowserAsync(privacyUrl)}>
-                  <Text variant="caption" className="text-muted">{t('account.privacy')}</Text>
-                </Pressable>
-                <Text variant="caption" className="text-muted">·</Text>
-              </>
-            ) : null}
-            <Text variant="caption" className="text-muted">{t('account.version', { v: Constants.expoConfig?.version ?? '' })}</Text>
-          </View>
+        <View className="mt-4 flex-row items-center gap-1">
+          {(['privacy', 'terms', 'support'] as const).map((page, i) => (
+            <Fragment key={page}>
+              {i ? <Text variant="caption" className="text-muted">·</Text> : null}
+              <Pressable accessibilityRole="link" hitSlop={8} onPress={() => openPage(page)}>
+                <Text variant="caption" className="text-muted">{t(`account.${page}`)}</Text>
+              </Pressable>
+            </Fragment>
+          ))}
+        </View>
+        <View className="flex-row items-center justify-between">
+          <Text variant="caption" className="text-muted">{t('account.version', { v: Constants.expoConfig?.version ?? '' })}</Text>
           {vehicle ? (
             <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/delete-vehicle', params: { vehicleId: vehicle.id } })}>
               <Text variant="caption" className="text-danger">{t('account.deleteVehicle')}</Text>

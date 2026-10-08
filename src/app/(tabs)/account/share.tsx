@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Choice, Field, Header, Item, Note, Text } from '@/components/ui';
+import { SITE } from '@/lib/links';
 import { useCurrentVehicle, useIsGuest, useVehicleLogs, useVehicleParts, useVehicles } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { useColors } from '@/lib/theme';
@@ -55,7 +56,7 @@ export default function ShareScreen() {
       token = ins.data?.share_token;
     }
     setBusy(false);
-    if (token) setLink(`bestim://receive?token=${token}`);
+    if (token) setLink(`${SITE}/receive?token=${token}`);
     else setError(true);
   };
   const send = () => link && Share.share({ message: t('share.message', { vehicle: name, link }) });

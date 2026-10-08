@@ -1,8 +1,18 @@
+import {
+  AudioQuality,
+  IOSOutputFormat,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+  useAudioRecorder,
+  useAudioRecorderState,
+  type AudioRecorder,
+  type RecordingOptions,
+} from 'expo-audio';
 import { File } from 'expo-file-system';
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { Platform, Pressable, TextInput, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -22,12 +32,34 @@ import { useVoiceBatch } from '@/stores/voiceBatch';
 const MAX_SECONDS = 90; // Q66; the function refuses more than ~3 MB
 const HINT_SECONDS = 75;
 const MAX_AUDIO_BYTES = 2_900_000;
+const MIME: Record<string, string> = { wav: 'audio/wav', aac: 'audio/aac', m4a: 'audio/mp4' };
+// Q79: phones with no speech service (Huawei), and Android 12 or older where the recognizer can't keep the
+// recording, record directly. Small voice-quality AAC: 90 s is about 360 KB.
+const DIRECT: RecordingOptions = {
+  extension: '.m4a',
+  sampleRate: 16000,
+  numberOfChannels: 1,
+  bitRate: 32000,
+  isMeteringEnabled: true,
+  android: { extension: '.aac', outputFormat: 'aac_adts', audioEncoder: 'aac' },
+  ios: { outputFormat: IOSOutputFormat.MPEG4AAC, audioQuality: AudioQuality.LOW },
+  web: {},
+};
 
 const BARS = [22, 46, 72, 98, 64, 132, 110, 132, 64, 98, 72, 46, 22]; // heights from the PNG, symmetric
 
 function Bar({ base, level }: { base: number; level: SharedValue<number> }) {
   const style = useAnimatedStyle(() => ({ height: withTiming(base * (0.3 + 0.7 * level.value), { duration: 120 }) }));
   return <Animated.View className="w-1.5 rounded-full bg-ink" style={style} />;
+}
+
+/** Direct recording has no recognizer to report loudness, so the bars follow the recorder's own meter (dB). */
+function DirectMeter({ recorder, level }: { recorder: AudioRecorder; level: SharedValue<number> }) {
+  const { metering } = useAudioRecorderState(recorder, 150);
+  useEffect(() => {
+    level.set(Math.min(1, Math.max(0, ((metering ?? -60) + 60) / 50)));
+  }, [metering, level]);
+  return null;
 }
 
 const mmss = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
@@ -45,27 +77,39 @@ export default function Voice() {
   const [seconds, setSeconds] = useState(0);
   const [listening, setListening] = useState(false);
   const [noSpeech, setNoSpeech] = useState(false);
-  const [typed, setTyped] = useState(false); // DEV fallback: recognizer unavailable (simulator); sends the typed text
+  const [typed, setTyped] = useState(false); // DEV fallback on the iOS simulator (no recognizer, no one to speak): sends the typed text
+  const recorder = useAudioRecorder(DIRECT);
+  const [direct, setDirect] = useState(false); // Q79: recording directly, so no live text
   const [busy, setBusy] = useState(false);
 
   const toManual = (notice = 'micDenied') => router.replace({ pathname: '/capture/manual', params: { notice } });
 
-  const unavailable = (why: string) => {
-    console.warn('speech recognition unavailable:', why);
-    return __DEV__ ? setTyped(true) : toManual();
+  const startDirect = async () => {
+    if (__DEV__ && Platform.OS === 'ios') return setTyped(true);
+    try {
+      if (!(await requestRecordingPermissionsAsync()).granted) return toManual();
+      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+      await recorder.prepareToRecordAsync();
+      recorder.record();
+      setDirect(true);
+      setListening(true);
+    } catch {
+      toManual('aiFailed');
+    }
   };
 
   const start = async () => {
+    audioUri.current = null;
+    // Decide before asking for the microphone, so nobody grants it only to be sent to manual entry.
+    if (!ExpoSpeechRecognitionModule.isRecognitionAvailable() || (Platform.OS === 'android' && Platform.Version < 33)) return startDirect();
     const perm = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
     if (!perm.granted) return toManual();
-    if (!ExpoSpeechRecognitionModule.isRecognitionAvailable()) return unavailable('not available on this device');
-    audioUri.current = null;
     ExpoSpeechRecognitionModule.start({
       lang: await speechLang(i18n.language),
       interimResults: true,
       continuous: true,
       volumeChangeEventOptions: { enabled: true },
-      // 16 kHz 16-bit keeps 90 s under the upload limit. Android 13+ only; older phones send the text instead.
+      // 16 kHz 16-bit keeps 90 s under the upload limit.
       recordingOptions: { persist: true, outputSampleRate: 16000, outputEncoding: 'pcmFormatInt16' },
     });
   };
@@ -79,7 +123,8 @@ export default function Voice() {
     waitingForEnd.current = false;
     const d = useLogDraft.getState();
     const text = said.current.trim();
-    const file = audioUri.current?.endsWith('.wav') ? new File(audioUri.current) : null;
+    const mime = MIME[audioUri.current?.split('.').pop() ?? ''];
+    const file = audioUri.current && mime ? new File(audioUri.current) : null;
     try {
       if (!d.vehicleId) return toManual('aiFailed');
       const audio = file && file.size > 0 && file.size <= MAX_AUDIO_BYTES ? await file.base64() : null;
@@ -88,7 +133,7 @@ export default function Voice() {
         return setNoSpeech(true);
       }
       const { data, error } = await supabase.functions.invoke('process-voice-log', {
-        body: { ...(audio ? { audio_base64: audio, mime: 'audio/wav' } : { transcript: text }), vehicle_id: d.vehicleId, lang: i18n.language },
+        body: { ...(audio ? { audio_base64: audio, mime } : { transcript: text }), vehicle_id: d.vehicleId, lang: i18n.language },
       });
       if (error) return toManual(error.context?.status === 429 ? 'dailyLimit' : 'aiFailed'); // Q64, Q65
       const heard = String(data?.transcript ?? '') || text;
@@ -139,7 +184,7 @@ export default function Voice() {
   useSpeechRecognitionEvent('error', (e) => {
     if (e.error === 'no-speech') setNoSpeech(true);
     else if (e.error === 'not-allowed') toManual();
-    else if (e.error === 'service-not-allowed' || e.error === 'language-not-supported') unavailable(e.error);
+    else if (e.error === 'service-not-allowed' || e.error === 'language-not-supported') startDirect();
   });
 
   const retry = () => {
@@ -149,15 +194,29 @@ export default function Voice() {
     start();
   };
 
-  const cancel = () => {
+  const stopDirect = async () => {
+    await recorder.stop().catch(() => {});
+    audioUri.current = recorder.uri;
+    setListening(false);
+    level.set(0);
+  };
+
+  const cancel = async () => {
     ExpoSpeechRecognitionModule.abort();
+    if (direct) {
+      await stopDirect();
+      try {
+        if (audioUri.current) new File(audioUri.current).delete(); // the recording is never kept
+      } catch {}
+    }
     router.back();
   };
 
-  const finish = () => {
+  const finish = async () => {
     if (busy) return;
     setBusy(true);
-    if (!listening) return send();
+    if (direct) await stopDirect();
+    if (direct || !listening) return send();
     waitingForEnd.current = true;
     ExpoSpeechRecognitionModule.stop();
   };
@@ -199,7 +258,10 @@ export default function Voice() {
           </View>
         ) : transcript ? (
           <Text variant="heading">«{transcript}»</Text>
+        ) : direct ? (
+          <Text variant="heading">{t('capture.voice.noPreview')}</Text>
         ) : null}
+        {direct && listening ? <DirectMeter recorder={recorder} level={level} /> : null}
         {noSpeech ? (
           <View className="gap-2">
             <Pressable onPress={retry}><Text className="text-muted">{t('capture.voice.noSpeech')}</Text></Pressable>
@@ -208,6 +270,7 @@ export default function Voice() {
         ) : (
           <Text className="text-muted">{t(seconds >= HINT_SECONDS ? 'capture.batch.longHint' : 'capture.voice.hint')}</Text>
         )}
+        <Text variant="caption" className="text-muted">{t('capture.voice.aiNotice')}</Text>
         <View className="flex-1" />
         <Button title={t('capture.voice.done')} onPress={finish} loading={busy} />
         <Button variant="secondary" title={t('capture.voice.cancel')} onPress={cancel} />

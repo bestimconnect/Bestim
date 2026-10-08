@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Field, Header, Item, Note, Progress, Text } from '@/components/ui';
+import { errorText } from '@/lib/errors';
 import { shouldAskNotifications } from '@/lib/notifications';
 import { supabase } from '@/lib/supabase';
 import { useSettings } from '@/stores/settingsStore';
@@ -114,7 +115,7 @@ export default function FirstLogScreen() {
         );
       else router.push({ pathname: '/success', params: { kind: 'vehicle', vehicleId } });
     },
-    onError: (e: Error) => setError(e.message),
+    onError: (e: Error) => setError(errorText(e)),
   });
 
   const selectService = (id: string) => {
