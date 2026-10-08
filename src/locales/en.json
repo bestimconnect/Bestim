@@ -70,8 +70,8 @@
     },
     "verifyEmail": {
       "title": "Check your email",
-      "subtitle": "We sent a reset link to your email.",
-      "subtitleWithEmail": "We sent a reset link to\n{{email}}",
+      "subtitle": "We sent a link to your email. Open it on this phone.",
+      "subtitleWithEmail": "We sent a link to\n{{email}}\nOpen it on this phone.",
       "backToLogin": "Go to sign in",
       "resendTitle": "Didn't receive the email?",
       "resendBody": "Check your spam folder, or try again in a minute."

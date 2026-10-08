@@ -39,6 +39,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      connect_leads: {
+        Row: {
+          company: string
+          created_at: string
+          fleet_size: string
+          id: string
+          kind: string
+          lang: string
+          name: string
+          note: string | null
+          phone: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          fleet_size: string
+          id?: string
+          kind: string
+          lang: string
+          name: string
+          note?: string | null
+          phone: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          fleet_size?: string
+          id?: string
+          kind?: string
+          lang?: string
+          name?: string
+          note?: string | null
+          phone?: string
+        }
+        Relationships: []
+      }
       expenses: {
         Row: {
           amount: number
@@ -509,12 +545,39 @@ export type Database = {
           },
         ]
       }
+      voice_usage: {
+        Row: {
+          count: number
+          day: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          day: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          day?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voice_usage_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       accept_share: { Args: { token: string }; Returns: string }
+      bump_voice_usage: { Args: never; Returns: number }
       correct_log: {
         Args: { changes: Json; log_id: string; reason: string }
         Returns: undefined
