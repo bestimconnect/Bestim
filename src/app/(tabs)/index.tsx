@@ -24,6 +24,7 @@ import { useOnline, useShowSaved } from '@/lib/online';
 import { pickVehicle } from '@/lib/sheet';
 import { shadows, useColors } from '@/lib/theme';
 import { vehicleArt } from '@/lib/vehicleArt';
+import { useInbox } from '@/stores/notifyInbox';
 import { useSettings } from '@/stores/settingsStore';
 
 const num = (n: number) => Math.abs(Math.round(n)).toLocaleString('en-US');
@@ -59,13 +60,15 @@ function Bell_() {
   const c = useColors();
   const { t } = useTranslation();
   const guest = useIsGuest();
+  const unread = useInbox((s) => s.items.some((i) => !i.read)); // Q92 (replaces Q13's "no badge")
   return (
     <PressableScale
       accessibilityRole="button"
-      accessibilityLabel={t('home.notifications')}
-      onPress={() => (guest ? router.push({ pathname: '/feature-gate', params: { feature: 'reminders' } }) : router.push('/reminders'))}
+      accessibilityLabel={unread ? `${t('home.notifications')}, ${t('inbox.unread')}` : t('home.notifications')}
+      onPress={() => (guest ? router.push({ pathname: '/feature-gate', params: { feature: 'reminders' } }) : router.push('/notifications'))}
       className="h-10 w-10 items-center justify-center rounded-full bg-white">
       <Bell size={20} color={c.ink} />
+      {unread ? <View className="absolute end-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-white bg-coral" /> : null}
     </PressableScale>
   );
 }

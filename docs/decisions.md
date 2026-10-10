@@ -1125,3 +1125,12 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 **Why:** Treating every fill-up as full gave wrong numbers after a partial fill-up.
 
 **Spec for dev:** `expenses.full_tank boolean not null default true` (`20261011090200_fuel_full_tank.sql`; older rows count as full), `consumption()` in `src/lib/fuel.ts`, `useFuelFills()` in `src/lib/queries.ts`.
+
+### Q92: Notifications page kept on the phone; the bell opens it and shows a dot (Shady, 2026-10-11)
+**Decision:**
+- A **Notifications** page lists every alert the phone has shown (due soon, overdue, update your odometer, weekly summary), newest first and grouped by day. Tapping one opens what it is about and marks it read; "Mark all as read" clears the dots.
+- The Home bell opens this page (it used to open Reminders) and shows a dot while something is unread. This replaces Q13's "no badge".
+- The list lives on the phone only and is cleared on sign-out. Server push (Phase 6) adds to the same list.
+**Why:** Q90 asked for a page with every alert; on-device is enough until server push exists.
+
+**Spec for dev:** `src/stores/notifyInbox.ts` (persisted): `syncNotifications()` records what it schedules, and on the next sync anything whose time has passed moves into the list. Page: `src/app/notifications.tsx`.

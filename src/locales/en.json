@@ -882,5 +882,14 @@
     "costPerKm": "EGP per km",
     "hint": "Add litres and the reading to two full-tank fill-ups to see consumption",
     "perFill": "{{n}} km/L"
+  },
+  "inbox": {
+    "header": "Notifications",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "emptyTitle": "No notifications yet",
+    "emptyBody": "Reminders about your car will show up here.",
+    "markAll": "Mark all as read",
+    "unread": "New"
   }
 }
