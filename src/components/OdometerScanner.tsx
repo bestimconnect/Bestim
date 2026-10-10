@@ -180,9 +180,13 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
       if (!onlineManager.isOnline()) return;
       setAsking(true);
       try {
+        const asked = Date.now();
         const { data } = await supabase.functions.invoke('read-odometer', { body: { image_base64: await still(photo) } });
         const n: unknown = data?.reading;
-        if (__DEV__) setSeen(`AI: ${JSON.stringify(data ?? null)}`.slice(0, 80));
+        if (__DEV__) {
+          console.log(`odometer AI: ${Date.now() - asked} ms from photo to answer`, data?.ms); // speed checks
+          setSeen(`AI: ${JSON.stringify(data ?? null)}`.slice(0, 80));
+        }
         const reading = typeof n === 'number' && Number.isInteger(n) ? (current == null ? n : pick([String(n)])) : null;
         if (reading != null && mine === look.current && !paused.current) show(reading);
       } catch (e) {

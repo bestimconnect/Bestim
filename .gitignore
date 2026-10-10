@@ -46,3 +46,5 @@ example
 
 # Real voice notes for the voice model test (scripts/voice-eval.ts)
 scripts/voice-eval/
+# Real dashboard photos for the odometer test (scripts/odometer-eval.ts)
+scripts/odometer-eval/

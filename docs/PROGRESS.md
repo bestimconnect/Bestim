@@ -1,6 +1,6 @@
 # Bestim: Build Progress
 
-Updated 2026-10-05. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
+Updated 2026-10-11. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
 
 ## Phase status
 
@@ -59,6 +59,12 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
   - **Status (2026-10-03): live.** Migration applied, function deployed, `GEMINI_API_KEY` set. Checked on the iPhone 16 simulator with a typed English sentence (the simulator has no speech recognition): 4 records came back right (oil change with reading, cost and interval; oil filter; fuel; an insurance expense with no amount, blocked until filled), edit an expense card, remove a card, save all, success screen, Home shows the new reading and the month's expenses without double counting. The function refuses callers who are not signed in.
   - **Not checked yet:** a real recording (needs a phone), Arabic and mixed speech, editing a maintenance card and the odometer card, the daily limit and the guest refusal, a partly failed save, Android, and the written test (`scripts/voice-eval.ts` needs a test account's email and password).
   - The old keyword parser, the one-question screen (17) and `USE_MOCK` are gone. `src/lib/voice.ts` only keeps `parseReading` for the update-odometer screen.
+
+## Round of 2026-10-11 (decisions Q90–Q93)
+- **Built:** record catalog seed (`20261011090100_record_catalog_seed.sql`), Car log tree filter and naming, "standard" label on the next service, fuel "Full tank" + consumption between full tanks on Home / car page / Car log (Q91, `20261011090200_fuel_full_tank.sql`), Notifications page with an unread dot on the Home bell (Q92), offline voice queue (Q93), `scripts/odometer-eval.ts` for odometer AI speed and accuracy (`read-odometer` now returns `ms`).
+- **To do on the Mac:** `supabase db push` (two new migrations) → `npm run types`; `supabase functions deploy read-odometer` (its AI call moved to `read.ts`).
+- **To check on the iPhone 16 simulator and an Android phone, Arabic and English:** airplane mode → record by voice → back online → "Recording ready to review" on Home → review → save; the Notifications page after an alert fires, and the bell dot; a partial fuel fill-up then a full one (Home row, Car log km/L); the Car log filter tree.
+- **Speed:** run `scripts/voice-eval.ts` and `scripts/odometer-eval.ts` (needs the keys in `.env.local` and photos in `scripts/odometer-eval/`). Raise the odometer `thinking_level` only if the test shows it reads segment digits better without being much slower.
 
 ## Open items
 - **Not verified yet (QA):**
@@ -127,8 +133,9 @@ A full pass for Google Play and Huawei AppGallery. Store texts and form answers:
 - iOS simulator dev build: `npx expo run:ios --device "iPhone 16"` (needs `LANG=en_US.UTF-8` for CocoaPods). It needs macOS + Xcode, so a cloud session can't run it. The founder verifies on their Mac.
 
 ## Cloud sessions (Claude Code on the web)
-- The environment variables hold only the public `EXPO_PUBLIC_*` values (Supabase URL + anon key, Google web/iOS client IDs). The setup script writes them to `.env`: `printenv | grep '^EXPO_PUBLIC_' > .env && npm ci`.
-- Network is set to Custom and allows `*.supabase.co`, `api.supabase.com`, `docs.expo.dev`.
+- Environment `bestim-app`: the environment variables hold only the public `EXPO_PUBLIC_*` values (Supabase URL + anon key, Google web/iOS client IDs). The setup script runs `npm ci` in the repo folder and never blocks the session if the repo is missing.
+- Pick the repo and branch when starting the session; otherwise the setup script runs in an empty folder.
+- The network policy does not allow the Supabase project or the AI services, so database calls and `*-eval.ts` scripts run on the Mac. Type check, lint and `npm run check` work in the cloud.
 - **Migrations:** the cloud session writes the SQL file and pushes it. The founder runs `supabase db push` + `npm run types` on the Mac. There's no Supabase access token in the cloud.
 - There's no simulator in the cloud. The founder pulls and runs `npx expo start` on the Mac to review.
 
