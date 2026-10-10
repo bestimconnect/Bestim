@@ -14,13 +14,13 @@ Updated 2026-10-05. Read this first in any new session. The spec is `docs/BESTIM
 | 6 · Release | Needs the Apple Developer account: Sign in with Apple, server push, TestFlight, Android Google key, universal links, store submission | ⏭ Next |
 
 ## App flow (decisions Q8)
-Splash → Language (01) → Tour 33→34→35 (once per device, `settingsStore.tourSeen`) → Welcome (02) → Sign in (30) / Create account (31) → Your profile (32, only if `profiles.full_name` is empty) → Add vehicle 03→04→05 → Home (tabs).
+Splash (native, then `SplashOverlay` animation) → Language (01) → Intro (`(onboarding)/intro`, 3 swipeable slides; "Get started" opens a guest session, "I already have an account" → Sign in 30) → Add car 03 → Odometer 04 (saves the car, sets `onboarding_completed`) → Save your car (`save-car`, guests only: Google / email / later) → First log 05 (optional) → Home (tabs). A signed-in user with an empty name goes to Your profile (32) first. Q87.
 The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "first vehicle added".
 
 ## What exists (Phases 1–5)
 - **UI kit** (`src/components/ui/`): Text, Button, Field, Card, Item, Header, Note, Divider, Progress, Choice (`className` for the track), Metric, GoogleIcon. Also `Hero`, `TourSlide`, `TabBar`, `PartMetric` in `src/components/`.
 - **Data hooks** (`src/lib/queries.ts`): vehicles, current vehicle, logs, log, service types, parts (`useVehicleParts` + `needsAttention`), snoozes, expenses, `useIsGuest`. Part status math: `src/lib/parts.ts` (pure, checked by `npm run check`). Voice: see "Voice logging" below.
-- **Flow stores:** `settingsStore` (language, theme, tourSeen, currentVehicleId), `vehicleDraft` (onboarding / `?mode=extra` add vehicle), `logDraft` (capture → review → save, and corrections).
+- **Flow stores:** `settingsStore` (language, theme, skipSplash, currentVehicleId), `vehicleDraft` (onboarding / `?mode=extra` add vehicle), `logDraft` (capture → review → save, and corrections).
 - **Tabs:** Home, Vehicles (stack: 08 → 09), Reminders (21), Account (Phase 5 placeholder with an Expenses row; stack → 23). The center + opens the capture sheet (13).
 - **Guest mode:** "Continue as guest" = Supabase anonymous user. Guests see Home (36); everything else opens the gate (37). Register/Google upgrade the same user (`updateUser` / `linkIdentity`). A guest can't merge into an account that already exists.
 - **DB** (migrations in `supabase/migrations/`):
@@ -101,6 +101,8 @@ A full pass for Google Play and Huawei AppGallery. Store texts and form answers:
 - **Email links must be opened on the phone that asked for them** (sign-up, reset password): the link carries a one-time code and the phone holds the other half. A link opened on another phone lands on Sign in with a plain notice.
 - **Website links open in the phone's own browser** (`Linking.openURL`), not the in-app browser sheet: the sheet came up blank on the simulator, and the plain browser behaves the same on iPhone, Android and Huawei.
 - **`ios/` was regenerated for the simulator on 2026-10-05.** For the real iPhone with the free Apple ID, run the `PERSONAL_TEAM=1` steps below again.
+- **Android needs 8.0+ (`minSdkVersion` 26, set through `expo-build-properties`, decisions Q85):** the camera text reader does not compile below it. The first release build (2026-10-08) failed on exactly this.
+- **Reading a failed EAS build's log from the command line:** `eas build:view <id> --json` gives `logFiles` URLs; they are brotli-compressed, so decode with Node's `zlib.brotliDecompressSync` (curl cannot).
 - **`expo-audio` is installed without its config plugin on purpose:** the plugin adds a background-playback service and "foreground service" permissions that Google Play asks to justify. The microphone permission already comes from the speech plugin.
 - **`supabase config push` applies immediately, with no prompt.** Before pushing, make config.toml match the remote (email confirmations on, TOTP MFA on, OTP length 8, max_frequency 1m0s). Load `.env` first (`set -a; . ./.env; set +a`) so the Google secret resolves.
 - **Tailwind font sizes/line heights must be px strings.** A unitless lineHeight is a multiplier and pushes text off-screen.

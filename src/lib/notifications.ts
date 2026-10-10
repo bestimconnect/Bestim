@@ -6,6 +6,7 @@ import { Platform } from 'react-native';
 
 import i18n from './i18n';
 import { latestPerType, partStatus, type Unit } from './parts';
+import { CATALOG_JOIN, vehicleName } from './queries';
 import { DEFAULT_PREFS, planNotifications, type PlanPart, type PlanVehicle, type Prefs } from './reminderPlan.ts';
 import { supabase } from './supabase';
 
@@ -52,7 +53,7 @@ export async function syncNotifications() {
     const today = new Date().toLocaleDateString('en-CA');
     const [profile, vehicles, logs, snoozes] = await Promise.all([
       supabase.from('profiles').select('notification_prefs').eq('id', user.id).single(),
-      supabase.from('vehicles').select('*'),
+      supabase.from('vehicles').select(`*, ${CATALOG_JOIN}`),
       supabase.from('maintenance_logs').select('*, service_types(*)').order('service_date', { ascending: false }).order('created_at', { ascending: false }),
       supabase.from('reminders').select('vehicle_id, service_type_id, due_date').eq('status', 'dismissed').gt('due_date', today),
     ]);
@@ -60,7 +61,6 @@ export async function syncNotifications() {
 
     const prefs = { ...DEFAULT_PREFS, ...(profile.data.notification_prefs as Partial<Prefs> | null) };
     const arabic = i18n.language === 'ar';
-    const nameOf = (v: (typeof vehicles.data)[number]) => v.nickname || `${v.make} ${v.model}`;
 
     const parts: PlanPart[] = [];
     const planVehicles: PlanVehicle[] = [];
@@ -68,7 +68,7 @@ export async function syncNotifications() {
       const mine = latestPerType(logs.data.filter((l) => l.vehicle_id === v.id));
       for (const log of mine) {
         const st = log.service_types;
-        if (!st) continue;
+        if (!st?.has_reminder) continue;
         const status = partStatus({
           odometer: v.current_odometer,
           unit: v.odometer_unit as Unit,
@@ -82,14 +82,14 @@ export async function syncNotifications() {
           vehicleId: v.id,
           serviceTypeId: st.id,
           name: arabic ? st.name_ar : st.name_en,
-          vehicleName: nameOf(v),
+          vehicleName: vehicleName(v),
           unit: v.odometer_unit as Unit,
           status,
           snoozedUntil: snoozes.data.find((s) => s.vehicle_id === v.id && s.service_type_id === st.id)?.due_date ?? null,
         });
       }
       // Q23: only nudge for the odometer when the vehicle has parts that depend on it.
-      if (parts.some((p) => p.vehicleId === v.id)) planVehicles.push({ id: v.id, name: nameOf(v), odometerUpdatedAt: v.odometer_updated_at });
+      if (parts.some((p) => p.vehicleId === v.id)) planVehicles.push({ id: v.id, name: vehicleName(v), odometerUpdatedAt: v.odometer_updated_at });
     }
 
     const sent = JSON.parse((await AsyncStorage.getItem(SENT_KEY)) ?? '{}');

@@ -2,54 +2,74 @@ import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { useMutationState } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
-import { BadgeCheck } from 'lucide-react-native';
+import { BadgeCheck, ListFilter, X } from 'lucide-react-native';
 import * as Icons from 'lucide-react-native';
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { Button, Choice, Header, Item, Text } from '@/components/ui';
-import { useCurrentVehicle, useVehicleLogs, type Log } from '@/lib/queries';
+import { carLog, scopeOf, type Kind } from '@/lib/carLog';
+import { useCurrentVehicle, useExpenses, useOdometerReadings, useRecordCategories, useServiceTypes, useVehicleLogs } from '@/lib/queries';
 import { SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
+import { pickOption, type PickOption } from '@/lib/sheet';
 import { shadows, useColors } from '@/lib/theme';
 
-// Screens 10 + 39 — Maintenance log / empty state. Figma: docs/figma-screens.md (10, 39).
-// Chip -> service_types.name_en (decisions Q11).
-const CATEGORIES = {
-  all: null,
-  oils: ['Oil Change', 'Oil Filter'],
-  brakes: ['Brake Inspection', 'Brake Pad Replacement'],
-  tires: ['Tire Rotation', 'Tire Replacement'],
-} as const;
-type Category = keyof typeof CATEGORIES;
+// Screens 10 + 39 — Car log / empty state. Figma: docs/figma-screens.md (10, 39); the timeline and its filters are decisions Q90.
+// Maintenance logs, running costs and odometer readings in one list (merge + filter: src/lib/carLog.ts).
+const n = (x: number) => x.toLocaleString('en-US');
+const KINDS: Kind[] = ['all', 'maintenance', 'cost', 'reading'];
+const icon = (name?: string | null, fallback = Icons.Wrench) => (name && (Icons as any)[name]) || fallback;
 
 export default function HistoryScreen() {
   const { t, i18n } = useTranslation();
   const c = useColors();
-  const p = useLocalSearchParams<{ vehicleId?: string; category?: Category }>();
+  const p = useLocalSearchParams<{ vehicleId?: string; filter?: string }>(); // filter: a category, subcategory or service id
   const { vehicle: current } = useCurrentVehicle();
   const vehicleId = p.vehicleId ?? current?.id;
   const logs = useVehicleLogs(vehicleId);
+  const costs = (useExpenses().data ?? []).filter((e) => e.vehicle_id === vehicleId);
+  const readings = useOdometerReadings(vehicleId).data ?? [];
+  const services = useServiceTypes().data ?? [];
+  const tree = useRecordCategories().data ?? [];
   const onShowSaved = useShowSavedAction();
-  const [category, setCategory] = useState<Category>(p.category && p.category in CATEGORIES ? p.category : 'all');
+  const [kind, setKind] = useState<Kind>('all');
+  const [filterId, setFilterId] = useState<string | null>(p.filter ?? null);
   // Q45: logs written offline wait in the mutation queue until they sync.
   const queued = useMutationState({
     filters: { mutationKey: SAVE_LOG_KEY, status: 'pending' },
     select: (m) => m.state.variables as SaveLogInput,
   }).filter((v) => v.vehicleId === vehicleId);
 
-  const names = CATEGORIES[category];
-  const rows = (logs.data ?? []).filter((l) => !names || (names as readonly string[]).includes(l.service_types?.name_en ?? ''));
-  const groups: { month: string; items: Log[] }[] = [];
-  for (const l of rows) {
-    const month = format(parseISO(l.service_date), 'MMMM yyyy', { locale: i18n.language === 'ar' ? ar : enUS });
+  const arabic = i18n.language === 'ar';
+  const name = (x: { name_en: string; name_ar: string }, other = false) => (arabic !== other ? x.name_ar : x.name_en);
+  // One list for the filter: categories, subcategories and services, each labelled with its level and parent.
+  const options: PickOption[] = [
+    ...tree.filter((x) => !x.parent_id).map((x) => ({ id: x.id, label: name(x), hint: t('history.level.category'), also: name(x, true) })),
+    ...tree.filter((x) => x.parent_id).map((x) => {
+      const parent = tree.find((y) => y.id === x.parent_id);
+      return { id: x.id, label: name(x), hint: `${t('history.level.subcategory')} · ${parent ? name(parent) : ''}`, also: name(x, true) };
+    }),
+    ...services.filter((s) => s.category_id).map((s) => ({
+      id: s.id,
+      label: name(s),
+      hint: `${t('history.level.service')} · ${s.subcategory ? name(s.subcategory) : ''}`,
+      also: name(s, true),
+    })),
+  ];
+  const chip = options.find((o) => o.id === filterId);
+
+  const entries = carLog(logs.data ?? [], costs, readings, kind, scopeOf(filterId, tree, services));
+  const groups: { month: string; items: typeof entries }[] = [];
+  for (const e of entries) {
+    const month = format(parseISO(e.date), 'MMMM yyyy', { locale: arabic ? ar : enUS });
     const last = groups[groups.length - 1];
-    if (last?.month === month) last.items.push(l);
-    else groups.push({ month, items: [l] });
+    if (last?.month === month) last.items.push(e);
+    else groups.push({ month, items: [e] });
   }
-  const empty = logs.isSuccess && logs.data.length === 0 && !queued.length;
+  const empty = logs.isSuccess && !carLog(logs.data, costs, readings, 'all', null).length && !queued.length;
   const add = () => router.push('/capture');
 
   if (logs.isError && !logs.data) return <ErrorState onRetry={logs.refetch} retrying={logs.isRefetching} onShowSaved={onShowSaved} />;
@@ -78,10 +98,29 @@ export default function HistoryScreen() {
             <Text variant="title">{t('history.title')}</Text>
             <Choice
               className="bg-line"
-              value={category}
-              onChange={setCategory}
-              options={(Object.keys(CATEGORIES) as Category[]).map((k) => ({ value: k, label: t(`history.${k}`) }))}
+              value={kind}
+              onChange={setKind}
+              options={KINDS.map((k) => ({ value: k, label: t(`history.kind.${k}`) }))}
             />
+            <View className="flex-row flex-wrap gap-2">
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => pickOption({ title: t('history.filter'), options, allowCustom: false, onPick: ({ id }) => setFilterId(id) })}
+                className="h-11 flex-row items-center gap-2 rounded-nav bg-line px-4">
+                <ListFilter size={16} color={c.muted} />
+                <Text variant="caption" className="text-muted">{t('history.filter')}</Text>
+              </Pressable>
+              {chip ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('history.removeFilter')}
+                  onPress={() => setFilterId(null)}
+                  className="h-11 flex-row items-center gap-2 rounded-nav bg-ink px-4">
+                  <Text variant="caption" className="text-paper">{chip.label}</Text>
+                  <X size={14} color={c.paper} />
+                </Pressable>
+              ) : null}
+            </View>
             {queued.map((q, i) => (
               <View key={i} className="gap-1.5">
                 <Text variant="caption" className="text-muted">{t('feedback.pending')}</Text>
@@ -94,7 +133,24 @@ export default function HistoryScreen() {
             {groups.map((g) => (
               <View key={g.month} className="gap-3">
                 <Text variant="heading">{g.month}</Text>
-                {g.items.map((l) => {
+                {g.items.map((e) => {
+                  if (e.type === 'reading')
+                    return <Item key={`r${e.item.id}`} icon={Icons.Gauge} title={t('history.rowNoCost', { reading: n(e.item.reading) })} subtitle={t('history.odometerUpdated')} chevron={false} disabled />;
+                  if (e.type === 'cost') {
+                    const x = e.item;
+                    const sub = tree.find((y) => y.expense_code === x.category);
+                    return (
+                      <Item
+                        key={`c${x.id}`}
+                        icon={icon(sub?.icon, Icons.Receipt)}
+                        title={sub ? name(sub) : t(`expenses.chip.${x.category}`)}
+                        subtitle={[`${n(x.amount)} ${t('expenses.currency')}`, x.description, x.liters != null ? t('history.liters', { n: n(x.liters) }) : null].filter(Boolean).join(' · ')}
+                        chevron={false}
+                        disabled
+                      />
+                    );
+                  }
+                  const l = e.item;
                   const suffix = l.photos.length ? t('history.receipt') : t(l.source === 'voice' ? 'history.voice' : 'history.manual');
                   const reading = (l.odometer_reading ?? 0).toLocaleString('en-US');
                   const base = l.cost != null
@@ -107,7 +163,7 @@ export default function HistoryScreen() {
                         <Text variant="caption" className={l.status === 'needs_review' ? 'text-[#B7791F]' : 'text-teal'}>{caption}</Text>
                       ) : null}
                       <Item
-                        icon={(Icons as any)[l.service_types?.icon ?? ''] ?? Icons.Wrench}
+                        icon={icon(l.service_types?.icon)}
                         title={l.title}
                         subtitle={`${base} · ${suffix}`}
                         onPress={() => router.push({ pathname: '/log/[id]', params: { id: l.id } })}

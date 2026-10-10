@@ -4,19 +4,22 @@ import { I18nManager, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { FuelCard } from '@/components/FuelCard';
 import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { Button, Header, Text } from '@/components/ui';
-import { useExpenses, useIsGuest, useVehicles } from '@/lib/queries';
+import { useCurrentVehicle, useExpenses, useIsGuest, useVehicles } from '@/lib/queries';
 import { useColors } from '@/lib/theme';
 
 // Screen 23 — Expenses (167:67034) + empty 40 (167:67235); decisions Q26, Q27, Q30, Q31.
 const rows = [
   ['maintenance', ['maintenance']],
   ['fuel', ['fuel']],
+  ['wash', ['wash']],
+  ['parking', ['parking', 'tolls']],
   ['insurance', ['insurance', 'registration']],
   ['parts', ['parts']],
-  ['other', ['parking', 'other']],
+  ['other', ['other']],
 ] as const;
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
 
@@ -29,6 +32,7 @@ export default function Expenses() {
   const expenses = query.data ?? [];
   const onShowSaved = useShowSavedAction();
   const vehicleCount = useVehicles().data?.length ?? 0;
+  const car = useCurrentVehicle().vehicle;
   if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'expenses' } }} />;
 
   if (query.isError && !query.data) return <ErrorState onRetry={query.refetch} retrying={query.isRefetching} onShowSaved={onShowSaved} />;
@@ -78,6 +82,7 @@ export default function Expenses() {
                 {vehicleCount === 1 ? t('expenses.captionOne') : t('expenses.caption', { count: vehicleCount })}
               </Text>
             </View>
+            {car ? <FuelCard vehicleId={car.id} /> : null}
             {/* Design keeps months oldest→newest left to right in Arabic too. */}
             <View className="h-[150px] items-end justify-between px-2" style={{ flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row' }}>
               {months.map((m) => (

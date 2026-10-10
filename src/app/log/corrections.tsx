@@ -33,7 +33,7 @@ export default function CorrectionsScreen() {
       const st = types?.find((x) => x.id === v);
       return (i18n.language === 'ar' ? st?.name_ar : st?.name_en) ?? v;
     }
-    if (field === 'odometer_reading') return t('log.review.km', { n: Number(v).toLocaleString('en-US') });
+    if (field === 'odometer_reading' || field === 'interval_km') return t('log.review.km', { n: Number(v).toLocaleString('en-US') });
     if (field === 'cost') return t('log.egp', { cost: Number(v).toLocaleString('en-US') });
     if (field === 'service_date') return day(v);
     return v;

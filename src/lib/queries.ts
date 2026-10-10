@@ -1,21 +1,41 @@
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 import { useSettings } from '@/stores/settingsStore';
 import type { Tables } from '@/types/database';
 
+import i18n from './i18n';
 import { latestPerType, partStatus, type PartStatus, type Unit } from './parts';
 import { useSession } from './session';
 import { supabase } from './supabase';
 
 // Shared query hooks (several screens read the same data). Keys: ['vehicles'], ['logs', vehicleId],
-// ['log', id], ['service_types'], ['snoozes', vehicleId], ['expenses', since]. After a write, invalidate
+// ['log', id], ['service_types'], ['record_categories'], ['snoozes', vehicleId], ['expenses', since]. After a write, invalidate
 // ['vehicles'], ['logs'] and ['expenses'] (a log's cost becomes an expense via a DB trigger).
 
-export type Vehicle = Tables<'vehicles'>;
+type Names = { name_en: string; name_ar: string };
+/** The linked catalog model and brand names; null for a car typed by hand. */
+export type CatalogJoin = (Names & { car_makes: Names | null }) | null;
+export type Vehicle = Tables<'vehicles'> & { car_models: CatalogJoin };
 export type ServiceType = Tables<'service_types'>;
+export type RecordCategory = Tables<'record_categories'>;
+/** A service with its subcategory and category; both null for a retired service (old logs still resolve it, pickers skip it). */
+export type Service = ServiceType & { subcategory: RecordCategory | null; parentCategory: RecordCategory | null }; // (`category` is an old text column of service_types)
 export type Log = Tables<'maintenance_logs'> & { service_types: ServiceType | null };
 export type Part = { serviceType: ServiceType; log: Log; status: PartStatus; snoozedUntil: string | null };
-export type Expense = Tables<'expenses'> & { vehicles: Pick<Vehicle, 'id' | 'make' | 'model' | 'nickname'> | null };
+export type Expense = Tables<'expenses'> & { vehicles: Pick<Vehicle, 'id' | 'make' | 'model' | 'nickname' | 'car_models'> | null };
+
+/** Select list that joins a vehicle's catalog model and brand names. */
+export const CATALOG_JOIN = 'car_models(name_en, name_ar, car_makes(name_en, name_ar))';
+
+/** What the owner sees as the car's name: nickname, else catalog brand + model in the app language, else the typed text. */
+export function vehicleName(v: Pick<Vehicle, 'nickname' | 'make' | 'model' | 'car_models'>) {
+  if (v.nickname) return v.nickname;
+  const m = v.car_models;
+  if (!m?.car_makes) return `${v.make} ${v.model}`;
+  const k = i18n.language === 'ar' ? 'name_ar' : 'name_en';
+  return `${m.car_makes[k]} ${m[k]}`;
+}
 
 /** Anonymous Supabase user = guest (decisions Q17). */
 export function useIsGuest() {
@@ -39,10 +59,10 @@ export function useProfile() {
 export function useVehicles() {
   return useQuery({
     queryKey: ['vehicles'],
-    queryFn: async () => {
+    queryFn: async (): Promise<Vehicle[]> => {
       const { data, error } = await supabase
         .from('vehicles')
-        .select('*')
+        .select(`*, ${CATALOG_JOIN}`)
         .order('is_primary', { ascending: false })
         .order('created_at');
       if (error) throw error;
@@ -64,16 +84,63 @@ export function useVehicle(id: string | undefined) {
   return { ...vehicles, vehicle: vehicles.data?.find((v) => v.id === id) ?? null };
 }
 
-export function useServiceTypes() {
+export type CarMake = Names & { id: string; sort: number; car_models: (Names & { id: string; body_type: string })[] };
+
+/** Every brand with its models, for the car pickers. Plain JSON because the query cache is persisted. */
+export function useCarCatalog() {
   return useQuery({
-    queryKey: ['service_types'],
-    staleTime: Infinity,
-    queryFn: async () => {
-      const { data, error } = await supabase.from('service_types').select('*').order('category');
+    queryKey: ['car_catalog'],
+    staleTime: 7 * 24 * 60 * 60 * 1000,
+    queryFn: async (): Promise<CarMake[]> => {
+      const { data, error } = await supabase
+        .from('car_makes')
+        .select('id, name_en, name_ar, sort, car_models(id, name_en, name_ar, body_type)')
+        .order('sort')
+        .order('name_en')
+        .order('name_en', { referencedTable: 'car_models' });
       if (error) throw error;
       return data;
     },
   });
+}
+
+/** The whole record tree (categories, their subcategories) in one query, ordered by `sort`. Plain JSON because the cache is persisted. */
+export function useRecordCategories() {
+  return useQuery({
+    queryKey: ['record_categories'],
+    staleTime: 7 * 24 * 60 * 60 * 1000,
+    queryFn: async (): Promise<RecordCategory[]> => {
+      const { data, error } = await supabase.from('record_categories').select('*').order('sort');
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+/** Every service (retired ones too, with `category_id` null), ordered category → subcategory → service. */
+export function useServiceTypes() {
+  const types = useQuery({
+    queryKey: ['service_types'],
+    staleTime: Infinity,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('service_types').select('*').order('sort');
+      if (error) throw error;
+      return data;
+    },
+  });
+  const tree = useRecordCategories().data;
+  const data = useMemo((): Service[] | undefined => {
+    if (!types.data) return undefined;
+    const byId = new Map((tree ?? []).map((c) => [c.id, c]));
+    const rank = (c: RecordCategory | null) => c?.sort ?? 1e9;
+    return types.data
+      .map((s) => {
+        const subcategory = byId.get(s.category_id ?? '') ?? null;
+        return { ...s, subcategory, parentCategory: byId.get(subcategory?.parent_id ?? '') ?? null };
+      })
+      .sort((a, b) => rank(a.parentCategory) - rank(b.parentCategory) || rank(a.subcategory) - rank(b.subcategory) || a.sort - b.sort);
+  }, [types.data, tree]);
+  return { ...types, data };
 }
 
 /** All logs of a vehicle, newest first, with their service type. */
@@ -126,6 +193,19 @@ export function useSnoozes(vehicleId: string | undefined) {
   });
 }
 
+/** Odometer readings of a car (a trigger writes one whenever the reading changes), newest first. Under 'vehicles' so a reading change refreshes it. */
+export function useOdometerReadings(vehicleId: string | undefined) {
+  return useQuery({
+    queryKey: ['vehicles', 'readings', vehicleId],
+    enabled: !!vehicleId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('odometer_readings').select('*').eq('vehicle_id', vehicleId!).order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 /** Tracked parts of a vehicle, most urgent first (decisions Q10). */
 export function useVehicleParts(vehicle: Vehicle | null | undefined) {
   const logs = useVehicleLogs(vehicle?.id);
@@ -134,7 +214,7 @@ export function useVehicleParts(vehicle: Vehicle | null | undefined) {
   if (vehicle && logs.data)
     for (const log of latestPerType(logs.data)) {
       const st = log.service_types;
-      if (!st) continue;
+      if (!st?.has_reminder) continue;
       const status = partStatus({
         odometer: vehicle.current_odometer,
         unit: vehicle.odometer_unit as Unit,
@@ -167,7 +247,7 @@ export function useExpenses() {
     queryFn: async (): Promise<Expense[]> => {
       const { data, error } = await supabase
         .from('expenses')
-        .select('*, vehicles(id, make, model, nickname)')
+        .select(`*, vehicles(id, make, model, nickname, ${CATALOG_JOIN})`)
         .gte('expense_date', since)
         .order('expense_date', { ascending: false });
       if (error) throw error;

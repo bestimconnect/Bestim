@@ -5,7 +5,7 @@ import * as Updates from 'expo-updates';
 
 import ar from '@/locales/ar.json';
 import en from '@/locales/en.json';
-import type { Language } from '@/stores/settingsStore';
+import { useSettings, type Language } from '@/stores/settingsStore';
 
 i18n.use(initReactI18next).init({
   resources: { ar: { common: ar }, en: { common: en } },
@@ -22,6 +22,7 @@ export function applyLanguage(lng: Language) {
   if (Platform.OS !== 'web' && I18nManager.isRTL !== rtl) {
     I18nManager.allowRTL(rtl);
     I18nManager.forceRTL(rtl);
+    useSettings.getState().set({ skipSplash: true }); // the reload below must not replay the splash animation
     // reloadAsync can fail in dev-client builds; DevSettings.reload is the dev fallback.
     Updates.reloadAsync().catch(() => DevSettings.reload());
   }

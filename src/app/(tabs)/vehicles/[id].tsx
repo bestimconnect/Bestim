@@ -7,13 +7,14 @@ import { I18nManager, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { FuelCard } from '@/components/FuelCard';
 import { useRefresh } from '@/components/Refresh';
 import { useLightStatusBar } from '@/components/Hero';
 import { Choice, Item, Metric, PressableScale, Rise, Text } from '@/components/ui';
 import { ErrorState } from '@/components/ErrorState';
-import { needsAttention, useExpenses, useVehicle, useVehicleParts, type Part } from '@/lib/queries';
+import { needsAttention, useExpenses, useRecordCategories, useVehicle, useVehicleParts, vehicleName, type Part } from '@/lib/queries';
 import { useColors } from '@/lib/theme';
-import { vehicleArt, vehicleIcons } from '@/lib/vehicleArt';
+import { vehicleArt } from '@/lib/vehicleArt';
 
 // Screen 09 — Vehicle detail, Figma ar-light 09/تفاصيل السيارة (segments per decisions Q15, links Q16).
 type Tab = 'overview' | 'log' | 'reminders';
@@ -31,6 +32,7 @@ export default function VehicleDetail() {
   const { vehicle, isError, data: all, refetch, isRefetching } = useVehicle(id);
   const { data: logs, parts } = useVehicleParts(vehicle);
   const expenses = useExpenses().data ?? [];
+  const tyres = useRecordCategories().data?.find((c) => !c.parent_id && c.name_en === 'Tyres & wheels');
   if (isError && !all) return <ErrorState onRetry={refetch} retrying={isRefetching} />;
   if (!vehicle) return <View className="flex-1 bg-paper" />;
 
@@ -38,8 +40,6 @@ export default function VehicleDetail() {
   const currency = t('vehicles.currency');
   const year = new Date().getFullYear().toString();
   const spent = expenses.filter((e) => e.vehicle_id === vehicle.id && e.expense_date.startsWith(year)).reduce((s, e) => s + e.amount, 0);
-  const TypeIcon = vehicleIcons[vehicle.vehicle_type];
-  const art = vehicleArt[vehicle.vehicle_type]; // none for equipment
   const Back = I18nManager.isRTL ? ChevronRight : ChevronLeft;
 
   const partItem = (p: Part) => {
@@ -73,18 +73,12 @@ export default function VehicleDetail() {
         </PressableScale>
         <View className="flex-row items-center gap-3">
           <View className="flex-1 gap-1">
-            <Text variant="title" className="text-onpanel">{vehicle.nickname || `${vehicle.make} ${vehicle.model}`}</Text>
+            <Text variant="title" className="text-onpanel">{vehicleName(vehicle)}</Text>
             <Text variant="caption" className="text-onpanel" style={{ opacity: 0.6 }}>
               {vehicle.year} · {t(`vehicles.type.${vehicle.vehicle_type}`)}
             </Text>
           </View>
-          {art ? (
-            <Image source={art} contentFit="contain" style={{ width: 128, height: 64 }} />
-          ) : (
-            <View className="h-14 w-14 items-center justify-center rounded-full bg-lime">
-              <TypeIcon size={26} color="#222E29" />
-            </View>
-          )}
+          <Image source={vehicleArt(vehicle.vehicle_type)} contentFit="contain" style={{ width: 128, height: 64 }} />
         </View>
         <View className="flex-row gap-3">
           <Metric
@@ -111,6 +105,7 @@ export default function VehicleDetail() {
           <>
             <Text variant="heading">{t(attention.length ? 'vehicles.attention' : 'vehicles.yourParts')}</Text>
             {overview.length ? overview.map((p, i) => <Rise key={p.serviceType.id} index={i}>{partItem(p)}</Rise>) : empty}
+            <FuelCard vehicleId={vehicle.id} hint />
           </>
         ) : seg === 'log' ? (
           logs?.length ? (
@@ -135,7 +130,7 @@ export default function VehicleDetail() {
         <View className="flex-row justify-between pt-2">
           <Pressable
             accessibilityRole="link"
-            onPress={() => router.push({ pathname: '/history', params: { vehicleId: vehicle.id, category: 'tires' } })}>
+            onPress={() => router.push({ pathname: '/history', params: { vehicleId: vehicle.id, filter: tyres?.id } })}>
             <Text variant="label" className="text-teal">{t('vehicles.tireHistory')}</Text>
           </Pressable>
           <Pressable accessibilityRole="link" onPress={() => router.push({ pathname: '/history', params: { vehicleId: vehicle.id } })}>

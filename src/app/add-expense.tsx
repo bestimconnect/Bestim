@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button, Field, Header, Item, Note, Text } from '@/components/ui';
 import { errorText } from '@/lib/errors';
-import { useCurrentVehicle, useIsGuest, useVehicle, useVehicleLogs } from '@/lib/queries';
+import { useCurrentVehicle, useIsGuest, useRecordCategories, useVehicle, useVehicleLogs } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { shadows } from '@/lib/theme';
 import { EXPENSE_CATEGORIES, type ExpenseRecord } from '@/lib/voiceRecords';
@@ -18,8 +18,7 @@ import { useVoiceBatch } from '@/stores/voiceBatch';
 
 // Screen 24 — Add expense (167:67164); decisions Q26, Q28, Q29, Q31.
 // With ?batch it edits one expense card of the voice review list and writes back instead of saving (Q69).
-const cats = ['maintenance', 'fuel', 'parts', 'insurance', 'registration', 'other'] as const;
-type Cat = (typeof cats)[number];
+type Cat = 'maintenance' | (typeof EXPENSE_CATEGORIES)[number];
 
 export default function AddExpense() {
   const { t, i18n } = useTranslation();
@@ -30,29 +29,43 @@ export default function AddExpense() {
   const current = useCurrentVehicle().vehicle;
   const picked = useVehicle(vehicleId).vehicle;
   const vehicle = picked ?? current;
+  // The chips are the tree's running-cost subcategories (the stored value is their expense code); the plain list is the fallback until the tree has loaded once.
+  const costs = (useRecordCategories().data ?? []).filter((c) => c.expense_code);
+  const codes = (costs.length ? costs.map((c) => c.expense_code) : EXPENSE_CATEGORIES) as Cat[];
+  const chipLabel = (k: Cat) => {
+    const c = costs.find((x) => x.expense_code === k);
+    return c ? (i18n.language === 'ar' ? c.name_ar : c.name_en) : t(`expenses.chip.${k}`);
+  };
   const logs = (useVehicleLogs(vehicle?.id).data ?? []).slice(0, 20);
-  const [category, setCategory] = useState<Cat>(card?.category ?? 'maintenance');
+  const [category, setCategory] = useState<Cat | null>(card ? card.category : 'maintenance'); // null: a voice card whose category the owner must choose
   const amountRef = useRef<TextInput>(null);
   const [amount, setAmount] = useState(card?.amount != null ? String(card.amount) : '');
   const [date, setDate] = useState(card?.date ?? new Date().toLocaleDateString('en-CA'));
   const [place, setPlace] = useState(card?.place ?? '');
+  const [liters, setLiters] = useState(card?.liters != null ? String(card.liters) : '');
+  const [reading, setReading] = useState(card?.odometer != null ? String(card.odometer) : '');
   const [logId, setLogId] = useState<string | null>(null);
   const [pick, setPick] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const save = useMutation({
     mutationFn: async () => {
+      const fuel = category === 'fuel';
+      const l = fuel && Number(liters) > 0 ? Number(liters) : null;
+      const odo = fuel && reading.trim() && Number(reading) >= 0 ? Math.round(Number(reading)) : null;
       if (batch) {
-        const patch: Partial<ExpenseRecord> = { category: category as ExpenseRecord['category'], amount: Number(amount), date, place: place.trim() };
+        const patch: Partial<ExpenseRecord> = { category: category as ExpenseRecord['category'], amount: Number(amount), date, place: place.trim(), liters: l, odometer: odo };
         return useVoiceBatch.getState().update(batch, { ...patch, error: undefined });
       }
       const { error } = await supabase.from('expenses').insert({
         vehicle_id: vehicle!.id,
-        category,
+        category: category!,
         amount: Number(amount),
         expense_date: date,
         description: place.trim() || null,
         log_id: logId,
+        liters: l,
+        odometer_reading: odo,
       });
       if (error) throw error;
     },
@@ -66,7 +79,7 @@ export default function AddExpense() {
   if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'expenses' } }} />;
 
   const dateOk = /^\d{4}-\d{2}-\d{2}$/.test(date) && !isNaN(Date.parse(date));
-  const valid = !!vehicle && Number(amount) > 0 && dateOk;
+  const valid = !!vehicle && !!category && Number(amount) > 0 && dateOk;
   const linked = logs.find((l) => l.id === logId);
   const vehicleName = vehicle ? vehicle.nickname || `${vehicle.make} ${vehicle.model}` : '';
 
@@ -76,14 +89,14 @@ export default function AddExpense() {
         <Header title={t('expenses.add')} />
         <Text variant="caption" className="text-muted">{vehicleName}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2">
-          {(batch ? EXPENSE_CATEGORIES : cats).map((k) => (
+          {(batch ? codes : (['maintenance', ...codes] as Cat[])).map((k) => (
             <Pressable
               key={k}
               accessibilityRole="button"
               accessibilityState={{ selected: category === k }}
               onPress={() => setCategory(k)}
               className={`h-11 justify-center rounded-nav px-4 ${category === k ? 'bg-ink' : 'bg-line'}`}>
-              <Text variant="caption" className={category === k ? 'text-paper' : 'text-muted'}>{t(`expenses.chip.${k}`)}</Text>
+              <Text variant="caption" className={category === k ? 'text-paper' : 'text-muted'}>{chipLabel(k)}</Text>
             </Pressable>
           ))}
         </ScrollView>
@@ -111,6 +124,12 @@ export default function AddExpense() {
           error={dateOk ? undefined : t('expenses.dateError')}
         />
         <Field label={t('expenses.place')} value={place} onChangeText={setPlace} placeholder={t('expenses.optional')} />
+        {category === 'fuel' ? (
+          <View className="flex-row gap-4">
+            <Field className="flex-1" label={t('expenses.liters')} value={liters} onChangeText={setLiters} keyboardType="decimal-pad" placeholder={t('expenses.optional')} />
+            <Field className="flex-1" label={t('expenses.reading')} value={reading} onChangeText={setReading} keyboardType="number-pad" placeholder={t('expenses.optional')} />
+          </View>
+        ) : null}
         {batch ? null : (
           <Item
             icon={Link2}

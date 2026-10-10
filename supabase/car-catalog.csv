@@ -1,0 +1,982 @@
+brand_en,brand_ar,model_en,model_ar,car_type,brand_rank
+Hyundai,هيونداي,Accent,أكسنت,sedan,1
+Hyundai,هيونداي,Accent RB,أكسنت RB,sedan,1
+Hyundai,هيونداي,Accent HCi,أكسنت HCi,sedan,1
+Hyundai,هيونداي,Verna,فيرنا,sedan,1
+Hyundai,هيونداي,Elantra,إلنترا,sedan,1
+Hyundai,هيونداي,Elantra HD,إلنترا HD,sedan,1
+Hyundai,هيونداي,Elantra AD,إلنترا AD,sedan,1
+Hyundai,هيونداي,Elantra CN7,إلنترا CN7,sedan,1
+Hyundai,هيونداي,Tucson,توسان,suv,1
+Hyundai,هيونداي,Creta,كريتا,suv,1
+Hyundai,هيونداي,Bayon,بايون,suv,1
+Hyundai,هيونداي,Kona,كونا,suv,1
+Hyundai,هيونداي,Venue,فينيو,suv,1
+Hyundai,هيونداي,Santa Fe,سانتافي,suv,1
+Hyundai,هيونداي,Palisade,باليسيد,suv,1
+Hyundai,هيونداي,ix35,ix35,suv,1
+Hyundai,هيونداي,ix20,ix20,hatchback,1
+Hyundai,هيونداي,i10,i10,hatchback,1
+Hyundai,هيونداي,Grand i10,جراند i10,hatchback,1
+Hyundai,هيونداي,i20,i20,hatchback,1
+Hyundai,هيونداي,i30,i30,hatchback,1
+Hyundai,هيونداي,i40,i40,sedan,1
+Hyundai,هيونداي,Sonata,سوناتا,sedan,1
+Hyundai,هيونداي,Azera,أزيرا,sedan,1
+Hyundai,هيونداي,Solaris,سولاريس,sedan,1
+Hyundai,هيونداي,Excel,إكسل,sedan,1
+Hyundai,هيونداي,Matrix,ماتريكس,hatchback,1
+Hyundai,هيونداي,Getz,جيتز,hatchback,1
+Hyundai,هيونداي,Atos,أتوس,hatchback,1
+Hyundai,هيونداي,Coupe,كوبيه,coupe,1
+Hyundai,هيونداي,Veloster,فيلوستر,coupe,1
+Hyundai,هيونداي,Genesis Coupe,جينيسيس كوبيه,coupe,1
+Hyundai,هيونداي,H-1,H-1,van,1
+Hyundai,هيونداي,Staria,ستاريا,van,1
+Hyundai,هيونداي,Stargazer,ستارجيزر,van,1
+Hyundai,هيونداي,Trajet,تراجيت,van,1
+Hyundai,هيونداي,Terracan,تيراكان,suv,1
+Hyundai,هيونداي,Galloper,جالوبر,suv,1
+Hyundai,هيونداي,Ioniq,أيونيك,hatchback,1
+Hyundai,هيونداي,Ioniq 5,أيونيك 5,suv,1
+Hyundai,هيونداي,Ioniq 6,أيونيك 6,sedan,1
+Hyundai,هيونداي,Porter,بورتر,pickup,1
+Hyundai,هيونداي,Veracruz,فيراكروز,suv,1
+Hyundai,هيونداي,Equus,إيكوس,sedan,1
+Chevrolet,شيفروليه,Aveo,أفيو,sedan,2
+Chevrolet,شيفروليه,Optra,أوبترا,sedan,2
+Chevrolet,شيفروليه,Lanos,لانوس,sedan,2
+Chevrolet,شيفروليه,Cruze,كروز,sedan,2
+Chevrolet,شيفروليه,Sonic,سونيك,sedan,2
+Chevrolet,شيفروليه,Malibu,ماليبو,sedan,2
+Chevrolet,شيفروليه,Impala,إمبالا,sedan,2
+Chevrolet,شيفروليه,Epica,إبيكا,sedan,2
+Chevrolet,شيفروليه,Nubira,نوبيرا,sedan,2
+Chevrolet,شيفروليه,Spark,سبارك,hatchback,2
+Chevrolet,شيفروليه,Captiva,كابتيفا,suv,2
+Chevrolet,شيفروليه,Equinox,إكوينوكس,suv,2
+Chevrolet,شيفروليه,Trax,تراكس,suv,2
+Chevrolet,شيفروليه,Groove,جروف,suv,2
+Chevrolet,شيفروليه,Blazer,بليزر,suv,2
+Chevrolet,شيفروليه,Trailblazer,تريل بليزر,suv,2
+Chevrolet,شيفروليه,Traverse,ترافيرس,suv,2
+Chevrolet,شيفروليه,Tahoe,تاهو,suv,2
+Chevrolet,شيفروليه,Suburban,سوبربان,suv,2
+Chevrolet,شيفروليه,Frontera,فرونتيرا,suv,2
+Chevrolet,شيفروليه,Camaro,كامارو,sports,2
+Chevrolet,شيفروليه,Corvette,كورفيت,sports,2
+Chevrolet,شيفروليه,T-Series,دبابة,pickup,2
+Chevrolet,شيفروليه,D-Max,دي ماكس,pickup,2
+Chevrolet,شيفروليه,Silverado,سيلفرادو,pickup,2
+Chevrolet,شيفروليه,Colorado,كولورادو,pickup,2
+Chevrolet,شيفروليه,N300,N300,van,2
+Nissan,نيسان,Sunny,صني,sedan,3
+Nissan,نيسان,Sentra,سنترا,sedan,3
+Nissan,نيسان,Altima,ألتيما,sedan,3
+Nissan,نيسان,Maxima,ماكسيما,sedan,3
+Nissan,نيسان,Versa,فيرسا,sedan,3
+Nissan,نيسان,Bluebird,بلوبيرد,sedan,3
+Nissan,نيسان,Primera,بريميرا,sedan,3
+Nissan,نيسان,Almera,ألميرا,sedan,3
+Nissan,نيسان,Tiida,تيدا,hatchback,3
+Nissan,نيسان,Micra,ميكرا,hatchback,3
+Nissan,نيسان,Livina,ليفينا,hatchback,3
+Nissan,نيسان,Leaf,ليف,hatchback,3
+Nissan,نيسان,Qashqai,قشقاي,suv,3
+Nissan,نيسان,Juke,جوك,suv,3
+Nissan,نيسان,Kicks,كيكس,suv,3
+Nissan,نيسان,X-Trail,إكس تريل,suv,3
+Nissan,نيسان,Murano,مورانو,suv,3
+Nissan,نيسان,Rogue,روج,suv,3
+Nissan,نيسان,Pathfinder,باثفايندر,suv,3
+Nissan,نيسان,Patrol,باترول,suv,3
+Nissan,نيسان,Armada,أرمادا,suv,3
+Nissan,نيسان,350Z,350Z,sports,3
+Nissan,نيسان,370Z,370Z,sports,3
+Nissan,نيسان,GT-R,GT-R,sports,3
+Nissan,نيسان,Navara,نافارا,pickup,3
+Nissan,نيسان,Pickup,بيك أب,pickup,3
+Nissan,نيسان,Urvan,أورفان,van,3
+Nissan,نيسان,Ariya,أريا,suv,3
+Nissan,نيسان,Xterra,إكستيرا,suv,3
+Toyota,تويوتا,Corolla,كورولا,sedan,4
+Toyota,تويوتا,Camry,كامري,sedan,4
+Toyota,تويوتا,Belta,بيلتا,sedan,4
+Toyota,تويوتا,Echo,إيكو,sedan,4
+Toyota,تويوتا,Corona,كورونا,sedan,4
+Toyota,تويوتا,Cressida,كريسيدا,sedan,4
+Toyota,تويوتا,Tercel,تيرسل,sedan,4
+Toyota,تويوتا,Avalon,أفالون,sedan,4
+Toyota,تويوتا,Crown,كراون,sedan,4
+Toyota,تويوتا,Yaris,ياريس,hatchback,4
+Toyota,تويوتا,Starlet,ستارلت,hatchback,4
+Toyota,تويوتا,Auris,أوريس,hatchback,4
+Toyota,تويوتا,Aygo,أيجو,hatchback,4
+Toyota,تويوتا,Prius,بريوس,hatchback,4
+Toyota,تويوتا,Fortuner,فورتشنر,suv,4
+Toyota,تويوتا,Land Cruiser,لاند كروزر,suv,4
+Toyota,تويوتا,Prado,برادو,suv,4
+Toyota,تويوتا,RAV4,راف 4,suv,4
+Toyota,تويوتا,C-HR,C-HR,suv,4
+Toyota,تويوتا,Corolla Cross,كورولا كروس,suv,4
+Toyota,تويوتا,Rush,راش,suv,4
+Toyota,تويوتا,Raize,رايز,suv,4
+Toyota,تويوتا,Urban Cruiser,أوربان كروزر,suv,4
+Toyota,تويوتا,Highlander,هايلاندر,suv,4
+Toyota,تويوتا,FJ Cruiser,إف جي كروزر,suv,4
+Toyota,تويوتا,Sequoia,سيكويا,suv,4
+Toyota,تويوتا,4Runner,فور رنر,suv,4
+Toyota,تويوتا,bZ4X,bZ4X,suv,4
+Toyota,تويوتا,Supra,سوبرا,sports,4
+Toyota,تويوتا,86,86,coupe,4
+Toyota,تويوتا,Celica,سيليكا,coupe,4
+Toyota,تويوتا,Hilux,هايلوكس,pickup,4
+Toyota,تويوتا,Tundra,تندرا,pickup,4
+Toyota,تويوتا,Hiace,هايس,van,4
+Toyota,تويوتا,Avanza,أفانزا,van,4
+Toyota,تويوتا,Innova,إينوفا,van,4
+Toyota,تويوتا,Previa,بريفيا,van,4
+Toyota,تويوتا,Sienna,سيينا,van,4
+Toyota,تويوتا,Venza,فينزا,suv,4
+Toyota,تويوتا,Tacoma,تاكوما,pickup,4
+Kia,كيا,Cerato,سيراتو,sedan,5
+Kia,كيا,Grand Cerato,جراند سيراتو,sedan,5
+Kia,كيا,K3,K3,sedan,5
+Kia,كيا,K5,K5,sedan,5
+Kia,كيا,Optima,أوبتيما,sedan,5
+Kia,كيا,Cadenza,كادينزا,sedan,5
+Kia,كيا,Pegas,بيجاس,sedan,5
+Kia,كيا,Spectra,سبكترا,sedan,5
+Kia,كيا,Shuma,شوما,sedan,5
+Kia,كيا,Sephia,سيفيا,sedan,5
+Kia,كيا,Stinger,ستينجر,sedan,5
+Kia,كيا,Picanto,بيكانتو,hatchback,5
+Kia,كيا,Rio,ريو,hatchback,5
+Kia,كيا,Ceed,سيد,hatchback,5
+Kia,كيا,Soul,سول,hatchback,5
+Kia,كيا,Pride,برايد,hatchback,5
+Kia,كيا,Sportage,سبورتاج,suv,5
+Kia,كيا,Sorento,سورينتو,suv,5
+Kia,كيا,Seltos,سيلتوس,suv,5
+Kia,كيا,Sonet,سونيت,suv,5
+Kia,كيا,Xceed,إكسيد,suv,5
+Kia,كيا,Stonic,ستونيك,suv,5
+Kia,كيا,Niro,نيرو,suv,5
+Kia,كيا,Mohave,موهافي,suv,5
+Kia,كيا,Telluride,تيلورايد,suv,5
+Kia,كيا,EV6,EV6,suv,5
+Kia,كيا,EV9,EV9,suv,5
+Kia,كيا,Cerato Koup,سيراتو كوب,coupe,5
+Kia,كيا,Carens,كارينز,van,5
+Kia,كيا,Carnival,كرنفال,van,5
+Kia,كيا,Bongo,بونجو,pickup,5
+Kia,كيا,K900,K900,sedan,5
+MG,إم جي,5,5,sedan,6
+MG,إم جي,6,6,sedan,6
+MG,إم جي,7,7,sedan,6
+MG,إم جي,GT,GT,sedan,6
+MG,إم جي,350,350,sedan,6
+MG,إم جي,360,360,sedan,6
+MG,إم جي,550,550,sedan,6
+MG,إم جي,750,750,sedan,6
+MG,إم جي,3,3,hatchback,6
+MG,إم جي,4,4,hatchback,6
+MG,إم جي,ZS,ZS,suv,6
+MG,إم جي,HS,HS,suv,6
+MG,إم جي,RX5,RX5,suv,6
+MG,إم جي,RX5 Plus,RX5 بلس,suv,6
+MG,إم جي,RX8,RX8,suv,6
+MG,إم جي,One,ون,suv,6
+Chery,شيري,Arrizo 5,أريزو 5,sedan,7
+Chery,شيري,Arrizo 6,أريزو 6,sedan,7
+Chery,شيري,Arrizo 8,أريزو 8,sedan,7
+Chery,شيري,Envy,إنفي,sedan,7
+Chery,شيري,Eastar,إيستار,sedan,7
+Chery,شيري,A11,A11,sedan,7
+Chery,شيري,A15,A15,sedan,7
+Chery,شيري,Tiggo,تيجو,suv,7
+Chery,شيري,Tiggo 2,تيجو 2,suv,7
+Chery,شيري,Tiggo 3,تيجو 3,suv,7
+Chery,شيري,Tiggo 4,تيجو 4,suv,7
+Chery,شيري,Tiggo 4 Pro,تيجو 4 برو,suv,7
+Chery,شيري,Tiggo 7,تيجو 7,suv,7
+Chery,شيري,Tiggo 7 Pro,تيجو 7 برو,suv,7
+Chery,شيري,Tiggo 8,تيجو 8,suv,7
+Chery,شيري,Tiggo 8 Pro,تيجو 8 برو,suv,7
+Renault,رينو,Logan,لوجان,sedan,8
+Renault,رينو,Taliant,تاليانت,sedan,8
+Renault,رينو,Megane,ميجان,sedan,8
+Renault,رينو,Fluence,فلوانس,sedan,8
+Renault,رينو,Symbol,سيمبول,sedan,8
+Renault,رينو,Laguna,لاجونا,sedan,8
+Renault,رينو,Talisman,تاليسمان,sedan,8
+Renault,رينو,Sandero,سانديرو,hatchback,8
+Renault,رينو,Sandero Stepway,سانديرو ستيب واي,hatchback,8
+Renault,رينو,Clio,كليو,hatchback,8
+Renault,رينو,Duster,داستر,suv,8
+Renault,رينو,Kadjar,كادجار,suv,8
+Renault,رينو,Captur,كابتشر,suv,8
+Renault,رينو,Koleos,كوليوس,suv,8
+Renault,رينو,Austral,أوسترال,suv,8
+Renault,رينو,Arkana,أركانا,suv,8
+Renault,رينو,Scenic,سينيك,van,8
+Renault,رينو,Kangoo,كانجو,van,8
+Renault,رينو,Trafic,ترافيك,van,8
+Renault,رينو,Master,ماستر,van,8
+Mitsubishi,ميتسوبيشي,Lancer,لانسر,sedan,9
+Mitsubishi,ميتسوبيشي,Lancer EX,لانسر EX,sedan,9
+Mitsubishi,ميتسوبيشي,Lancer Puma,لانسر بوما,sedan,9
+Mitsubishi,ميتسوبيشي,Attrage,أتراج,sedan,9
+Mitsubishi,ميتسوبيشي,Galant,جالانت,sedan,9
+Mitsubishi,ميتسوبيشي,Mirage,ميراج,hatchback,9
+Mitsubishi,ميتسوبيشي,Colt,كولت,hatchback,9
+Mitsubishi,ميتسوبيشي,Eclipse Cross,إكليبس كروس,suv,9
+Mitsubishi,ميتسوبيشي,Outlander,أوتلاندر,suv,9
+Mitsubishi,ميتسوبيشي,ASX,ASX,suv,9
+Mitsubishi,ميتسوبيشي,Pajero,باجيرو,suv,9
+Mitsubishi,ميتسوبيشي,Pajero Sport,باجيرو سبورت,suv,9
+Mitsubishi,ميتسوبيشي,Nativa,ناتيفا,suv,9
+Mitsubishi,ميتسوبيشي,Eclipse,إكليبس,coupe,9
+Mitsubishi,ميتسوبيشي,L200,L200,pickup,9
+Mitsubishi,ميتسوبيشي,Xpander,إكسباندر,van,9
+Peugeot,بيجو,301,301,sedan,10
+Peugeot,بيجو,508,508,sedan,10
+Peugeot,بيجو,408,408,sedan,10
+Peugeot,بيجو,407,407,sedan,10
+Peugeot,بيجو,406,406,sedan,10
+Peugeot,بيجو,405,405,sedan,10
+Peugeot,بيجو,504,504,sedan,10
+Peugeot,بيجو,505,505,sedan,10
+Peugeot,بيجو,607,607,sedan,10
+Peugeot,بيجو,208,208,hatchback,10
+Peugeot,بيجو,308,308,hatchback,10
+Peugeot,بيجو,307,307,hatchback,10
+Peugeot,بيجو,207,207,hatchback,10
+Peugeot,بيجو,206,206,hatchback,10
+Peugeot,بيجو,205,205,hatchback,10
+Peugeot,بيجو,306,306,hatchback,10
+Peugeot,بيجو,106,106,hatchback,10
+Peugeot,بيجو,2008,2008,suv,10
+Peugeot,بيجو,3008,3008,suv,10
+Peugeot,بيجو,5008,5008,suv,10
+Peugeot,بيجو,RCZ,RCZ,coupe,10
+Peugeot,بيجو,Landtrek,لاندتريك,pickup,10
+Peugeot,بيجو,Partner,بارتنر,van,10
+Peugeot,بيجو,Expert,إكسبرت,van,10
+Peugeot,بيجو,Traveller,ترافيلر,van,10
+Peugeot,بيجو,Boxer,بوكسر,van,10
+Fiat,فيات,Tipo,تيبو,sedan,11
+Fiat,فيات,Siena,سيينا,sedan,11
+Fiat,فيات,Petra,بيترا,sedan,11
+Fiat,فيات,Linea,لينيا,sedan,11
+Fiat,فيات,Albea,ألبيا,sedan,11
+Fiat,فيات,Shahin,شاهين,sedan,11
+Fiat,فيات,Dogan,دوجان,sedan,11
+Fiat,فيات,Tempra,تمبرا,sedan,11
+Fiat,فيات,Regata,ريجاتا,sedan,11
+Fiat,فيات,Marea,ماريا,sedan,11
+Fiat,فيات,128,128,sedan,11
+Fiat,فيات,131,131,sedan,11
+Fiat,فيات,132,132,sedan,11
+Fiat,فيات,124,124,sedan,11
+Fiat,فيات,125,125,sedan,11
+Fiat,فيات,500,500,hatchback,11
+Fiat,فيات,Punto,بونتو,hatchback,11
+Fiat,فيات,Grande Punto,جراند بونتو,hatchback,11
+Fiat,فيات,Uno,أونو,hatchback,11
+Fiat,فيات,Palio,باليو,hatchback,11
+Fiat,فيات,Bravo,برافو,hatchback,11
+Fiat,فيات,Brava,برافا,hatchback,11
+Fiat,فيات,Panda,باندا,hatchback,11
+Fiat,فيات,127,127,hatchback,11
+Fiat,فيات,126,126,hatchback,11
+Fiat,فيات,500X,500X,suv,11
+Fiat,فيات,Doblo,دوبلو,van,11
+Fiat,فيات,Fiorino,فيورينو,van,11
+Fiat,فيات,Ducato,دوكاتو,van,11
+Skoda,سكودا,Octavia,أوكتافيا,sedan,12
+Skoda,سكودا,Rapid,رابيد,sedan,12
+Skoda,سكودا,Superb,سوبيرب,sedan,12
+Skoda,سكودا,Fabia,فابيا,hatchback,12
+Skoda,سكودا,Scala,سكالا,hatchback,12
+Skoda,سكودا,Felicia,فيليشيا,hatchback,12
+Skoda,سكودا,Favorit,فافوريت,hatchback,12
+Skoda,سكودا,Roomster,رومستر,hatchback,12
+Skoda,سكودا,Kodiaq,كودياك,suv,12
+Skoda,سكودا,Karoq,كاروك,suv,12
+Skoda,سكودا,Kamiq,كاميك,suv,12
+Skoda,سكودا,Yeti,يتي,suv,12
+Skoda,سكودا,Enyaq,إنياك,suv,12
+BYD,بي واي دي,F3,F3,sedan,13
+BYD,بي واي دي,L3,L3,sedan,13
+BYD,بي واي دي,F6,F6,sedan,13
+BYD,بي واي دي,Seal,سيل,sedan,13
+BYD,بي واي دي,Han,هان,sedan,13
+BYD,بي واي دي,Qin Plus,تشين بلس,sedan,13
+BYD,بي واي دي,F0,F0,hatchback,13
+BYD,بي واي دي,Dolphin,دولفين,hatchback,13
+BYD,بي واي دي,Seagull,سيجال,hatchback,13
+BYD,بي واي دي,e2,e2,hatchback,13
+BYD,بي واي دي,Song Plus,سونج بلس,suv,13
+BYD,بي واي دي,Song Pro,سونج برو,suv,13
+BYD,بي واي دي,Yuan Plus,يوان بلس,suv,13
+BYD,بي واي دي,Atto 3,أتو 3,suv,13
+BYD,بي واي دي,Tang,تانج,suv,13
+BYD,بي واي دي,Shark,شارك,pickup,13
+Suzuki,سوزوكي,Dzire,ديزاير,sedan,14
+Suzuki,سوزوكي,Ciaz,سياز,sedan,14
+Suzuki,سوزوكي,Liana,ليانا,sedan,14
+Suzuki,سوزوكي,Swift,سويفت,hatchback,14
+Suzuki,سوزوكي,Alto,ألتو,hatchback,14
+Suzuki,سوزوكي,Maruti,ماروتي,hatchback,14
+Suzuki,سوزوكي,Baleno,بالينو,hatchback,14
+Suzuki,سوزوكي,Celerio,سيليريو,hatchback,14
+Suzuki,سوزوكي,S-Presso,إس بريسو,hatchback,14
+Suzuki,سوزوكي,Ignis,إجنيس,hatchback,14
+Suzuki,سوزوكي,SX4,SX4,hatchback,14
+Suzuki,سوزوكي,Vitara,فيتارا,suv,14
+Suzuki,سوزوكي,Grand Vitara,جراند فيتارا,suv,14
+Suzuki,سوزوكي,Jimny,جيمني,suv,14
+Suzuki,سوزوكي,Fronx,فرونكس,suv,14
+Suzuki,سوزوكي,S-Cross,إس كروس,suv,14
+Suzuki,سوزوكي,XL7,XL7,suv,14
+Suzuki,سوزوكي,Samurai,ساموراي,suv,14
+Suzuki,سوزوكي,Ertiga,إرتيجا,van,14
+Suzuki,سوزوكي,APV,APV,van,14
+Suzuki,سوزوكي,Van,فان,van,14
+Suzuki,سوزوكي,Pick Up,بيك أب,pickup,14
+Opel,أوبل,Insignia,إنسيجنيا,sedan,15
+Opel,أوبل,Vectra,فيكترا,sedan,15
+Opel,أوبل,Kadett,كاديت,sedan,15
+Opel,أوبل,Omega,أوميجا,sedan,15
+Opel,أوبل,Ascona,أسكونا,sedan,15
+Opel,أوبل,Rekord,ريكورد,sedan,15
+Opel,أوبل,Astra,أسترا,hatchback,15
+Opel,أوبل,Corsa,كورسا,hatchback,15
+Opel,أوبل,Meriva,ميريفا,hatchback,15
+Opel,أوبل,Grandland,جراند لاند,suv,15
+Opel,أوبل,Crossland,كروس لاند,suv,15
+Opel,أوبل,Mokka,موكا,suv,15
+Opel,أوبل,Frontera,فرونتيرا,suv,15
+Opel,أوبل,Tigra,تيجرا,coupe,15
+Opel,أوبل,Zafira,زافيرا,van,15
+Opel,أوبل,Combo,كومبو,van,15
+Volkswagen,فولكس فاجن,Passat,باسات,sedan,16
+Volkswagen,فولكس فاجن,Jetta,جيتا,sedan,16
+Volkswagen,فولكس فاجن,Bora,بورا,sedan,16
+Volkswagen,فولكس فاجن,Vento,فينتو,sedan,16
+Volkswagen,فولكس فاجن,Santana,سانتانا,sedan,16
+Volkswagen,فولكس فاجن,CC,CC,sedan,16
+Volkswagen,فولكس فاجن,Arteon,أرتيون,sedan,16
+Volkswagen,فولكس فاجن,Golf,جولف,hatchback,16
+Volkswagen,فولكس فاجن,Polo,بولو,hatchback,16
+Volkswagen,فولكس فاجن,Beetle,بيتل,hatchback,16
+Volkswagen,فولكس فاجن,Parati,باراتي,hatchback,16
+Volkswagen,فولكس فاجن,Gol,جول,hatchback,16
+Volkswagen,فولكس فاجن,Pointer,بوينتر,hatchback,16
+Volkswagen,فولكس فاجن,ID.3,ID.3,hatchback,16
+Volkswagen,فولكس فاجن,Tiguan,تيجوان,suv,16
+Volkswagen,فولكس فاجن,Touareg,طوارق,suv,16
+Volkswagen,فولكس فاجن,T-Roc,تي روك,suv,16
+Volkswagen,فولكس فاجن,Teramont,تيرامونت,suv,16
+Volkswagen,فولكس فاجن,ID.4,ID.4,suv,16
+Volkswagen,فولكس فاجن,ID.6,ID.6,suv,16
+Volkswagen,فولكس فاجن,Scirocco,شيروكو,coupe,16
+Volkswagen,فولكس فاجن,Amarok,أماروك,pickup,16
+Volkswagen,فولكس فاجن,Touran,توران,van,16
+Volkswagen,فولكس فاجن,Sharan,شاران,van,16
+Volkswagen,فولكس فاجن,Caddy,كادي,van,16
+Volkswagen,فولكس فاجن,Transporter,ترانسبورتر,van,16
+Volkswagen,فولكس فاجن,Eos,إيوس,convertible,16
+Mercedes-Benz,مرسيدس,C-Class,سي كلاس,sedan,17
+Mercedes-Benz,مرسيدس,E-Class,إي كلاس,sedan,17
+Mercedes-Benz,مرسيدس,S-Class,إس كلاس,sedan,17
+Mercedes-Benz,مرسيدس,CLA,CLA,sedan,17
+Mercedes-Benz,مرسيدس,CLS,CLS,sedan,17
+Mercedes-Benz,مرسيدس,190,190,sedan,17
+Mercedes-Benz,مرسيدس,EQE,EQE,sedan,17
+Mercedes-Benz,مرسيدس,EQS,EQS,sedan,17
+Mercedes-Benz,مرسيدس,A-Class,إيه كلاس,hatchback,17
+Mercedes-Benz,مرسيدس,B-Class,بي كلاس,hatchback,17
+Mercedes-Benz,مرسيدس,GLA,GLA,suv,17
+Mercedes-Benz,مرسيدس,GLB,GLB,suv,17
+Mercedes-Benz,مرسيدس,GLC,GLC,suv,17
+Mercedes-Benz,مرسيدس,GLE,GLE,suv,17
+Mercedes-Benz,مرسيدس,GLS,GLS,suv,17
+Mercedes-Benz,مرسيدس,GLK,GLK,suv,17
+Mercedes-Benz,مرسيدس,ML,ML,suv,17
+Mercedes-Benz,مرسيدس,G-Class,جي كلاس,suv,17
+Mercedes-Benz,مرسيدس,EQA,EQA,suv,17
+Mercedes-Benz,مرسيدس,EQB,EQB,suv,17
+Mercedes-Benz,مرسيدس,EQC,EQC,suv,17
+Mercedes-Benz,مرسيدس,CLK,CLK,coupe,17
+Mercedes-Benz,مرسيدس,CLE,CLE,coupe,17
+Mercedes-Benz,مرسيدس,AMG GT,AMG GT,sports,17
+Mercedes-Benz,مرسيدس,SLK,SLK,convertible,17
+Mercedes-Benz,مرسيدس,SLC,SLC,convertible,17
+Mercedes-Benz,مرسيدس,SL,SL,convertible,17
+Mercedes-Benz,مرسيدس,X-Class,إكس كلاس,pickup,17
+Mercedes-Benz,مرسيدس,V-Class,في كلاس,van,17
+Mercedes-Benz,مرسيدس,Vito,فيتو,van,17
+Mercedes-Benz,مرسيدس,Viano,فيانو,van,17
+Mercedes-Benz,مرسيدس,Sprinter,سبرينتر,van,17
+Mercedes-Benz,مرسيدس,GL,GL,suv,17
+Mercedes-Benz,مرسيدس,CL,CL,coupe,17
+BMW,بي إم دبليو,3 Series,الفئة الثالثة,sedan,18
+BMW,بي إم دبليو,5 Series,الفئة الخامسة,sedan,18
+BMW,بي إم دبليو,7 Series,الفئة السابعة,sedan,18
+BMW,بي إم دبليو,i4,i4,sedan,18
+BMW,بي إم دبليو,i5,i5,sedan,18
+BMW,بي إم دبليو,i7,i7,sedan,18
+BMW,بي إم دبليو,M3,M3,sedan,18
+BMW,بي إم دبليو,M5,M5,sedan,18
+BMW,بي إم دبليو,1 Series,الفئة الأولى,hatchback,18
+BMW,بي إم دبليو,i3,i3,hatchback,18
+BMW,بي إم دبليو,X1,X1,suv,18
+BMW,بي إم دبليو,X2,X2,suv,18
+BMW,بي إم دبليو,X3,X3,suv,18
+BMW,بي إم دبليو,X4,X4,suv,18
+BMW,بي إم دبليو,X5,X5,suv,18
+BMW,بي إم دبليو,X6,X6,suv,18
+BMW,بي إم دبليو,X7,X7,suv,18
+BMW,بي إم دبليو,XM,XM,suv,18
+BMW,بي إم دبليو,iX,iX,suv,18
+BMW,بي إم دبليو,iX1,iX1,suv,18
+BMW,بي إم دبليو,iX3,iX3,suv,18
+BMW,بي إم دبليو,2 Series,الفئة الثانية,coupe,18
+BMW,بي إم دبليو,4 Series,الفئة الرابعة,coupe,18
+BMW,بي إم دبليو,6 Series,الفئة السادسة,coupe,18
+BMW,بي إم دبليو,8 Series,الفئة الثامنة,coupe,18
+BMW,بي إم دبليو,M2,M2,coupe,18
+BMW,بي إم دبليو,M4,M4,coupe,18
+BMW,بي إم دبليو,i8,i8,sports,18
+BMW,بي إم دبليو,Z3,Z3,convertible,18
+BMW,بي إم دبليو,Z4,Z4,convertible,18
+Jetour,جيتور,X70,X70,suv,19
+Jetour,جيتور,X70 Plus,X70 بلس,suv,19
+Jetour,جيتور,X90,X90,suv,19
+Jetour,جيتور,X90 Plus,X90 بلس,suv,19
+Jetour,جيتور,X95,X95,suv,19
+Jetour,جيتور,Dashing,داشينج,suv,19
+Jetour,جيتور,T2,T2,suv,19
+Haval,هافال,H6,H6,suv,20
+Haval,هافال,Jolion,جوليون,suv,20
+Haval,هافال,H2,H2,suv,20
+Haval,هافال,H9,H9,suv,20
+Haval,هافال,M6,M6,suv,20
+Haval,هافال,Dargo,دارجو,suv,20
+Geely,جيلي,Emgrand,إمجراند,sedan,21
+Geely,جيلي,Emgrand 7,إمجراند 7,sedan,21
+Geely,جيلي,Binray,بن راي,sedan,21
+Geely,جيلي,CK,CK,sedan,21
+Geely,جيلي,Pandino,باندينو,hatchback,21
+Geely,جيلي,Geometry C,جيومتري C,hatchback,21
+Geely,جيلي,Coolray,كولراي,suv,21
+Geely,جيلي,Emgrand X7,إمجراند X7,suv,21
+Geely,جيلي,Okavango,أوكافانجو,suv,21
+Geely,جيلي,Starray,ستاراي,suv,21
+Geely,جيلي,Cityray,سيتي راي,suv,21
+Geely,جيلي,Azkarra,أزكارا,suv,21
+Geely,جيلي,GX3 Pro,GX3 برو,suv,21
+Geely,جيلي,EX5,EX5,suv,21
+Changan,شانجان,Alsvin,ألسفن,sedan,22
+Changan,شانجان,Eado,إيدو,sedan,22
+Changan,شانجان,Eado Plus,إيدو بلس,sedan,22
+Changan,شانجان,UNI-V,يوني في,sedan,22
+Changan,شانجان,Benni,بيني,hatchback,22
+Changan,شانجان,CS15,CS15,suv,22
+Changan,شانجان,CS35,CS35,suv,22
+Changan,شانجان,CS35 Plus,CS35 بلس,suv,22
+Changan,شانجان,CS55,CS55,suv,22
+Changan,شانجان,CS55 Plus,CS55 بلس,suv,22
+Changan,شانجان,CS75,CS75,suv,22
+Changan,شانجان,CS75 Plus,CS75 بلس,suv,22
+Changan,شانجان,CS85,CS85,suv,22
+Changan,شانجان,CS95,CS95,suv,22
+Changan,شانجان,UNI-T,يوني تي,suv,22
+Changan,شانجان,UNI-K,يوني كي,suv,22
+Changan,شانجان,Hunter,هانتر,pickup,22
+Changan,شانجان,Star,ستار,van,22
+Citroen,ستروين,C-Elysee,سي إليزيه,sedan,23
+Citroen,ستروين,C5,C5,sedan,23
+Citroen,ستروين,Xantia,زانتيا,sedan,23
+Citroen,ستروين,C1,C1,hatchback,23
+Citroen,ستروين,C2,C2,hatchback,23
+Citroen,ستروين,C3,C3,hatchback,23
+Citroen,ستروين,C4,C4,hatchback,23
+Citroen,ستروين,Xsara,إكسارا,hatchback,23
+Citroen,ستروين,Saxo,ساكسو,hatchback,23
+Citroen,ستروين,ZX,ZX,hatchback,23
+Citroen,ستروين,AX,AX,hatchback,23
+Citroen,ستروين,BX,BX,hatchback,23
+Citroen,ستروين,C3 Aircross,C3 إيركروس,suv,23
+Citroen,ستروين,C5 Aircross,C5 إيركروس,suv,23
+Citroen,ستروين,C4 Picasso,C4 بيكاسو,van,23
+Citroen,ستروين,Xsara Picasso,إكسارا بيكاسو,van,23
+Citroen,ستروين,Berlingo,بيرلينجو,van,23
+Citroen,ستروين,Jumpy,جامبي,van,23
+Honda,هوندا,Civic,سيفيك,sedan,24
+Honda,هوندا,City,سيتي,sedan,24
+Honda,هوندا,Accord,أكورد,sedan,24
+Honda,هوندا,Legend,ليجند,sedan,24
+Honda,هوندا,Jazz,جاز,hatchback,24
+Honda,هوندا,Fit,فيت,hatchback,24
+Honda,هوندا,CR-V,سي آر في,suv,24
+Honda,هوندا,HR-V,إتش آر في,suv,24
+Honda,هوندا,ZR-V,ZR-V,suv,24
+Honda,هوندا,Pilot,بايلوت,suv,24
+Honda,هوندا,e:NP1,e:NP1,suv,24
+Honda,هوندا,e:NS1,e:NS1,suv,24
+Honda,هوندا,Prelude,بريلود,coupe,24
+Honda,هوندا,Integra,إنتيجرا,coupe,24
+Honda,هوندا,S2000,S2000,convertible,24
+Honda,هوندا,Odyssey,أوديسي,van,24
+Mazda,مازدا,3,3,sedan,25
+Mazda,مازدا,6,6,sedan,25
+Mazda,مازدا,323,323,sedan,25
+Mazda,مازدا,626,626,sedan,25
+Mazda,مازدا,929,929,sedan,25
+Mazda,مازدا,2,2,hatchback,25
+Mazda,مازدا,CX-3,CX-3,suv,25
+Mazda,مازدا,CX-30,CX-30,suv,25
+Mazda,مازدا,CX-5,CX-5,suv,25
+Mazda,مازدا,CX-7,CX-7,suv,25
+Mazda,مازدا,CX-9,CX-9,suv,25
+Mazda,مازدا,CX-60,CX-60,suv,25
+Mazda,مازدا,CX-90,CX-90,suv,25
+Mazda,مازدا,MX-30,MX-30,suv,25
+Mazda,مازدا,RX-8,RX-8,sports,25
+Mazda,مازدا,MX-5,MX-5,convertible,25
+Mazda,مازدا,BT-50,BT-50,pickup,25
+Mazda,مازدا,CX-50,CX-50,suv,25
+Jeep,جيب,Wrangler,رانجلر,suv,26
+Jeep,جيب,Grand Cherokee,جراند شيروكي,suv,26
+Jeep,جيب,Cherokee,شيروكي,suv,26
+Jeep,جيب,Renegade,رينيجيد,suv,26
+Jeep,جيب,Compass,كومباس,suv,26
+Jeep,جيب,Liberty,ليبرتي,suv,26
+Jeep,جيب,Commander,كوماندر,suv,26
+Jeep,جيب,Patriot,باتريوت,suv,26
+Jeep,جيب,Avenger,أفينجر,suv,26
+Jeep,جيب,Gladiator,جلادياتور,pickup,26
+Seat,سيات,Toledo,توليدو,sedan,27
+Seat,سيات,Cordoba,كوردوبا,sedan,27
+Seat,سيات,Ibiza,إيبيزا,hatchback,27
+Seat,سيات,Leon,ليون,hatchback,27
+Seat,سيات,Altea,ألتيا,hatchback,27
+Seat,سيات,Ateca,أتيكا,suv,27
+Seat,سيات,Arona,أرونا,suv,27
+Seat,سيات,Tarraco,تاراكو,suv,27
+Seat,سيات,Alhambra,الهمبرا,van,27
+Lada,لادا,2107,2107,sedan,28
+Lada,لادا,2105,2105,sedan,28
+Lada,لادا,2106,2106,sedan,28
+Lada,لادا,2110,2110,sedan,28
+Lada,لادا,Granta,جرانتا,sedan,28
+Lada,لادا,Vesta,فيستا,sedan,28
+Lada,لادا,2104,2104,hatchback,28
+Lada,لادا,Samara,سمارا,hatchback,28
+Lada,لادا,Kalina,كالينا,hatchback,28
+Lada,لادا,Niva,نيفا,suv,28
+Daewoo,دايو,Lanos,لانوس,sedan,29
+Daewoo,دايو,Nubira,نوبيرا,sedan,29
+Daewoo,دايو,Leganza,ليجانزا,sedan,29
+Daewoo,دايو,Cielo,سيلو,sedan,29
+Daewoo,دايو,Racer,ريسر,sedan,29
+Daewoo,دايو,Espero,إسبيرو,sedan,29
+Daewoo,دايو,Lacetti,لاسيتي,sedan,29
+Daewoo,دايو,Nexia,نيكسيا,sedan,29
+Daewoo,دايو,Juliet,جوليت,hatchback,29
+Daewoo,دايو,Matiz,ماتيز,hatchback,29
+Daewoo,دايو,Tico,تيكو,hatchback,29
+Daewoo,دايو,Damas,داماس,van,29
+Speranza,سبيرانزا,A11,A11,sedan,30
+Speranza,سبيرانزا,A113,A113,sedan,30
+Speranza,سبيرانزا,A516,A516,sedan,30
+Speranza,سبيرانزا,A620,A620,sedan,30
+Speranza,سبيرانزا,M12,M12,sedan,30
+Speranza,سبيرانزا,A213,A213,hatchback,30
+Speranza,سبيرانزا,M11,M11,hatchback,30
+Speranza,سبيرانزا,Tiggo,تيجو,suv,30
+Ford,فورد,Fusion,فيوجن,sedan,31
+Ford,فورد,Mondeo,مونديو,sedan,31
+Ford,فورد,Taurus,توروس,sedan,31
+Ford,فورد,Escort,إسكورت,sedan,31
+Ford,فورد,Focus,فوكس,hatchback,31
+Ford,فورد,Fiesta,فييستا,hatchback,31
+Ford,فورد,B-Max,بي ماكس,hatchback,31
+Ford,فورد,C-Max,سي ماكس,hatchback,31
+Ford,فورد,Ka,كا,hatchback,31
+Ford,فورد,Kuga,كوجا,suv,31
+Ford,فورد,EcoSport,إيكوسبورت,suv,31
+Ford,فورد,Territory,تيريتوري,suv,31
+Ford,فورد,Puma,بوما,suv,31
+Ford,فورد,Escape,إسكيب,suv,31
+Ford,فورد,Edge,إيدج,suv,31
+Ford,فورد,Explorer,إكسبلورر,suv,31
+Ford,فورد,Expedition,إكسبيديشن,suv,31
+Ford,فورد,Everest,إيفرست,suv,31
+Ford,فورد,Bronco,برونكو,suv,31
+Ford,فورد,Mustang,موستانج,sports,31
+Ford,فورد,Ranger,رينجر,pickup,31
+Ford,فورد,F-150,F-150,pickup,31
+Ford,فورد,Transit,ترانزيت,van,31
+Ford,فورد,Tourneo,تورنيو,van,31
+Ford,فورد,Mustang Mach-E,موستانج ماك إي,suv,31
+Ford,فورد,Bronco Sport,برونكو سبورت,suv,31
+Audi,أودي,A3,A3,sedan,32
+Audi,أودي,A4,A4,sedan,32
+Audi,أودي,A6,A6,sedan,32
+Audi,أودي,A7,A7,sedan,32
+Audi,أودي,A8,A8,sedan,32
+Audi,أودي,80,80,sedan,32
+Audi,أودي,100,100,sedan,32
+Audi,أودي,A1,A1,hatchback,32
+Audi,أودي,Q2,Q2,suv,32
+Audi,أودي,Q3,Q3,suv,32
+Audi,أودي,Q5,Q5,suv,32
+Audi,أودي,Q7,Q7,suv,32
+Audi,أودي,Q8,Q8,suv,32
+Audi,أودي,e-tron,إي ترون,suv,32
+Audi,أودي,Q4 e-tron,Q4 إي ترون,suv,32
+Audi,أودي,Q5 e-tron,Q5 إي ترون,suv,32
+Audi,أودي,A5,A5,coupe,32
+Audi,أودي,TT,TT,coupe,32
+Audi,أودي,R8,R8,sports,32
+Audi,أودي,e-tron GT,إي ترون GT,sedan,32
+Proton,بروتون,Saga,ساجا,sedan,33
+Proton,بروتون,Persona,بيرسونا,sedan,33
+Proton,بروتون,Waja,واجا,sedan,33
+Proton,بروتون,Wira,ويرا,sedan,33
+Proton,بروتون,Preve,بريفي,sedan,33
+Proton,بروتون,Gen-2,جين 2,hatchback,33
+Proton,بروتون,Satria,ساتريا,hatchback,33
+Proton,بروتون,X50,X50,suv,33
+Proton,بروتون,X70,X70,suv,33
+Proton,بروتون,Exora,إكسورا,van,33
+Brilliance,بريليانس,Galena,جالينا,sedan,34
+Brilliance,بريليانس,Splendor,سبلندور,sedan,34
+Brilliance,بريليانس,FSV,FSV,sedan,34
+Brilliance,بريليانس,H230,H230,sedan,34
+Brilliance,بريليانس,H330,H330,sedan,34
+Brilliance,بريليانس,FRV,FRV,hatchback,34
+Brilliance,بريليانس,FRV Cross,FRV كروس,hatchback,34
+Brilliance,بريليانس,V3,V3,suv,34
+Brilliance,بريليانس,V5,V5,suv,34
+Alfa Romeo,ألفا روميو,Giulia,جوليا,sedan,1000
+Alfa Romeo,ألفا روميو,156,156,sedan,1000
+Alfa Romeo,ألفا روميو,159,159,sedan,1000
+Alfa Romeo,ألفا روميو,Giulietta,جوليتا,hatchback,1000
+Alfa Romeo,ألفا روميو,MiTo,ميتو,hatchback,1000
+Alfa Romeo,ألفا روميو,147,147,hatchback,1000
+Alfa Romeo,ألفا روميو,Stelvio,ستيلفيو,suv,1000
+Alfa Romeo,ألفا روميو,Tonale,تونالي,suv,1000
+Aston Martin,أستون مارتن,DBX,DBX,suv,1000
+Aston Martin,أستون مارتن,DB11,DB11,coupe,1000
+Aston Martin,أستون مارتن,Vantage,فانتاج,sports,1000
+Avatr,أفاتار,12,12,sedan,1000
+Avatr,أفاتار,11,11,suv,1000
+BAIC,بايك,U5 Plus,U5 بلس,sedan,1000
+BAIC,بايك,D20,D20,hatchback,1000
+BAIC,بايك,X3,X3,suv,1000
+BAIC,بايك,X7,X7,suv,1000
+BAIC,بايك,X25,X25,suv,1000
+BAIC,بايك,X35,X35,suv,1000
+BAIC,بايك,X55,X55,suv,1000
+BAIC,بايك,BJ30,BJ30,suv,1000
+BAIC,بايك,BJ40,BJ40,suv,1000
+Bentley,بنتلي,Flying Spur,فلاينج سبير,sedan,1000
+Bentley,بنتلي,Bentayga,بنتايجا,suv,1000
+Bentley,بنتلي,Continental GT,كونتيننتال GT,coupe,1000
+Bestune,بيستون,B70,B70,sedan,1000
+Bestune,بيستون,T33,T33,suv,1000
+Bestune,بيستون,T55,T55,suv,1000
+Bestune,بيستون,T77,T77,suv,1000
+Bestune,بيستون,T99,T99,suv,1000
+Cadillac,كاديلاك,CTS,CTS,sedan,1000
+Cadillac,كاديلاك,ATS,ATS,sedan,1000
+Cadillac,كاديلاك,CT5,CT5,sedan,1000
+Cadillac,كاديلاك,Escalade,إسكاليد,suv,1000
+Cadillac,كاديلاك,SRX,SRX,suv,1000
+Cadillac,كاديلاك,XT4,XT4,suv,1000
+Cadillac,كاديلاك,XT5,XT5,suv,1000
+Cadillac,كاديلاك,XT6,XT6,suv,1000
+Chrysler,كرايسلر,300C,300C,sedan,1000
+Chrysler,كرايسلر,Sebring,سيبرينج,sedan,1000
+Chrysler,كرايسلر,PT Cruiser,بي تي كروزر,hatchback,1000
+Chrysler,كرايسلر,Voyager,فوياجر,van,1000
+Chrysler,كرايسلر,Pacifica,باسيفيكا,van,1000
+Cupra,كوبرا,Leon,ليون,hatchback,1000
+Cupra,كوبرا,Born,بورن,hatchback,1000
+Cupra,كوبرا,Formentor,فورمنتور,suv,1000
+Cupra,كوبرا,Ateca,أتيكا,suv,1000
+Daihatsu,دايهاتسو,Charade,شاراد,hatchback,1000
+Daihatsu,دايهاتسو,Sirion,سيريون,hatchback,1000
+Daihatsu,دايهاتسو,Mira,ميرا,hatchback,1000
+Daihatsu,دايهاتسو,YRV,YRV,hatchback,1000
+Daihatsu,دايهاتسو,Materia,ماتيريا,hatchback,1000
+Daihatsu,دايهاتسو,Terios,تيريوس,suv,1000
+Daihatsu,دايهاتسو,Gran Max,جران ماكس,van,1000
+Deepal,ديبال,L07,L07,sedan,1000
+Deepal,ديبال,S05,S05,suv,1000
+Deepal,ديبال,S07,S07,suv,1000
+Denza,دنزا,D9,D9,van,1000
+DFSK,دي إف إس كيه,Glory 500,جلوري 500,suv,1000
+DFSK,دي إف إس كيه,Glory 580,جلوري 580,suv,1000
+DFSK,دي إف إس كيه,Glory 330,جلوري 330,van,1000
+DFSK,دي إف إس كيه,EC35,EC35,van,1000
+DFSK,دي إف إس كيه,K01,K01,pickup,1000
+Dodge,دودج,Charger,تشارجر,sedan,1000
+Dodge,دودج,Neon,نيون,sedan,1000
+Dodge,دودج,Caliber,كاليبر,hatchback,1000
+Dodge,دودج,Durango,دورانجو,suv,1000
+Dodge,دودج,Journey,جيرني,suv,1000
+Dodge,دودج,Nitro,نيترو,suv,1000
+Dodge,دودج,Challenger,تشالنجر,coupe,1000
+Dodge,دودج,Ram,رام,pickup,1000
+Dodge,دودج,Avenger,أفينجر,sedan,1000
+Dodge,دودج,Dart,دارت,sedan,1000
+Dongfeng,دونج فينج,S30,S30,sedan,1000
+Dongfeng,دونج فينج,A30,A30,sedan,1000
+Dongfeng,دونج فينج,Shine,شاين,sedan,1000
+Dongfeng,دونج فينج,H30 Cross,H30 كروس,hatchback,1000
+Dongfeng,دونج فينج,Box,بوكس,hatchback,1000
+Dongfeng,دونج فينج,AX7,AX7,suv,1000
+Dongfeng,دونج فينج,Mage,ماج,suv,1000
+DS,دي إس,3,3,hatchback,1000
+DS,دي إس,4,4,hatchback,1000
+DS,دي إس,5,5,hatchback,1000
+DS,دي إس,3 Crossback,3 كروس باك,suv,1000
+DS,دي إس,7,7,suv,1000
+DS,دي إس,7 Crossback,7 كروس باك,suv,1000
+Exeed,إكسيد,LX,LX,suv,1000
+Exeed,إكسيد,TXL,TXL,suv,1000
+Exeed,إكسيد,RX,RX,suv,1000
+Exeed,إكسيد,VX,VX,suv,1000
+FAW,فاو,V5,V5,sedan,1000
+FAW,فاو,N5,N5,sedan,1000
+FAW,فاو,B50,B50,sedan,1000
+FAW,فاو,V2,V2,hatchback,1000
+FAW,فاو,X40,X40,suv,1000
+Ferrari,فيراري,488,488,sports,1000
+Ferrari,فيراري,F8,F8,sports,1000
+Ferrari,فيراري,SF90,SF90,sports,1000
+Ferrari,فيراري,Roma,روما,coupe,1000
+Ferrari,فيراري,Portofino,بورتوفينو,convertible,1000
+Ferrari,فيراري,Purosangue,بوروسانجوي,suv,1000
+Forthing,فورثينج,T5,T5,suv,1000
+Forthing,فورثينج,T5 Evo,T5 إيفو,suv,1000
+Foton,فوتون,Tunland,تونلاند,pickup,1000
+Foton,فوتون,View,فيو,van,1000
+GAC,جي إيه سي,Empow,إمباو,sedan,1000
+GAC,جي إيه سي,GA4,GA4,sedan,1000
+GAC,جي إيه سي,GS3,GS3,suv,1000
+GAC,جي إيه سي,GS4,GS4,suv,1000
+GAC,جي إيه سي,GS8,GS8,suv,1000
+GAC,جي إيه سي,Emkoo,إمكو,suv,1000
+Genesis,جينيسيس,G70,G70,sedan,1000
+Genesis,جينيسيس,G80,G80,sedan,1000
+Genesis,جينيسيس,G90,G90,sedan,1000
+Genesis,جينيسيس,GV70,GV70,suv,1000
+Genesis,جينيسيس,GV80,GV80,suv,1000
+Genesis,جينيسيس,GV60,GV60,suv,1000
+GMC,جي إم سي,Yukon,يوكون,suv,1000
+GMC,جي إم سي,Acadia,أكاديا,suv,1000
+GMC,جي إم سي,Terrain,تيرين,suv,1000
+GMC,جي إم سي,Sierra,سييرا,pickup,1000
+GMC,جي إم سي,Savana,سافانا,van,1000
+Great Wall,جريت وول,C30,C30,sedan,1000
+Great Wall,جريت وول,Peri,بيري,hatchback,1000
+Great Wall,جريت وول,Hover,هوفر,suv,1000
+Great Wall,جريت وول,Wingle,وينجل,pickup,1000
+Great Wall,جريت وول,Poer,باور,pickup,1000
+Haima,هايما,2,2,hatchback,1000
+Hongqi,هونشي,H5,H5,sedan,1000
+Hongqi,هونشي,H9,H9,sedan,1000
+Hongqi,هونشي,HS5,HS5,suv,1000
+Hongqi,هونشي,E-HS9,E-HS9,suv,1000
+Hummer,هامر,H1,H1,suv,1000
+Hummer,هامر,H2,H2,suv,1000
+Hummer,هامر,H3,H3,suv,1000
+Infiniti,إنفينيتي,Q50,Q50,sedan,1000
+Infiniti,إنفينيتي,Q30,Q30,hatchback,1000
+Infiniti,إنفينيتي,QX50,QX50,suv,1000
+Infiniti,إنفينيتي,QX55,QX55,suv,1000
+Infiniti,إنفينيتي,QX60,QX60,suv,1000
+Infiniti,إنفينيتي,QX70,QX70,suv,1000
+Infiniti,إنفينيتي,QX80,QX80,suv,1000
+Infiniti,إنفينيتي,FX,FX,suv,1000
+Infiniti,إنفينيتي,Q70,Q70,sedan,1000
+Infiniti,إنفينيتي,G35,G35,sedan,1000
+Infiniti,إنفينيتي,G37,G37,sedan,1000
+Infiniti,إنفينيتي,Q60,Q60,coupe,1000
+Isuzu,إيزوزو,MU-X,MU-X,suv,1000
+Isuzu,إيزوزو,Trooper,تروبر,suv,1000
+Isuzu,إيزوزو,D-Max,دي ماكس,pickup,1000
+Isuzu,إيزوزو,TFR,TFR,pickup,1000
+JAC,جاك,J7,J7,sedan,1000
+JAC,جاك,J3,J3,sedan,1000
+JAC,جاك,J4,J4,sedan,1000
+JAC,جاك,J5,J5,sedan,1000
+JAC,جاك,JS2,JS2,suv,1000
+JAC,جاك,JS3,JS3,suv,1000
+JAC,جاك,JS4,JS4,suv,1000
+JAC,جاك,JS6,JS6,suv,1000
+JAC,جاك,S2,S2,suv,1000
+JAC,جاك,S3,S3,suv,1000
+JAC,جاك,S4,S4,suv,1000
+JAC,جاك,S7,S7,suv,1000
+JAC,جاك,T6,T6,pickup,1000
+JAC,جاك,T8,T8,pickup,1000
+Jaecoo,جايكو,J7,J7,suv,1000
+Jaecoo,جايكو,J8,J8,suv,1000
+Jaguar,جاجوار,XE,XE,sedan,1000
+Jaguar,جاجوار,XF,XF,sedan,1000
+Jaguar,جاجوار,XJ,XJ,sedan,1000
+Jaguar,جاجوار,X-Type,X-Type,sedan,1000
+Jaguar,جاجوار,S-Type,S-Type,sedan,1000
+Jaguar,جاجوار,F-Pace,F-Pace,suv,1000
+Jaguar,جاجوار,E-Pace,E-Pace,suv,1000
+Jaguar,جاجوار,I-Pace,I-Pace,suv,1000
+Jaguar,جاجوار,F-Type,F-Type,sports,1000
+Jaguar,جاجوار,XK,XK,coupe,1000
+Jinbei,جينبي,Haise,هايس,van,1000
+Kaiyi,كايي,E5,E5,sedan,1000
+Kaiyi,كايي,X3 Pro,X3 برو,suv,1000
+Kaiyi,كايي,X7 Kunlun,X7 كونلون,suv,1000
+Lamborghini,لامبورجيني,Urus,أوروس,suv,1000
+Lamborghini,لامبورجيني,Huracan,هوراكان,sports,1000
+Lamborghini,لامبورجيني,Aventador,أفينتادور,sports,1000
+Lamborghini,لامبورجيني,Gallardo,جالاردو,sports,1000
+Land Rover,لاند روفر,Range Rover,رينج روفر,suv,1000
+Land Rover,لاند روفر,Range Rover Sport,رينج روفر سبورت,suv,1000
+Land Rover,لاند روفر,Range Rover Evoque,رينج روفر إيفوك,suv,1000
+Land Rover,لاند روفر,Range Rover Velar,رينج روفر فيلار,suv,1000
+Land Rover,لاند روفر,Defender,ديفندر,suv,1000
+Land Rover,لاند روفر,Discovery,ديسكفري,suv,1000
+Land Rover,لاند روفر,Discovery Sport,ديسكفري سبورت,suv,1000
+Land Rover,لاند روفر,Freelander,فريلاندر,suv,1000
+Landwind,لاند ويند,X7,X7,suv,1000
+Leapmotor,ليب موتور,T03,T03,hatchback,1000
+Leapmotor,ليب موتور,C10,C10,suv,1000
+Leapmotor,ليب موتور,C11,C11,suv,1000
+Lexus,لكزس,IS,IS,sedan,1000
+Lexus,لكزس,ES,ES,sedan,1000
+Lexus,لكزس,LS,LS,sedan,1000
+Lexus,لكزس,UX,UX,suv,1000
+Lexus,لكزس,NX,NX,suv,1000
+Lexus,لكزس,RX,RX,suv,1000
+Lexus,لكزس,GX,GX,suv,1000
+Lexus,لكزس,LX,LX,suv,1000
+Lexus,لكزس,RC,RC,coupe,1000
+Lexus,لكزس,LC,LC,coupe,1000
+Lexus,لكزس,GS,GS,sedan,1000
+Lexus,لكزس,CT,CT,hatchback,1000
+Li Auto,لي أوتو,L7,L7,suv,1000
+Li Auto,لي أوتو,L9,L9,suv,1000
+Lifan,ليفان,520,520,sedan,1000
+Lifan,ليفان,620,620,sedan,1000
+Lifan,ليفان,320,320,hatchback,1000
+Lifan,ليفان,X60,X60,suv,1000
+Lincoln,لينكولن,MKZ,MKZ,sedan,1000
+Lincoln,لينكولن,Town Car,تاون كار,sedan,1000
+Lincoln,لينكولن,Navigator,نافيجيتور,suv,1000
+Lincoln,لينكولن,Aviator,أفياتور,suv,1000
+Lynk & Co,لينك آند كو,01,01,suv,1000
+Lynk & Co,لينك آند كو,05,05,suv,1000
+Lynk & Co,لينك آند كو,09,09,suv,1000
+Mahindra,ماهيندرا,KUV100,KUV100,hatchback,1000
+Mahindra,ماهيندرا,Scorpio,سكوربيو,suv,1000
+Mahindra,ماهيندرا,XUV500,XUV500,suv,1000
+Maserati,مازيراتي,Ghibli,جيبلي,sedan,1000
+Maserati,مازيراتي,Quattroporte,كواتروبورتي,sedan,1000
+Maserati,مازيراتي,Levante,ليفانتي,suv,1000
+Maserati,مازيراتي,Grecale,جريكالي,suv,1000
+Maserati,مازيراتي,GranTurismo,جران توريزمو,coupe,1000
+Mini,ميني,Cooper,كوبر,hatchback,1000
+Mini,ميني,Clubman,كلوب مان,hatchback,1000
+Mini,ميني,Countryman,كنتري مان,suv,1000
+Mini,ميني,Paceman,بيسمان,suv,1000
+Mini,ميني,Cabrio,كابريو,convertible,1000
+Nasr,نصر,128,128,sedan,1000
+Nasr,نصر,Shahin,شاهين,sedan,1000
+Nasr,نصر,Dogan,دوجان,sedan,1000
+Nasr,نصر,125,125,sedan,1000
+Nasr,نصر,131,131,sedan,1000
+Nasr,نصر,Regata,ريجاتا,sedan,1000
+Nasr,نصر,127,127,hatchback,1000
+Nasr,نصر,Florida,فلوريدا,hatchback,1000
+Nasr,نصر,Polonez,بولونيز,hatchback,1000
+Omoda,أومودا,C5,C5,suv,1000
+Omoda,أومودا,C9,C9,suv,1000
+Porsche,بورشه,Panamera,باناميرا,sedan,1000
+Porsche,بورشه,Taycan,تايكان,sedan,1000
+Porsche,بورشه,Cayenne,كايين,suv,1000
+Porsche,بورشه,Macan,ماكان,suv,1000
+Porsche,بورشه,911,911,sports,1000
+Porsche,بورشه,Cayman,كايمان,sports,1000
+Porsche,بورشه,Boxster,بوكستر,convertible,1000
+Rolls-Royce,رولز رويس,Ghost,جوست,sedan,1000
+Rolls-Royce,رولز رويس,Phantom,فانتوم,sedan,1000
+Rolls-Royce,رولز رويس,Cullinan,كولينان,suv,1000
+Rolls-Royce,رولز رويس,Wraith,رايث,coupe,1000
+Saab,ساب,9-3,9-3,sedan,1000
+Saab,ساب,9-5,9-5,sedan,1000
+Saab,ساب,900,900,hatchback,1000
+Saipa,سايبا,Tiba,تيبا,sedan,1000
+Saipa,سايبا,Pride,برايد,hatchback,1000
+Smart,سمارت,Fortwo,فورتو,hatchback,1000
+Smart,سمارت,Forfour,فورفور,hatchback,1000
+Smart,سمارت,#1,#1,suv,1000
+Smart,سمارت,#3,#3,suv,1000
+Soueast,ساوايست,A5,A5,sedan,1000
+Soueast,ساوايست,DX3,DX3,suv,1000
+Soueast,ساوايست,DX7,DX7,suv,1000
+SsangYong,سانج يونج,Tivoli,تيفولي,suv,1000
+SsangYong,سانج يونج,XLV,XLV,suv,1000
+SsangYong,سانج يونج,Korando,كوراندو,suv,1000
+SsangYong,سانج يونج,Rexton,ريكستون,suv,1000
+SsangYong,سانج يونج,Actyon,أكتيون,suv,1000
+SsangYong,سانج يونج,Kyron,كايرون,suv,1000
+SsangYong,سانج يونج,Musso,موسو,pickup,1000
+Subaru,سوبارو,Impreza,إمبريزا,sedan,1000
+Subaru,سوبارو,Legacy,ليجاسي,sedan,1000
+Subaru,سوبارو,WRX,WRX,sedan,1000
+Subaru,سوبارو,XV,XV,suv,1000
+Subaru,سوبارو,Crosstrek,كروس تريك,suv,1000
+Subaru,سوبارو,Forester,فورستر,suv,1000
+Subaru,سوبارو,Outback,أوتباك,suv,1000
+Subaru,سوبارو,BRZ,BRZ,coupe,1000
+Subaru,سوبارو,Tribeca,تريبيكا,suv,1000
+Tank,تانك,300,300,suv,1000
+Tank,تانك,500,500,suv,1000
+Tesla,تسلا,Model 3,موديل 3,sedan,1000
+Tesla,تسلا,Model S,موديل S,sedan,1000
+Tesla,تسلا,Model Y,موديل Y,suv,1000
+Tesla,تسلا,Model X,موديل X,suv,1000
+Tesla,تسلا,Cybertruck,سايبرترك,pickup,1000
+Volvo,فولفو,S40,S40,sedan,1000
+Volvo,فولفو,S60,S60,sedan,1000
+Volvo,فولفو,S80,S80,sedan,1000
+Volvo,فولفو,S90,S90,sedan,1000
+Volvo,فولفو,850,850,sedan,1000
+Volvo,فولفو,V40,V40,hatchback,1000
+Volvo,فولفو,C30,C30,hatchback,1000
+Volvo,فولفو,XC40,XC40,suv,1000
+Volvo,فولفو,XC60,XC60,suv,1000
+Volvo,فولفو,XC90,XC90,suv,1000
+Volvo,فولفو,EX30,EX30,suv,1000
+Volvo,فولفو,C40,C40,suv,1000
+Volvo,فولفو,XC70,XC70,suv,1000
+Voyah,فويا,Free,فري,suv,1000
+Voyah,فويا,Dream,دريم,van,1000
+Xpeng,إكس بينج,P7,P7,sedan,1000
+Xpeng,إكس بينج,G6,G6,suv,1000
+Xpeng,إكس بينج,G9,G9,suv,1000
+Zeekr,زيكر,001,001,sedan,1000
+Zeekr,زيكر,X,X,suv,1000
+Zeekr,زيكر,7X,7X,suv,1000
+Zeekr,زيكر,009,009,van,1000
+Zotye,زوتي,Z300,Z300,sedan,1000
+Zotye,زوتي,Z100,Z100,hatchback,1000
+Zotye,زوتي,T600,T600,suv,1000

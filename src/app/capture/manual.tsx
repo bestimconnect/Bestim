@@ -11,6 +11,8 @@ import { Button, Field, Header, Item, Note, Text } from '@/components/ui';
 import { errorText } from '@/lib/errors';
 import { useOnline } from '@/lib/online';
 import { useLog, useServiceTypes } from '@/lib/queries';
+import { cleanDetails, LOG_FIELDS } from '@/lib/saveLog';
+import { pickOption } from '@/lib/sheet';
 import { supabase } from '@/lib/supabase';
 import { useLogDraft } from '@/stores/logDraft';
 import { useVoiceBatch } from '@/stores/voiceBatch';
@@ -26,14 +28,32 @@ export default function Manual() {
   const queryClient = useQueryClient();
   const { notice, logId, batch } = useLocalSearchParams<{ notice?: keyof typeof NOTICES; logId?: string; batch?: string }>();
   const d = useLogDraft();
-  const types = useServiceTypes().data ?? [];
+  const all = useServiceTypes().data ?? [];
+  const service = all.find((s) => s.id === d.serviceTypeId);
   const original = useLog(logId).data;
   const [odo, setOdo] = useState(d.odometer != null ? String(d.odometer) : '');
   const [cost, setCost] = useState(d.cost != null ? String(d.cost) : '');
+  const [every, setEvery] = useState(d.intervalKm != null ? String(d.intervalKm) : '');
   const [reason, setReason] = useState('');
-  const [pickType, setPickType] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const name = (s: (typeof types)[number]) => (i18n.language === 'ar' ? s.name_ar : s.name_en);
+  const ar = i18n.language === 'ar';
+  const name = (x: { name_en: string; name_ar: string }) => (ar ? x.name_ar : x.name_en);
+  const where = (s: (typeof all)[number], arabic = ar) => [s.parentCategory, s.subcategory].filter(Boolean).map((c) => (arabic ? c!.name_ar : c!.name_en)).join(' · ');
+  const fields = (service?.fields ?? []).filter((f) => f in LOG_FIELDS);
+
+  // Every active service. A retired one (Car Wash) still shows on the old logs that have it, but is never offered.
+  const choose = () =>
+    pickOption({
+      title: t('capture.manual.serviceType'),
+      allowCustom: false,
+      options: all.filter((s) => s.category_id).map((s) => ({ id: s.id, label: name(s), hint: where(s), also: `${ar ? s.name_en : s.name_ar} ${where(s, !ar)}` })),
+      onPick: ({ id }) => {
+        const next = all.find((s) => s.id === id)!;
+        const keep = Object.fromEntries(Object.entries(d.details).filter(([k]) => next.fields.includes(k)));
+        d.set({ serviceTypeId: next.id, title: d.title.trim() ? d.title : name(next), details: keep, ...(next.has_reminder ? {} : { intervalKm: null }) });
+        if (!next.has_reminder) setEvery('');
+      },
+    });
 
   // Correction mode: prefill the draft from the log once it loads.
   useEffect(() => {
@@ -47,10 +67,12 @@ export default function Manual() {
       cost: original.cost,
       serviceDate: original.service_date,
       location: original.location ?? '',
+      intervalKm: original.interval_km,
     });
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOdo(original.odometer_reading != null ? String(original.odometer_reading) : '');
     setCost(original.cost != null ? String(original.cost) : '');
+    setEvery(original.interval_km != null ? String(original.interval_km) : '');
   }, [original]);
 
   const dateOk = /^\d{4}-\d{2}-\d{2}$/.test(d.serviceDate) && !isNaN(Date.parse(d.serviceDate));
@@ -72,6 +94,7 @@ export default function Manual() {
         cost: num(cost),
         service_date: d.serviceDate,
         location: d.location.trim() || null,
+        ...(num(every) != null ? { interval_km: num(every) } : {}),
       };
       const prev: Record<string, unknown> = { ...o, location: o.location || null };
       const changes = Object.fromEntries(
@@ -90,17 +113,20 @@ export default function Manual() {
   });
 
   const submit = () => {
-    d.set({ odometer: num(odo), cost: num(cost) });
+    d.set({ odometer: num(odo), cost: num(cost), intervalKm: service?.has_reminder ? num(every) : null });
     if (correcting) return correct.mutate();
     if (!batch) return router.push('/capture/review');
     useVoiceBatch.getState().update(batch, {
-      serviceType: types.find((s) => s.id === d.serviceTypeId)?.name_en ?? null,
+      serviceType: service?.name_en ?? null,
       title: d.title.trim(),
       odometer: num(odo),
       cost: num(cost),
       date: d.serviceDate,
       location: d.location.trim(),
+      notes: d.notes.trim(),
       photoUri: d.photoUri,
+      intervalKm: service?.has_reminder ? num(every) : null,
+      details: cleanDetails(d.details, service?.fields ?? []),
       error: undefined,
     });
     router.back();
@@ -112,24 +138,10 @@ export default function Manual() {
         <Header title={t(correcting ? 'capture.manual.correctionHeader' : 'capture.newRecord')} />
         {notice && NOTICES[notice] ? <Note tone="info" text={t(NOTICES[notice])} /> : null}
         <Field label={t('capture.manual.what')} value={d.title} onChangeText={(title) => d.set({ title })} />
-        <Pressable onPress={() => setPickType(!pickType)} className="rounded-field border border-line bg-white px-4 py-3">
+        <Pressable onPress={choose} accessibilityRole="button" className="rounded-field border border-line bg-white px-4 py-3">
           <Text variant="caption" className="text-muted">{t('capture.manual.serviceType')}</Text>
-          <Text>{types.find((s) => s.id === d.serviceTypeId) ? name(types.find((s) => s.id === d.serviceTypeId)!) : '—'}</Text>
-          {pickType ? (
-            <View className="flex-row flex-wrap gap-2 pt-3">
-              {types.map((s) => (
-                <Pressable
-                  key={s.id}
-                  onPress={() => {
-                    d.set({ serviceTypeId: s.id, title: d.title.trim() ? d.title : name(s) });
-                    setPickType(false);
-                  }}
-                  className={`rounded-full px-3 py-1.5 ${s.id === d.serviceTypeId ? 'bg-lime' : 'bg-paper'}`}>
-                  <Text variant="caption" className={s.id === d.serviceTypeId ? 'text-[#222E29]' : ''}>{name(s)}</Text>
-                </Pressable>
-              ))}
-            </View>
-          ) : null}
+          <Text>{service ? name(service) : '—'}</Text>
+          {service?.category_id ? <Text variant="caption" className="text-muted">{where(service)}</Text> : null}
         </Pressable>
         <View className="flex-row gap-4">
           <Field className="flex-1" label={t('capture.manual.odometer')} value={odo} onChangeText={setOdo} keyboardType="number-pad" />
@@ -149,9 +161,39 @@ export default function Manual() {
           onChangeText={(location) => d.set({ location })}
           placeholder={t('capture.manual.optional')}
         />
+        {correcting
+          ? null
+          : fields.map((f) => (
+              <Field
+                key={f}
+                label={t(`capture.fields.${f}`)}
+                value={d.details[f] ?? ''}
+                onChangeText={(v) => d.set({ details: { ...d.details, [f]: v } })}
+                keyboardType={LOG_FIELDS[f]}
+                placeholder={t('capture.manual.optional')}
+              />
+            ))}
+        {service?.has_reminder ? (
+          <Field
+            label={t('capture.manual.interval')}
+            value={every}
+            onChangeText={setEvery}
+            keyboardType="number-pad"
+            placeholder={service.default_interval_km != null ? service.default_interval_km.toLocaleString('en-US') : t('capture.manual.optional')}
+          />
+        ) : null}
         {correcting ? (
           <Field label={t('capture.manual.reason')} value={reason} onChangeText={setReason} multiline />
         ) : (
+          <Field
+            label={t('capture.manual.notes')}
+            value={d.notes}
+            onChangeText={(notes) => d.set({ notes })}
+            placeholder={t('capture.manual.optional')}
+            multiline
+          />
+        )}
+        {correcting ? null : (
           <Item
             icon={Camera}
             tone="sky"

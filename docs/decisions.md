@@ -1060,3 +1060,59 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 **Why:** A link people can tap in WhatsApp is the whole point of sharing. Founder approved on 2026-10-05.
 
 **Spec for dev:** the app must handle the web link (Android App Links / iOS Universal Links) as well as `bestim://`; the website page is a `bestim-landing` task. Note it in `docs/UPDATES.md`.
+
+### Q85: The app needs Android 8.0 or newer (dev, 2026-10-10; founder can overrule)
+
+**Decision:** The smallest Android version the app installs on moves from 7.0 to 8.0 (released 2017).
+**Why:** The first Android build of the release code failed: the part that reads the odometer with the camera only works from Android 8.0. The alternative was shipping Android without the camera reader, which breaks the rule that every feature works the same on both platforms (Q75). Phones still on Android 7 are a very small share.
+
+**Spec for dev:** `expo-build-properties` in `app.json` sets `android.minSdkVersion` to 26. The camera text reader (`react-native-vision-camera-ocr-plus`) declares 26 itself; the app's lower default was overriding it and its native code would not compile.
+
+
+### Q86: Cars only, picked from a list (founder, 2026-10-10)
+
+**Decision:** Bestim is for cars only. Motorcycles, equipment and the "operating hours" reading are removed. Brand, model and year are picked from a list; the owner types the car by hand only when it is not on the list. Eight car types stay, each with its picture: sedan, hatchback, SUV, coupe, sports, convertible, pickup, van. Station wagons count as hatchback, minivans and microbuses as van. This replaces the type list of Q52 and the km / hours switch of Q5.
+**Why:** Founder request before the first test build: a typed brand and model gives messy data and a slow first step; a picked car gives clean data and lets the app show the right picture straight away.
+
+**Spec for dev:** the list lives in the database (`car_makes`, `car_models`), filled from `supabase/car-catalog.csv` by `scripts/car-catalog.ts`; the review copy is `../docs/car-list.xlsx`. It is built for Egypt first, with Arabic and English names. A vehicle keeps `make` / `model` as text (the English names) plus `car_model_id` (empty when typed by hand); `vehicleName()` shows the name in the app language. The database still accepts the old hours unit so no old row breaks, but the app never offers it.
+
+### Q87: First run is car first, account after (founder, 2026-10-10)
+
+**Decision:** New order: Splash → Language → Intro slides → Car setup → Odometer → Save your car (create an account, or later) → First log (optional) → Home. "Get started" quietly opens a guest session so the car can be saved before any form. The intro is one swipeable screen of three slides built from real app pieces, on a light background, and it replaces both the three tour screens and the Welcome screen. The splash continues into a short logo animation with the tagline. This replaces the order of Q8.
+**Why:** The first minutes decide whether someone keeps the app. Seeing your own car appear before being asked for an email is a better first impression than a sign-up form. Guests could already become full accounts and keep their car (Q17), so nothing new is needed underneath.
+
+**Spec for dev:** the car is saved at the end of the odometer step (that is also when `onboarding_completed` is set), so closing the app mid-way never creates a second car. Motion follows Q57.
+
+### Q88: The odometer camera gets an AI backup (founder, 2026-10-10)
+
+**Decision:** The phone still reads the number itself first. If it has not managed after about two seconds, the app takes the picture and the AI reads it. The owner always confirms the number. The backup is for full accounts only, with its own daily limit.
+**Why:** The on-phone reader cannot read digital segment displays, which many cars have. The partner's notes preferred no AI for the odometer; the founder chose accuracy on every display over that, with the phone still doing the work whenever it can.
+
+**Spec for dev:** new Edge Function `read-odometer`, counted by `bump_scan_usage()`. Guests get the on-phone reader and typing. The lag came from sending every camera frame to the app; the reader now reports about five times a second and only when the text changes, and two reads a quarter of a second apart must agree.
+
+### Q89: Voice follows the partner's cases file, logging only (founder, 2026-10-10)
+
+**Decision:** This round voice only records things; answering questions about history and spending waits. Rules taken from the cases file:
+- Fuel, car wash, parking and tolls are quick running costs with their own expense category, never a maintenance job. "Car Wash" is no longer offered as a service when logging by hand (old logs that use it stay as they are).
+- Money said about a part or a service ("paid 1,200 for the battery") is that maintenance job with the cost filled in.
+- Money with no clear purpose ("paid 1,000 on the car") becomes an expense with no category; the owner must choose one before saving.
+- Extra remarks go into a Notes field on the maintenance record, in the owner's own words.
+- Arabic, English, mixed and Franco-Arabic sentences are all understood the same way.
+- A local keyword parser and phone-only transcription are not built; the side-by-side test decides whether they are worth it.
+**Why:** Founder scope for the test build. Money already creates a linked expense through the database (Q28), so that rule needed nothing new.
+
+**Spec for dev:** the instructions, answer format and both AI services live in `supabase/functions/process-voice-log/understand.ts`. The secret `VOICE_PROVIDER` picks `gemini` (default) or `openai`. `scripts/voice-eval.ts` runs the same cases through both on a laptop and prints correct answers and timings; the recording list for real voices is `docs/voice-test-sentences.md`. With ChatGPT a recording takes two steps (speech to text, then understanding) and raw `.aac` recordings from some Android phones still go to Gemini, so the Gemini key stays. **Open:** a voice note also shows under "Reason for replacement" on the part history page; and ChatGPT keeps the text of what was said for 30 days for abuse monitoring, which the in-app notice ("We don't keep it") does not cover.
+
+### Q90: Records get categories, their own fields, and a Car log (CEO + Shady, 2026-10-10)
+
+**Decision:**
+- Every record sits in a tree: category → subcategory → service. Running costs (fuel, wash, parking, tolls, papers, parts) are in the same tree. The draft is `../docs/record-categories.xlsx`; Ahmed and Shady correct it before it goes in.
+- The form shows extra inputs that fit the service (oil grade, tyre size…). Not every service reminds: running costs and one-off repairs never do.
+- Every service that reminds has a default distance. The form has "Next maintenance after (km)"; left blank, the default applies.
+- The log page is the **Car log** («سجل السيارة»): maintenance, running costs and odometer readings together, filtered by kind, category, subcategory and service. This replaces the four chips of Q11.
+- Fuel can take litres and the reading; consumption shows once two fill-ups have both.
+- Reminders stays its own page. A separate **Notifications** page lists every alert and is built so server push can feed it later.
+- Voice works offline: the recording waits and is written up when the phone is back online, then the owner reviews it as usual.
+**Why:** CEO review before the test build: the app has many kinds of records, not only maintenance, and one identical form did not fit them.
+
+**Spec for dev:** `record_categories`, new columns on `service_types` / `maintenance_logs.details` / `expenses.liters` + `odometer_reading`, `odometer_readings` filled by a trigger (`20261011090000_record_catalog.sql`). "Car Wash" as a service is retired (no category, no reminder); old logs keep it.

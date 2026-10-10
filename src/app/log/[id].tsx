@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button, Header, Text } from '@/components/ui';
 import { useLog } from '@/lib/queries';
+import { LOG_FIELDS } from '@/lib/saveLog';
 import { supabase } from '@/lib/supabase';
 
 // Screen 18 — Record details. Banner per decisions Q12 (replaces "verified by service center").
@@ -49,10 +50,16 @@ export default function LogDetailScreen() {
     ? log.parts_replaced.map((p: any) => (typeof p === 'string' ? p : p?.name)).filter(Boolean).join(' + ')
     : '';
   const date = format(parseISO(log.service_date), 'd MMMM yyyy', { locale: i18n.language === 'ar' ? ar : enUS });
+  const st = log.service_types;
+  const details = Object.entries((log.details ?? {}) as Record<string, string | number>).filter(([f, v]) => f in LOG_FIELDS && v !== '');
+  const next = st?.has_reminder ? log.interval_km ?? st.default_interval_km : null;
   const rows: [string, string][] = [
+    ...(st ? [[t('log.service'), i18n.language === 'ar' ? st.name_ar : st.name_en] as [string, string]] : []),
     [t('log.cost'), log.cost != null ? t('log.egp', { cost: log.cost.toLocaleString('en-US') }) : '—'],
     [t('log.parts'), parts || '—'],
     [t('log.workshop'), log.location || '—'],
+    ...details.map(([f, v]) => [t(`capture.fields.${f}`), String(v)] as [string, string]),
+    ...(next != null ? [[t('log.next'), t('log.review.km', { n: next.toLocaleString('en-US') })] as [string, string]] : []),
   ];
   const count = corrections.data?.length ?? 0;
 
@@ -80,6 +87,12 @@ export default function LogDetailScreen() {
             <Text variant="label" className="flex-1 text-end">{v}</Text>
           </View>
         ))}
+        {log.description ? (
+          <View className="gap-1">
+            <Text variant="caption" className="text-muted">{t('log.notes')}</Text>
+            <Text variant="body">{log.description}</Text>
+          </View>
+        ) : null}
         {receipt.data ? (
           <View className="flex-row items-center justify-between gap-4">
             <Text variant="caption" className="text-muted">{t('log.receipt')}</Text>

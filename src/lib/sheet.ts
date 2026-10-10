@@ -20,3 +20,20 @@ export function pickVehicle(currentId: string | null, onPick: (id: string) => vo
   useVehiclePick.setState({ currentId, onPick });
   router.push('/switch-vehicle');
 }
+
+/** One row of the search picker: `label` in the app language, `hint` the line under it. Both are searched, and so is `also` (e.g. the other language's names). */
+export type PickOption = { id: string; label: string; hint?: string; also?: string };
+type PickRequest = {
+  title: string;
+  options: PickOption[];
+  allowCustom: boolean; // adds a last row that uses the typed text as-is: onPick gets id null
+  onPick: (choice: { id: string | null; label: string }) => void;
+};
+
+export const usePick = create<PickRequest>(() => ({ title: '', options: [], allowCustom: false, onPick: () => {} }));
+
+/** The search picker (brand, model, year). A full-height modal: a long list can't live in a fit-to-content sheet (Q56). */
+export function pickOption(request: PickRequest) {
+  usePick.setState(request);
+  router.push('/pick');
+}

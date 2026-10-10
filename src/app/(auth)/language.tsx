@@ -22,7 +22,7 @@ export default function LanguageScreen() {
   };
   const confirm = () => {
     setLanguage(picked);
-    router.replace('/tour-voice');
+    router.replace('/intro');
     applyLanguage(picked);
   };
 

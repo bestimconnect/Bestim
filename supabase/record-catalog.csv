@@ -1,0 +1,40 @@
+category_en,category_ar,subcategory_en,subcategory_ar,service_en,service_ar,kind,reminder,default_km,default_months,fields,icon,expense_code
+Engine & oil,المحرك والزيت,Engine oil,زيت المحرك,Oil Change,تغيير الزيت,maintenance,yes,5000,6,brand grade quantity,Droplets,
+Engine & oil,المحرك والزيت,Engine oil,زيت المحرك,Oil Filter,فلتر الزيت,maintenance,yes,5000,6,brand,Filter,
+Engine & oil,المحرك والزيت,Engine,المحرك,Spark Plug Replacement,تغيير شمعات الاحتراق,maintenance,yes,30000,,brand count,Zap,
+Engine & oil,المحرك والزيت,Engine,المحرك,Timing Belt,تغيير سير التوقيت,maintenance,yes,100000,,brand,Timer,
+Engine & oil,المحرك والزيت,Engine,المحرك,Drive Belt,تغيير سير الدينامو,maintenance,yes,60000,,brand,Timer,
+Filters,الفلاتر,Air,الهواء,Air Filter,فلتر الهواء,maintenance,yes,15000,12,brand,Wind,
+Filters,الفلاتر,Air,الهواء,Cabin Filter,فلتر التكييف,maintenance,yes,15000,12,brand,Wind,
+Filters,الفلاتر,Fuel,الوقود,Fuel Filter,فلتر البنزين,maintenance,yes,40000,,brand,Filter,
+Brakes,الفرامل,Pads & discs,التيل والطنابير,Brake Pad Replacement,تغيير تيل الفرامل,maintenance,yes,40000,,brand,Disc,
+Brakes,الفرامل,Pads & discs,التيل والطنابير,Brake Disc Replacement,تغيير طنابير الفرامل,maintenance,yes,80000,,brand,Disc,
+Brakes,الفرامل,Brake fluid,زيت الفرامل,Brake Fluid Change,تغيير زيت الفرامل,maintenance,yes,40000,24,brand,Droplets,
+Brakes,الفرامل,Inspection,الفحص,Brake Inspection,فحص الفرامل,maintenance,yes,20000,12,,CircleAlert,
+Tyres & wheels,الإطارات والعجل,Tyres,الإطارات,Tire Replacement,تغيير الإطارات,maintenance,yes,50000,,brand size count,Circle,
+Tyres & wheels,الإطارات والعجل,Tyres,الإطارات,Tire Rotation,تبديل الإطارات,maintenance,yes,10000,6,,RefreshCcw,
+Tyres & wheels,الإطارات والعجل,Wheels,العجل,Wheel Alignment & Balancing,ضبط زوايا وترصيص,maintenance,yes,10000,6,,RefreshCcw,
+Battery & electrics,البطارية والكهرباء,Battery,البطارية,Battery Replacement,تغيير البطارية,maintenance,yes,60000,36,brand warranty_months,BatteryCharging,
+Battery & electrics,البطارية والكهرباء,Battery,البطارية,Battery Check,فحص البطارية,maintenance,yes,10000,6,,BatteryFull,
+Battery & electrics,البطارية والكهرباء,Lights,الإضاءة,Bulb Replacement,تغيير لمبات,maintenance,no,,,brand,Zap,
+Cooling & AC,التبريد والتكييف,Cooling,التبريد,Coolant Check,فحص سائل التبريد,maintenance,yes,30000,12,,Thermometer,
+Cooling & AC,التبريد والتكييف,Cooling,التبريد,Coolant Change,تغيير مياه الردياتير,maintenance,yes,40000,24,brand,Thermometer,
+Cooling & AC,التبريد والتكييف,AC,التكييف,AC Service,فحص التكييف,maintenance,yes,20000,12,,Snowflake,
+Cooling & AC,التبريد والتكييف,AC,التكييف,AC Gas Refill,شحن فريون التكييف,maintenance,no,,,,Snowflake,
+Transmission,ناقل الحركة,Gearbox,الفتيس,Transmission Check,فحص ناقل الحركة,maintenance,yes,60000,24,,Settings,
+Transmission,ناقل الحركة,Gearbox,الفتيس,Transmission Oil Change,تغيير زيت الفتيس,maintenance,yes,60000,,brand grade,Settings,
+Suspension & steering,العفشة والدركسيون,Suspension,العفشة,Shock Absorbers,تغيير المساعدين,maintenance,yes,80000,,brand count,Wrench,
+Suspension & steering,العفشة والدركسيون,Suspension,العفشة,Suspension Repair,إصلاح العفشة,maintenance,no,,,,Wrench,
+Body & glass,الهيكل والزجاج,Wipers,المساحات,Wiper Replacement,تغيير مساحات الزجاج,maintenance,yes,20000,12,brand,CloudRain,
+Body & glass,الهيكل والزجاج,Body,الهيكل,Body & Paint Repair,سمكرة ودهان,maintenance,no,,,,Wrench,
+Body & glass,الهيكل والزجاج,Glass,الزجاج,Glass Repair,إصلاح أو تغيير الزجاج,maintenance,no,,,,Wrench,
+Inspection & repairs,الفحص والإصلاحات,Inspection,الفحص,Full Inspection,فحص دوري شامل,maintenance,yes,20000,12,,ClipboardCheck,
+Inspection & repairs,الفحص والإصلاحات,Repairs,الإصلاحات,General Repair,إصلاح عام,maintenance,no,,,,Wrench,
+Fuel,الوقود,Fuel,الوقود,,,cost,no,,,liters odometer,Fuel,fuel
+Cleaning,النظافة,Car wash,غسيل السيارة,,,cost,no,,,,Sparkles,wash
+Parking & tolls,الركن والكارتة,Parking,الركن,,,cost,no,,,,ParkingCircle,parking
+Parking & tolls,الركن والكارتة,Tolls,الكارتة والرسوم,,,cost,no,,,,Ticket,tolls
+Papers & insurance,الأوراق والتأمين,Insurance,التأمين,,,cost,no,,,,ShieldCheck,insurance
+Papers & insurance,الأوراق والتأمين,Licence renewal,تجديد الرخصة,,,cost,no,,,,FileText,registration
+Parts bought,قطع غيار,Spare parts,قطع غيار,,,cost,no,,,,Package,parts
+Other,أخرى,Other,أخرى,,,cost,no,,,,Receipt,other

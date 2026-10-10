@@ -12,7 +12,7 @@ import { Button, Header, Item, Note, Text } from '@/components/ui';
 import { errorText } from '@/lib/errors';
 import { shouldAskNotifications } from '@/lib/notifications';
 import { useServiceTypes } from '@/lib/queries';
-import { SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
+import { cleanDetails, SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
 import { useLogDraft } from '@/stores/logDraft';
 
 // Screen 15 — Review before saving, PNG 15/مراجعة قبل الحفظ.
@@ -33,8 +33,10 @@ export default function Review() {
   const serviceType = useServiceTypes().data?.find((s) => s.id === d.serviceTypeId);
   const [error, setError] = useState<string | null>(null);
 
-  const intervalKm = d.intervalKm ?? serviceType?.default_interval_km ?? null;
-  const months = serviceType?.default_interval_months ?? null;
+  const reminds = !!serviceType?.has_reminder;
+  const details = cleanDetails(d.details, serviceType?.fields ?? []);
+  const intervalKm = reminds ? d.intervalKm ?? serviceType?.default_interval_km ?? null : null;
+  const months = reminds ? serviceType?.default_interval_months ?? null : null;
   const next = [
     intervalKm != null && d.odometer != null ? `${n(d.odometer + intervalKm)} ${t('capture.review.km')}` : null,
     months != null ? t('capture.review.months', { n: months }) : null,
@@ -74,10 +76,12 @@ export default function Review() {
       cost: d.cost,
       serviceDate: d.serviceDate,
       location: d.location,
+      notes: d.notes,
       source: d.source,
       transcript: d.transcript,
       parts: d.parts,
-      intervalKm: d.intervalKm,
+      intervalKm: reminds ? d.intervalKm : null,
+      details,
       photoUri: d.photoUri,
     };
     if (!onlineManager.isOnline()) {
@@ -114,6 +118,9 @@ export default function Review() {
           <Row label={t('capture.review.cost')} value={d.cost != null ? `${n(d.cost)} ${t('capture.review.egp')}` : '—'} />
           <Row label={t(voice ? 'capture.review.suggestedDate' : 'capture.review.date')} value={date} />
           <Row label={t('capture.review.workshop')} value={d.location || t('capture.review.notMentioned')} />
+          {Object.entries(details).map(([f, v]) => (
+            <Row key={f} label={t(`capture.fields.${f}`)} value={String(v)} />
+          ))}
           <Row label={t('capture.review.next')} value={next} />
         </View>
         {voice ? (

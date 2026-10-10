@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Header, Item, Text } from '@/components/ui';
-import { useVehicle } from '@/lib/queries';
+import { useVehicle, vehicleName } from '@/lib/queries';
 import { useColors } from '@/lib/theme';
 
 // Screen 37 — Feature gate for guests (decisions Q17); ar-light 37/ميزة تتطلب حساباً.png
@@ -21,7 +21,7 @@ export default function FeatureGateScreen() {
     <SafeAreaView className="flex-1 rounded-t-screen border-t border-line bg-sheet" edges={['top', 'bottom']}>
       <View className="flex-1 gap-4 p-6">
         <Header title={title} />
-        {car ? <Item icon={Car} title={`${vehicle.make} ${vehicle.model}`} subtitle={String(vehicle.year)} chevron={false} disabled /> : null}
+        {car ? <Item icon={Car} title={vehicleName(vehicle)} subtitle={String(vehicle.year)} chevron={false} disabled /> : null}
         <View className="flex-1 justify-center gap-5">
           <View className="h-[70px] w-[70px] items-center justify-center self-center rounded-full bg-mint">
             <Lock size={30} color={c.teal} />

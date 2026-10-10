@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import * as Icons from 'lucide-react-native';
-import { Bell, Car, ChartNoAxesColumn, ChevronDown, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
+import { Bell, Car, ChartNoAxesColumn, ChevronDown, ClipboardList, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
 import { FlatList, I18nManager, Pressable, ScrollView, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -17,12 +17,12 @@ import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { useLightStatusBar } from '@/components/Hero';
 import { OfflineHome } from '@/components/OfflineHome';
 import { Button, Item, Metric, PressableScale, Rise, Text } from '@/components/ui';
-import { needsAttention, useCurrentVehicle, useExpenses, useIsGuest, useVehicleParts, useVehicles, type Part, type Vehicle, useProfile } from '@/lib/queries';
+import { needsAttention, useCurrentVehicle, useExpenses, useIsGuest, useVehicleParts, useVehicles, vehicleName, type Part, type Vehicle, useProfile } from '@/lib/queries';
 import { EASE_OUT, POP, SWAP } from '@/lib/motion';
 import { useOnline, useShowSaved } from '@/lib/online';
 import { pickVehicle } from '@/lib/sheet';
 import { shadows, useColors } from '@/lib/theme';
-import { vehicleArt, vehicleIcons } from '@/lib/vehicleArt';
+import { vehicleArt } from '@/lib/vehicleArt';
 import { useSettings } from '@/stores/settingsStore';
 
 const num = (n: number) => Math.abs(Math.round(n)).toLocaleString('en-US');
@@ -129,7 +129,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
           <Bell_ />
         </View>
         <Pressable onPress={pick} disabled={vehicles.length < 2} className="flex-row items-center gap-2">
-          <Text variant="label" className="flex-1 text-onpanel">{`${vehicle.make} ${vehicle.model} · ${vehicle.year}`}</Text>
+          <Text variant="label" className="flex-1 text-onpanel">{`${vehicleName(vehicle)} · ${vehicle.year}`}</Text>
           {vehicles.length > 1 ? <ChevronDown size={18} color={c.lime} /> : null}
         </Pressable>
         <FlatList
@@ -151,11 +151,9 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
           }}
           onMomentumScrollEnd={onSettle}
           renderItem={({ item }) => {
-            const art = vehicleArt[item.vehicle_type]; // none for equipment
-            const Icon = vehicleIcons[item.vehicle_type];
             return (
               <View style={{ width, height: 150 }} className="items-center justify-center px-6">
-                {art ? <Image source={art} contentFit="contain" style={{ width: '100%', height: 150 }} /> : <Icon size={72} color={c.lime} />}
+                <Image source={vehicleArt(item.vehicle_type)} contentFit="contain" style={{ width: '100%', height: 150 }} />
               </View>
             );
           }}
@@ -235,6 +233,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
             ))}
           </View>
         </PressableScale>
+        <Item icon={ClipboardList} title={t('home.carLog')} subtitle={t('home.carLogSub')} onPress={() => router.push({ pathname: '/history', params: { vehicleId: vehicle.id } })} />
       </View>
     </ScrollView>
   );
@@ -293,7 +292,7 @@ function Guest({ vehicle }: { vehicle: Vehicle | null }) {
         {vehicle ? (
           <>
             <Text variant="title" className="mt-2">{t('home.guest.yourCar')}</Text>
-            <Item icon={Car} title={`${vehicle.make} ${vehicle.model}`} subtitle={String(vehicle.year)} onPress={() => gate('car')} />
+            <Item icon={Car} title={vehicleName(vehicle)} subtitle={String(vehicle.year)} onPress={() => gate('car')} />
           </>
         ) : null}
         {parts.length ? (

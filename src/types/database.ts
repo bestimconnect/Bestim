@@ -39,6 +39,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      car_makes: {
+        Row: {
+          id: string
+          name_ar: string
+          name_en: string
+          sort: number
+        }
+        Insert: {
+          id?: string
+          name_ar: string
+          name_en: string
+          sort?: number
+        }
+        Update: {
+          id?: string
+          name_ar?: string
+          name_en?: string
+          sort?: number
+        }
+        Relationships: []
+      }
+      car_models: {
+        Row: {
+          body_type: string
+          id: string
+          make_id: string
+          name_ar: string
+          name_en: string
+        }
+        Insert: {
+          body_type: string
+          id?: string
+          make_id: string
+          name_ar: string
+          name_en: string
+        }
+        Update: {
+          body_type?: string
+          id?: string
+          make_id?: string
+          name_ar?: string
+          name_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_models_make_id_fkey"
+            columns: ["make_id"]
+            isOneToOne: false
+            referencedRelation: "car_makes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       connect_leads: {
         Row: {
           company: string
@@ -85,7 +138,9 @@ export type Database = {
           expense_date: string
           from_log: boolean
           id: string
+          liters: number | null
           log_id: string | null
+          odometer_reading: number | null
           receipt_url: string | null
           user_id: string
           vehicle_id: string
@@ -99,7 +154,9 @@ export type Database = {
           expense_date?: string
           from_log?: boolean
           id?: string
+          liters?: number | null
           log_id?: string | null
+          odometer_reading?: number | null
           receipt_url?: string | null
           user_id?: string
           vehicle_id: string
@@ -113,7 +170,9 @@ export type Database = {
           expense_date?: string
           from_log?: boolean
           id?: string
+          liters?: number | null
           log_id?: string | null
+          odometer_reading?: number | null
           receipt_url?: string | null
           user_id?: string
           vehicle_id?: string
@@ -196,6 +255,7 @@ export type Database = {
           created_at: string
           currency: string
           description: string | null
+          details: Json
           id: string
           interval_km: number | null
           interval_months: number | null
@@ -218,6 +278,7 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          details?: Json
           id?: string
           interval_km?: number | null
           interval_months?: number | null
@@ -240,6 +301,7 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          details?: Json
           id?: string
           interval_km?: number | null
           interval_months?: number | null
@@ -274,6 +336,45 @@ export type Database = {
           },
           {
             foreignKeyName: "maintenance_logs_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      odometer_readings: {
+        Row: {
+          created_at: string
+          id: string
+          reading: number
+          user_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reading: number
+          user_id: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reading?: number
+          user_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "odometer_readings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "odometer_readings_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -319,6 +420,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      record_categories: {
+        Row: {
+          expense_code: string | null
+          icon: string | null
+          id: string
+          name_ar: string
+          name_en: string
+          parent_id: string | null
+          sort: number
+        }
+        Insert: {
+          expense_code?: string | null
+          icon?: string | null
+          id?: string
+          name_ar: string
+          name_en: string
+          parent_id?: string | null
+          sort?: number
+        }
+        Update: {
+          expense_code?: string | null
+          icon?: string | null
+          id?: string
+          name_ar?: string
+          name_en?: string
+          parent_id?: string | null
+          sort?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "record_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "record_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reminders: {
         Row: {
@@ -396,35 +535,55 @@ export type Database = {
       service_types: {
         Row: {
           category: string
+          category_id: string | null
           default_interval_km: number | null
           default_interval_months: number | null
+          fields: string[]
+          has_reminder: boolean
           icon: string
           id: string
           is_system: boolean
           name_ar: string
           name_en: string
+          sort: number
         }
         Insert: {
           category?: string
+          category_id?: string | null
           default_interval_km?: number | null
           default_interval_months?: number | null
+          fields?: string[]
+          has_reminder?: boolean
           icon?: string
           id?: string
           is_system?: boolean
           name_ar: string
           name_en: string
+          sort?: number
         }
         Update: {
           category?: string
+          category_id?: string | null
           default_interval_km?: number | null
           default_interval_months?: number | null
+          fields?: string[]
+          has_reminder?: boolean
           icon?: string
           id?: string
           is_system?: boolean
           name_ar?: string
           name_en?: string
+          sort?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "service_types_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "record_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vehicle_shares: {
         Row: {
@@ -479,6 +638,7 @@ export type Database = {
       }
       vehicles: {
         Row: {
+          car_model_id: string | null
           color: string | null
           created_at: string
           current_odometer: number
@@ -498,6 +658,7 @@ export type Database = {
           year: number
         }
         Insert: {
+          car_model_id?: string | null
           color?: string | null
           created_at?: string
           current_odometer?: number
@@ -517,6 +678,7 @@ export type Database = {
           year: number
         }
         Update: {
+          car_model_id?: string | null
           color?: string | null
           created_at?: string
           current_odometer?: number
@@ -537,6 +699,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "vehicles_car_model_id_fkey"
+            columns: ["car_model_id"]
+            isOneToOne: false
+            referencedRelation: "car_models"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "vehicles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -549,16 +718,19 @@ export type Database = {
         Row: {
           count: number
           day: string
+          scans: number
           user_id: string
         }
         Insert: {
           count?: number
           day: string
+          scans?: number
           user_id: string
         }
         Update: {
           count?: number
           day?: string
+          scans?: number
           user_id?: string
         }
         Relationships: [
@@ -577,6 +749,7 @@ export type Database = {
     }
     Functions: {
       accept_share: { Args: { token: string }; Returns: string }
+      bump_scan_usage: { Args: never; Returns: number }
       bump_voice_usage: { Args: never; Returns: number }
       correct_log: {
         Args: { changes: Json; log_id: string; reason: string }

@@ -9,11 +9,12 @@ import { useLastNotificationResponse } from 'expo-notifications';
 import { type ErrorBoundaryProps, router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { type ComponentProps, useEffect, useRef, useState } from 'react';
+import { type ComponentProps, useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 
+import { SplashOverlay } from '@/components/SplashOverlay';
 import { Toast } from '@/components/Toast';
 import { Button, Text } from '@/components/ui';
 import { applyLanguage } from '@/lib/i18n';
@@ -59,16 +60,17 @@ function App() {
   const [fontsLoaded] = useFonts({ Tajawal_400Regular, Tajawal_700Bold, Poppins_400Regular, Poppins_700Bold });
   const [hydrated, setHydrated] = useState(useSettings.persist.hasHydrated());
   const language = useSettings((s) => s.language);
-  const tourSeen = useSettings((s) => s.tourSeen);
   const pendingShareToken = useSettings((s) => s.pendingShareToken);
   const session = useSession();
   const userId = session?.user.id;
   const profile = useProfile();
+  const [splashDone, setSplashDone] = useState(false); // lives here, not in the overlay: the tree unmounts while a new sign-in loads
+  const endSplash = useCallback(() => setSplashDone(true), []);
   const ready = fontsLoaded && hydrated && session !== undefined && (!userId || !profile.isPending);
 
   useEffect(() => useSettings.persist.onFinishHydration(() => setHydrated(true)), []);
 
-  // Email links (confirm sign-up / reset password). Sign-up needs nothing more: the gate below routes new users to the tour.
+  // Email links (confirm sign-up / reset password). Sign-up needs nothing more: the gate below routes new users to car setup.
   const url = useURL();
   const handledUrl = useRef<string | null>(null); // a code works once; `ready` flips again right after it signs the user in
   useEffect(() => {
@@ -104,14 +106,13 @@ function App() {
     if (!language) router.replace('/language');
     else {
       applyLanguage(language);
-      // Flow: language → tour → welcome/auth → profile (if no name) → add vehicle → home.
+      // Flow (Q87): language → intro → car → odometer → save car → first log → home. Intro's "Get started" opens a guest session.
       // Guests (anonymous accounts, Q17) have no name and skip the profile step.
-      if (!userId) router.replace(tourSeen ? '/welcome' : '/tour-voice');
+      if (!userId) router.replace('/intro');
       else if (profile.data && !profile.data.full_name.trim() && !session?.user.is_anonymous) router.replace('/profile-setup'); // Q7
       else if (profile.data && !profile.data.onboarding_completed) router.replace('/add-vehicle');
     }
-    SplashScreen.hideAsync();
-  }, [ready, language, tourSeen, userId, profile.data, session?.user.is_anonymous]);
+  }, [ready, language, userId, profile.data, session?.user.is_anonymous]);
 
   if (!ready) return null;
   // Bottom sheets: the capture chooser (13) and the confirm sheet (Q55) and switch vehicle (Q56).
@@ -131,9 +132,11 @@ function App() {
         <Stack.Screen name="sheet" options={sheetOptions} />
         <Stack.Screen name="switch-vehicle" options={sheetOptions} />
         <Stack.Screen name="feature-gate" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="pick" options={{ presentation: 'modal' }} />
         <Stack.Screen name="notify-permission" options={{ presentation: 'modal' }} />
       </Stack>
       <Toast />
+      {splashDone ? null : <SplashOverlay onDone={endSplash} />}
     </View>
     </GestureHandlerRootView>
   );

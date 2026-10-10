@@ -18,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Header, Text } from '@/components/ui';
+import { rise, SWAP } from '@/lib/motion';
 import { useServiceTypes, useVehicles } from '@/lib/queries';
 import { speechLang } from '@/lib/speech';
 import { supabase } from '@/lib/supabase';
@@ -73,6 +74,7 @@ export default function Voice() {
   const audioUri = useRef<string | null>(null);
   const said = useRef(''); // the latest transcript, for handlers that run after the state they closed over
   const waitingForEnd = useRef(false);
+  const doneAt = useRef(0); // when the owner tapped Done, to time the wait in development
   const [transcript, setTranscript] = useState('');
   const [seconds, setSeconds] = useState(0);
   const [listening, setListening] = useState(false);
@@ -136,6 +138,7 @@ export default function Voice() {
         body: { ...(audio ? { audio_base64: audio, mime } : { transcript: text }), vehicle_id: d.vehicleId, lang: i18n.language },
       });
       if (error) return toManual(error.context?.status === 429 ? 'dailyLimit' : 'aiFailed'); // Q64, Q65
+      if (__DEV__) console.log(`voice: ${Date.now() - doneAt.current} ms from Done to result`, data?.ms);
       const heard = String(data?.transcript ?? '') || text;
       if (!heard) {
         setBusy(false);
@@ -146,7 +149,7 @@ export default function Voice() {
         normalizeRecords(data?.records, {
           vehicleIds: (vehicles.data ?? []).map((v) => v.id),
           fallbackVehicleId: d.vehicleId,
-          serviceNames: (serviceTypes.data ?? []).map((s) => s.name_en),
+          serviceNames: (serviceTypes.data ?? []).filter((s) => s.category_id).map((s) => s.name_en), // retired services are not offered
           today: new Date().toLocaleDateString('en-CA'),
         }),
       );
@@ -214,6 +217,7 @@ export default function Voice() {
 
   const finish = async () => {
     if (busy) return;
+    doneAt.current = Date.now();
     setBusy(true);
     if (direct) await stopDirect();
     if (direct || !listening) return send();
@@ -238,10 +242,12 @@ export default function Voice() {
       <View className="flex-1 gap-5 p-6">
         <Header title={t('capture.voice.header')} />
         <View className="flex-row items-center justify-between">
-          <Text variant="label">{t('capture.voice.listening')}</Text>
+          <Animated.View key={String(busy)} entering={SWAP}>
+            <Text variant="label">{t(busy ? 'capture.voice.understanding' : 'capture.voice.listening')}</Text>
+          </Animated.View>
           <Text variant="small-number">{mmss(seconds)}</Text>
         </View>
-        <View className="h-[150px] flex-row items-center justify-center gap-3.5">
+        <View className={`h-[150px] flex-row items-center justify-center gap-3.5 ${busy ? 'opacity-40' : ''}`}>
           {BARS.map((b, i) => <Bar key={i} base={b} level={level} />)}
         </View>
         {typed ? (
@@ -258,7 +264,7 @@ export default function Voice() {
           </View>
         ) : transcript ? (
           <Text variant="heading">«{transcript}»</Text>
-        ) : direct ? (
+        ) : direct && !busy ? (
           <Text variant="heading">{t('capture.voice.noPreview')}</Text>
         ) : null}
         {direct && listening ? <DirectMeter recorder={recorder} level={level} /> : null}
@@ -267,6 +273,10 @@ export default function Voice() {
             <Pressable onPress={retry}><Text className="text-muted">{t('capture.voice.noSpeech')}</Text></Pressable>
             <Pressable onPress={() => router.replace('/capture/manual')}><Text variant="label" className="text-teal">{t('capture.voice.manualLink')}</Text></Pressable>
           </View>
+        ) : busy ? (
+          <Animated.View entering={rise()}>
+            <Text variant="label">{t('capture.voice.understandingBody')}</Text>
+          </Animated.View>
         ) : (
           <Text className="text-muted">{t(seconds >= HINT_SECONDS ? 'capture.batch.longHint' : 'capture.voice.hint')}</Text>
         )}

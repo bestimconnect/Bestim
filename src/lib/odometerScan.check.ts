@@ -1,7 +1,7 @@
 // Run: node --experimental-strip-types src/lib/odometerScan.check.ts
 import assert from 'node:assert/strict';
 
-import { candidates, maxJump, pickOutlier, pickReading } from './odometerScan.ts';
+import { candidates, maxJump, pickOutlier, pickReading, settle } from './odometerScan.ts';
 
 const values = (lines: string[]) => candidates(lines).map((s) => s.value);
 
@@ -41,5 +41,17 @@ assert.equal(pickOutlier(['50 60 70', 'MPH']), null); // speed marks are never o
 assert.equal(maxJump('km', 0), 5000);
 assert.equal(maxJump('km', 30), 30000);
 assert.equal(maxJump('h', 2), 100);
+
+// A number counts when two reads at least 250 ms apart agree (times in ms; the camera started looking at 0).
+const first = settle(null, 205343, 1000, 0);
+assert.deepEqual(first, { held: { reading: 205343, at: 1000 }, accept: false }); // one read is never enough
+assert.equal(settle(first.held, 205343, 1200, 0).accept, false); // too soon: it can be the same read handed back
+assert.deepEqual(settle(first.held, 205343, 1200, 0).held, first.held); // ...and the wait is counted from the first read
+assert.equal(settle(first.held, 205343, 1250, 0).accept, true);
+assert.deepEqual(settle(first.held, 205348, 1400, 0), { held: { reading: 205348, at: 1400 }, accept: false }); // another number starts over
+assert.deepEqual(settle(first.held, null, 1400, 0), { held: null, accept: false }); // lost sight of it
+// "Look again" at 1000: for 400 ms nothing counts, not even the number that was waiting.
+assert.deepEqual(settle(first.held, 205343, 1300, 1000), { held: null, accept: false });
+assert.deepEqual(settle(null, 205343, 1400, 1000), { held: { reading: 205343, at: 1400 }, accept: false });
 
 console.log('odometerScan ok');
