@@ -15,6 +15,7 @@ import { saveLog } from '@/lib/saveLog';
 import { supabase } from '@/lib/supabase';
 import { useColors } from '@/lib/theme';
 import { useLogDraft } from '@/stores/logDraft';
+import { dropVoice } from '@/lib/voiceSend';
 import { useVoiceBatch, type BatchRecord } from '@/stores/voiceBatch';
 
 // Review what one voice recording produced: a card per record, edit or remove, then save them all
@@ -144,6 +145,8 @@ export default function ReviewAll() {
     },
     onSuccess: async ({ saved, total, review, vehicleId }) => {
       for (const key of ['vehicles', 'logs', 'expenses']) queryClient.invalidateQueries({ queryKey: [key] });
+      const queued = useVoiceBatch.getState().queueId;
+      if (queued && saved.length) dropVoice(queued); // Q93: a recording from the offline queue is done once saved
       if (saved.length < total) {
         saved.forEach(remove);
         return setPartial(saved.length ? { saved: saved.length, total } : null);

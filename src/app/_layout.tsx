@@ -2,6 +2,7 @@ import '@/global.css';
 
 import { Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { Tajawal_400Regular, Tajawal_700Bold } from '@expo-google-fonts/tajawal';
+import { onlineManager } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
 import { useURL } from 'expo-linking';
@@ -10,7 +11,7 @@ import { type ErrorBoundaryProps, router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { type ComponentProps, useCallback, useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { AppState, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 
@@ -24,6 +25,7 @@ import { sessionFromUrl, useSession } from '@/lib/session';
 import { useProfile } from '@/lib/queries';
 import { palette } from '@/lib/palette';
 import { themeVars, useScheme } from '@/lib/theme';
+import { processVoiceQueue } from '@/lib/voiceSend';
 import { useSettings } from '@/stores/settingsStore';
 
 SplashScreen.preventAutoHideAsync();
@@ -96,6 +98,17 @@ function App() {
   useEffect(() => {
     if (ready && userId) syncNotifications();
   }, [ready, userId]);
+  // Q93: recordings made offline are written up when the connection is back, and whenever the app comes back.
+  useEffect(() => {
+    if (!ready || !fullAccount) return;
+    processVoiceQueue();
+    const offOnline = onlineManager.subscribe((online) => online && processVoiceQueue());
+    const app = AppState.addEventListener('change', (s) => s === 'active' && processVoiceQueue());
+    return () => {
+      offOnline();
+      app.remove();
+    };
+  }, [ready, fullAccount]);
   const tapped = useLastNotificationResponse()?.notification.request.content.data?.url;
   useEffect(() => {
     if (ready && userId && typeof tapped === 'string') router.push(tapped as never);

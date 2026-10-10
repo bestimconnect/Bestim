@@ -17,6 +17,7 @@ import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { useLightStatusBar } from '@/components/Hero';
 import { OfflineHome } from '@/components/OfflineHome';
+import { VoiceQueueCard } from '@/components/VoiceQueueCard';
 import { Button, Item, Metric, PressableScale, Rise, Text } from '@/components/ui';
 import { needsAttention, useCurrentVehicle, useExpenses, useIsGuest, useVehicleParts, useVehicles, vehicleName, type Part, type Vehicle, useProfile } from '@/lib/queries';
 import { EASE_OUT, POP, SWAP } from '@/lib/motion';
@@ -192,6 +193,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
       </View>
 
       <View className="gap-3 px-6 pt-6">
+        <VoiceQueueCard vehicleId={vehicle.id} />
         <View className="flex-row items-center justify-between">
           <Text variant="heading">{t('home.priority')}</Text>
           <Pressable onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id, tab: 'reminders' } })}>

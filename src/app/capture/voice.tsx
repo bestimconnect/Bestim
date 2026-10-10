@@ -10,6 +10,7 @@ import {
 } from 'expo-audio';
 import { File } from 'expo-file-system';
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
+import { onlineManager } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, TextInput, View } from 'react-native';
@@ -21,8 +22,8 @@ import { Button, Header, Text } from '@/components/ui';
 import { rise, SWAP } from '@/lib/motion';
 import { useServiceTypes, useVehicles } from '@/lib/queries';
 import { speechLang } from '@/lib/speech';
-import { supabase } from '@/lib/supabase';
 import { normalizeRecords } from '@/lib/voiceRecords';
+import { MAX_AUDIO_BYTES, queueVoice, sendVoice } from '@/lib/voiceSend';
 import { useColors } from '@/lib/theme';
 import { useLogDraft } from '@/stores/logDraft';
 import { useVoiceBatch } from '@/stores/voiceBatch';
@@ -30,9 +31,8 @@ import { useVoiceBatch } from '@/stores/voiceBatch';
 // Screen 14 — Log by voice, PNG 14/التسجيل بالصوت.
 // The phone's own recognizer only draws the live text; the recording itself goes to the `process-voice-log`
 // Edge Function, which answers with a list of records for capture/review-all (decisions Q58–Q69).
-const MAX_SECONDS = 90; // Q66; the function refuses more than ~3 MB
+const MAX_SECONDS = 90; // Q66
 const HINT_SECONDS = 75;
-const MAX_AUDIO_BYTES = 2_900_000;
 const MIME: Record<string, string> = { wav: 'audio/wav', aac: 'audio/aac', m4a: 'audio/mp4' };
 // Q79: phones with no speech service (Huawei), and Android 12 or older where the recognizer can't keep the
 // recording, record directly. Small voice-quality AAC: 90 s is about 360 KB.
@@ -103,7 +103,9 @@ export default function Voice() {
   const start = async () => {
     audioUri.current = null;
     // Decide before asking for the microphone, so nobody grants it only to be sent to manual entry.
-    if (!ExpoSpeechRecognitionModule.isRecognitionAvailable() || (Platform.OS === 'android' && Platform.Version < 33)) return startDirect();
+    // Offline (Q93) the phone's recognizer often needs the network too, so record directly; the recording waits in the queue.
+    if (!onlineManager.isOnline() || !ExpoSpeechRecognitionModule.isRecognitionAvailable() || (Platform.OS === 'android' && Platform.Version < 33))
+      return startDirect();
     const perm = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
     if (!perm.granted) return toManual();
     ExpoSpeechRecognitionModule.start({
@@ -125,28 +127,35 @@ export default function Voice() {
     waitingForEnd.current = false;
     const d = useLogDraft.getState();
     const text = said.current.trim();
-    const mime = MIME[audioUri.current?.split('.').pop() ?? ''];
-    const file = audioUri.current && mime ? new File(audioUri.current) : null;
+    const mime = MIME[audioUri.current?.split('.').pop() ?? ''] ?? null;
+    const uri = audioUri.current && mime ? audioUri.current : null;
+    const file = uri ? new File(uri) : null;
+    let kept = false; // queued for later: the file now lives in the queue
     try {
       if (!d.vehicleId) return toManual('aiFailed');
-      const audio = file && file.size > 0 && file.size <= MAX_AUDIO_BYTES ? await file.base64() : null;
-      if (!audio && !text) {
+      const fits = !!file && file.size > 0 && file.size <= MAX_AUDIO_BYTES;
+      if (!fits && !text) {
         setBusy(false);
         return setNoSpeech(true);
       }
-      const { data, error } = await supabase.functions.invoke('process-voice-log', {
-        body: { ...(audio ? { audio_base64: audio, mime } : { transcript: text }), vehicle_id: d.vehicleId, lang: i18n.language },
-      });
-      if (error) return toManual(error.context?.status === 429 ? 'dailyLimit' : 'aiFailed'); // Q64, Q65
-      if (__DEV__) console.log(`voice: ${Date.now() - doneAt.current} ms from Done to result`, data?.ms);
-      const heard = String(data?.transcript ?? '') || text;
+      // Q93: no connection, so the recording waits on the phone and is written up once it's back.
+      const keep = () => {
+        kept = queueVoice({ uri: fits ? uri : null, mime, text, vehicleId: d.vehicleId!, lang: i18n.language });
+        if (!kept) return toManual('aiFailed');
+        router.replace({ pathname: '/success', params: { kind: 'log', vehicleId: d.vehicleId!, offline: '1', queued: '1' } });
+      };
+      if (!onlineManager.isOnline()) return keep();
+      const res = await sendVoice({ audio: fits ? await file!.base64() : null, mime, text, vehicleId: d.vehicleId, lang: i18n.language });
+      if (!res.ok) return res.reason === 'offline' ? keep() : toManual(res.reason === 'limit' ? 'dailyLimit' : 'aiFailed'); // Q64, Q65
+      if (__DEV__) console.log(`voice: ${Date.now() - doneAt.current} ms from Done to result`, res.ms);
+      const heard = res.transcript || text;
       if (!heard) {
         setBusy(false);
         return setNoSpeech(true);
       }
       useVoiceBatch.getState().start(
         heard,
-        normalizeRecords(data?.records, {
+        normalizeRecords(res.records, {
           vehicleIds: (vehicles.data ?? []).map((v) => v.id),
           fallbackVehicleId: d.vehicleId,
           serviceNames: (serviceTypes.data ?? []).filter((s) => s.category_id).map((s) => s.name_en), // retired services are not offered
@@ -158,7 +167,7 @@ export default function Voice() {
       toManual('aiFailed');
     } finally {
       try {
-        file?.delete(); // the recording is never kept
+        if (!kept) file?.delete(); // the recording is never kept
       } catch {}
     }
   };
@@ -187,7 +196,7 @@ export default function Voice() {
   useSpeechRecognitionEvent('error', (e) => {
     if (e.error === 'no-speech') setNoSpeech(true);
     else if (e.error === 'not-allowed') toManual();
-    else if (e.error === 'service-not-allowed' || e.error === 'language-not-supported') startDirect();
+    else if (e.error === 'service-not-allowed' || e.error === 'language-not-supported' || e.error === 'network') startDirect();
   });
 
   const retry = () => {

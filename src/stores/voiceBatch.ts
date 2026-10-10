@@ -9,7 +9,8 @@ export type BatchRecord = VoiceRecord & { key: string; error?: string };
 type VoiceBatch = {
   transcript: string;
   records: BatchRecord[];
-  start: (transcript: string, records: VoiceRecord[]) => void;
+  queueId: string | null; // set when the batch came from the offline queue (Q93): saving removes it there
+  start: (transcript: string, records: VoiceRecord[], queueId?: string | null) => void;
   update: (key: string, patch: Partial<VoiceRecord> & { error?: string }) => void;
   remove: (key: string) => void;
 };
@@ -17,7 +18,8 @@ type VoiceBatch = {
 export const useVoiceBatch = create<VoiceBatch>((set) => ({
   transcript: '',
   records: [],
-  start: (transcript, records) => set({ transcript, records: records.map((r, i) => ({ ...r, key: String(i) })) }),
+  queueId: null,
+  start: (transcript, records, queueId = null) => set({ transcript, queueId, records: records.map((r, i) => ({ ...r, key: String(i) })) }),
   update: (key, patch) =>
     set((s) => ({ records: s.records.map((r) => (r.key === key ? ({ ...r, ...patch } as BatchRecord) : r)) })),
   remove: (key) => set((s) => ({ records: s.records.filter((r) => r.key !== key) })),

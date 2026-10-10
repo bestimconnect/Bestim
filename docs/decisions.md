@@ -1134,3 +1134,13 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 **Why:** Q90 asked for a page with every alert; on-device is enough until server push exists.
 
 **Spec for dev:** `src/stores/notifyInbox.ts` (persisted): `syncNotifications()` records what it schedules, and on the next sync anything whose time has passed moves into the list. Page: `src/app/notifications.tsx`.
+
+### Q93: Offline voice: the recording waits on the phone, is written up when back online, then reviewed (Shady, 2026-10-11)
+**Decision:**
+- Full accounts can record by voice with no connection. Offline, the app records directly (the phone's live text needs the network on most phones). Tapping Done keeps the recording on the phone and shows "saved, we'll write it up when you're back online". Guests still need a connection.
+- When the connection returns (or the app is opened again), waiting recordings are sent one at a time. A ready one shows as "Recording ready to review" on Home and at the top of the Car log, and joins the Notifications page. Nothing is saved without the owner's review, as in Q61.
+- If the AI fails or the daily limit is reached, the row says so; the owner can try again or delete it. The audio is deleted once written up (Q70), when deleted, and on sign-out.
+- If the connection drops while sending from the voice screen, the recording goes to the queue instead of being lost. An AI error still goes to manual entry (Q64).
+**Why:** Q90: owners often log at the workshop or garage, where the signal is weak.
+
+**Spec for dev:** `src/stores/voiceQueue.ts` (persisted list; audio files in `Paths.document/voice-queue`), `src/lib/voiceSend.ts` (`sendVoice`, `queueVoice`, `processVoiceQueue`, `dropVoice`), run from `_layout.tsx` on reconnect and app resume. Card: `src/components/VoiceQueueCard.tsx`. Opening a ready item fills `useVoiceBatch` with its `queueId`; a save in `capture/review-all` removes it from the queue.

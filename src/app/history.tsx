@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
+import { VoiceQueueCard } from '@/components/VoiceQueueCard';
 import { Button, Choice, Header, Item, Text } from '@/components/ui';
 import { carLog, scopeOf, type Kind } from '@/lib/carLog';
 import { consumption } from '@/lib/fuel';
@@ -103,6 +104,7 @@ export default function HistoryScreen() {
         <>
           <ScrollView className="flex-1" contentContainerClassName="gap-3 pb-4" showsVerticalScrollIndicator={false}>
             <Text variant="title">{t('history.title')}</Text>
+            {vehicleId ? <VoiceQueueCard vehicleId={vehicleId} /> : null}
             <Choice
               className="bg-line"
               value={kind}

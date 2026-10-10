@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { PressableScale, Text } from '@/components/ui';
 import { useOnline } from '@/lib/online';
-import { useCurrentVehicle } from '@/lib/queries';
+import { useCurrentVehicle, useIsGuest } from '@/lib/queries';
 import { shadows, useColors } from '@/lib/theme';
 import { useLogDraft } from '@/stores/logDraft';
 
@@ -16,7 +16,9 @@ export default function CaptureSheet() {
   const c = useColors();
   const { bottom } = useSafeAreaInsets();
   const { vehicle } = useCurrentVehicle();
-  const online = useOnline();
+  const connected = useOnline();
+  const guest = useIsGuest();
+  const online = connected || !guest; // Q93: full accounts can record offline (it waits on the phone); guests can't
 
   const pick = (source: 'voice' | 'manual') => {
     useLogDraft.getState().reset({ vehicleId: vehicle?.id ?? null, source });

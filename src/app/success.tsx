@@ -27,6 +27,7 @@ type Params = {
   offline?: string;
   review?: string;
   nophoto?: string;
+  queued?: string; // a voice recording kept for later (Q93)
 };
 
 // Screens 43 (log saved) + 44 (vehicle added) — PNGs 43/نجاح حفظ السجل, 44/نجاح إضافة السيارة (Q40, Q41).
@@ -68,6 +69,8 @@ export default function Success() {
     : batch
       ? t(p.count === '1' ? 'capture.batch.successOne' : 'capture.batch.successMany', { count: Number(p.count) }) +
         (p.review === '1' ? ` ${t('capture.batch.successReview')}` : '')
+    : p.queued === '1'
+      ? t('voiceQueue.savedBody')
     : offline
       ? t('feedback.success.offlineBody') + (p.nophoto === '1' ? ` ${t('feedback.success.noPhoto')}` : '')
       : p.review === '1'

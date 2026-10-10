@@ -802,7 +802,7 @@
       "cardNote": "{{unit}} · check your connection to update schedules",
       "write": "Write a new record",
       "voice": "Voice recording needs a connection.",
-      "voiceSheet": "Voice recording needs a connection."
+      "voiceSheet": "Voice recording needs a connection for guests."
     },
     "pending": "Waiting to sync",
     "success": {
@@ -891,5 +891,21 @@
     "emptyBody": "Reminders about your car will show up here.",
     "markAll": "Mark all as read",
     "unread": "New"
+  },
+  "voiceQueue": {
+    "savedBody": "Your recording is saved on this phone. We will write it up when you are back online, then you review it.",
+    "waitingTitle": "Recording waiting for a connection",
+    "sendingTitle": "Writing up your recording…",
+    "readyTitle": "Recording ready to review",
+    "readyBody": "Open it to check the records and save them.",
+    "failedTitle": "We couldn’t write up this recording",
+    "failed": {
+      "ai": "Something went wrong while reading it. Try again, or delete it and add the record by hand.",
+      "limit": "You reached today’s voice limit. Try again tomorrow."
+    },
+    "waitingBody": "It will be sent as soon as the phone is online.",
+    "manageTitle": "Saved recording",
+    "retry": "Try again",
+    "delete": "Delete recording"
   }
 }
