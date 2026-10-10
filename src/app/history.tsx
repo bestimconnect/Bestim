@@ -45,20 +45,20 @@ export default function HistoryScreen() {
 
   const arabic = i18n.language === 'ar';
   const name = (x: { name_en: string; name_ar: string }, other = false) => (arabic !== other ? x.name_ar : x.name_en);
-  // One list for the filter: categories, subcategories and services, each labelled with its level and parent.
-  const options: PickOption[] = [
-    ...tree.filter((x) => !x.parent_id).map((x) => ({ id: x.id, label: name(x), hint: t('history.level.category'), also: name(x, true) })),
-    ...tree.filter((x) => x.parent_id).map((x) => {
-      const parent = tree.find((y) => y.id === x.parent_id);
-      return { id: x.id, label: name(x), hint: `${t('history.level.subcategory')} · ${parent ? name(parent) : ''}`, also: name(x, true) };
-    }),
-    ...services.filter((s) => s.category_id).map((s) => ({
-      id: s.id,
-      label: name(s),
-      hint: `${t('history.level.service')} · ${s.subcategory ? name(s.subcategory) : ''}`,
-      also: name(s, true),
-    })),
-  ];
+  // The filter list as a tree: each category, then its subcategories, each followed by its services (indented).
+  const options: PickOption[] = tree
+    .filter((x) => !x.parent_id)
+    .flatMap((cat) => [
+      { id: cat.id, label: name(cat), hint: t('history.level.category'), also: name(cat, true), depth: 0 },
+      ...tree
+        .filter((sub) => sub.parent_id === cat.id)
+        .flatMap((sub) => [
+          { id: sub.id, label: name(sub), hint: `${t('history.level.subcategory')} · ${name(cat)}`, also: name(sub, true), depth: 1 },
+          ...services
+            .filter((s) => s.category_id === sub.id)
+            .map((s) => ({ id: s.id, label: name(s), hint: `${t('history.level.service')} · ${name(sub)}`, also: name(s, true), depth: 2 })),
+        ]),
+    ]);
   const chip = options.find((o) => o.id === filterId);
 
   const entries = carLog(logs.data ?? [], costs, readings, kind, scopeOf(filterId, tree, services));

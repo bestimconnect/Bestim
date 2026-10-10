@@ -22,7 +22,7 @@ export function pickVehicle(currentId: string | null, onPick: (id: string) => vo
 }
 
 /** One row of the search picker: `label` in the app language, `hint` the line under it. Both are searched, and so is `also` (e.g. the other language's names). */
-export type PickOption = { id: string; label: string; hint?: string; also?: string };
+export type PickOption = { id: string; label: string; hint?: string; also?: string; depth?: number }; // depth indents a tree row (Car log filter)
 type PickRequest = {
   title: string;
   options: PickOption[];

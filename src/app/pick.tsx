@@ -38,7 +38,11 @@ export default function Pick() {
           keyboardDismissMode="on-drag"
           initialNumToRender={12}
           contentContainerClassName="gap-2 pb-6"
-          renderItem={({ item }) => <Item title={item.label} subtitle={item.hint} chevron={false} onPress={() => pick(item.id, item.label)} />}
+          renderItem={({ item }) => (
+            <View style={{ paddingStart: query ? 0 : (item.depth ?? 0) * 16 }}>
+              <Item title={item.label} subtitle={item.hint} chevron={false} onPress={() => pick(item.id, item.label)} />
+            </View>
+          )}
           ListEmptyComponent={allowCustom && typed ? null : <Text variant="body" className="text-muted">{t(allowCustom ? 'pick.type' : 'pick.empty')}</Text>}
           ListFooterComponent={
             allowCustom && typed && isNew ? <Item icon={Plus} title={t('pick.custom', { text: typed })} chevron={false} onPress={() => pick(null, typed)} /> : null

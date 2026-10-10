@@ -561,7 +561,8 @@
     },
     "service": "Service",
     "next": "Next maintenance after",
-    "notes": "Notes"
+    "notes": "Notes",
+    "standard": "standard"
   },
   "reminders": {
     "title": "Your next step is clear",
@@ -708,7 +709,7 @@
     "header": "Export history",
     "title": "Share what you choose",
     "logs": {
-      "title": "Maintenance logs",
+      "title": "Car log",
       "sub": "Always included"
     },
     "costs": {
@@ -732,7 +733,7 @@
     "empty": "No records to export yet.",
     "error": "We couldn't prepare the file. Try again.",
     "file": {
-      "title": "Bestim · Maintenance log",
+      "title": "Bestim · Car log",
       "date": "Date",
       "service": "Service",
       "odometer": "Odometer",

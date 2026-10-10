@@ -37,10 +37,12 @@ export default function Review() {
   const details = cleanDetails(d.details, serviceType?.fields ?? []);
   const intervalKm = reminds ? d.intervalKm ?? serviceType?.default_interval_km ?? null : null;
   const months = reminds ? serviceType?.default_interval_months ?? null : null;
-  const next = [
+  const nextParts = [
     intervalKm != null && d.odometer != null ? `${n(d.odometer + intervalKm)} ${t('capture.review.km')}` : null,
     months != null ? t('capture.review.months', { n: months }) : null,
-  ].filter(Boolean).join(' / ') || '—';
+  ].filter(Boolean);
+  // Blank "Next maintenance after" means the service's default (Q90): say so.
+  const next = nextParts.length ? nextParts.join(' / ') + (d.intervalKm == null ? ` · ${t('log.standard')}` : '') : '—';
   const date = format(new Date(`${d.serviceDate}T00:00:00`), 'd MMMM yyyy', { locale: i18n.language === 'ar' ? ar : enUS });
   const voice = d.source === 'voice';
 

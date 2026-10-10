@@ -59,7 +59,9 @@ export default function LogDetailScreen() {
     [t('log.parts'), parts || '—'],
     [t('log.workshop'), log.location || '—'],
     ...details.map(([f, v]) => [t(`capture.fields.${f}`), String(v)] as [string, string]),
-    ...(next != null ? [[t('log.next'), t('log.review.km', { n: next.toLocaleString('en-US') })] as [string, string]] : []),
+    ...(next != null
+      ? [[t('log.next'), `${t('log.review.km', { n: next.toLocaleString('en-US') })}${log.interval_km == null ? ` · ${t('log.standard')}` : ''}`] as [string, string]]
+      : []),
   ];
   const count = corrections.data?.length ?? 0;
 
