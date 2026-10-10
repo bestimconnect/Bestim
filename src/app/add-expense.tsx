@@ -8,7 +8,7 @@ import { I18nManager, Pressable, ScrollView, TextInput, View } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Field, Header, Item, Note, Text } from '@/components/ui';
+import { Button, Field, Header, Item, Note, Text, Toggle } from '@/components/ui';
 import { errorText } from '@/lib/errors';
 import { useCurrentVehicle, useIsGuest, useRecordCategories, useVehicle, useVehicleLogs } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
@@ -44,6 +44,7 @@ export default function AddExpense() {
   const [place, setPlace] = useState(card?.place ?? '');
   const [liters, setLiters] = useState(card?.liters != null ? String(card.liters) : '');
   const [reading, setReading] = useState(card?.odometer != null ? String(card.odometer) : '');
+  const [fullTank, setFullTank] = useState(true); // consumption is measured between full tanks (Q91)
   const [logId, setLogId] = useState<string | null>(null);
   const [pick, setPick] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +67,7 @@ export default function AddExpense() {
         log_id: logId,
         liters: l,
         odometer_reading: odo,
+        full_tank: fuel ? fullTank : true,
       });
       if (error) throw error;
     },
@@ -128,6 +130,15 @@ export default function AddExpense() {
           <View className="flex-row gap-4">
             <Field className="flex-1" label={t('expenses.liters')} value={liters} onChangeText={setLiters} keyboardType="decimal-pad" placeholder={t('expenses.optional')} />
             <Field className="flex-1" label={t('expenses.reading')} value={reading} onChangeText={setReading} keyboardType="number-pad" placeholder={t('expenses.optional')} />
+          </View>
+        ) : null}
+        {category === 'fuel' && !batch ? (
+          <View className="flex-row items-center gap-3 rounded-field bg-white p-4">
+            <View className="flex-1 gap-0.5">
+              <Text variant="label">{t('expenses.fullTank')}</Text>
+              <Text variant="caption" className="text-muted">{t('expenses.fullTankHint')}</Text>
+            </View>
+            <Toggle value={fullTank} onChange={setFullTank} label={t('expenses.fullTank')} />
           </View>
         ) : null}
         {batch ? null : (

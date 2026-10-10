@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 
+import { FuelLine } from '@/components/FuelCard';
 import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { useLightStatusBar } from '@/components/Hero';
@@ -233,6 +234,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
             ))}
           </View>
         </PressableScale>
+        <FuelLine vehicleId={vehicle.id} />
         <Item icon={ClipboardList} title={t('home.carLog')} subtitle={t('home.carLogSub')} onPress={() => router.push({ pathname: '/history', params: { vehicleId: vehicle.id } })} />
       </View>
     </ScrollView>

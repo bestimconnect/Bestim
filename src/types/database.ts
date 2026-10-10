@@ -138,6 +138,7 @@ export type Database = {
           expense_date: string
           from_log: boolean
           id: string
+          full_tank: boolean
           liters: number | null
           log_id: string | null
           odometer_reading: number | null
@@ -154,6 +155,7 @@ export type Database = {
           expense_date?: string
           from_log?: boolean
           id?: string
+          full_tank?: boolean
           liters?: number | null
           log_id?: string | null
           odometer_reading?: number | null
@@ -170,6 +172,7 @@ export type Database = {
           expense_date?: string
           from_log?: boolean
           id?: string
+          full_tank?: boolean
           liters?: number | null
           log_id?: string | null
           odometer_reading?: number | null

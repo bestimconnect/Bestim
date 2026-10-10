@@ -636,7 +636,9 @@
     "linkHint": "Added as an extra cost for this record.",
     "save": "Save expense",
     "liters": "Litres",
-    "reading": "Odometer reading · km"
+    "reading": "Odometer reading · km",
+    "fullTank": "Full tank",
+    "fullTankHint": "Turn off if you didn’t fill it to the top"
   },
   "notify": {
     "soonTitle": "{{part}} is coming up",
@@ -878,6 +880,7 @@
     "title": "Fuel consumption",
     "kmPerLiter": "km per litre",
     "costPerKm": "EGP per km",
-    "hint": "Add litres and the reading to two fill-ups to see consumption"
+    "hint": "Add litres and the reading to two full-tank fill-ups to see consumption",
+    "perFill": "{{n}} km/L"
   }
 }

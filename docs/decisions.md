@@ -1116,3 +1116,12 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 **Why:** CEO review before the test build: the app has many kinds of records, not only maintenance, and one identical form did not fit them.
 
 **Spec for dev:** `record_categories`, new columns on `service_types` / `maintenance_logs.details` / `expenses.liters` + `odometer_reading`, `odometer_readings` filled by a trigger (`20261011090000_record_catalog.sql`). "Car Wash" as a service is retired (no category, no reminder); old logs keep it.
+
+### Q91: Fuel consumption between full tanks, shown on Home and in the Car log (Shady, 2026-10-11)
+**Decision:**
+- The fuel form has a "Full tank" switch (on by default). Consumption is measured from one full tank to the next: the distance ÷ every litre put in between (partial fill-ups included). A partial fill-up never closes a figure on its own.
+- The average shows on the car page (as before), as one row on Home (hidden until there is a figure), and each fuel row in the Car log shows the km per litre of the full tank that closed it.
+- Consumption uses the car's whole fuel history, not the 6-month money window.
+**Why:** Treating every fill-up as full gave wrong numbers after a partial fill-up.
+
+**Spec for dev:** `expenses.full_tank boolean not null default true` (`20261011090200_fuel_full_tank.sql`; older rows count as full), `consumption()` in `src/lib/fuel.ts`, `useFuelFills()` in `src/lib/queries.ts`.

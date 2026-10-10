@@ -232,6 +232,25 @@ export function useVehicleParts(vehicle: Vehicle | null | undefined) {
 /** Soon/overdue parts that aren't snoozed: Home "today's priority", 09 overview, 21 "needs attention". */
 export const needsAttention = (parts: Part[]) => parts.filter((p) => p.status.state !== 'ok' && !p.snoozedUntil);
 
+/** Every fuel fill-up of one car, no date window, so consumption (src/lib/fuel.ts) uses the whole history. */
+export function useFuelFills(vehicleId: string | undefined) {
+  return useQuery({
+    queryKey: ['expenses', 'fuel', vehicleId], // under ['expenses'], so every expense write refreshes it
+    enabled: !!vehicleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('expenses')
+        .select('id, amount, liters, odometer_reading, full_tank')
+        .eq('vehicle_id', vehicleId!)
+        .eq('category', 'fuel')
+        .not('liters', 'is', null)
+        .not('odometer_reading', 'is', null);
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 /** Start of the expense window every money screen shares: Jan 1st, or 6 months back if earlier (bars on 06/23). */
 export function expensesSince(today = new Date()) {
   const sixBack = new Date(today.getFullYear(), today.getMonth() - 5, 1);

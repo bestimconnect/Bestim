@@ -12,7 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { Button, Choice, Header, Item, Text } from '@/components/ui';
 import { carLog, scopeOf, type Kind } from '@/lib/carLog';
-import { useCurrentVehicle, useExpenses, useOdometerReadings, useRecordCategories, useServiceTypes, useVehicleLogs } from '@/lib/queries';
+import { consumption } from '@/lib/fuel';
+import { useCurrentVehicle, useExpenses, useFuelFills, useOdometerReadings, useRecordCategories, useServiceTypes, useVehicleLogs } from '@/lib/queries';
 import { SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
 import { pickOption, type PickOption } from '@/lib/sheet';
 import { shadows, useColors } from '@/lib/theme';
@@ -59,6 +60,12 @@ export default function HistoryScreen() {
             .map((s) => ({ id: s.id, label: name(s), hint: `${t('history.level.service')} · ${name(sub)}`, also: name(s, true), depth: 2 })),
         ]),
     ]);
+  // Fuel: the km per litre of each full tank that closed a pair (src/lib/fuel.ts).
+  const fuel = consumption(useFuelFills(vehicleId).data ?? []);
+  const perFill = (id: string) => {
+    const f = fuel?.byFill.get(id);
+    return f ? t('fuel.perFill', { n: f.kmPerLiter.toLocaleString('en-US', { maximumFractionDigits: 1 }) }) : null;
+  };
   const chip = options.find((o) => o.id === filterId);
 
   const entries = carLog(logs.data ?? [], costs, readings, kind, scopeOf(filterId, tree, services));
@@ -144,7 +151,7 @@ export default function HistoryScreen() {
                         key={`c${x.id}`}
                         icon={icon(sub?.icon, Icons.Receipt)}
                         title={sub ? name(sub) : t(`expenses.chip.${x.category}`)}
-                        subtitle={[`${n(x.amount)} ${t('expenses.currency')}`, x.description, x.liters != null ? t('history.liters', { n: n(x.liters) }) : null].filter(Boolean).join(' · ')}
+                        subtitle={[`${n(x.amount)} ${t('expenses.currency')}`, x.description, x.liters != null ? t('history.liters', { n: n(x.liters) }) : null, perFill(x.id)].filter(Boolean).join(' · ')}
                         chevron={false}
                         disabled
                       />
