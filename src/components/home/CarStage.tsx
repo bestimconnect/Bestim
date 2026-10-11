@@ -5,7 +5,6 @@ import { FlatList, I18nManager, useWindowDimensions, View, type NativeScrollEven
 import Animated from 'react-native-reanimated';
 
 import { EASE_OUT } from '@/lib/motion';
-import { useColors } from '@/lib/theme';
 import type { Vehicle } from '@/lib/queries';
 import { vehicleArt } from '@/lib/vehicleArt';
 import { useSettings } from '@/stores/settingsStore';
@@ -15,7 +14,6 @@ const HEIGHT = 200;
 /** Home's car on a soft lime oval (Q94). Swipe between cars (Q56): the page it settles on becomes the current car. */
 export function CarStage({ vehicle, vehicles }: { vehicle: Vehicle; vehicles: Vehicle[] }) {
   const { width } = useWindowDimensions();
-  const c = useColors();
   const setCurrent = useSettings((s) => s.setCurrentVehicle);
   const pager = useRef<FlatList<Vehicle>>(null);
   const placed = useRef(false);
@@ -36,14 +34,12 @@ export function CarStage({ vehicle, vehicles }: { vehicle: Vehicle; vehicles: Ve
     Haptics.selectionAsync();
     setCurrent(vehicles[i].id);
   };
-  // A true oval, placed by numbers: `self-center` doesn't centre an absolute view reliably.
-  const ovalW = Math.min(270, width - 100);
-  const ovalH = HEIGHT - 16;
+  const oval = Math.min(260, width - 130);
 
   return (
     <View className="gap-1">
       <View style={{ height: HEIGHT }}>
-        <View style={{ position: 'absolute', top: 4, left: (width - ovalW) / 2, width: ovalW, height: ovalH, borderRadius: ovalW / 2, backgroundColor: c.spot }} />
+        <View className="absolute self-center rounded-full bg-spot" style={{ top: 8, width: oval, height: HEIGHT - 24 }} />
         <FlatList
           ref={pager}
           horizontal
@@ -72,7 +68,7 @@ export function CarStage({ vehicle, vehicles }: { vehicle: Vehicle; vehicles: Ve
           {vehicles.map((v) => (
             <Animated.View
               key={v.id}
-              className={`h-1.5 rounded-full ${v.id === vehicle.id ? 'bg-lime' : 'bg-line'}`}
+              className={`h-1.5 rounded-full ${v.id === vehicle.id ? 'bg-ink' : 'bg-line'}`}
               style={{ width: v.id === vehicle.id ? 18 : 6, transitionProperty: 'width', transitionDuration: '220ms', transitionTimingFunction: EASE_OUT }}
             />
           ))}

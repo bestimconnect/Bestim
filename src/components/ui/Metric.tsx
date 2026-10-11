@@ -19,17 +19,16 @@ type Props = {
   size?: 'large' | 'small';
   aside?: ReactNode; // e.g. the refresh button on 06
   className?: string;
-  labelClassName?: string; // overrides the label colour (Home: a stale reading in amber, Q23)
 };
 
-export function Metric({ label, value, caption, tone = 'white', size = 'large', aside, className = '', labelClassName }: Props) {
+export function Metric({ label, value, caption, tone = 'white', size = 'large', aside, className = '' }: Props) {
   const t = tones[tone];
   return (
     <View
       className={`flex-row items-center gap-3 rounded-metric p-5 ${t.box} ${className}`}
       style={tone === 'white' ? { boxShadow: shadows.soft } : tone === 'lime' ? { boxShadow: shadows.glow } : undefined}>
       <View className="flex-1 gap-1">
-        <Text variant="caption" className={labelClassName ?? t.muted}>{label}</Text>
+        <Text variant="caption" className={t.muted}>{label}</Text>
         <Text variant={size === 'large' ? 'number' : 'small-number'} className={t.text} numberOfLines={1}>
           {value}
         </Text>

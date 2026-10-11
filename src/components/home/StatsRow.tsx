@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { Card, PressableScale, Text } from '@/components/ui';
+import { PressableScale, Text } from '@/components/ui';
 import { consumption } from '@/lib/fuel';
 import { kmThisMonth } from '@/lib/homeStats';
 import { useExpenses, useFuelFills, useOdometerReadings, type Part, type Vehicle } from '@/lib/queries';
@@ -27,7 +27,7 @@ function Column({ label, value, unit, caption, tone, onPress, middle }: {
       className={`flex-1 items-center gap-0.5 px-1 ${middle ? 'border-x border-line' : ''}`}>
       <Text variant="caption" className="text-center text-muted" numberOfLines={1}>{label}</Text>
       <View className="flex-row items-baseline gap-1">
-        <Text variant="small-number" className={tone} numberOfLines={1} adjustsFontSizeToFit>{value}</Text>
+        <Text variant="heading" className={tone} style={{ fontFamily: 'Poppins_700Bold' }}>{value}</Text>
         {unit ? <Text variant="caption" className="text-muted">{unit}</Text> : null}
       </View>
       {caption ? <Text variant="caption" className="text-center text-muted" numberOfLines={1}>{caption}</Text> : null}
@@ -35,7 +35,7 @@ function Column({ label, value, unit, caption, tone, onPress, middle }: {
   );
 }
 
-/** Home's row of three (Q94): next service · this month · fuel, in one white card of the UI kit. */
+/** Home's row of three (Q94): next service · this month · fuel, between thin lines, no cards. */
 export function StatsRow({ vehicle, next }: { vehicle: Vehicle; next: Part | null }) {
   const { t, i18n } = useTranslation();
   const unit = t(`home.${vehicle.odometer_unit}`);
@@ -62,7 +62,7 @@ export function StatsRow({ vehicle, next }: { vehicle: Vehicle; next: Part | nul
   }
 
   return (
-    <Card className="flex-row px-1 py-4">
+    <View className="flex-row border-y border-line py-3.5">
       <Column
         label={t('home.next')}
         value={nextValue}
@@ -90,6 +90,6 @@ export function StatsRow({ vehicle, next }: { vehicle: Vehicle; next: Part | nul
         caption={fuel ? t('home.perKm', { n: n(fuel.average.costPerKm, 2) }) : t('home.fuelHint')}
         onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id } })}
       />
-    </Card>
+    </View>
   );
 }

@@ -1157,4 +1157,3 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 **Why:** The old top took more than half the screen; the founder chose this layout from six mockups (artifact "Bestim Home Options", board 6).
 
 **Spec for dev:** `src/components/home/{CarStage,StatsRow}.tsx`, pure figures in `src/lib/homeStats.ts` (checked), palette colour `spot`.
-**Update (founder, 2026-10-11):** built from the UI kit so it matches the rest of the app in both themes: the odometer is the white `Metric` with the lime update button, the three numbers sit in one white `Card`, priority rows and the Car log are `Item`s with icon badges, the bell is back on its white button, the active dot is lime. The oval's colour is `spot` from the palette, read with `useColors()` (no new Tailwind class).

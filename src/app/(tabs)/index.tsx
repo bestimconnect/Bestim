@@ -2,9 +2,9 @@ import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router } from 'expo-router';
 import * as Icons from 'lucide-react-native';
-import { Bell, Car, ChevronDown, ClipboardList, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
+import { Bell, Car, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
 import { useEffect } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { I18nManager, Pressable, ScrollView, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -16,13 +16,13 @@ import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { OfflineHome } from '@/components/OfflineHome';
 import { VoiceQueueCard } from '@/components/VoiceQueueCard';
-import { Button, Item, Metric, PressableScale, Rise, Text } from '@/components/ui';
+import { Button, Item, PressableScale, Rise, Text } from '@/components/ui';
 import { needsAttention, useCurrentVehicle, useIsGuest, useVehicleParts, useVehicles, vehicleName, type Part, type Vehicle, useProfile } from '@/lib/queries';
 import { nextDue, statusCounts } from '@/lib/homeStats';
 import { POP, SWAP } from '@/lib/motion';
 import { useOnline, useShowSaved } from '@/lib/online';
 import { pickVehicle } from '@/lib/sheet';
-import { shadows, useColors } from '@/lib/theme';
+import { useColors } from '@/lib/theme';
 import { useInbox } from '@/stores/notifyInbox';
 import { useSettings } from '@/stores/settingsStore';
 
@@ -60,10 +60,9 @@ function Bell_() {
       accessibilityRole="button"
       accessibilityLabel={unread ? `${t('home.notifications')}, ${t('inbox.unread')}` : t('home.notifications')}
       onPress={() => (guest ? router.push({ pathname: '/feature-gate', params: { feature: 'reminders' } }) : router.push('/notifications'))}
-      className="h-10 w-10 items-center justify-center rounded-full bg-white"
-      style={{ boxShadow: shadows.soft }}>
-      <Bell size={20} color={c.ink} />
-      {unread ? <View className="absolute end-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-white bg-coral" /> : null}
+      className="h-11 w-11 items-center justify-center rounded-full">
+      <Bell size={22} color={c.ink} strokeWidth={1.8} />
+      {unread ? <View className="absolute end-2.5 top-2.5 h-2 w-2 rounded-full bg-coral" /> : null}
     </PressableScale>
   );
 }
@@ -84,6 +83,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
   const next = nextDue(parts, urgent);
   const unit = t(`home.${vehicle.odometer_unit}`);
   const toReminders = () => router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id, tab: 'reminders' } });
+  const Chevron = I18nManager.isRTL ? ChevronLeft : ChevronRight;
   const status =
     counts.overdue && counts.soon
       ? t('home.statusBoth', { o: counts.overdue, s: counts.soon })
@@ -106,8 +106,8 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
             accessibilityRole={vehicles.length > 1 ? 'button' : undefined}
             accessibilityLabel={vehicles.length > 1 ? t('home.switchVehicle') : undefined}
             className="flex-row items-center gap-1.5">
-            <Text variant="heading" numberOfLines={1} className="shrink">{vehicleName(vehicle)}</Text>
-            {vehicles.length > 1 ? <ChevronDown size={18} color={c.teal} /> : null}
+            <Text variant="title" numberOfLines={1} className="shrink">{vehicleName(vehicle)}</Text>
+            {vehicles.length > 1 ? <ChevronDown size={20} color={c.muted} /> : null}
           </Pressable>
         </View>
         <Bell_ />
@@ -117,28 +117,31 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
 
       {/* Keyed by vehicle: the figures fade in fresh when the car changes instead of popping (Q57). */}
       <Animated.View key={vehicle.id} entering={SWAP} className="gap-4 px-6 pt-3">
-        {/* Q23: a reading 30+ days old is stale; the label turns amber, never added to the priority list. */}
-        <Metric
-          label={days > 0 ? t('home.lastReading', { count: days }) : t('home.lastReadingToday')}
-          labelClassName={days >= 30 ? 'text-[#B7791F]' : undefined}
-          value={vehicle.current_odometer.toLocaleString('en-US')}
-          caption={t('vehicles.odometer', { unit })}
-          aside={
-            <PressableScale
-              accessibilityRole="button"
-              accessibilityLabel={t('home.updateOdometer')}
-              onPress={() => router.push('/update-odometer')}
-              className="h-11 w-11 items-center justify-center rounded-full bg-lime">
-              <RefreshCw size={20} color="#222E29" />
-            </PressableScale>
-          }
-        />
+        <View className="flex-row items-center gap-3">
+          <View className="flex-1">
+            <View className="flex-row items-baseline gap-1.5">
+              <Text variant="number">{vehicle.current_odometer.toLocaleString('en-US')}</Text>
+              <Text variant="body" className="text-muted">{unit}</Text>
+            </View>
+            {/* Q23: a reading 30+ days old is stale; said here in amber, never added to the priority list. */}
+            <Text variant="caption" className={days >= 30 ? 'text-[#B7791F]' : 'text-muted'}>
+              {days > 0 ? t('home.lastReading', { count: days }) : t('home.lastReadingToday')}
+            </Text>
+          </View>
+          <PressableScale
+            accessibilityRole="button"
+            accessibilityLabel={t('home.updateOdometer')}
+            onPress={() => router.push('/update-odometer')}
+            className="h-[52px] w-[52px] items-center justify-center rounded-full bg-panel">
+            <RefreshCw size={22} color={c.lime} />
+          </PressableScale>
+        </View>
 
         <StatsRow vehicle={vehicle} next={next} />
 
         <VoiceQueueCard vehicleId={vehicle.id} />
 
-        <View className="gap-3">
+        <View>
           <View className="flex-row items-center justify-between">
             <Text variant="heading">{t('home.priority')}</Text>
             <Pressable onPress={toReminders} hitSlop={8}>
@@ -150,22 +153,38 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
               const overdue = p.status.state === 'overdue';
               return (
                 <Rise key={p.serviceType.id} index={i}>
-                  <Item
-                    icon={iconOf(p.serviceType.icon)}
-                    tone={overdue ? 'blush' : 'amber'}
-                    title={t(overdue ? 'home.overdueTitle' : 'home.soonTitle', { part: partName(i18n.language, p) })}
-                    subtitle={subtitle(t, i18n.language, p, vehicle.odometer_unit)}
+                  <PressableScale
+                    accessibilityRole="button"
+                    scale={0.98}
                     onPress={() => router.push({ pathname: '/part', params: { vehicleId: vehicle.id, serviceTypeId: p.serviceType.id } })}
-                  />
+                    className={`min-h-[60px] flex-row items-center gap-3 ${i < urgent.length - 1 ? 'border-b border-line' : ''}`}>
+                    <View className={`h-2 w-2 rounded-full ${overdue ? 'bg-coral' : 'bg-[#E9B23A]'}`} />
+                    <View className="flex-1">
+                      <Text variant="label">{partName(i18n.language, p)}</Text>
+                      <Text variant="caption" className="text-muted">{subtitle(t, i18n.language, p, vehicle.odometer_unit)}</Text>
+                    </View>
+                    <Chevron size={18} color={c.muted} />
+                  </PressableScale>
                 </Rise>
               );
             })
           ) : (
-            <Rise><Text variant="body" className="text-muted">{t('home.allGood')}</Text></Rise>
+            <Rise><Text variant="body" className="pt-2 text-muted">{t('home.allGood')}</Text></Rise>
           )}
         </View>
 
-        <Item icon={ClipboardList} title={t('home.carLog')} subtitle={t('home.carLogSub')} onPress={() => router.push({ pathname: '/history', params: { vehicleId: vehicle.id } })} />
+        <PressableScale
+          accessibilityRole="button"
+          scale={0.98}
+          onPress={() => router.push({ pathname: '/history', params: { vehicleId: vehicle.id } })}
+          className="min-h-[56px] flex-row items-center gap-3 border-t border-line">
+          <ClipboardList size={20} color={c.teal} />
+          <View className="flex-1">
+            <Text variant="label">{t('home.carLog')}</Text>
+            <Text variant="caption" className="text-muted">{t('home.carLogSub')}</Text>
+          </View>
+          <Chevron size={18} color={c.muted} />
+        </PressableScale>
       </Animated.View>
     </ScrollView>
   );
