@@ -1,12 +1,10 @@
-import { router } from 'expo-router';
-import { Fuel } from 'lucide-react-native';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { consumption } from '@/lib/fuel';
 import { useFuelFills } from '@/lib/queries';
 import { shadows } from '@/lib/theme';
-import { Item, Text } from './ui';
+import { Text } from './ui';
 
 const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 2 });
 
@@ -29,20 +27,5 @@ export function FuelCard({ vehicleId, hint }: { vehicleId: string; hint?: boolea
         </View>
       </View>
     </View>
-  );
-}
-
-/** One-row version for Home: hidden until there is a figure; opens the car page where the full card lives. */
-export function FuelLine({ vehicleId }: { vehicleId: string }) {
-  const { t } = useTranslation();
-  const c = consumption(useFuelFills(vehicleId).data ?? []);
-  if (!c) return null;
-  return (
-    <Item
-      icon={Fuel}
-      title={t('fuel.title')}
-      subtitle={`${fmt(c.average.kmPerLiter)} ${t('fuel.kmPerLiter')} · ${fmt(c.average.costPerKm)} ${t('fuel.costPerKm')}`}
-      onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: vehicleId } })}
-    />
   );
 }
