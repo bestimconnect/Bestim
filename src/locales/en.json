@@ -228,7 +228,9 @@
       "upcoming": "Upcoming dates"
     },
     "carLog": "Car log",
-    "carLogSub": "Services, costs and odometer readings"
+    "carLogSub": "Services, costs and odometer readings",
+    "kmL": "km/L",
+    "perKm": "{{n}} EGP per km"
   },
   "gate": {
     "title": {

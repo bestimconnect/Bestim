@@ -1144,3 +1144,11 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 **Why:** Q90: owners often log at the workshop or garage, where the signal is weak.
 
 **Spec for dev:** `src/stores/voiceQueue.ts` (persisted list; audio files in `Paths.document/voice-queue`), `src/lib/voiceSend.ts` (`sendVoice`, `queueVoice`, `processVoiceQueue`, `dropVoice`), run from `_layout.tsx` on reconnect and app resume. Card: `src/components/VoiceQueueCard.tsx`. Opening a ready item fills `useVoiceBatch` with its `queueId`; a save in `capture/review-all` removes it from the queue.
+
+### Q95: Home keeps its layout, shown more clearly ("design A") (founder, 2026-10-11)
+**Decision:** same information and order as before, organised better (after the Q94 redesign was undone):
+- Dark top as one column: greeting and bell → the car (smaller) → the car's name as a tap-to-switch pill with the swipe dots under it → the odometer as a see-through strip with its unit and the lime update button.
+- "Today's priority": the top 3 (Q10) in one white card split by lines; an overdue line in red.
+- This month's expenses (total + 6 bars, Q14) and fuel consumption (Q91) share one white card; fuel shows only once there is a figure.
+- The Car log row stays last.
+**Why:** The founder chose design A from the "Same layout" mockups (artifact "Bestim Home Options") and asked for no new information.
