@@ -1150,5 +1150,5 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 - Dark top as one column: greeting and bell → the car (smaller) → the car's name as a tap-to-switch pill with the swipe dots under it → the odometer as a see-through strip with its unit and the lime update button.
 - "Today's priority": the top 3 (Q10) in one white card split by lines; an overdue line in red.
 - This month's expenses (total + 6 bars, Q14) and fuel consumption (Q91) share one white card; fuel shows only once there is a figure.
-- The Car log row stays last.
+- The Car log row was removed from Home (founder, 2026-10-11); it opens from the car page (09) and from VoiceQueueCard rows.
 **Why:** The founder chose design A from the "Same layout" mockups (artifact "Bestim Home Options") and asked for no new information.

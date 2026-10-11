@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import * as Icons from 'lucide-react-native';
-import { Bell, Car, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Fuel, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
+import { Bell, Car, ChevronDown, ChevronLeft, ChevronRight, Fuel, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
 import { FlatList, I18nManager, Pressable, ScrollView, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -274,7 +274,6 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
             </PressableScale>
           ) : null}
         </View>
-        <Item icon={ClipboardList} title={t('home.carLog')} subtitle={t('home.carLogSub')} onPress={() => router.push({ pathname: '/history', params: { vehicleId: vehicle.id } })} />
       </View>
     </ScrollView>
   );
