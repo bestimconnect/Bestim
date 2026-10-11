@@ -1060,3 +1060,115 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 **Why:** A link people can tap in WhatsApp is the whole point of sharing. Founder approved on 2026-10-05.
 
 **Spec for dev:** the app must handle the web link (Android App Links / iOS Universal Links) as well as `bestim://`; the website page is a `bestim-landing` task. Note it in `docs/UPDATES.md`.
+
+### Q85: The app needs Android 8.0 or newer (dev, 2026-10-10; founder can overrule)
+
+**Decision:** The smallest Android version the app installs on moves from 7.0 to 8.0 (released 2017).
+**Why:** The first Android build of the release code failed: the part that reads the odometer with the camera only works from Android 8.0. The alternative was shipping Android without the camera reader, which breaks the rule that every feature works the same on both platforms (Q75). Phones still on Android 7 are a very small share.
+
+**Spec for dev:** `expo-build-properties` in `app.json` sets `android.minSdkVersion` to 26. The camera text reader (`react-native-vision-camera-ocr-plus`) declares 26 itself; the app's lower default was overriding it and its native code would not compile.
+
+
+### Q86: Cars only, picked from a list (founder, 2026-10-10)
+
+**Decision:** Bestim is for cars only. Motorcycles, equipment and the "operating hours" reading are removed. Brand, model and year are picked from a list; the owner types the car by hand only when it is not on the list. Eight car types stay, each with its picture: sedan, hatchback, SUV, coupe, sports, convertible, pickup, van. Station wagons count as hatchback, minivans and microbuses as van. This replaces the type list of Q52 and the km / hours switch of Q5.
+**Why:** Founder request before the first test build: a typed brand and model gives messy data and a slow first step; a picked car gives clean data and lets the app show the right picture straight away.
+
+**Spec for dev:** the list lives in the database (`car_makes`, `car_models`), filled from `supabase/car-catalog.csv` by `scripts/car-catalog.ts`; the review copy is `../docs/car-list.xlsx`. It is built for Egypt first, with Arabic and English names. A vehicle keeps `make` / `model` as text (the English names) plus `car_model_id` (empty when typed by hand); `vehicleName()` shows the name in the app language. The database still accepts the old hours unit so no old row breaks, but the app never offers it.
+
+### Q87: First run is car first, account after (founder, 2026-10-10)
+
+**Decision:** New order: Splash → Language → Intro slides → Car setup → Odometer → Save your car (create an account, or later) → First log (optional) → Home. "Get started" quietly opens a guest session so the car can be saved before any form. The intro is one swipeable screen of three slides built from real app pieces, on a light background, and it replaces both the three tour screens and the Welcome screen. The splash continues into a short logo animation with the tagline. This replaces the order of Q8.
+**Why:** The first minutes decide whether someone keeps the app. Seeing your own car appear before being asked for an email is a better first impression than a sign-up form. Guests could already become full accounts and keep their car (Q17), so nothing new is needed underneath.
+
+**Spec for dev:** the car is saved at the end of the odometer step (that is also when `onboarding_completed` is set), so closing the app mid-way never creates a second car. Motion follows Q57.
+
+### Q88: The odometer camera gets an AI backup (founder, 2026-10-10)
+
+**Decision:** The phone still reads the number itself first. If it has not managed after about two seconds, the app takes the picture and the AI reads it. The owner always confirms the number. The backup is for full accounts only, with its own daily limit.
+**Why:** The on-phone reader cannot read digital segment displays, which many cars have. The partner's notes preferred no AI for the odometer; the founder chose accuracy on every display over that, with the phone still doing the work whenever it can.
+
+**Spec for dev:** new Edge Function `read-odometer`, counted by `bump_scan_usage()`. Guests get the on-phone reader and typing. The lag came from sending every camera frame to the app; the reader now reports about five times a second and only when the text changes, and two reads a quarter of a second apart must agree.
+
+### Q89: Voice follows the partner's cases file, logging only (founder, 2026-10-10)
+
+**Decision:** This round voice only records things; answering questions about history and spending waits. Rules taken from the cases file:
+- Fuel, car wash, parking and tolls are quick running costs with their own expense category, never a maintenance job. "Car Wash" is no longer offered as a service when logging by hand (old logs that use it stay as they are).
+- Money said about a part or a service ("paid 1,200 for the battery") is that maintenance job with the cost filled in.
+- Money with no clear purpose ("paid 1,000 on the car") becomes an expense with no category; the owner must choose one before saving.
+- Extra remarks go into a Notes field on the maintenance record, in the owner's own words.
+- Arabic, English, mixed and Franco-Arabic sentences are all understood the same way.
+- A local keyword parser and phone-only transcription are not built; the side-by-side test decides whether they are worth it.
+**Why:** Founder scope for the test build. Money already creates a linked expense through the database (Q28), so that rule needed nothing new.
+
+**Spec for dev:** the instructions, answer format and both AI services live in `supabase/functions/process-voice-log/understand.ts`. The secret `VOICE_PROVIDER` picks `gemini` (default) or `openai`. `scripts/voice-eval.ts` runs the same cases through both on a laptop and prints correct answers and timings; the recording list for real voices is `docs/voice-test-sentences.md`. With ChatGPT a recording takes two steps (speech to text, then understanding) and raw `.aac` recordings from some Android phones still go to Gemini, so the Gemini key stays. **Open:** a voice note also shows under "Reason for replacement" on the part history page; and ChatGPT keeps the text of what was said for 30 days for abuse monitoring, which the in-app notice ("We don't keep it") does not cover.
+
+### Q90: Records get categories, their own fields, and a Car log (CEO + Shady, 2026-10-10)
+
+**Decision:**
+- Every record sits in a tree: category → subcategory → service. Running costs (fuel, wash, parking, tolls, papers, parts) are in the same tree. The draft is `../docs/record-categories.xlsx`; Ahmed and Shady correct it before it goes in.
+- The form shows extra inputs that fit the service (oil grade, tyre size…). Not every service reminds: running costs and one-off repairs never do.
+- Every service that reminds has a default distance. The form has "Next maintenance after (km)"; left blank, the default applies.
+- The log page is the **Car log** («سجل السيارة»): maintenance, running costs and odometer readings together, filtered by kind, category, subcategory and service. This replaces the four chips of Q11.
+- Fuel can take litres and the reading; consumption shows once two fill-ups have both.
+- Reminders stays its own page. A separate **Notifications** page lists every alert and is built so server push can feed it later.
+- Voice works offline: the recording waits and is written up when the phone is back online, then the owner reviews it as usual.
+**Why:** CEO review before the test build: the app has many kinds of records, not only maintenance, and one identical form did not fit them.
+
+**Spec for dev:** `record_categories`, new columns on `service_types` / `maintenance_logs.details` / `expenses.liters` + `odometer_reading`, `odometer_readings` filled by a trigger (`20261011090000_record_catalog.sql`). "Car Wash" as a service is retired (no category, no reminder); old logs keep it.
+
+### Q91: Fuel consumption between full tanks, shown on Home and in the Car log (Shady, 2026-10-11)
+**Decision:**
+- The fuel form has a "Full tank" switch (on by default). Consumption is measured from one full tank to the next: the distance ÷ every litre put in between (partial fill-ups included). A partial fill-up never closes a figure on its own.
+- The average shows on the car page (as before), as one row on Home (hidden until there is a figure), and each fuel row in the Car log shows the km per litre of the full tank that closed it.
+- Consumption uses the car's whole fuel history, not the 6-month money window.
+**Why:** Treating every fill-up as full gave wrong numbers after a partial fill-up.
+
+**Spec for dev:** `expenses.full_tank boolean not null default true` (`20261011090200_fuel_full_tank.sql`; older rows count as full), `consumption()` in `src/lib/fuel.ts`, `useFuelFills()` in `src/lib/queries.ts`.
+
+### Q92: Notifications page kept on the phone; the bell opens it and shows a dot (Shady, 2026-10-11)
+**Decision:**
+- A **Notifications** page lists every alert the phone has shown (due soon, overdue, update your odometer, weekly summary), newest first and grouped by day. Tapping one opens what it is about and marks it read; "Mark all as read" clears the dots.
+- The Home bell opens this page (it used to open Reminders) and shows a dot while something is unread. This replaces Q13's "no badge".
+- The list lives on the phone only and is cleared on sign-out. Server push (Phase 6) adds to the same list.
+**Why:** Q90 asked for a page with every alert; on-device is enough until server push exists.
+
+**Spec for dev:** `src/stores/notifyInbox.ts` (persisted): `syncNotifications()` records what it schedules, and on the next sync anything whose time has passed moves into the list. Page: `src/app/notifications.tsx`.
+
+### Q93: Offline voice: the recording waits on the phone, is written up when back online, then reviewed (Shady, 2026-10-11)
+**Decision:**
+- Full accounts can record by voice with no connection. Offline, the app records directly (the phone's live text needs the network on most phones). Tapping Done keeps the recording on the phone and shows "saved, we'll write it up when you're back online". Guests still need a connection.
+- When the connection returns (or the app is opened again), waiting recordings are sent one at a time. A ready one shows as "Recording ready to review" on Home and at the top of the Car log, and joins the Notifications page. Nothing is saved without the owner's review, as in Q61.
+- If the AI fails or the daily limit is reached, the row says so; the owner can try again or delete it. The audio is deleted once written up (Q70), when deleted, and on sign-out.
+- If the connection drops while sending from the voice screen, the recording goes to the queue instead of being lost. An AI error still goes to manual entry (Q64).
+**Why:** Q90: owners often log at the workshop or garage, where the signal is weak.
+
+**Spec for dev:** `src/stores/voiceQueue.ts` (persisted list; audio files in `Paths.document/voice-queue`), `src/lib/voiceSend.ts` (`sendVoice`, `queueVoice`, `processVoiceQueue`, `dropVoice`), run from `_layout.tsx` on reconnect and app resume. Card: `src/components/VoiceQueueCard.tsx`. Opening a ready item fills `useVoiceBatch` with its `queueId`; a save in `capture/review-all` removes it from the queue.
+
+### Q95: Home keeps its layout, shown more clearly ("design A") (founder, 2026-10-11)
+**Decision:** same information and order as before, organised better (after the Q94 redesign was undone):
+- Dark top as one column: greeting and bell → the car (smaller) → the car's name as a tap-to-switch pill with the swipe dots under it → the odometer as a see-through strip with its unit and the lime update button.
+- "Today's priority": the top 3 (Q10) in one white card split by lines; an overdue line in red.
+- This month's expenses (total + 6 bars, Q14) and fuel consumption (Q91) share one white card; fuel shows only once there is a figure.
+- The Car log row was removed from Home (founder, 2026-10-11); it still opens from the car page (09: "All records" and "Tire history").
+**Why:** The founder chose design A from the "Same layout" mockups (artifact "Bestim Home Options") and asked for no new information.
+
+### Q96: Home's cards keep one shape for every car and every state (founder, 2026-10-11)
+**Decision:** switching cars never removes a card or swaps it for plain text.
+- "Today's priority" is always the same white card. Its states: loading (a grey placeholder row), the top 3 (Q10), "All on schedule" (mint tick; opens the car's reminders) when nothing is due, and "No services logged yet" (sky plus; opens the capture sheet) for a car with no tracked parts.
+- The expenses card always has its fuel line; until two full tanks give a figure it reads "Add 2 full tanks".
+**Why:** The founder wants the same layout whatever the car's data.
+
+### Q97: Odometer camera reads on the phone only; recovery of the reader (founder, 2026-10-11)
+**Decision:**
+- Reading stays on the phone, to keep AI cost at zero. The AI backup (Q88) is switched off: the app only calls it when built with `EXPO_PUBLIC_ODOMETER_AI=on`, and the `read-odometer` function only answers when `ODOMETER_AI=on` is set. Turning it on is the CEO's call (cost table in the plan / CEO page).
+- Fixes from the code review (the camera picture itself was correct; the number picking was not):
+  - Look-alike letters inside number-like words become digits (O/D→0, I/l→1, Z→2, S→5, G/b→6, B→8, g/q→9); labels and glued units are dropped ("ODO134550km"); a reading split in two ("134 550") is matched joined, only against the expected range.
+  - Agreement is real: a number counts once it wins 3 of the last 5 reads sampled at least 200 ms apart (the reader hands its last result back on most frames). This replaces Q75's "two reads 250 ms apart".
+  - The reader only looks at the band the window shows (37–63% of the picture), so speed and RPM numbers around it are left out.
+  - Full HD frames, a zoom button for small LCD digits, and tap the window to focus.
+  - Test builds show what was read, the numbers found, the pick and the votes; tapping it shares the raw text so failures become test cases.
+- iPhone reads with Apple Vision (`@chuksdengr/vision-camera-ocr`, accurate mode, no language correction), keeping only lines in the window band, at most every 300 ms. Android keeps ML Kit (`react-native-vision-camera-ocr-plus`) with the same band. Both feed the same picking and voting rules, so the screen behaves the same on both (Q75).
+- Next: the CEO picks between our own small model and the Anyline SDK for segment displays (phase 3), with the AI cost table alongside.
+**Why:** On the founder's iPhone the reader failed on every dashboard type, even with the AI on.
+- **Round 2 (founder test, 2026-10-11: better, but inconsistent and slow):** reads are combined digit by digit (the most common digit at each position across the last 6 reads, 2/3 majority, at least 3 reads), so a flickering segment digit no longer blocks the reading. The same believable number (5+ digits, at or just above the saved reading) twice in a row counts at once. iPhone reads every 200 ms. While nothing is found, the exposure cycles normal → darker → brighter every 1.2 s, for backlit LCDs, glare and night. No test text under the camera window any more; in test builds a long-press on the window shares what was read.

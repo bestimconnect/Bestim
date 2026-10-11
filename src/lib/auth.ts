@@ -55,4 +55,7 @@ export async function signOut() {
   useSettings.getState().setCurrentVehicle(null);
   useSettings.getState().set({ pendingShareToken: null });
   syncNotifications(); // no user → cancels every scheduled reminder
+  const { useVoiceQueue } = await import('@/stores/voiceQueue');
+  const { dropVoice } = await import('./voiceSend');
+  useVoiceQueue.getState().items.forEach((i) => dropVoice(i.id)); // recordings belong to the account that made them
 }

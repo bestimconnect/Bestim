@@ -1,9 +1,9 @@
 // Run: node --experimental-strip-types src/lib/odometerScan.check.ts
 import assert from 'node:assert/strict';
 
-import { candidates, maxJump, pickOutlier, pickReading } from './odometerScan.ts';
+import { candidates, cleanLine, consensus, decide, maxJump, NO_READS, pickOutlier, pickReading, type Reads } from './odometerScan.ts';
 
-const values = (lines: string[]) => candidates(lines).map((s) => s.value);
+const values = (lines: string[]) => candidates(lines).filter((s) => !s.joined).map((s) => s.value);
 
 const KM = maxJump('km', 10); // 10 days since the last update → up to 10,000 km
 
@@ -41,5 +41,62 @@ assert.equal(pickOutlier(['50 60 70', 'MPH']), null); // speed marks are never o
 assert.equal(maxJump('km', 0), 5000);
 assert.equal(maxJump('km', 30), 30000);
 assert.equal(maxJump('h', 2), 100);
+
+// Q97: what the reader really hands back on segment / LCD displays and labelled clusters.
+assert.equal(cleanLine('ODO134550km'), ' 134550 ');
+assert.equal(pickReading(['ODO 134550 km'], 134000, KM), 134550);
+assert.equal(pickReading(['ODO134550km'], 134000, KM), 134550);
+assert.equal(pickReading(['TOTAL 134550KM'], 134000, KM), 134550);
+assert.equal(pickReading(['1345S0'], 134000, KM), 134550); // S for 5
+assert.equal(pickReading(['O31308'], 30900, KM), 31308); // O for 0
+assert.equal(pickReading(['2O5343'], 204000, KM), 205343);
+assert.equal(pickReading(['1B4550'], 180000, maxJump('km', 400)), 184550); // B for 8
+assert.equal(pickReading(['l34550'], 134000, KM), 134550); // l for 1
+assert.equal(pickReading(['134 550'], 134000, KM), 134550); // split in two
+assert.equal(pickReading(['134,550 km'], 134000, KM), 134550);
+assert.equal(pickReading(['كم 134550'], 134000, KM), 134550);
+// Gears, speeds and words are left alone.
+assert.deepEqual(values(['P R N D D3']), []); // a gear is not a number
+assert.deepEqual(values(['180km/h']), []);
+assert.equal(pickReading(['TRIP A 412.6', 'ODO 134550'], 134000, KM), 134550);
+// A speed scale is never joined into a reading, and a joined number is never offered on its own.
+assert.equal(pickReading(['100 120 140 160'], 100000, KM), null);
+assert.equal(pickOutlier(['134 550']), null);
+assert.ok(candidates(['134 550']).some((c) => c.joined && c.value === 134550));
+
+// Q97: reads are combined digit by digit, so a flickering segment digit doesn't stop the reading.
+assert.equal(consensus([134559, 134550, 134550]), 134550);
+assert.equal(consensus([134550, 134559]), null); // two reads are not enough
+assert.equal(consensus([134550, 120, 134558, 134550]), 134550); // a speed number in between is a different length
+assert.equal(consensus([134550, 134559, 134557]), null); // no 2/3 majority on the last digit
+assert.equal(consensus([1, 2, 3, 4]), null);
+assert.equal(consensus([31308, 31308, 31368, 31308]), 31308);
+
+let r: Reads = NO_READS;
+const fits = (n: number) => n >= 134000 && n <= 139000;
+const step = (reading: number | null, now: number, since = 0) => {
+  const out = decide(r, reading, now, since, fits);
+  r = out.reads;
+  return out.accept;
+};
+// Fast path: the same believable reading twice in a row.
+assert.equal(step(134550, 1000), null);
+assert.equal(step(134550, 1100), null); // too soon: the same read handed back, not counted
+assert.equal(step(134550, 1200), 134550);
+// Not believable (below the saved reading): needs the digit-by-digit rule instead.
+r = NO_READS;
+assert.equal(step(98765, 1000), null);
+assert.equal(step(98765, 1200), null);
+assert.equal(step(98765, 1400), 98765);
+// Flickering last digit, never twice in a row: the combined reads still give it.
+r = NO_READS;
+assert.equal(step(134559, 1000), null);
+assert.equal(step(134550, 1200), null);
+assert.equal(step(null, 1400), null); // a read with no number breaks the "in a row"
+assert.equal(step(134550, 1600), 134550);
+// "Look again" at 1000: for 400 ms nothing counts.
+r = NO_READS;
+assert.equal(step(134550, 1100, 1000), null);
+assert.deepEqual(r.values, []);
 
 console.log('odometerScan ok');

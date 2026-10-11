@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button, Choice, Header, Note, Text, Toggle } from '@/components/ui';
 import { toCsv, toHtml, toJson, type ExportLabels, type ExportLog, type ExportOptions } from '@/lib/export';
-import { useCurrentVehicle, useIsGuest, useVehicleLogs, useVehicles } from '@/lib/queries';
+import { useCurrentVehicle, useIsGuest, useVehicleLogs, useVehicles, vehicleName } from '@/lib/queries';
 
 // Screen 27 — Export (decisions Q42); ar-light 27/تصدير السجل.png
 type Format = 'pdf' | 'csv' | 'json';
@@ -83,7 +83,7 @@ export default function ExportScreen() {
       <Header title={t('export.header')} />
       <ScrollView contentContainerClassName="gap-4 pb-[120px]" showsVerticalScrollIndicator={false}>
         <Text variant="title">{t('export.title')}</Text>
-        {(vehicles.data?.length ?? 0) > 1 && vehicle ? <Text variant="caption" className="text-muted">{`${vehicle.make} ${vehicle.model}`}</Text> : null}
+        {(vehicles.data?.length ?? 0) > 1 && vehicle ? <Text variant="caption" className="text-muted">{vehicleName(vehicle)}</Text> : null}
         <Choice<Format> className="bg-line" value={fmt} onChange={setFmt} options={[{ value: 'pdf', label: 'PDF' }, { value: 'csv', label: 'CSV' }, { value: 'json', label: 'JSON' }]} />
         <Row title={t('export.logs.title')} subtitle={t('export.logs.sub')} value disabled />
         {ROWS.map((r) => (

@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Item, Text } from '@/components/ui';
-import type { Vehicle } from '@/lib/queries';
+import { vehicleName, type Vehicle } from '@/lib/queries';
 import { shadows } from '@/lib/theme';
 import { useLogDraft } from '@/stores/logDraft';
 
@@ -26,7 +26,7 @@ export function OfflineHome({ vehicle }: { vehicle: Vehicle }) {
       <Text variant="title">{t('feedback.offline.title')}</Text>
       <Item
         icon={Car}
-        title={`${vehicle.make} ${vehicle.model}`}
+        title={vehicleName(vehicle)}
         subtitle={t('feedback.offline.vehicleSub')}
         onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id } })}
       />

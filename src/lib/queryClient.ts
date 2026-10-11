@@ -19,7 +19,7 @@ queryClient.setMutationDefaults(SAVE_LOG_KEY, {
   },
 });
 // Bump the key's version whenever a query's data shape changes, so an old cached shape is never read back.
-export const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: 'queryCache.v2' });
+export const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: 'queryCache.v3' });
 // Cached data belongs to one user: drop it whenever the signed-in user changes (sign out, an expired session,
 // another account), so the next person on this phone never sees it. The first event only restores the session.
 let cacheOwner: string | null | undefined;

@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { Button, Header, Item, Rise, Text } from '@/components/ui';
-import { useVehicles } from '@/lib/queries';
-import { vehicleArt, vehicleIcons } from '@/lib/vehicleArt';
+import { useVehicles, vehicleName } from '@/lib/queries';
+import { vehicleArt } from '@/lib/vehicleArt';
 
 // Screen 08 — My vehicles, Figma ar-light 08/سياراتي ومعداتي.
 
@@ -25,10 +25,9 @@ export default function VehiclesScreen() {
         {vehicles?.map((v, i) => (
           <Rise key={v.id} index={i}>
           <Item
-            image={vehicleArt[v.vehicle_type]}
-            icon={vehicleIcons[v.vehicle_type]}
+            image={vehicleArt(v.vehicle_type)}
             tone={v.is_primary ? 'mint' : 'paper'}
-            title={v.nickname || `${v.make} ${v.model}`}
+            title={vehicleName(v)}
             subtitle={`${v.make} ${v.year} · ${v.current_odometer.toLocaleString('en-US')} ${t(`vehicles.unit.${v.odometer_unit}`)}`}
             onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: v.id } })}
           />

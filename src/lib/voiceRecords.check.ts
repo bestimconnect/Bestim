@@ -6,13 +6,13 @@ import { isComplete, normalizeRecords } from './voiceRecords.ts';
 const ctx = { vehicleIds: ['car', 'bike'], fallbackVehicleId: 'car', serviceNames: ['Oil Change', 'Oil Filter'], today: '2026-10-03' };
 const blank = {
   vehicle_id: 'car', service_type: null, category: null, title: null, amount: null, odometer: null,
-  date: null, location: null, parts: [], interval_km: null, interval_months: null,
+  date: null, location: null, parts: [], interval_km: null, interval_months: null, notes: null, liters: null,
 };
 
 // "Changed the oil and the filter at 125k for 1200, filled petrol for 500, the bike is at 8,000."
 let r = normalizeRecords(
   [
-    { ...blank, kind: 'maintenance', service_type: 'Oil Change', amount: 1200, odometer: 125000, parts: ['Mobil 1'], interval_km: 10000 },
+    { ...blank, kind: 'maintenance', service_type: 'Oil Change', amount: 1200, odometer: 125000, parts: ['Mobil 1'], interval_km: 10000, notes: ' صوت بسيط في الموتور ' },
     { ...blank, kind: 'maintenance', service_type: 'Oil Filter', odometer: 125000 },
     { ...blank, kind: 'expense', category: 'fuel', amount: 500, location: 'Shell', title: 'بنزين' },
     { ...blank, kind: 'odometer', vehicle_id: 'bike', odometer: 8000 },
@@ -23,9 +23,9 @@ let r = normalizeRecords(
 assert.deepEqual(r.map((x) => x.kind), ['maintenance', 'maintenance', 'expense', 'odometer']);
 assert.deepEqual(r[0], {
   kind: 'maintenance', vehicleId: 'car', serviceType: 'Oil Change', title: '', odometer: 125000, cost: 1200, date: null,
-  location: '', parts: [{ name: 'Mobil 1' }], intervalKm: 10000, intervalMonths: null, photoUri: null,
+  location: '', parts: [{ name: 'Mobil 1' }], intervalKm: 10000, intervalMonths: null, notes: 'صوت بسيط في الموتور', photoUri: null,
 });
-assert.deepEqual(r[2], { kind: 'expense', vehicleId: 'car', category: 'fuel', amount: 500, date: null, place: 'Shell' });
+assert.deepEqual(r[2], { kind: 'expense', vehicleId: 'car', category: 'fuel', amount: 500, date: null, place: 'Shell', liters: null, odometer: null });
 assert.deepEqual(r[3], { kind: 'odometer', vehicleId: 'bike', reading: 8000 });
 
 // The model's answer is never trusted: unknown vehicle, service, category and impossible values are corrected or dropped.
@@ -45,14 +45,27 @@ r = normalizeRecords(
 assert.equal(r.length, 2);
 assert.deepEqual(r[0], {
   kind: 'maintenance', vehicleId: 'car', serviceType: null, title: 'لحام الشكمان', odometer: null, cost: null, date: null,
-  location: '', parts: [], intervalKm: null, intervalMonths: null, photoUri: null,
+  location: '', parts: [], intervalKm: null, intervalMonths: null, notes: '', photoUri: null,
 });
-assert.deepEqual(r[1], { kind: 'expense', vehicleId: 'car', category: 'other', amount: 100, date: '2026-10-02', place: '' });
+assert.deepEqual(r[1], { kind: 'expense', vehicleId: 'car', category: 'other', amount: 100, date: '2026-10-02', place: '', liters: null, odometer: null });
 // A fuel expense's label ("petrol") is not a place; an "other" expense's label is all that says what it was.
 const place = (category: string, title: string) =>
   (normalizeRecords([{ ...blank, kind: 'expense', category, amount: 1, title }], ctx)[0] as { place: string }).place;
 assert.equal(place('fuel', 'بنزين'), '');
-assert.equal(place('other', 'ركنة'), 'ركنة');
+assert.equal(place('other', 'مخالفة'), 'مخالفة');
+
+// Running costs keep their own category.
+for (const category of ['wash', 'parking', 'tolls']) {
+  assert.equal((normalizeRecords([{ ...blank, kind: 'expense', category, amount: 50 }], ctx)[0] as { category: string }).category, category);
+}
+
+// "Filled up 40 litres for 600 at 91,200": litres and the reading belong to fuel only.
+r = normalizeRecords([
+  { ...blank, kind: 'expense', category: 'fuel', amount: 600, liters: 40.456, odometer: 91200 },
+  { ...blank, kind: 'expense', category: 'wash', amount: 50, liters: 40, odometer: 91200 },
+  { ...blank, kind: 'expense', category: 'fuel', amount: 100, liters: -3 },
+], ctx);
+assert.deepEqual(r.map((x) => [(x as { liters: number | null }).liters, (x as { odometer: number | null }).odometer]), [[40.46, 91200], [null, null], [null, null]]);
 
 assert.deepEqual(normalizeRecords({ records: 'no' }, ctx), []);
 assert.equal(normalizeRecords(Array(50).fill({ ...blank, kind: 'expense', amount: 1 }), ctx).length, 20);
@@ -61,5 +74,11 @@ assert.equal(normalizeRecords(Array(50).fill({ ...blank, kind: 'expense', amount
 r = normalizeRecords([{ ...blank, kind: 'expense', category: 'fuel' }], ctx);
 assert.equal(r.length, 1);
 assert.equal(isComplete(r[0]), false);
+
+// "I paid 1000 on the car": money with no clear purpose stays on the list, but the owner must choose a category first.
+r = normalizeRecords([{ ...blank, kind: 'expense', amount: 1000 }], ctx);
+assert.deepEqual(r[0], { kind: 'expense', vehicleId: 'car', category: null, amount: 1000, date: null, place: '', liters: null, odometer: null });
+assert.equal(isComplete(r[0]), false);
+assert.equal(isComplete({ ...r[0], category: 'fuel' } as typeof r[0]), true);
 
 console.log('voiceRecords ok');

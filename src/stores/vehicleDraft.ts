@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
-// Picker order (decisions Q52). The DB also still accepts the older 'car'.
-export const VEHICLE_TYPES = ['sedan', 'hatchback', 'suv', 'coupe', 'sports', 'convertible', 'pickup', 'van', 'motorcycle', 'equipment'] as const;
+// Picker order (decisions Q52). Cars only (founder, 2026-10-10).
+export const VEHICLE_TYPES = ['sedan', 'hatchback', 'suv', 'coupe', 'sports', 'convertible', 'pickup', 'van'] as const;
 export type VehicleType = (typeof VEHICLE_TYPES)[number];
 
 type VehicleDraft = {
@@ -9,9 +9,9 @@ type VehicleDraft = {
   vehicleType: VehicleType;
   make: string;
   model: string;
+  carModelId: string | null; // the catalog model picked; null = typed by hand
   year: number | null;
   currentOdometer: number | null;
-  odometerUnit: 'km' | 'h'; // 'h' = operating hours (equipment)
   serviceTypeId: string | null;
   serviceCost: number | null;
   serviceDate: string | null; // ISO date, defaults to today when omitted
@@ -24,9 +24,9 @@ const initial = {
   vehicleType: 'sedan' as VehicleType,
   make: '',
   model: '',
+  carModelId: null,
   year: null,
   currentOdometer: null,
-  odometerUnit: 'km' as const,
   serviceTypeId: null,
   serviceCost: null,
   serviceDate: null,

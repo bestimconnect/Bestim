@@ -6,8 +6,10 @@ import { Platform } from 'react-native';
 
 import i18n from './i18n';
 import { latestPerType, partStatus, type Unit } from './parts';
+import { CATALOG_JOIN, vehicleName } from './queries';
 import { DEFAULT_PREFS, planNotifications, type PlanPart, type PlanVehicle, type Prefs } from './reminderPlan.ts';
 import { supabase } from './supabase';
+import { useInbox, type InboxItem } from '@/stores/notifyInbox';
 
 // On-device reminders (decisions Q37–Q39). What to schedule is decided by the pure planner in
 // reminderPlan.ts; this file loads the data, asks the OS, and schedules. Server push comes in Phase 6.
@@ -44,7 +46,11 @@ export async function syncNotifications() {
     const { data: auth } = await supabase.auth.getSession();
     const user = auth.session?.user;
     await Notifications.cancelAllScheduledNotificationsAsync();
-    if (!user || user.is_anonymous || !(await notificationsAllowed())) return;
+    // Notifications page (Q92): what was scheduled and is now past has been shown, so it joins the list.
+    if (!user || user.is_anonymous) return useInbox.getState().clear(); // signed out: the list belongs to that account
+    useInbox.getState().deliver();
+    useInbox.getState().setScheduled([]);
+    if (!(await notificationsAllowed())) return;
     // Android files every reminder under this category in the phone's settings (re-set each sync so the name follows the language).
     if (Platform.OS === 'android')
       await Notifications.setNotificationChannelAsync('default', { name: i18n.t('notify.channel'), importance: Notifications.AndroidImportance.DEFAULT });
@@ -52,7 +58,7 @@ export async function syncNotifications() {
     const today = new Date().toLocaleDateString('en-CA');
     const [profile, vehicles, logs, snoozes] = await Promise.all([
       supabase.from('profiles').select('notification_prefs').eq('id', user.id).single(),
-      supabase.from('vehicles').select('*'),
+      supabase.from('vehicles').select(`*, ${CATALOG_JOIN}`),
       supabase.from('maintenance_logs').select('*, service_types(*)').order('service_date', { ascending: false }).order('created_at', { ascending: false }),
       supabase.from('reminders').select('vehicle_id, service_type_id, due_date').eq('status', 'dismissed').gt('due_date', today),
     ]);
@@ -60,7 +66,6 @@ export async function syncNotifications() {
 
     const prefs = { ...DEFAULT_PREFS, ...(profile.data.notification_prefs as Partial<Prefs> | null) };
     const arabic = i18n.language === 'ar';
-    const nameOf = (v: (typeof vehicles.data)[number]) => v.nickname || `${v.make} ${v.model}`;
 
     const parts: PlanPart[] = [];
     const planVehicles: PlanVehicle[] = [];
@@ -68,7 +73,7 @@ export async function syncNotifications() {
       const mine = latestPerType(logs.data.filter((l) => l.vehicle_id === v.id));
       for (const log of mine) {
         const st = log.service_types;
-        if (!st) continue;
+        if (!st?.has_reminder) continue;
         const status = partStatus({
           odometer: v.current_odometer,
           unit: v.odometer_unit as Unit,
@@ -82,14 +87,14 @@ export async function syncNotifications() {
           vehicleId: v.id,
           serviceTypeId: st.id,
           name: arabic ? st.name_ar : st.name_en,
-          vehicleName: nameOf(v),
+          vehicleName: vehicleName(v),
           unit: v.odometer_unit as Unit,
           status,
           snoozedUntil: snoozes.data.find((s) => s.vehicle_id === v.id && s.service_type_id === st.id)?.due_date ?? null,
         });
       }
       // Q23: only nudge for the odometer when the vehicle has parts that depend on it.
-      if (parts.some((p) => p.vehicleId === v.id)) planVehicles.push({ id: v.id, name: nameOf(v), odometerUpdatedAt: v.odometer_updated_at });
+      if (parts.some((p) => p.vehicleId === v.id)) planVehicles.push({ id: v.id, name: vehicleName(v), odometerUpdatedAt: v.odometer_updated_at });
     }
 
     const sent = JSON.parse((await AsyncStorage.getItem(SENT_KEY)) ?? '{}');
@@ -97,16 +102,17 @@ export async function syncNotifications() {
     await AsyncStorage.setItem(SENT_KEY, JSON.stringify(plan.sent));
 
     const t = i18n.t.bind(i18n);
+    const inbox: Omit<InboxItem, 'read'>[] = [];
+    const schedule = async (kind: InboxItem['kind'], id: string, at: Date, content: { title: string; body: string; data: { url: string } }, trigger: Notifications.NotificationTriggerInput) => {
+      await Notifications.scheduleNotificationAsync({ identifier: id, content, trigger });
+      inbox.push({ id: `${id}@${at.toISOString()}`, kind, title: content.title, body: content.body, url: content.data.url, at: at.toISOString() });
+    };
     const dated = plan.planned.filter((p) => p.kind !== 'weekly').sort((a, b) => +a.at - +b.at).slice(0, MAX_PENDING);
     for (const p of dated) {
       const trigger = { type: Notifications.SchedulableTriggerInputTypes.DATE, date: p.at } as const;
       if (p.kind === 'odometer') {
         const n = differenceInCalendarDays(p.at, parseISO(p.vehicle.odometerUpdatedAt));
-        await Notifications.scheduleNotificationAsync({
-          identifier: p.key,
-          content: { title: t('notify.odometerTitle'), body: t('notify.odometerBody', { vehicle: p.vehicle.name, n }), data: { url: '/update-odometer' } },
-          trigger,
-        });
+        await schedule('odometer', p.key, p.at, { title: t('notify.odometerTitle'), body: t('notify.odometerBody', { vehicle: p.vehicle.name, n }), data: { url: '/update-odometer' } }, trigger);
         continue;
       }
       const { status, name, unit, vehicleId, serviceTypeId } = p.part;
@@ -116,26 +122,38 @@ export async function syncNotifications() {
           : status.dueDate
             ? t('notify.soonDate', { date: format(parseISO(status.dueDate), 'd MMMM', { locale: arabic ? ar : enUS }) })
             : t('notify.soonKm', { km: Math.max(status.remainingKm ?? 0, 0).toLocaleString('en-US'), unit: t(`home.${unit}`) });
-      await Notifications.scheduleNotificationAsync({
-        identifier: p.key,
-        content: {
+      await schedule(
+        p.kind,
+        p.key,
+        p.at,
+        {
           title: t(p.kind === 'overdue' ? 'notify.overdueTitle' : 'notify.soonTitle', { part: name }),
           body,
           data: { url: `/reminder?vehicleId=${vehicleId}&serviceTypeId=${serviceTypeId}` },
         },
         trigger,
-      });
+      );
     }
 
     const weekly = plan.planned.find((p) => p.kind === 'weekly');
     if (weekly)
-      await Notifications.scheduleNotificationAsync({
-        identifier: 'weekly',
-        content: { title: t('notify.weeklyTitle'), body: t('notify.weeklyBody'), data: { url: '/' } },
-        trigger: { type: Notifications.SchedulableTriggerInputTypes.WEEKLY, weekday: 6, hour: weekly.hour, minute: 0 }, // 6 = Friday
-      });
+      await schedule(
+        'weekly',
+        'weekly',
+        nextFriday(weekly.hour),
+        { title: t('notify.weeklyTitle'), body: t('notify.weeklyBody'), data: { url: '/' } },
+        { type: Notifications.SchedulableTriggerInputTypes.WEEKLY, weekday: 6, hour: weekly.hour, minute: 0 }, // 6 = Friday
+      );
+    useInbox.getState().setScheduled(inbox);
   } catch (e) {
     // A reminder that fails to schedule must never break the app; the next sync retries.
     if (__DEV__) console.warn('syncNotifications', e);
   }
+}
+
+/** The next Friday at `hour` (today if it is Friday and the hour hasn't come yet): when the weekly summary shows. */
+function nextFriday(hour: number, now = new Date()) {
+  const at = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((5 - now.getDay() + 7) % 7), hour);
+  if (at <= now) at.setDate(at.getDate() + 7);
+  return at;
 }

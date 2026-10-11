@@ -6,7 +6,7 @@ import { toast } from '@/components/Toast';
 import { DeleteConfirm } from '@/components/DeleteConfirm';
 import { queryClient } from '@/lib/queryClient';
 import { syncNotifications } from '@/lib/notifications';
-import { useIsGuest, useVehicles } from '@/lib/queries';
+import { useIsGuest, useVehicles, vehicleName } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { useSettings } from '@/stores/settingsStore';
 
@@ -38,7 +38,7 @@ export default function DeleteVehicle() {
     <DeleteConfirm
       header={t('feedback.deleteVehicle.header')}
       title={t('feedback.deleteVehicle.title')}
-      name={vehicle ? `${vehicle.make} ${vehicle.model}` : undefined}
+      name={vehicle ? vehicleName(vehicle) : undefined}
       body={t('feedback.deleteVehicle.body')}
       keep={t('feedback.deleteVehicle.keep')}
       error={t('feedback.deleteVehicle.error')}

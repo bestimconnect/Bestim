@@ -1,6 +1,6 @@
 # Bestim: Build Progress
 
-Updated 2026-10-05. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
+Updated 2026-10-11. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
 
 ## Phase status
 
@@ -14,13 +14,13 @@ Updated 2026-10-05. Read this first in any new session. The spec is `docs/BESTIM
 | 6 · Release | Needs the Apple Developer account: Sign in with Apple, server push, TestFlight, Android Google key, universal links, store submission | ⏭ Next |
 
 ## App flow (decisions Q8)
-Splash → Language (01) → Tour 33→34→35 (once per device, `settingsStore.tourSeen`) → Welcome (02) → Sign in (30) / Create account (31) → Your profile (32, only if `profiles.full_name` is empty) → Add vehicle 03→04→05 → Home (tabs).
+Splash (native, then `SplashOverlay` animation) → Language (01) → Intro (`(onboarding)/intro`, 3 swipeable slides; "Get started" opens a guest session, "I already have an account" → Sign in 30) → Add car 03 → Odometer 04 (saves the car, sets `onboarding_completed`) → Save your car (`save-car`, guests only: Google / email / later) → First log 05 (optional) → Home (tabs). A signed-in user with an empty name goes to Your profile (32) first. Q87.
 The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "first vehicle added".
 
 ## What exists (Phases 1–5)
 - **UI kit** (`src/components/ui/`): Text, Button, Field, Card, Item, Header, Note, Divider, Progress, Choice (`className` for the track), Metric, GoogleIcon. Also `Hero`, `TourSlide`, `TabBar`, `PartMetric` in `src/components/`.
 - **Data hooks** (`src/lib/queries.ts`): vehicles, current vehicle, logs, log, service types, parts (`useVehicleParts` + `needsAttention`), snoozes, expenses, `useIsGuest`. Part status math: `src/lib/parts.ts` (pure, checked by `npm run check`). Voice: see "Voice logging" below.
-- **Flow stores:** `settingsStore` (language, theme, tourSeen, currentVehicleId), `vehicleDraft` (onboarding / `?mode=extra` add vehicle), `logDraft` (capture → review → save, and corrections).
+- **Flow stores:** `settingsStore` (language, theme, skipSplash, currentVehicleId), `vehicleDraft` (onboarding / `?mode=extra` add vehicle), `logDraft` (capture → review → save, and corrections).
 - **Tabs:** Home, Vehicles (stack: 08 → 09), Reminders (21), Account (Phase 5 placeholder with an Expenses row; stack → 23). The center + opens the capture sheet (13).
 - **Guest mode:** "Continue as guest" = Supabase anonymous user. Guests see Home (36); everything else opens the gate (37). Register/Google upgrade the same user (`updateUser` / `linkIdentity`). A guest can't merge into an account that already exists.
 - **DB** (migrations in `supabase/migrations/`):
@@ -59,6 +59,14 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
   - **Status (2026-10-03): live.** Migration applied, function deployed, `GEMINI_API_KEY` set. Checked on the iPhone 16 simulator with a typed English sentence (the simulator has no speech recognition): 4 records came back right (oil change with reading, cost and interval; oil filter; fuel; an insurance expense with no amount, blocked until filled), edit an expense card, remove a card, save all, success screen, Home shows the new reading and the month's expenses without double counting. The function refuses callers who are not signed in.
   - **Not checked yet:** a real recording (needs a phone), Arabic and mixed speech, editing a maintenance card and the odometer card, the daily limit and the guest refusal, a partly failed save, Android, and the written test (`scripts/voice-eval.ts` needs a test account's email and password).
   - The old keyword parser, the one-question screen (17) and `USE_MOCK` are gone. `src/lib/voice.ts` only keeps `parseReading` for the update-odometer screen.
+
+## Round of 2026-10-11 (decisions Q90–Q93)
+- **Built:** record catalog seed (`20261011090100_record_catalog_seed.sql`), Car log tree filter and naming, "standard" label on the next service, fuel "Full tank" + consumption between full tanks on Home / car page / Car log (Q91, `20261011090200_fuel_full_tank.sql`), Notifications page with an unread dot on the Home bell (Q92), offline voice queue (Q93), `scripts/odometer-eval.ts` for odometer AI speed and accuracy (`read-odometer` now returns `ms`).
+- **To do on the Mac:** `supabase db push` (two new migrations) → `npm run types`; `supabase functions deploy read-odometer` (its AI call moved to `read.ts`).
+- **To check on the iPhone 16 simulator and an Android phone, Arabic and English:** airplane mode → record by voice → back online → "Recording ready to review" on Home → review → save; the Notifications page after an alert fires, and the bell dot; a partial fuel fill-up then a full one (Home row, Car log km/L); the Car log filter tree.
+- **Speed:** run `scripts/voice-eval.ts` and `scripts/odometer-eval.ts` (needs the keys in `.env.local` and photos in `scripts/odometer-eval/`). Raise the odometer `thinking_level` only if the test shows it reads segment digits better without being much slower.
+
+- **Odometer reader recovery (Q97, 2026-10-11):** number picking fixed, real 3-of-5 agreement, read band = the window, Full HD frames, zoom + tap to focus, AI off. iPhone now reads with Apple Vision (new native package: needs a new dev build); Android keeps ML Kit. Not yet tried on a phone.
 
 ## Open items
 - **Not verified yet (QA):**
@@ -101,6 +109,8 @@ A full pass for Google Play and Huawei AppGallery. Store texts and form answers:
 - **Email links must be opened on the phone that asked for them** (sign-up, reset password): the link carries a one-time code and the phone holds the other half. A link opened on another phone lands on Sign in with a plain notice.
 - **Website links open in the phone's own browser** (`Linking.openURL`), not the in-app browser sheet: the sheet came up blank on the simulator, and the plain browser behaves the same on iPhone, Android and Huawei.
 - **`ios/` was regenerated for the simulator on 2026-10-05.** For the real iPhone with the free Apple ID, run the `PERSONAL_TEAM=1` steps below again.
+- **Android needs 8.0+ (`minSdkVersion` 26, set through `expo-build-properties`, decisions Q85):** the camera text reader does not compile below it. The first release build (2026-10-08) failed on exactly this.
+- **Reading a failed EAS build's log from the command line:** `eas build:view <id> --json` gives `logFiles` URLs; they are brotli-compressed, so decode with Node's `zlib.brotliDecompressSync` (curl cannot).
 - **`expo-audio` is installed without its config plugin on purpose:** the plugin adds a background-playback service and "foreground service" permissions that Google Play asks to justify. The microphone permission already comes from the speech plugin.
 - **`supabase config push` applies immediately, with no prompt.** Before pushing, make config.toml match the remote (email confirmations on, TOTP MFA on, OTP length 8, max_frequency 1m0s). Load `.env` first (`set -a; . ./.env; set +a`) so the Google secret resolves.
 - **Tailwind font sizes/line heights must be px strings.** A unitless lineHeight is a multiplier and pushes text off-screen.
@@ -125,8 +135,9 @@ A full pass for Google Play and Huawei AppGallery. Store texts and form answers:
 - iOS simulator dev build: `npx expo run:ios --device "iPhone 16"` (needs `LANG=en_US.UTF-8` for CocoaPods). It needs macOS + Xcode, so a cloud session can't run it. The founder verifies on their Mac.
 
 ## Cloud sessions (Claude Code on the web)
-- The environment variables hold only the public `EXPO_PUBLIC_*` values (Supabase URL + anon key, Google web/iOS client IDs). The setup script writes them to `.env`: `printenv | grep '^EXPO_PUBLIC_' > .env && npm ci`.
-- Network is set to Custom and allows `*.supabase.co`, `api.supabase.com`, `docs.expo.dev`.
+- Environment `bestim-app`: the environment variables hold only the public `EXPO_PUBLIC_*` values (Supabase URL + anon key, Google web/iOS client IDs). The setup script runs `npm ci` in the repo folder and never blocks the session if the repo is missing.
+- Pick the repo and branch when starting the session; otherwise the setup script runs in an empty folder.
+- The network policy does not allow the Supabase project or the AI services, so database calls and `*-eval.ts` scripts run on the Mac. Type check, lint and `npm run check` work in the cloud.
 - **Migrations:** the cloud session writes the SQL file and pushes it. The founder runs `supabase db push` + `npm run types` on the Mac. There's no Supabase access token in the cloud.
 - There's no simulator in the cloud. The founder pulls and runs `npx expo start` on the Mac to review.
 

@@ -2,7 +2,7 @@
 // Pure (no RN imports) so `node --experimental-strip-types src/lib/voiceRecords.check.ts` can run it.
 // The answer comes from an AI model: nothing in it is trusted until it has been through normalizeRecords().
 
-export const EXPENSE_CATEGORIES = ['fuel', 'parts', 'insurance', 'registration', 'other'] as const;
+export const EXPENSE_CATEGORIES = ['fuel', 'wash', 'parking', 'tolls', 'parts', 'insurance', 'registration', 'other'] as const;
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
 
 export type MaintenanceRecord = {
@@ -17,15 +17,19 @@ export type MaintenanceRecord = {
   parts: { name: string }[];
   intervalKm: number | null;
   intervalMonths: number | null;
+  notes: string; // remarks that fit no other field; saved as the log's description
   photoUri: string | null; // receipt photo added on the edit form
+  details?: Record<string, string | number>; // the service's extra fields, typed on the edit form (the model never fills them)
 };
 export type ExpenseRecord = {
   kind: 'expense';
   vehicleId: string;
-  category: ExpenseCategory;
+  category: ExpenseCategory | null; // required to save; null = money with no clear purpose, the user must choose
   amount: number | null; // required to save; null = the user must fill it in
   date: string | null;
   place: string;
+  liters: number | null; // fuel only
+  odometer: number | null; // fuel only: the reading at the fill-up
 };
 export type OdometerRecord = { kind: 'odometer'; vehicleId: string; reading: number };
 export type VoiceRecord = MaintenanceRecord | ExpenseRecord | OdometerRecord;
@@ -34,9 +38,10 @@ const MAX_RECORDS = 20;
 const MAX_READING = 5_000_000;
 const MAX_AMOUNT = 99_999_999; // numeric(10,2)
 
-const text = (v: unknown) => (typeof v === 'string' ? v.trim().slice(0, 200) : '');
+const text = (v: unknown, max = 200) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const amount = (v: unknown) =>
   typeof v === 'number' && Number.isFinite(v) && v > 0 && v <= MAX_AMOUNT ? Math.round(v * 100) / 100 : null;
+const litres = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) && v > 0 && v <= 99_999 ? Math.round(v * 100) / 100 : null); // numeric(7,2)
 const whole = (v: unknown, max: number) =>
   typeof v === 'number' && Number.isFinite(v) && v > 0 && v <= max ? Math.round(v) : null;
 
@@ -65,18 +70,25 @@ export function normalizeRecords(raw: unknown, ctx: Context): VoiceRecord[] {
         cost: amount(r.amount),
         date: date(r.date),
         location: text(r.location),
-        parts: (Array.isArray(r.parts) ? r.parts : []).map(text).filter(Boolean).slice(0, 10).map((name: string) => ({ name })),
+        parts: (Array.isArray(r.parts) ? r.parts : []).map((p: unknown) => text(p)).filter(Boolean).slice(0, 10).map((name: string) => ({ name })),
         intervalKm: whole(r.interval_km, 500_000),
         intervalMonths: whole(r.interval_months, 120),
+        notes: text(r.notes, 1000),
         photoUri: null,
       });
     } else if (r.kind === 'expense') {
-      const category = EXPENSE_CATEGORIES.includes(r.category) ? (r.category as ExpenseCategory) : 'other';
+      // No category = the owner did not say what the money was for; a category we don't know is "other".
+      const category = r.category == null ? null : EXPENSE_CATEGORIES.includes(r.category) ? (r.category as ExpenseCategory) : 'other';
       // The category already names a fuel/insurance/… expense; only "other" needs the label to say what it was.
       const place = text(r.location) || (category === 'other' ? text(r.title) : '');
       const value = amount(r.amount);
-      if (value == null && category === 'other' && !place) continue; // an empty shell
-      out.push({ kind: 'expense', vehicleId, category, amount: value, date: date(r.date), place });
+      if (value == null && !place && (category == null || category === 'other')) continue; // an empty shell
+      const fuel = category === 'fuel';
+      out.push({
+        kind: 'expense', vehicleId, category, amount: value, date: date(r.date), place,
+        liters: fuel ? litres(r.liters) : null,
+        odometer: fuel ? whole(r.odometer, MAX_READING) : null,
+      });
     } else if (r.kind === 'odometer') {
       const reading = whole(r.odometer, MAX_READING);
       if (reading != null) out.push({ kind: 'odometer', vehicleId, reading });
@@ -88,5 +100,5 @@ export function normalizeRecords(raw: unknown, ctx: Context): VoiceRecord[] {
   );
 }
 
-/** Can this card be saved as it is? (An expense needs an amount; the rest is optional.) */
-export const isComplete = (r: VoiceRecord) => r.kind !== 'expense' || r.amount != null;
+/** Can this card be saved as it is? (An expense needs an amount and a category; the rest is optional.) */
+export const isComplete = (r: VoiceRecord) => r.kind !== 'expense' || (r.amount != null && r.category != null);

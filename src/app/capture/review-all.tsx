@@ -15,6 +15,7 @@ import { saveLog } from '@/lib/saveLog';
 import { supabase } from '@/lib/supabase';
 import { useColors } from '@/lib/theme';
 import { useLogDraft } from '@/stores/logDraft';
+import { dropVoice } from '@/lib/voiceSend';
 import { useVoiceBatch, type BatchRecord } from '@/stores/voiceBatch';
 
 // Review what one voice recording produced: a card per record, edit or remove, then save them all
@@ -49,18 +50,23 @@ export default function ReviewAll() {
     !d || d === today ? t('capture.batch.today') : format(new Date(`${d}T00:00:00`), 'd MMM yyyy', { locale: arabic ? ar : enUS });
 
   const title = (r: BatchRecord) =>
-    r.kind === 'maintenance' ? r.title || typeName(r) : r.kind === 'expense' ? t(`expenses.chip.${r.category}`) : t('capture.batch.odometerTitle');
+    r.kind === 'maintenance'
+      ? r.title || typeName(r)
+      : r.kind === 'expense'
+        ? r.category ? t(`expenses.chip.${r.category}`) : t('capture.batch.unclearExpense')
+        : t('capture.batch.odometerTitle');
   // Q59: only what was said; a missing part is left out, never shown as "not mentioned".
   const subtitle = (r: BatchRecord) =>
     (r.kind === 'maintenance'
       ? [r.odometer != null ? reading(r, r.odometer) : null, r.cost != null ? money(r.cost) : null, day(r.date)]
       : r.kind === 'expense'
-        ? [r.amount != null ? money(r.amount) : null, r.place || null, day(r.date)]
+        ? [r.amount != null ? money(r.amount) : null, r.liters != null ? t('capture.batch.liters', { value: n(r.liters) }) : null, r.odometer != null ? reading(r, r.odometer) : null, r.place || null, day(r.date)]
         : [reading(r, r.reading)]
     ).filter(Boolean).join(' · ');
 
   // What stops a card from being saved as it is (Q61). A lower reading is never written silently (Q9).
   const problem = (r: BatchRecord) => {
+    if (r.kind === 'expense' && r.category == null) return t('capture.batch.missingCategory');
     if (r.kind === 'expense' && r.amount == null) return t('capture.batch.missingAmount');
     const current = vehicleOf(r)?.current_odometer ?? 0;
     if (r.kind === 'odometer' && (r.reading <= 0 || r.reading < current)) return t('capture.batch.lowerReading', { value: n(current) });
@@ -79,7 +85,10 @@ export default function ReviewAll() {
       cost: r.cost,
       serviceDate: r.date ?? today,
       location: r.location,
+      notes: r.notes,
       source: 'voice',
+      intervalKm: r.intervalKm,
+      details: Object.fromEntries(Object.entries(r.details ?? {}).map(([k, v]) => [k, String(v)])),
       photoUri: r.photoUri,
     });
     router.push({ pathname: '/capture/manual', params: { batch: r.key } });
@@ -102,11 +111,13 @@ export default function ReviewAll() {
               cost: r.cost,
               serviceDate: r.date ?? today,
               location: r.location,
+              notes: r.notes,
               source: 'voice',
               transcript,
               parts: r.parts,
               intervalKm: r.intervalKm,
               intervalMonths: r.intervalMonths,
+              details: r.details,
               photoUri: r.photoUri,
             });
             review ||= log.status === 'needs_review';
@@ -115,10 +126,12 @@ export default function ReviewAll() {
               r.kind === 'expense'
                 ? await supabase.from('expenses').insert({
                     vehicle_id: r.vehicleId,
-                    category: r.category,
+                    category: r.category!,
                     amount: r.amount!,
                     expense_date: r.date ?? today,
                     description: r.place || null,
+                    liters: r.liters,
+                    odometer_reading: r.odometer,
                   })
                 : await supabase.from('vehicles').update({ current_odometer: r.reading }).eq('id', r.vehicleId);
             if (error) throw error;
@@ -132,6 +145,8 @@ export default function ReviewAll() {
     },
     onSuccess: async ({ saved, total, review, vehicleId }) => {
       for (const key of ['vehicles', 'logs', 'expenses']) queryClient.invalidateQueries({ queryKey: [key] });
+      const queued = useVoiceBatch.getState().queueId;
+      if (queued && saved.length) dropVoice(queued); // Q93: a recording from the offline queue is done once saved
       if (saved.length < total) {
         saved.forEach(remove);
         return setPartial(saved.length ? { saved: saved.length, total } : null);
@@ -193,6 +208,9 @@ export default function ReviewAll() {
                   </Pressable>
                 }
               />
+              {r.kind === 'maintenance' && r.notes ? (
+                <Text variant="caption" className="px-1 text-muted">{t('capture.batch.notes', { notes: r.notes })}</Text>
+              ) : null}
               {r.kind === 'odometer' && editing === r.key ? (
                 <Field
                   label={t('capture.batch.odometerTitle')}

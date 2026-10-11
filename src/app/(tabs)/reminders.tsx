@@ -14,7 +14,7 @@ import type { TFunction } from 'i18next';
 import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { Button, Choice, Item, Text, Rise } from '@/components/ui';
-import { needsAttention, useCurrentVehicle, useIsGuest, useVehicleParts, useVehicles, type Part } from '@/lib/queries';
+import { needsAttention, useCurrentVehicle, useIsGuest, useVehicleParts, useVehicles, vehicleName, type Part } from '@/lib/queries';
 import { shadows, useColors } from '@/lib/theme';
 import { useSettings } from '@/stores/settingsStore';
 
@@ -78,7 +78,7 @@ export default function RemindersScreen() {
 
   if (isError && !data) return <ErrorState onRetry={refetch} retrying={isRefetching} onShowSaved={onShowSaved} />;
   const unit = vehicle?.odometer_unit ?? 'km';
-  const name = vehicle ? `${vehicle.make} ${vehicle.model}` : '';
+  const name = vehicle ? vehicleName(vehicle) : '';
   const staleDays = vehicle ? differenceInCalendarDays(new Date(), parseISO(vehicle.odometer_updated_at)) : 0;
   const stale = parts.length > 0 && staleDays >= STALE_ODOMETER_DAYS;
   const list =

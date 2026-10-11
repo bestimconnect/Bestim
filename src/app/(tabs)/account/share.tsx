@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button, Choice, Field, Header, Item, Note, Text } from '@/components/ui';
 import { SITE } from '@/lib/links';
-import { useCurrentVehicle, useIsGuest, useVehicleLogs, useVehicleParts, useVehicles } from '@/lib/queries';
+import { useCurrentVehicle, useIsGuest, useVehicleLogs, useVehicleParts, useVehicles, vehicleName } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { useColors } from '@/lib/theme';
 
@@ -37,7 +37,7 @@ export default function ShareScreen() {
   const [pasted, setPasted] = useState('');
   if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'account' } }} />;
 
-  const name = vehicle ? `${vehicle.make} ${vehicle.model}` : '';
+  const name = vehicle ? vehicleName(vehicle) : '';
   const count = logs.data?.length ?? 0;
   const empty = logs.isSuccess && count === 0;
   const pick = () =>

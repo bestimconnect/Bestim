@@ -6,21 +6,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Item, PressableScale, Rise, Text } from '@/components/ui';
-import { needsAttention, useVehicleParts, useVehicles, type Vehicle } from '@/lib/queries';
+import { needsAttention, useVehicleParts, useVehicles, vehicleName, type Vehicle } from '@/lib/queries';
 import { useVehiclePick } from '@/lib/sheet';
 import { useColors } from '@/lib/theme';
-import { vehicleArt, vehicleIcons } from '@/lib/vehicleArt';
+import { vehicleArt } from '@/lib/vehicleArt';
 
 function VehicleRow({ vehicle, current, onPress }: { vehicle: Vehicle; current: boolean; onPress: () => void }) {
   const { t } = useTranslation();
   const { parts } = useVehicleParts(vehicle);
   const overdue = needsAttention(parts).some((p) => p.status.state === 'overdue');
-  const title = vehicle.nickname || `${vehicle.make} ${vehicle.model}`;
+  const title = vehicleName(vehicle);
   const subtitle = `${vehicle.year} · ${vehicle.current_odometer.toLocaleString('en-US')} ${t(`vehicles.unit.${vehicle.odometer_unit}`)}`;
   return (
     <Item
-      image={vehicleArt[vehicle.vehicle_type]}
-      icon={vehicleIcons[vehicle.vehicle_type]}
+      image={vehicleArt(vehicle.vehicle_type)}
       tone="paper"
       title={title}
       subtitle={subtitle}
