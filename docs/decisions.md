@@ -1158,3 +1158,15 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 - "Today's priority" is always the same white card. Its states: loading (a grey placeholder row), the top 3 (Q10), "All on schedule" (mint tick; opens the car's reminders) when nothing is due, and "No services logged yet" (sky plus; opens the capture sheet) for a car with no tracked parts.
 - The expenses card always has its fuel line; until two full tanks give a figure it reads "Add 2 full tanks".
 **Why:** The founder wants the same layout whatever the car's data.
+
+### Q97: Odometer camera reads on the phone only; recovery of the reader (founder, 2026-10-11)
+**Decision:**
+- Reading stays on the phone, to keep AI cost at zero. The AI backup (Q88) is switched off: the app only calls it when built with `EXPO_PUBLIC_ODOMETER_AI=on`, and the `read-odometer` function only answers when `ODOMETER_AI=on` is set. Turning it on is the CEO's call (cost table in the plan / CEO page).
+- Fixes from the code review (the camera picture itself was correct; the number picking was not):
+  - Look-alike letters inside number-like words become digits (O/D→0, I/l→1, Z→2, S→5, G/b→6, B→8, g/q→9); labels and glued units are dropped ("ODO134550km"); a reading split in two ("134 550") is matched joined, only against the expected range.
+  - Agreement is real: a number counts once it wins 3 of the last 5 reads sampled at least 200 ms apart (the reader hands its last result back on most frames). This replaces Q75's "two reads 250 ms apart".
+  - The reader only looks at the band the window shows (37–63% of the picture), so speed and RPM numbers around it are left out.
+  - Full HD frames, a zoom button for small LCD digits, and tap the window to focus.
+  - Test builds show what was read, the numbers found, the pick and the votes; tapping it shares the raw text so failures become test cases.
+- Next: Apple Vision on iPhone (phase 2), then the CEO picks between our own small model and the Anyline SDK for segment displays (phase 3).
+**Why:** On the founder's iPhone the reader failed on every dashboard type, even with the AI on.

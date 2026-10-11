@@ -4,7 +4,7 @@
 //
 // One Gemini call (read.ts, shared with scripts/odometer-eval.ts), same endpoint and key as process-voice-log.
 // Secrets (supabase secrets set …): GEMINI_API_KEY; optionally GEMINI_MODEL to switch models, and
-// SCAN_DAILY_LIMIT to change the limit.
+// SCAN_DAILY_LIMIT to change the limit; ODOMETER_AI=on to switch the backup on at all (off by default, Q97).
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 import { DEFAULT_MODEL, readOdometer } from './read.ts';
@@ -18,6 +18,8 @@ const json = (body: unknown, status = 200) =>
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'method' }, 405);
+  // Decisions Q97: reading stays on the phone. The AI backup only answers once ODOMETER_AI=on is set (CEO's call).
+  if (Deno.env.get('ODOMETER_AI') !== 'on') return json({ error: 'disabled' }, 403);
   if (Number(req.headers.get('content-length') ?? 0) > MAX_IMAGE_B64 + 10_000) return json({ error: 'too_large' }, 413);
 
   const auth = req.headers.get('Authorization') ?? '';

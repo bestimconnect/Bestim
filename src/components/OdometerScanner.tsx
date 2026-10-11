@@ -2,9 +2,9 @@ import { onlineManager } from '@tanstack/react-query';
 import { File } from 'expo-file-system';
 import * as Haptics from 'expo-haptics';
 import { StatusBar } from 'expo-status-bar';
-import { Flashlight, X } from 'lucide-react-native';
+import { Flashlight, X, ZoomIn } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { BackHandler, Linking, Platform, Pressable, View } from 'react-native';
+import { BackHandler, Linking, Platform, Pressable, Share, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Camera,
@@ -15,6 +15,7 @@ import {
   usePhotoOutput,
   type CameraDevice,
   type CameraPhotoOutput,
+  type CameraRef,
   type Frame,
 } from 'react-native-vision-camera';
 import { useTextRecognition } from 'react-native-vision-camera-ocr-plus';
@@ -22,20 +23,24 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Text } from '@/components/ui';
-import { pickOutlier, pickReading, settle, type Held } from '@/lib/odometerScan';
+import { candidates, NO_VOTES, pickOutlier, pickReading, vote, type Votes } from '@/lib/odometerScan';
 import { useIsGuest } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 
 const WINDOW_H = 120; // the camera window: a wide strip, the shape of an odometer display
 const SLOW_AFTER = 8000; // decisions Q72
 const AI_AFTER = 2000; // no number from the phone by then: the AI gets one look
-const ZOOM = 1.6; // the digits fill the window without holding the phone too close to focus
+const ZOOMS = [1.6, 3] as const; // 1.6: the digits fill the window without holding the phone too close to focus; 3: small LCDs
+// Decisions Q97: reading stays on the phone. The AI backup only runs when this is switched on (and the server allows it).
+const AI_ON = process.env.EXPO_PUBLIC_ODOMETER_AI === 'on';
+const AI_TRIES = 3;
 const STILL_W = 960; // px: the still the AI sees, far under 300 KB as a JPEG
 const GLASS = 'rgba(245, 247, 245, 0.12)'; // round buttons on the dark panel
 // The video is read as it streams (decisions Q75), and only the middle band of the picture, which is what the
-// window shows (the preview fills its width), with slack for the video's shape. The reader itself paces the work:
-// one frame in six is read (about five a second), the rest pass untouched. Module-level so the reader is built once.
-const READER = { language: 'latin', frameSkipThreshold: 6, scanRegion: { left: '0%', top: '33%', width: '100%', height: '34%' } } as const;
+// window shows: the preview fills its width and shows about 40–60% of its height (Q97), so 37–63% gives a small margin
+// without the speed and RPM numbers around it. The reader paces the work: one frame in six is read (about five a
+// second), the rest get the last result back. Module-level so the reader is built once.
+const READER = { language: 'latin', frameSkipThreshold: 6, scanRegion: { left: '0%', top: '37%', width: '100%', height: '26%' } } as const;
 
 type Props = {
   current?: number; // the reading on file: a number at or just above it is preferred. Leave out when there is none yet (a vehicle being added)
@@ -98,12 +103,15 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
   const [slow, setSlow] = useState(false);
   const [asking, setAsking] = useState(false); // the AI is looking at a still
   const [found, setFound] = useState<number | null>(null);
-  const held = useRef<Held>(null);
+  const [zoom, setZoom] = useState(0); // index in ZOOMS
+  const camera = useRef<CameraRef>(null);
+  const votes = useRef<Votes>(NO_VOTES);
   const since = useRef(0); // when "Look again" was last pressed
   const look = useRef(0); // counts looks, so an AI answer for an earlier look is dropped
   const paused = useRef(false);
-  const last = useRef(''); // the text last looked at
   const [seen, setSeen] = useState(''); // test builds only: what the reader saw, under the window
+  const [frameInfo, setFrameInfo] = useState(''); // test builds only: the frame's size and orientation
+  const raw = useRef<string[]>([]); // test builds only: every distinct text read, to send to the developer
 
   useEffect(() => {
     const id = setTimeout(() => setSlow(true), SLOW_AFTER);
@@ -132,15 +140,17 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
   const onLines = useCallback(
     (lines: string[]) => {
       if (paused.current) return;
-      // The same text with no number waiting needs no second look; a waiting number is checked on every report.
-      const key = lines.join('\n');
-      if (key === last.current && held.current == null) return;
-      last.current = key;
-      if (__DEV__) setSeen(key.replace(/\n/g, ' | ').slice(0, 80));
       const reading = pick(lines);
-      const step = settle(held.current, reading, Date.now(), since.current);
-      held.current = step.held;
-      if (step.accept && reading != null) show(reading);
+      if (__DEV__) {
+        const key = lines.join(' | ');
+        if (raw.current[raw.current.length - 1] !== key) raw.current = [...raw.current, key].slice(-40);
+        const nums = candidates(lines).map((c) => `${c.value}${c.joined ? '*' : ''}`).join(',');
+        setSeen(`${key.slice(0, 60)} → [${nums}] → ${reading ?? '—'} (${votes.current.values.join(',')})`);
+      }
+      // Q97: a number counts once it wins 3 of the last 5 real reads (see vote() in lib/odometerScan).
+      const step = vote(votes.current, reading, Date.now(), since.current);
+      votes.current = step.votes;
+      if (step.accept != null) show(step.accept);
     },
     [pick, show],
   );
@@ -151,6 +161,7 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
   const onFrame = useCallback(
     (frame: Frame) => {
       'worklet';
+      if (__DEV__) scheduleOnRN(setFrameInfo, `${frame.width}x${frame.height} ${frame.orientation}`);
       const lines: string[] = [];
       const buffer = frame.getNativeBuffer();
       try {
@@ -165,46 +176,55 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
     [recognizer, onLines],
   );
   // The reader needs RGB frames on Android and reads the camera's own format on iPhone.
-  const frames = useFrameOutput({ pixelFormat: Platform.OS === 'android' ? 'rgb' : 'yuv', onFrame });
+  // Full HD frames (Q97): small LCD digits are only a few dozen pixels tall at the default 720p.
+  const frames = useFrameOutput({ targetResolution: CommonResolutions.FHD_16_9, pixelFormat: Platform.OS === 'android' ? 'rgb' : 'yuv', onFrame });
   const photo = usePhotoOutput({ targetResolution: CommonResolutions.FHD_16_9, containerFormat: 'jpeg', qualityPrioritization: 'speed' });
   // Guests never ask the AI, so their camera does without the photo stream.
-  const outputs = useMemo(() => (guest ? [frames] : [frames, photo]), [guest, frames, photo]);
+  const outputs = useMemo(() => (guest || !AI_ON ? [frames] : [frames, photo]), [guest, frames, photo]);
   const onStarted = useCallback(() => setStarted(true), []);
 
-  // The backup for displays the phone cannot read (digital segment digits): with no number after AI_AFTER, a still
-  // goes to the AI, once per look. Its answer is doubted like the phone's own read, and the owner still confirms it.
+  // The AI backup (off unless AI_ON, Q97): with no number after AI_AFTER, a still goes to the AI, retried a few times
+  // while nothing is found. Its answer is doubted like the phone's own read, and the owner still confirms it.
   useEffect(() => {
-    if (!started || found != null || guest) return;
+    if (!AI_ON || !started || found != null || guest) return;
     const mine = look.current;
-    const id = setTimeout(async () => {
-      if (!onlineManager.isOnline()) return;
+    let tries = 0;
+    let stop = false;
+    const ask = async () => {
+      if (stop || paused.current || mine !== look.current || !onlineManager.isOnline()) return;
+      tries += 1;
       setAsking(true);
       try {
         const asked = Date.now();
-        const { data } = await supabase.functions.invoke('read-odometer', { body: { image_base64: await still(photo) } });
-        const n: unknown = data?.reading;
+        const { data, error } = await supabase.functions.invoke('read-odometer', { body: { image_base64: await still(photo) } });
         if (__DEV__) {
-          console.log(`odometer AI: ${Date.now() - asked} ms from photo to answer`, data?.ms); // speed checks
-          setSeen(`AI: ${JSON.stringify(data ?? null)}`.slice(0, 80));
+          console.log(`odometer AI: ${Date.now() - asked} ms`, error ? `error ${error.context?.status ?? error.message}` : data);
+          setSeen(`AI: ${error ? `error ${error.context?.status ?? error.message}` : JSON.stringify(data)}`.slice(0, 80));
         }
-        const reading = typeof n === 'number' && Number.isInteger(n) ? (current == null ? n : pick([String(n)])) : null;
-        if (reading != null && mine === look.current && !paused.current) show(reading);
+        const status = error?.context?.status;
+        if (status === 403 || status === 429) return void (stop = true); // switched off, a guest, or today's limit: no retry
+        const n: unknown = data?.reading;
+        const reading = typeof n === 'number' && Number.isInteger(n) ? (current == null ? n : pick([String(n)]) ?? n) : null;
+        if (reading != null && mine === look.current && !paused.current) return show(reading);
       } catch (e) {
-        // Silent for the owner: the phone keeps reading, and "Type it instead" is still offered.
         if (__DEV__) setSeen(`AI: ${e instanceof Error ? e.message : String(e)}`.slice(0, 80));
       } finally {
         if (mine === look.current) setAsking(false);
       }
-    }, AI_AFTER);
-    return () => clearTimeout(id);
+      if (tries < AI_TRIES && !stop) timer = setTimeout(ask, 2500);
+    };
+    let timer = setTimeout(ask, AI_AFTER);
+    return () => {
+      stop = true;
+      clearTimeout(timer);
+    };
   }, [started, found, guest, photo, current, pick, show]);
 
   const again = () => {
     look.current += 1;
-    held.current = null;
+    votes.current = NO_VOTES;
     since.current = Date.now();
     paused.current = false;
-    last.current = '';
     setAsking(false);
     setFound(null);
   };
@@ -215,18 +235,31 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
     <Shell
       onClose={onClose}
       corner={
-        device.hasTorch ? (
+        <View className="flex-row gap-2">
+          {/* Q97: closer for small LCD digits. */}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={t('odometer.scan.torch')}
-            accessibilityState={{ selected: torch }}
+            accessibilityLabel={t('odometer.scan.zoom')}
+            accessibilityState={{ selected: zoom === 1 }}
             hitSlop={12}
-            onPress={() => setTorch(!torch)}
-            className={`h-11 w-11 items-center justify-center rounded-full ${torch ? 'bg-lime' : ''}`}
-            style={torch ? undefined : { backgroundColor: GLASS }}>
-            <Flashlight size={20} color={torch ? '#222E29' : '#F5F7F5'} />
+            onPress={() => setZoom(zoom ? 0 : 1)}
+            className={`h-11 w-11 items-center justify-center rounded-full ${zoom ? 'bg-lime' : ''}`}
+            style={zoom ? undefined : { backgroundColor: GLASS }}>
+            <ZoomIn size={20} color={zoom ? '#222E29' : '#F5F7F5'} />
           </Pressable>
-        ) : null
+          {device.hasTorch ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('odometer.scan.torch')}
+              accessibilityState={{ selected: torch }}
+              hitSlop={12}
+              onPress={() => setTorch(!torch)}
+              className={`h-11 w-11 items-center justify-center rounded-full ${torch ? 'bg-lime' : ''}`}
+              style={torch ? undefined : { backgroundColor: GLASS }}>
+              <Flashlight size={20} color={torch ? '#222E29' : '#F5F7F5'} />
+            </Pressable>
+          ) : null}
+        </View>
       }
       footer={
         found != null ? (
@@ -246,18 +279,25 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
       ) : (
         <Text variant="heading" className="text-center text-onpanel">{t('odometer.scan.hint')}</Text>
       )}
-      <View className="overflow-hidden rounded-[20px] border-2 border-lime" style={{ height: WINDOW_H }}>
+      {/* Tap the window to focus on the digits (Q97). */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('odometer.scan.focus')}
+        onPress={(e) => camera.current?.focusTo({ x: e.nativeEvent.locationX, y: e.nativeEvent.locationY }).catch(() => {})}
+        className="overflow-hidden rounded-[20px] border-2 border-lime"
+        style={{ height: WINDOW_H }}>
         <Camera
+          ref={camera}
           style={{ flex: 1 }}
           device={device}
           isActive
           resizeMode="cover"
           torchMode={torch ? 'on' : 'off'}
-          zoom={Math.min(device.maxZoom, Math.max(device.minZoom, ZOOM))}
+          zoom={Math.min(device.maxZoom, Math.max(device.minZoom, ZOOMS[zoom]))}
           outputs={outputs}
           onStarted={onStarted}
         />
-      </View>
+      </Pressable>
       {found != null && current != null && (found < current || found > current + jump) ? (
         <Text variant="caption" className="text-center text-onpanel">
           {t(found < current ? 'odometer.scan.lowerNote' : 'odometer.scan.higherNote', { current: n(current) })}
@@ -268,9 +308,12 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
         <Text variant="caption" className="text-center text-onpanel">{t('odometer.scan.slow')}</Text>
       ) : null}
       {__DEV__ ? (
-        <Text variant="caption" className="text-center text-onpanel" style={{ opacity: 0.5 }}>
-          {`${guest ? 'guest' : 'account'} · ${started ? 'camera on' : 'camera starting'} · ${seen || 'no text yet'}`}
-        </Text>
+        // Test builds only (Q97): what was read, the numbers found, the pick and the last votes; tap to send the raw text.
+        <Pressable onPress={() => Share.share({ message: [frameInfo, ...raw.current].join('\n') })}>
+          <Text variant="caption" className="text-center text-onpanel" style={{ opacity: 0.5 }}>
+            {`${guest ? 'guest' : 'account'} · AI ${AI_ON ? 'on' : 'off'} · ${started ? frameInfo || 'camera on' : 'camera starting'}\n${seen || 'no text yet'}`}
+          </Text>
+        </Pressable>
       ) : null}
     </Shell>
   );

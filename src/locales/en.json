@@ -275,7 +275,7 @@
     "scan": {
       "row": "Read with camera",
       "rowSub": "Point it at the number under the speedometer.",
-      "hint": "Point the camera at the kilometer digits",
+      "hint": "Put the kilometer digits inside the frame. Tap it to focus.",
       "torch": "Turn the flashlight on or off",
       "close": "Close the camera",
       "slow": "We couldn't read it yet. Try getting a bit closer, or type the number yourself.",
@@ -289,7 +289,9 @@
       "again": "Look again",
       "lowerNote": "Lower than the saved reading ({{current}}). We'll ask for a reason before saving.",
       "higherNote": "Much higher than the saved reading ({{current}}). Check it before you confirm.",
-      "asking": "Taking a closer look. Hold still for a moment…"
+      "asking": "Taking a closer look. Hold still for a moment…",
+      "zoom": "Zoom in on small digits",
+      "focus": "Tap to focus on the digits"
     }
   },
   "vehicles": {
