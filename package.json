@@ -3,6 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
+    "@chuksdengr/vision-camera-ocr": "1.1.2",
     "@expo-google-fonts/poppins": "^0.4.1",
     "@expo-google-fonts/tajawal": "^0.4.1",
     "@expo/ui": "~57.0.22",

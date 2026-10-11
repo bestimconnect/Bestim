@@ -1168,5 +1168,6 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
   - The reader only looks at the band the window shows (37–63% of the picture), so speed and RPM numbers around it are left out.
   - Full HD frames, a zoom button for small LCD digits, and tap the window to focus.
   - Test builds show what was read, the numbers found, the pick and the votes; tapping it shares the raw text so failures become test cases.
-- Next: Apple Vision on iPhone (phase 2), then the CEO picks between our own small model and the Anyline SDK for segment displays (phase 3).
+- iPhone reads with Apple Vision (`@chuksdengr/vision-camera-ocr`, accurate mode, no language correction), keeping only lines in the window band, at most every 300 ms. Android keeps ML Kit (`react-native-vision-camera-ocr-plus`) with the same band. Both feed the same picking and voting rules, so the screen behaves the same on both (Q75).
+- Next: the CEO picks between our own small model and the Anyline SDK for segment displays (phase 3), with the AI cost table alongside.
 **Why:** On the founder's iPhone the reader failed on every dashboard type, even with the AI on.

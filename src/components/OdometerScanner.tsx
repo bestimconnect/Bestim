@@ -18,6 +18,8 @@ import {
   type CameraRef,
   type Frame,
 } from 'react-native-vision-camera';
+import { performOcr, type OcrOptions } from '@chuksdengr/vision-camera-ocr';
+import { useSharedValue } from 'react-native-reanimated';
 import { useTextRecognition } from 'react-native-vision-camera-ocr-plus';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useTranslation } from 'react-i18next';
@@ -40,7 +42,13 @@ const GLASS = 'rgba(245, 247, 245, 0.12)'; // round buttons on the dark panel
 // window shows: the preview fills its width and shows about 40–60% of its height (Q97), so 37–63% gives a small margin
 // without the speed and RPM numbers around it. The reader paces the work: one frame in six is read (about five a
 // second), the rest get the last result back. Module-level so the reader is built once.
-const READER = { language: 'latin', frameSkipThreshold: 6, scanRegion: { left: '0%', top: '37%', width: '100%', height: '26%' } } as const;
+const BAND = { top: 0.37, bottom: 0.63 };
+const READER = { language: 'latin', frameSkipThreshold: 6, scanRegion: { left: '0%', top: `${BAND.top * 100}%`, width: '100%', height: `${(BAND.bottom - BAND.top) * 100}%` } } as const;
+// iPhone (Q97, phase 2): Apple Vision reads digits better than ML Kit. It reads the whole frame, so only lines whose
+// middle sits in BAND are kept, and it runs at most every VISION_MS (an accurate read takes a few hundred ms).
+const VISION: OcrOptions = { recognitionLevel: 'accurate', usesLanguageCorrection: false, recognitionLanguages: ['en-US'], includeBoxes: true };
+const VISION_MS = 300;
+const IOS = Platform.OS === 'ios';
 
 type Props = {
   current?: number; // the reading on file: a number at or just above it is preferred. Leave out when there is none yet (a vehicle being added)
@@ -158,9 +166,27 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
   const { recognizer } = useTextRecognition(READER);
   // Runs on the camera's thread for every frame, the same way the reader's own camera does it: the call never
   // waits (it hands back the last finished read), and only the lines of text cross to the screen's thread.
+  const lastVision = useSharedValue(0);
   const onFrame = useCallback(
     (frame: Frame) => {
       'worklet';
+      if (IOS) {
+        const now = Date.now();
+        if (now - lastVision.get() >= VISION_MS) {
+          lastVision.set(now);
+          const lines: string[] = [];
+          for (const block of performOcr(frame, VISION)?.blocks ?? [])
+            for (const line of block.lines ?? []) {
+              // Vision's boxes are 0–1 with the origin at the bottom-left of the upright picture.
+              const mid = line.box ? 1 - (line.box.y + line.box.height / 2) : 0.5;
+              if (mid >= BAND.top && mid <= BAND.bottom) lines.push(line.text);
+            }
+          if (__DEV__) scheduleOnRN(setFrameInfo, `${frame.width}x${frame.height} ${frame.orientation} · Vision`);
+          if (lines.length) scheduleOnRN(onLines, lines);
+        }
+        frame.dispose();
+        return;
+      }
       if (__DEV__) scheduleOnRN(setFrameInfo, `${frame.width}x${frame.height} ${frame.orientation}`);
       const lines: string[] = [];
       const buffer = frame.getNativeBuffer();
@@ -173,7 +199,7 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
       if (lines.length) scheduleOnRN(onLines, lines);
       frame.dispose();
     },
-    [recognizer, onLines],
+    [recognizer, onLines, lastVision],
   );
   // The reader needs RGB frames on Android and reads the camera's own format on iPhone.
   // Full HD frames (Q97): small LCD digits are only a few dozen pixels tall at the default 720p.
