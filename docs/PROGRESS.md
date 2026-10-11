@@ -66,8 +66,6 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 - **To check on the iPhone 16 simulator and an Android phone, Arabic and English:** airplane mode → record by voice → back online → "Recording ready to review" on Home → review → save; the Notifications page after an alert fires, and the bell dot; a partial fuel fill-up then a full one (Home row, Car log km/L); the Car log filter tree.
 - **Speed:** run `scripts/voice-eval.ts` and `scripts/odometer-eval.ts` (needs the keys in `.env.local` and photos in `scripts/odometer-eval/`). Raise the odometer `thinking_level` only if the test shows it reads segment digits better without being much slower.
 
-- **Home redesign (Q94, 2026-10-11):** light page, car on a lime oval with swipe, odometer row, one row of three numbers, light priority list. Check on the iPhone in both languages and themes.
-
 ## Open items
 - **Not verified yet (QA):**
   - English/LTR layout of the Phase 3–5 screens;

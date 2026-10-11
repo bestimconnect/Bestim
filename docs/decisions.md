@@ -1144,16 +1144,3 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 **Why:** Q90: owners often log at the workshop or garage, where the signal is weak.
 
 **Spec for dev:** `src/stores/voiceQueue.ts` (persisted list; audio files in `Paths.document/voice-queue`), `src/lib/voiceSend.ts` (`sendVoice`, `queueVoice`, `processVoiceQueue`, `dropVoice`), run from `_layout.tsx` on reconnect and app resume. Card: `src/components/VoiceQueueCard.tsx`. Opening a ready item fills `useVoiceBatch` with its `queueId`; a save in `capture/review-all` removes it from the queue.
-
-### Q94: New Home, "lime spotlight" (founder, 2026-10-11)
-**Decision:**
-- Home is a light page: greeting and the car's name at the top (tap it to switch cars when there are 2+), the bell with its dot (Q92).
-- The car's picture sits large on a soft lime oval; swiping between cars and the dots stay (Q56).
-- Under it: the odometer with its unit, "last reading N days ago" (amber at 30+ days, Q23), and a round dark update button.
-- One row of three numbers between thin lines, no cards: next service (the most urgent part not already in the priority list), this month's spending with km driven this month, and fuel (km per litre, EGP per km; a hint until two full tanks).
-- "Today's priority" is a light list (dot, part, what's left, chevron), top 3 (Q10), with "N overdue · N coming up" opening the car's reminders (Q13). The Car log is a plain row under it.
-- No car health score for now (founder).
-**Replaces:** Q54's dark hero with the centred car and odometer card, and Q14's expenses card on Home (its month total is in the row; the 6 bars stay on the expenses page). `FuelLine` (Q91) is now the fuel column.
-**Why:** The old top took more than half the screen; the founder chose this layout from six mockups (artifact "Bestim Home Options", board 6).
-
-**Spec for dev:** `src/components/home/{CarStage,StatsRow}.tsx`, pure figures in `src/lib/homeStats.ts` (checked), palette colour `spot`.

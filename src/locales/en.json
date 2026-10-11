@@ -228,20 +228,7 @@
       "upcoming": "Upcoming dates"
     },
     "carLog": "Car log",
-    "carLogSub": "Services, costs and odometer readings",
-    "next": "Next service",
-    "nextNone": "Log a service",
-    "nextOverdue": "Overdue · {{name}}",
-    "days": "days",
-    "thisMonth": "This month",
-    "kmMonth": "{{km}} {{unit}} driven",
-    "fuel": "Fuel",
-    "kmL": "km/L",
-    "perKm": "{{n}} EGP per km",
-    "fuelHint": "Add 2 full tanks",
-    "statusBoth": "{{o}} overdue · {{s}} coming up",
-    "statusOverdue": "{{count}} overdue",
-    "statusSoon": "{{count}} coming up"
+    "carLogSub": "Services, costs and odometer readings"
   },
   "gate": {
     "title": {
