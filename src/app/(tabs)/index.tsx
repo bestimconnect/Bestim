@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import * as Icons from 'lucide-react-native';
-import { Bell, Car, ChevronDown, ChevronLeft, ChevronRight, Fuel, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
+import { Bell, Car, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Fuel, Plus, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
 import { FlatList, I18nManager, Pressable, ScrollView, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -83,7 +83,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
   const name = useFirstName();
   const vehicles = useVehicles().data ?? [];
   const setCurrent = useSettings((s) => s.setCurrentVehicle);
-  const { parts } = useVehicleParts(vehicle);
+  const { parts, isPending: partsLoading } = useVehicleParts(vehicle);
   const expenses = (useExpenses().data ?? []).filter((e) => e.vehicle_id === vehicle.id);
   const days = differenceInCalendarDays(new Date(), parseISO(vehicle.odometer_updated_at));
   const urgent = needsAttention(parts).slice(0, 3);
@@ -215,12 +215,20 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
             <Text variant="caption" className="text-teal">{t('home.viewAll')}</Text>
           </Pressable>
         </View>
-        {/* Q95: the top 3 (Q10) in one card, split by lines; an overdue line in red. */}
-        <View key={vehicle.id}>
-        {urgent.length ? (
-          <Rise>
-            <View className="rounded-item bg-white px-3.5" style={{ boxShadow: shadows.card }}>
-              {urgent.map((p, i) => {
+        {/* Q95/Q96: the same card for every car and every state: loading, the top 3 (Q10) split by lines
+            (an overdue line in red), all on schedule, or no services logged yet. */}
+        <Rise key={vehicle.id}>
+          <View className="rounded-item bg-white px-3.5" style={{ boxShadow: shadows.card }}>
+            {partsLoading ? (
+              <View className="min-h-[56px] flex-row items-center gap-3 py-2" accessibilityLabel={t('home.loading')}>
+                <View className="h-9 w-9 rounded-full bg-line" />
+                <View className="flex-1 gap-1.5">
+                  <View className="h-3.5 w-3/5 rounded-full bg-line" />
+                  <View className="h-3 w-2/5 rounded-full bg-line" />
+                </View>
+              </View>
+            ) : urgent.length ? (
+              urgent.map((p, i) => {
                 const overdue = p.status.state === 'overdue';
                 const Icon = iconOf(p.serviceType.icon);
                 return (
@@ -240,13 +248,25 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
                     <Chevron size={18} color={c.muted} />
                   </PressableScale>
                 );
-              })}
-            </View>
-          </Rise>
-        ) : (
-          <Rise><Text variant="body" className="text-muted">{t('home.allGood')}</Text></Rise>
-        )}
-        </View>
+              })
+            ) : (
+              <PressableScale
+                accessibilityRole="button"
+                scale={0.98}
+                onPress={() => (parts.length ? router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id, tab: 'reminders' } }) : router.push('/capture'))}
+                className="min-h-[56px] flex-row items-center gap-3 py-2">
+                <View className={`h-9 w-9 items-center justify-center rounded-full ${parts.length ? 'bg-mint' : 'bg-sky'}`}>
+                  {parts.length ? <CircleCheck size={18} color={c.teal} /> : <Plus size={18} color={c.teal} />}
+                </View>
+                <View className="flex-1">
+                  <Text variant="label">{t(parts.length ? 'home.allGoodTitle' : 'home.noParts.title')}</Text>
+                  <Text variant="caption" className="text-muted">{t(parts.length ? 'home.allGood' : 'home.noParts.body')}</Text>
+                </View>
+                <Chevron size={18} color={c.muted} />
+              </PressableScale>
+            )}
+          </View>
+        </Rise>
 
         {/* Q95: this month's expenses (Q14: the 6 bars never animate) and fuel (Q91) in one card. */}
         <View className="gap-2 rounded-item bg-white px-4 py-3" style={{ boxShadow: shadows.card }}>
@@ -261,18 +281,23 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
               ))}
             </View>
           </PressableScale>
-          {fuel ? (
-            <PressableScale
-              accessibilityRole="button"
-              scale={0.98}
-              onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id } })}
-              className="flex-row items-center gap-2 border-t border-line pt-2.5">
-              <Fuel size={16} color={c.teal} />
-              <Text variant="caption" className="flex-1 text-muted">{t('fuel.title')}</Text>
-              <Text variant="caption" style={{ fontFamily: 'Poppins_700Bold' }}>{fmt(fuel.average.kmPerLiter, 1)}</Text>
-              <Text variant="caption" className="text-muted">{`${t('home.kmL')} · ${t('home.perKm', { n: fmt(fuel.average.costPerKm) })}`}</Text>
-            </PressableScale>
-          ) : null}
+          {/* Q96: the fuel line is always there; until two full tanks give a figure it says how to get one. */}
+          <PressableScale
+            accessibilityRole="button"
+            scale={0.98}
+            onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id } })}
+            className="flex-row items-center gap-2 border-t border-line pt-2.5">
+            <Fuel size={16} color={c.teal} />
+            <Text variant="caption" className="flex-1 text-muted">{t('fuel.title')}</Text>
+            {fuel ? (
+              <>
+                <Text variant="caption" style={{ fontFamily: 'Poppins_700Bold' }}>{fmt(fuel.average.kmPerLiter, 1)}</Text>
+                <Text variant="caption" className="text-muted">{`${t('home.kmL')} · ${t('home.perKm', { n: fmt(fuel.average.costPerKm) })}`}</Text>
+              </>
+            ) : (
+              <Text variant="caption" className="text-muted">{t('home.fuelHint')}</Text>
+            )}
+          </PressableScale>
         </View>
       </View>
     </ScrollView>

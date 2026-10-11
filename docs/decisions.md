@@ -1152,3 +1152,9 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 - This month's expenses (total + 6 bars, Q14) and fuel consumption (Q91) share one white card; fuel shows only once there is a figure.
 - The Car log row was removed from Home (founder, 2026-10-11); it still opens from the car page (09: "All records" and "Tire history").
 **Why:** The founder chose design A from the "Same layout" mockups (artifact "Bestim Home Options") and asked for no new information.
+
+### Q96: Home's cards keep one shape for every car and every state (founder, 2026-10-11)
+**Decision:** switching cars never removes a card or swaps it for plain text.
+- "Today's priority" is always the same white card. Its states: loading (a grey placeholder row), the top 3 (Q10), "All on schedule" (mint tick; opens the car's reminders) when nothing is due, and "No services logged yet" (sky plus; opens the capture sheet) for a car with no tracked parts.
+- The expenses card always has its fuel line; until two full tanks give a figure it reads "Add 2 full tanks".
+**Why:** The founder wants the same layout whatever the car's data.

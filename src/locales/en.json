@@ -199,7 +199,7 @@
     "notifications": "Notifications",
     "priority": "Today's priority",
     "viewAll": "View all",
-    "allGood": "All your parts are on schedule. Nothing needs your attention today.",
+    "allGood": "Nothing needs your attention today.",
     "expenses": "This month's expenses",
     "currency": "EGP",
     "km": "km",
@@ -230,7 +230,14 @@
     "carLog": "Car log",
     "carLogSub": "Services, costs and odometer readings",
     "kmL": "km/L",
-    "perKm": "{{n}} EGP per km"
+    "perKm": "{{n}} EGP per km",
+    "allGoodTitle": "All on schedule",
+    "noParts": {
+      "title": "No services logged yet",
+      "body": "Log a service and we will remind you of the next one"
+    },
+    "fuelHint": "Add 2 full tanks",
+    "loading": "Loading"
   },
   "gate": {
     "title": {
