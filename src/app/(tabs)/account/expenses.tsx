@@ -51,7 +51,7 @@ export default function Expenses() {
     return { label: key.slice(5), sum, current: i === 5 };
   });
   const max = Math.max(...months.map((m) => m.sum), 1);
-  const add = () => router.push('/add-expense');
+  const add = () => router.push('/capture');
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>

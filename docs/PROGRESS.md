@@ -14,7 +14,7 @@ Updated 2026-10-11. Read this first in any new session. The spec is `docs/BESTIM
 | 6 · Release | Needs the Apple Developer account: Sign in with Apple, server push, TestFlight, Android Google key, universal links, store submission | ⏭ Next |
 
 ## App flow (decisions Q8)
-Splash (native, then `SplashOverlay` animation) → Language (01) → Intro (`(onboarding)/intro`, 3 swipeable slides; "Get started" opens a guest session, "I already have an account" → Sign in 30) → Add car 03 → Odometer 04 (saves the car, sets `onboarding_completed`) → Save your car (`save-car`, guests only: Google / email / later) → First log 05 (optional) → Home (tabs). A signed-in user with an empty name goes to Your profile (32) first. Q87.
+Splash (native, then `SplashOverlay` animation) → Intro (`(onboarding)/intro`, 3 swipeable slides; "Get started" opens a guest session, "I already have an account" → Sign in 30) → Add car (saves the car, sets `onboarding_completed`) → Home (tabs). Guests can add records by hand. A signed-in user with an empty name goes to Your profile (32) first. Q87, Q98–Q102.
 The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "first vehicle added".
 
 ## What exists (Phases 1–5)
@@ -67,6 +67,13 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 - **Speed:** run `scripts/voice-eval.ts` and `scripts/odometer-eval.ts` (needs the keys in `.env.local` and photos in `scripts/odometer-eval/`). Raise the odometer `thinking_level` only if the test shows it reads segment digits better without being much slower.
 
 - **Odometer reader recovery (Q97, 2026-10-11):** number picking fixed, real 3-of-5 agreement, read band = the window, Full HD frames, zoom + tap to focus, AI off. iPhone now reads with Apple Vision (new native package: needs a new dev build); Android keeps ML Kit. Not yet tried on a phone.
+
+## UX round of 2026-10-12 (Q98–Q102)
+**Built (four stages):** a quick-add sheet for records and costs (the "+" and the voice button open it); one-tap "Done" on Home's Today's priority rows (opens the sheet for that service); edit a record with a reason, the original stays visible; delete with Undo (also from the car log rows); an honest line "N records were removed from this history" on the share screen; old flow screens and unused text removed.
+
+**Deliberately simple for now:** the date is today / yesterday / last 30 days until a native date picker arrives with the next build; delete waits 5 seconds in memory (closing the app inside those seconds keeps the record); no swipe-to-delete; the notify-permission step is still its own screen; the receive screen does not show the removed-records line yet (the `get_share` function does not return it, needs a small database change); `capture/review` and `capture/manual` still exist for the voice fallback, and `add-expense` for editing a voice card.
+
+**Not verified yet:** Android; the English pass; saving from the sheet while offline; Undo on an offline save that is still queued.
 
 ## Open items
 - **Not verified yet (QA):**

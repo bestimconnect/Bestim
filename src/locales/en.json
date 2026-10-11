@@ -61,7 +61,6 @@
       "title": "Check your email",
       "subtitle": "We sent a link to your email. Open it on this phone.",
       "subtitleWithEmail": "We sent a link to\n{{email}}\nOpen it on this phone.",
-      "backToLogin": "Go to sign in",
       "resendTitle": "Didn't receive the email?",
       "resendBody": "Check your spam folder, or try again in a minute."
     },
@@ -119,8 +118,6 @@
         "make": "Make",
         "model": "Model",
         "year": "Year",
-        "required": "This field is required",
-        "yearInvalid": "Enter a valid year",
         "cta": "Save my car",
         "nickname": "Your nickname for it",
         "type": {
@@ -740,6 +737,7 @@
     "prepare": "Prepare the share",
     "send": "Share link",
     "valid": "Valid for 7 days.",
+    "removed": "{{n}} records were removed from this history.",
     "empty": "Add at least one record to share.",
     "error": "We couldn't prepare the share. Try again.",
     "message": "I shared the maintenance history of {{vehicle}} on Bestim: {{link}}",
@@ -795,11 +793,8 @@
       "nextBoth": "At {{km}} {{unit}} or after {{m}} months",
       "nextKm": "At {{km}} {{unit}}",
       "nextDate": "On {{date}}",
-      "vehicleTitle": "Your car is with us",
-      "vehicleBody": "Next step? Log your last service and we'll arrange its reminders.",
       "home": "To Home",
-      "another": "Add another record",
-      "firstService": "Log my first service"
+      "another": "Add another record"
     },
     "notify": {
       "title": "Let us remind you on time",

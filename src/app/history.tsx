@@ -1,8 +1,8 @@
 import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
-import { useMutationState } from '@tanstack/react-query';
+import { useMutationState, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
-import { BadgeCheck, ListFilter, X } from 'lucide-react-native';
+import { BadgeCheck, ListFilter, Trash2, X } from 'lucide-react-native';
 import * as Icons from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
@@ -16,6 +16,7 @@ import { carLog, scopeOf, type Kind } from '@/lib/carLog';
 import { consumption } from '@/lib/fuel';
 import { useCurrentVehicle, useExpenses, useFuelFills, useOdometerReadings, useRecordCategories, useServiceTypes, useVehicleLogs } from '@/lib/queries';
 import { SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
+import { removeRecord } from '@/lib/removeRecord';
 import { pickOption, type PickOption } from '@/lib/sheet';
 import { shadows, useColors } from '@/lib/theme';
 
@@ -28,6 +29,7 @@ const icon = (name?: string | null, fallback = Icons.Wrench) => (name && (Icons 
 export default function HistoryScreen() {
   const { t, i18n } = useTranslation();
   const c = useColors();
+  const qc = useQueryClient();
   const p = useLocalSearchParams<{ vehicleId?: string; filter?: string }>(); // filter: a category, subcategory or service id
   const { vehicle: current } = useCurrentVehicle();
   const vehicleId = p.vehicleId ?? current?.id;
@@ -67,6 +69,11 @@ export default function HistoryScreen() {
     const f = fuel?.byFill.get(id);
     return f ? t('fuel.perFill', { n: f.kmPerLiter.toLocaleString('en-US', { maximumFractionDigits: 1 }) }) : null;
   };
+  const trash = (table: 'maintenance_logs' | 'expenses', id: string) => (
+    <Pressable accessibilityRole="button" accessibilityLabel={t('capture.quick.delete')} hitSlop={8} onPress={() => removeRecord(qc, table, id)}>
+      <Trash2 size={18} color={c.muted} />
+    </Pressable>
+  );
   const chip = options.find((o) => o.id === filterId);
 
   const entries = carLog(logs.data ?? [], costs, readings, kind, scopeOf(filterId, tree, services));
@@ -156,6 +163,7 @@ export default function HistoryScreen() {
                         subtitle={[`${n(x.amount)} ${t('expenses.currency')}`, x.description, x.liters != null ? t('history.liters', { n: n(x.liters) }) : null, perFill(x.id)].filter(Boolean).join(' · ')}
                         chevron={false}
                         disabled
+                        aside={x.from_log ? undefined : trash('expenses', x.id)}
                       />
                     );
                   }
@@ -176,6 +184,7 @@ export default function HistoryScreen() {
                         title={l.title}
                         subtitle={`${base} · ${suffix}`}
                         onPress={() => router.push({ pathname: '/log/[id]', params: { id: l.id } })}
+                        aside={trash('maintenance_logs', l.id)}
                       />
                     </View>
                   );

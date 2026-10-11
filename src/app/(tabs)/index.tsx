@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import * as Icons from 'lucide-react-native';
-import { Bell, Car, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Fuel, Plus, RefreshCw, Sparkles, X, type LucideIcon } from 'lucide-react-native';
+import { Bell, Car, Check, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Fuel, Plus, RefreshCw, Sparkles, X, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { FlatList, I18nManager, Pressable, ScrollView, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -294,7 +294,14 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
                       <Text variant="label">{t(overdue ? 'home.overdueTitle' : 'home.soonTitle', { part: partName(i18n.language, p) })}</Text>
                       <Text variant="caption" className={overdue ? 'text-danger' : 'text-muted'}>{subtitle(t, i18n.language, p, vehicle.odometer_unit)}</Text>
                     </View>
-                    <Chevron size={18} color={c.muted} />
+                    <PressableScale
+                      accessibilityRole="button"
+                      accessibilityLabel={t('reminders.done')}
+                      hitSlop={6}
+                      onPress={() => router.push({ pathname: '/capture', params: { vehicleId: vehicle.id, serviceTypeId: p.serviceType.id } })}
+                      className="h-9 w-9 items-center justify-center rounded-full bg-mint">
+                      <Check size={18} color={c.teal} />
+                    </PressableScale>
                   </PressableScale>
                 );
               })

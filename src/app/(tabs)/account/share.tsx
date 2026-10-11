@@ -89,6 +89,7 @@ export default function ShareScreen() {
           </View>
         ) : null}
         <Note tone="info" text={t('share.note')} />
+        {vehicle?.removed_records ? <Text variant="caption" className="text-muted">{t('share.removed', { n: vehicle.removed_records })}</Text> : null}
         {empty ? <Text variant="caption" className="text-muted">{t('share.empty')}</Text> : null}
         {error ? <Note tone="warning" text={t('share.error')} /> : null}
         <Button title={link ? t('share.send') : t('share.prepare')} loading={busy} disabled={!vehicle || !logs.isSuccess || empty} onPress={link ? send : prepare} />
