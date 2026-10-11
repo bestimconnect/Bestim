@@ -1,7 +1,7 @@
 // Run: node --experimental-strip-types src/lib/odometerScan.check.ts
 import assert from 'node:assert/strict';
 
-import { candidates, cleanLine, maxJump, NO_VOTES, pickOutlier, pickReading, vote, type Votes } from './odometerScan.ts';
+import { candidates, cleanLine, consensus, decide, maxJump, NO_READS, pickOutlier, pickReading, type Reads } from './odometerScan.ts';
 
 const values = (lines: string[]) => candidates(lines).filter((s) => !s.joined).map((s) => s.value);
 
@@ -64,28 +64,39 @@ assert.equal(pickReading(['100 120 140 160'], 100000, KM), null);
 assert.equal(pickOutlier(['134 550']), null);
 assert.ok(candidates(['134 550']).some((c) => c.joined && c.value === 134550));
 
-// A number counts when it wins 3 of the last 5 reads, sampled at most every 200 ms (the camera started at 0).
-let v: Votes = NO_VOTES;
+// Q97: reads are combined digit by digit, so a flickering segment digit doesn't stop the reading.
+assert.equal(consensus([134559, 134550, 134550]), 134550);
+assert.equal(consensus([134550, 134559]), null); // two reads are not enough
+assert.equal(consensus([134550, 120, 134558, 134550]), 134550); // a speed number in between is a different length
+assert.equal(consensus([134550, 134559, 134557]), null); // no 2/3 majority on the last digit
+assert.equal(consensus([1, 2, 3, 4]), null);
+assert.equal(consensus([31308, 31308, 31368, 31308]), 31308);
+
+let r: Reads = NO_READS;
+const fits = (n: number) => n >= 134000 && n <= 139000;
 const step = (reading: number | null, now: number, since = 0) => {
-  const r = vote(v, reading, now, since);
-  v = r.votes;
-  return r.accept;
+  const out = decide(r, reading, now, since, fits);
+  r = out.reads;
+  return out.accept;
 };
-assert.equal(step(205343, 1000), null); // one read is never enough
-assert.equal(step(205343, 1100), null); // too soon: the same read handed back, not counted
-assert.deepEqual(v.values, [205343]);
-assert.equal(step(205843, 1200), null); // a misread in between
-assert.equal(step(205343, 1400), null); // 2 of 3
-assert.equal(step(205343, 1600), 205343); // 3 of 4: read for real
-v = NO_VOTES;
-assert.equal(step(1, 1000), null);
-assert.equal(step(2, 1200), null);
-assert.equal(step(3, 1400), null);
-assert.equal(step(4, 1600), null);
-assert.equal(step(5, 1800), null); // never the same twice: nothing
+// Fast path: the same believable reading twice in a row.
+assert.equal(step(134550, 1000), null);
+assert.equal(step(134550, 1100), null); // too soon: the same read handed back, not counted
+assert.equal(step(134550, 1200), 134550);
+// Not believable (below the saved reading): needs the digit-by-digit rule instead.
+r = NO_READS;
+assert.equal(step(98765, 1000), null);
+assert.equal(step(98765, 1200), null);
+assert.equal(step(98765, 1400), 98765);
+// Flickering last digit, never twice in a row: the combined reads still give it.
+r = NO_READS;
+assert.equal(step(134559, 1000), null);
+assert.equal(step(134550, 1200), null);
+assert.equal(step(null, 1400), null); // a read with no number breaks the "in a row"
+assert.equal(step(134550, 1600), 134550);
 // "Look again" at 1000: for 400 ms nothing counts.
-v = NO_VOTES;
-assert.equal(step(7, 1100, 1000), null);
-assert.deepEqual(v.values, []);
+r = NO_READS;
+assert.equal(step(134550, 1100, 1000), null);
+assert.deepEqual(r.values, []);
 
 console.log('odometerScan ok');

@@ -92,27 +92,57 @@ export function pickOutlier(lines: string[]): number | null {
 export const maxJump = (unit: string, daysSinceUpdate: number) =>
   unit === 'h' ? Math.max(100, daysSinceUpdate * 24) : Math.max(5000, daysSinceUpdate * 1000);
 
-export const SAMPLE_MS = 200; // the reader finishes about five reads a second; faster samples are the same read again
-export const WINDOW = 5; // the last reads a number has to win
-export const NEED = 3; // ...this many times
+export const SAMPLE_MS = 200; // the readers finish about five reads a second; faster samples are the same read again
+export const KEEP = 6; // the last reads with a number that are combined
+export const NEED = 3; // reads that must support a combined number
 export const SETTLE_MS = 400;
 
-/** The last reads, oldest first (null = no number in that read). */
-export type Votes = { values: (number | null)[]; at: number };
-
 /**
- * Whether a number has been read for real (decisions Q97). The reader hands its last result back on most frames,
- * so a sample is taken at most every SAMPLE_MS; a number counts once it wins NEED of the last WINDOW samples.
- * Nothing counts for SETTLE_MS after the camera starts looking again (`since`).
+ * The number several reads agree on, digit by digit (decisions Q97). Segment and LCD digits flicker: one read says
+ * 134559, the next 134550. Reads of the most common length are lined up and each position takes its most common
+ * digit; the result counts when at least NEED reads are lined up and every position has a 2/3 majority.
  */
-export function vote(votes: Votes, reading: number | null, now: number, since: number): { votes: Votes; accept: number | null } {
-  if (now - since < SETTLE_MS) return { votes: { values: [], at: now }, accept: null };
-  if (votes.values.length && now - votes.at < SAMPLE_MS) return { votes, accept: null };
-  const values = [...votes.values, reading].slice(-WINDOW);
-  const next = { values, at: now };
-  if (reading == null) return { votes: next, accept: null };
-  const wins = values.filter((v) => v === reading).length;
-  return { votes: next, accept: wins >= NEED ? reading : null };
+export function consensus(values: number[]): number | null {
+  const byLength = new Map<number, string[]>();
+  for (const v of values) {
+    const s = String(v);
+    byLength.set(s.length, [...(byLength.get(s.length) ?? []), s]);
+  }
+  const group = [...byLength.values()].sort((a, b) => b.length - a.length || b[0].length - a[0].length)[0];
+  if (!group || group.length < NEED) return null;
+  let out = '';
+  for (let i = 0; i < group[0].length; i++) {
+    const counts = new Map<string, number>();
+    for (const s of group) counts.set(s[i], (counts.get(s[i]) ?? 0) + 1);
+    const [digit, n] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
+    if (n * 3 < group.length * 2) return null;
+    out += digit;
+  }
+  return Number(out);
 }
 
-export const NO_VOTES: Votes = { values: [], at: 0 };
+/** The recent reads with a number, oldest first; `last` = the previous sample (null when it had no number). */
+export type Reads = { values: number[]; last: number | null; at: number };
+export const NO_READS: Reads = { values: [], last: null, at: 0 };
+
+/**
+ * Whether the reads so far give a number (Q97). Sampled at most every SAMPLE_MS. Fast path: the same number twice
+ * in a row, five digits or more, and believable (`fits`: at or just above the saved reading) counts at once.
+ * Otherwise the digit-by-digit consensus of the last KEEP reads decides. Nothing counts for SETTLE_MS after the
+ * camera starts looking again (`since`).
+ */
+export function decide(
+  reads: Reads,
+  reading: number | null,
+  now: number,
+  since: number,
+  fits: (n: number) => boolean,
+): { reads: Reads; accept: number | null } {
+  if (now - since < SETTLE_MS) return { reads: { ...NO_READS, at: now }, accept: null };
+  if (reads.at && now - reads.at < SAMPLE_MS) return { reads, accept: null };
+  if (reading == null) return { reads: { ...reads, last: null, at: now }, accept: null };
+  const values = [...reads.values, reading].slice(-KEEP);
+  const next = { values, last: reading, at: now };
+  if (reading === reads.last && String(reading).length >= 5 && fits(reading)) return { reads: next, accept: reading };
+  return { reads: next, accept: consensus(values) };
+}
