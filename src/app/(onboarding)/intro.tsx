@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Bell, Check, Disc, Droplets, Mic, Share2, ShieldCheck, Wrench, type LucideIcon } from 'lucide-react-native';
-import { type ReactNode, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { FlatList, useWindowDimensions, View, type ViewStyle } from 'react-native';
 import Animated, { type EntryOrExitLayoutType, useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,6 +12,7 @@ import { continueAsGuest } from '@/lib/auth';
 import { errorText } from '@/lib/errors';
 import { EASE_OUT, POP, rise } from '@/lib/motion';
 import { shadows, useColors } from '@/lib/theme';
+import { useSettings } from '@/stores/settingsStore';
 import { vehicleArt } from '@/lib/vehicleArt';
 
 const SLIDES = ['voice', 'reminders', 'history'] as const;
@@ -116,10 +117,11 @@ function Dot({ on }: { on: boolean }) {
   );
 }
 
-// First screen after the language: three swipeable slides of real app pieces, then a guest session so the car comes first (Q87).
+// First screen: three slides of real app pieces that advance by themselves (and swipe), then a guest session so the car comes first (Q87).
 export default function IntroScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { width } = useWindowDimensions();
+  const still = useReducedMotion();
   const [height, setHeight] = useState(0);
   const [index, setIndex] = useState(0);
   const [seen, setSeen] = useState([0]); // slides whose pieces have entered; they stay on screen afterwards
@@ -128,6 +130,14 @@ export default function IntroScreen() {
   const list = useRef<FlatList<(typeof SLIDES)[number]>>(null);
   const placed = useRef(false);
   const last = index === SLIDES.length - 1;
+  const other = i18n.language === 'ar' ? 'en' : 'ar';
+
+  // Next slide every 3.5 s; a swipe restarts the wait, and the last slide stays. Not at all when the phone asks for less motion.
+  useEffect(() => {
+    if (still || last || !height) return;
+    const id = setTimeout(() => list.current?.scrollToIndex({ index: index + 1 }), 3500);
+    return () => clearTimeout(id);
+  }, [still, last, height, index]);
 
   // Viewability gives the slide's index whatever the scroll direction, so Arabic (right to left) needs no special maths.
   const [onViewable] = useState(() => ({ viewableItems }: { viewableItems: { index: number | null }[] }) => {
@@ -147,16 +157,16 @@ export default function IntroScreen() {
       setBusy(false);
     }
   };
-  const next = () => (last ? start() : list.current?.scrollToIndex({ index: index + 1 }));
 
   const illo = Math.round(height * 0.56);
   const scale = Math.min(1, illo / STAGE.h, (width - 16) / STAGE.w);
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <View className="h-12 items-end justify-center px-6" style={{ opacity: last ? 0 : 1 }}>
-        <PressableScale accessibilityRole="button" disabled={last || busy} onPress={start} className="px-2 py-2">
-          <Text variant="label" className="text-muted">{t('onboarding.intro.skip')}</Text>
+      <View className="h-12 items-end justify-center px-6">
+        {/* The language comes from the phone; this is the way to the other one (the gate applies it and flips the layout). */}
+        <PressableScale accessibilityRole="button" disabled={busy} onPress={() => useSettings.getState().setLanguage(other)} className="px-2 py-2">
+          <Text variant="label" className="text-muted">{t(`language.${other}`)}</Text>
         </PressableScale>
       </View>
       <View className="flex-1" onLayout={(e) => setHeight(e.nativeEvent.layout.height)}>
@@ -199,7 +209,7 @@ export default function IntroScreen() {
           {SLIDES.map((s, i) => <Dot key={s} on={i === index} />)}
         </View>
         {error ? <Note tone="warning" text={error} /> : null}
-        <Button title={t(last ? 'onboarding.intro.start' : 'onboarding.intro.next')} onPress={next} loading={busy} />
+        <Button title={t('onboarding.intro.start')} onPress={start} loading={busy} />
         <PressableScale accessibilityRole="link" disabled={busy} onPress={() => router.push('/login')} className="items-center py-2">
           <Text variant="label" className="text-teal">{t('onboarding.intro.haveAccount')}</Text>
         </PressableScale>

@@ -4,7 +4,7 @@ import { ar as arLocale, enUS } from 'date-fns/locale';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Camera, ChevronDown, Mic, X } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -14,8 +14,9 @@ import { Button, Field, Item, Note, PressableScale, Text, Toggle } from '@/compo
 import { errorText } from '@/lib/errors';
 import { shouldAskNotifications } from '@/lib/notifications';
 import { useOnline } from '@/lib/online';
-import { useCurrentVehicle, useExpenses, useIsGuest, useRecordCategories, useServiceTypes, useVehicle, useVehicleLogs } from '@/lib/queries';
-import { expenseChip, topChips } from '@/lib/quickAdd';
+import { useCurrentVehicle, useExpenses, useIsGuest, useLog, useRecordCategories, useServiceTypes, useVehicle, useVehicleLogs } from '@/lib/queries';
+import { expenseChip, isFresh, topChips } from '@/lib/quickAdd';
+import { refreshRecords, removeRecord } from '@/lib/removeRecord';
 import { cleanDetails, LOG_FIELDS, SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
 import { pickOption } from '@/lib/sheet';
 import { supabase } from '@/lib/supabase';
@@ -24,6 +25,7 @@ import { useLogDraft } from '@/stores/logDraft';
 
 // The + button: one sheet that saves a maintenance record or a running cost in one step (docs/ux-mockup, states #sheet and #fuel).
 // Opened with ?serviceTypeId (+ ?vehicleId) to start on one service, e.g. from a reminder.
+// Opened with ?logId or ?expenseId it edits that record instead: free for 24 hours, then with a reason (correct_log); Delete has Undo.
 // Chips by identity: a service is its service_types id; a running cost is `x:<expense_code>` (fuel, wash …). Defaults by name_en / code.
 const DEFAULTS = ['Oil Change', expenseChip('fuel'), expenseChip('wash'), 'Tire Replacement', 'Brake Pad Replacement', 'Battery Replacement'];
 const num = (s: string) => (s.trim() && !isNaN(Number(s)) ? Number(s) : null);
@@ -43,9 +45,13 @@ export default function CaptureSheet() {
   const c = useColors();
   const { bottom } = useSafeAreaInsets();
   const queryClient = useQueryClient();
-  const { serviceTypeId, vehicleId } = useLocalSearchParams<{ serviceTypeId?: string; vehicleId?: string }>();
+  const { serviceTypeId, vehicleId, logId, expenseId } = useLocalSearchParams<{ serviceTypeId?: string; vehicleId?: string; logId?: string; expenseId?: string }>();
+  const editing = !!(logId || expenseId);
+  const log = useLog(logId).data;
+  const allSpent = useExpenses().data ?? [];
+  const expense = allSpent.find((e) => e.id === expenseId);
   const current = useCurrentVehicle().vehicle;
-  const picked = useVehicle(vehicleId).vehicle;
+  const picked = useVehicle(vehicleId ?? log?.vehicle_id ?? expense?.vehicle_id).vehicle;
   const vehicle = picked ?? current;
   const connected = useOnline();
   const guest = useIsGuest();
@@ -54,7 +60,7 @@ export default function CaptureSheet() {
   const tree = useRecordCategories().data ?? [];
   const costs = tree.filter((x) => x.expense_code);
   const logs = useVehicleLogs(vehicle?.id).data ?? [];
-  const spent = (useExpenses().data ?? []).filter((e) => e.vehicle_id === vehicle?.id);
+  const spent = allSpent.filter((e) => e.vehicle_id === vehicle?.id);
   const ar = i18n.language === 'ar';
   const name = (x: { name_en: string; name_ar: string }) => (ar ? x.name_ar : x.name_en);
 
@@ -72,9 +78,13 @@ export default function CaptureSheet() {
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [filled, setFilled] = useState(!editing); // edit mode: the form waits for the record
+  const [needsReason, setNeedsReason] = useState(false); // the server said the record is older than it looked
+  const [reason, setReason] = useState('');
 
   const service = services.find((s) => s.id === chip);
-  const cost = chip?.startsWith('x:') ? costs.find((x) => expenseChip(x.expense_code!) === chip) : undefined;
+  const code = chip?.startsWith('x:') ? chip.slice(2) : null; // a running cost's expense code
+  const reasonMode = !!log && (!isFresh(log.created_at) || needsReason);
   const fuel = chip === expenseChip('fuel');
   const fields = (service?.fields ?? []).filter((f) => f in LOG_FIELDS);
   const label = (id: string) => {
@@ -90,8 +100,35 @@ export default function CaptureSheet() {
     logs.filter((l) => l.service_type_id && known.has(l.service_type_id)),
     spent.filter((e) => known.has(expenseChip(e.category))),
     defaults.filter((id) => label(id)),
-  );
+  ).filter((id) => !editing || id.startsWith('x:') === !!expenseId); // a record keeps its kind
   if (chip && !chips.includes(chip) && label(chip)) chips.push(chip); // chosen from "More"
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (filled) return;
+    const s = (n: number | null) => (n != null ? String(n) : '');
+    if (log) {
+      setChip(log.service_type_id);
+      setAmount(s(log.cost));
+      setDate(log.service_date);
+      setOdo(s(log.odometer_reading));
+      setWorkshop(log.location ?? '');
+      setDetails(Object.fromEntries(Object.entries((log.details ?? {}) as Record<string, string | number>).map(([k, v]) => [k, String(v)])));
+      setEvery(s(log.interval_km));
+      setNotes(log.description ?? '');
+    } else if (expense) {
+      setChip(expenseChip(expense.category));
+      setAmount(String(expense.amount));
+      setDate(expense.expense_date);
+      setLiters(s(expense.liters));
+      setFullTank(expense.full_tank ?? true);
+      setOdo(s(expense.odometer_reading));
+      setWorkshop(expense.description ?? '');
+    } else return;
+    setMore(true);
+    setFilled(true);
+  }, [log, expense, filled]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const choose = (id: string) => {
     setChip(id);
@@ -103,12 +140,12 @@ export default function CaptureSheet() {
       title: t('capture.manual.serviceType'),
       allowCustom: false,
       options: [
-        ...services.map((s) => {
+        ...(expenseId ? [] : services).map((s) => {
           const where = [s.parentCategory, s.subcategory].filter(Boolean).map((x) => name(x!)).join(' · ');
           const other = [s.parentCategory, s.subcategory].filter(Boolean).map((x) => (ar ? x!.name_en : x!.name_ar)).join(' · ');
           return { id: s.id, label: name(s), hint: where, also: `${ar ? s.name_en : s.name_ar} ${other}` };
         }),
-        ...costs.map((x) => ({ id: expenseChip(x.expense_code!), label: name(x), hint: t('capture.quick.runningCost'), also: ar ? x.name_en : x.name_ar })),
+        ...(logId ? [] : costs).map((x) => ({ id: expenseChip(x.expense_code!), label: name(x), hint: t('capture.quick.runningCost'), also: ar ? x.name_en : x.name_ar })),
       ],
       onPick: ({ id }) => choose(id!),
     });
@@ -131,15 +168,17 @@ export default function CaptureSheet() {
   };
 
   const voice = () => {
+    if (guest) {
+      router.back();
+      return router.push({ pathname: '/feature-gate', params: { feature: 'capture' } }); // voice is for full accounts (Q17)
+    }
     useLogDraft.getState().reset({ vehicleId: vehicle?.id ?? null, source: 'voice' });
     // replace() from a formSheet only closes the sheet on iOS, so close it, then push the full screen.
     router.back();
     router.push('/capture/voice');
   };
 
-  const refresh = () => {
-    for (const key of ['vehicles', 'logs', 'expenses']) queryClient.invalidateQueries({ queryKey: [key] });
-  };
+  const refresh = () => refreshRecords(queryClient);
   const undoToast = (undo: () => PromiseLike<unknown> | void) =>
     toast(t('capture.quick.saved'), {
       label: t('capture.quick.undo'),
@@ -156,31 +195,73 @@ export default function CaptureSheet() {
     if (reminds && (await shouldAskNotifications())) router.push({ pathname: '/notify-permission', params }); // Q39: once, after the first saved log
   };
 
+  // Editing a maintenance record: a direct update while it is fresh; later, the changes go through correct_log with the reason.
+  const editLog = async () => {
+    const o = log!;
+    const s = service!;
+    const next: Record<string, string | number | null> = {
+      title: s.id === o.service_type_id ? o.title : name(s),
+      service_type_id: s.id,
+      odometer_reading: num(odo),
+      cost: num(amount),
+      service_date: date,
+      location: workshop.trim() || null,
+      description: notes.trim() || null,
+      interval_km: s.has_reminder ? num(every) : o.interval_km,
+    };
+    const changes = Object.fromEntries(Object.entries(next).filter(([k, v]) => v !== (o as Record<string, unknown>)[k]));
+    const det = cleanDetails(details, s.fields);
+    const detailsChanged = JSON.stringify(det) !== JSON.stringify(o.details ?? {});
+    if (!Object.keys(changes).length && !detailsChanged) return router.back();
+    setBusy(true);
+    let failed: { message?: string } | null = null;
+    if (reasonMode) {
+      // details are not part of the audited fields, so they are written directly
+      const text = Object.fromEntries(Object.entries(changes).map(([k, v]) => [k, v == null ? null : String(v)]));
+      if (Object.keys(changes).length) failed = (await supabase.rpc('correct_log', { log_id: o.id, changes: text, reason: reason.trim() })).error;
+      if (!failed && detailsChanged) failed = (await supabase.from('maintenance_logs').update({ details: det }).eq('id', o.id)).error;
+    } else {
+      failed = (await supabase.from('maintenance_logs').update(detailsChanged ? { ...changes, details: det } : changes).eq('id', o.id)).error;
+    }
+    setBusy(false);
+    if (/needs_reason/.test(failed?.message ?? '')) return setNeedsReason(true);
+    if (failed) return setError(errorText(failed));
+    refresh();
+    router.back();
+    toast(t('capture.quick.saved'));
+  };
+
+  const remove = () => {
+    router.dismiss(logId ? 2 : 1); // a log's sheet sits on its details page
+    removeRecord(queryClient, logId ? 'maintenance_logs' : 'expenses', (logId ?? expenseId)!);
+  };
+
   const submit = async () => {
     setError(null);
     if (!vehicle || !chip) return;
-    if (cost) {
+    if (logId) return editLog();
+    if (code) {
       setBusy(true);
       const l = fuel && Number(liters) > 0 ? Number(liters) : null;
       const reading = fuel && odo.trim() && Number(odo) >= 0 ? Math.round(Number(odo)) : null;
-      const { data, error } = await supabase
-        .from('expenses')
-        .insert({
-          vehicle_id: vehicle.id,
-          category: cost.expense_code!,
-          amount: Number(amount),
-          expense_date: date,
-          description: workshop.trim() || null,
-          liters: l,
-          odometer_reading: reading,
-          full_tank: fuel ? fullTank : true,
-        })
-        .select('id')
-        .single();
+      const row = {
+        category: code,
+        amount: Number(amount),
+        expense_date: date,
+        description: workshop.trim() || null,
+        liters: l,
+        odometer_reading: reading,
+        full_tank: fuel ? fullTank : true,
+      };
+      const { data, error } = await (expenseId
+        ? supabase.from('expenses').update(row).eq('id', expenseId)
+        : supabase.from('expenses').insert({ vehicle_id: vehicle.id, ...row })
+      ).select('id').single();
       setBusy(false);
       if (error) return setError(errorText(error));
       refresh();
       router.back();
+      if (expenseId) return toast(t('capture.quick.saved'));
       return undoToast(() => supabase.from('expenses').delete().eq('id', data.id));
     }
     const reminds = !!service?.has_reminder;
@@ -232,7 +313,13 @@ export default function CaptureSheet() {
     undoToast(undo);
   };
 
-  const valid = !!vehicle && !!chip && (cost ? Number(amount) > 0 : !amount.trim() || Number(amount) > 0);
+  // A record dated today can't carry a reading below the car's (older dates are history; an edit may fix the record that set the reading).
+  const tooLow = !editing && date === daysAgo(0) && odo.trim() !== '' && (!code || fuel) && Number(odo) < (vehicle?.current_odometer ?? 0);
+  const valid =
+    filled && !!vehicle && !!chip && !tooLow &&
+    (code ? Number(amount) > 0 : !amount.trim() || Number(amount) > 0) &&
+    (!logId || !!service) &&
+    (!reasonMode || reason.trim().length >= 3);
   const day = date === daysAgo(0) ? 'today' : date === daysAgo(1) ? 'yesterday' : 'other';
 
   return (
@@ -244,11 +331,12 @@ export default function CaptureSheet() {
       keyboardShouldPersistTaps="handled"
       automaticallyAdjustKeyboardInsets>
       <View className="flex-row items-center justify-between">
-        <Text variant="heading">{t('capture.newRecord')}</Text>
+        <Text variant="heading">{t(editing ? 'capture.quick.editTitle' : 'capture.newRecord')}</Text>
         <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white">
           <X size={20} color={c.ink} />
         </PressableScale>
       </View>
+        {editing ? null : (
         <PressableScale
           accessibilityRole="button"
           onPress={voice}
@@ -257,7 +345,8 @@ export default function CaptureSheet() {
           <Mic size={22} color="#D3F53D" />
           <Text variant="label" className="text-onpanel">{t(online ? 'capture.quick.say' : 'feedback.offline.voiceSheet')}</Text>
         </PressableScale>
-        <Text variant="caption" className="text-muted">{t('capture.quick.mostUsed')}</Text>
+        )}
+        {editing ? null : <Text variant="caption" className="text-muted">{t('capture.quick.mostUsed')}</Text>}
         <View className="flex-row flex-wrap gap-2">
           {chips.map((id) => (
             <Pressable
@@ -288,7 +377,7 @@ export default function CaptureSheet() {
                   </View>
                   <Toggle value={fullTank} onChange={setFullTank} label={t('expenses.fullTank')} />
                 </View>
-                <Field label={t('expenses.reading')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" placeholder={t('expenses.optional')} />
+                <Field label={t('expenses.reading')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" placeholder={t('expenses.optional')} error={tooLow ? t('errors.lowerReading') : undefined} />
               </>
             ) : null}
             <View className="gap-2">
@@ -315,7 +404,7 @@ export default function CaptureSheet() {
             {more ? (
               <View className="gap-4">
                 {fuel ? null : service ? (
-                  <Field label={t('capture.manual.odometer')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" placeholder={t('capture.manual.optional')} />
+                  <Field label={t('capture.manual.odometer')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" placeholder={t('capture.manual.optional')} error={tooLow ? t('errors.lowerReading') : undefined} />
                 ) : null}
                 <Field
                   label={t(service ? 'capture.manual.workshop' : 'expenses.place')}
@@ -358,8 +447,19 @@ export default function CaptureSheet() {
             ) : null}
           </>
         ) : null}
+        {reasonMode ? (
+          <>
+            <Field label={t('capture.quick.why')} value={reason} onChangeText={setReason} multiline />
+            <Text variant="caption" className="text-muted">{t('capture.quick.originalStays')}</Text>
+          </>
+        ) : null}
         {error ? <Note tone="warning" text={error} /> : null}
         <Button title={t('capture.quick.save')} onPress={submit} disabled={!valid} loading={busy || save.isPending} />
+        {editing && filled ? (
+          <Pressable accessibilityRole="button" onPress={remove} className="h-11 items-center justify-center">
+            <Text variant="label" className="text-danger">{t('capture.quick.delete')}</Text>
+          </Pressable>
+        ) : null}
     </ScrollView>
   );
 }

@@ -15,5 +15,7 @@ const KEYS: Record<string, string> = {
 export function errorText(e: unknown, fallback: 'errors.generic' | 'errors.google' = 'errors.generic'): string {
   const { code, message, name } = (e ?? {}) as { code?: string; message?: string; name?: string };
   if (name === 'AuthRetryableFetchError' || /network|failed to fetch/i.test(message ?? '')) return i18n.t('errors.network');
+  if (/lower_reading/.test(message ?? '')) return i18n.t('errors.lowerReading'); // the database's own refusals arrive in the message
+  if (/needs_reason/.test(message ?? '')) return i18n.t('errors.needsReason');
   return i18n.t(KEYS[code ?? ''] ?? fallback);
 }

@@ -17,3 +17,6 @@ export function topChips(
   const used = [...uses].sort((a, b) => b[1] - a[1]).map(([id]) => id);
   return [...new Set([...used, ...defaults])].slice(0, max);
 }
+
+/** A record stays freely editable for 24 hours after it was created; later changes need a reason (the database enforces the same). */
+export const isFresh = (createdAt: string, now = Date.now()) => now - Date.parse(createdAt) < 24 * 60 * 60 * 1000;

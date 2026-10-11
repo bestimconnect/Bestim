@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { differenceInCalendarDays, format, parseISO } from 'date-fns';
+import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { router } from 'expo-router';
 import { ArrowLeft, ArrowRight, Camera, TrendingUp } from 'lucide-react-native';
 import { useState } from 'react';
@@ -11,7 +11,8 @@ import { useTranslation } from 'react-i18next';
 import { OdometerRuler } from '@/components/OdometerRuler';
 import { OdometerScanner } from '@/components/OdometerScanner';
 import { RollingNumber } from '@/components/RollingNumber';
-import { Button, Field, Header, Item, Text } from '@/components/ui';
+import { Button, Header, Item, Text } from '@/components/ui';
+import { errorText } from '@/lib/errors';
 import { easeOut } from '@/lib/motion';
 import { maxJump } from '@/lib/odometerScan';
 import { useCurrentVehicle, type Vehicle } from '@/lib/queries';
@@ -31,8 +32,6 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
   const [reading, setReading] = useState(vehicle.current_odometer);
   const [typing, setTyping] = useState<string | null>(null); // the digits being typed; null = the rolling number shows
   const [scanning, setScanning] = useState(false);
-  const [scanned, setScanned] = useState<number | null>(null); // what the camera read; the note shows while it still stands
-  const [reason, setReason] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -57,24 +56,11 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
 
   /** `value`: the camera's confirmed number saves straight away, before the rolling number has caught up. */
   const save = async (value = reading) => {
-    const lower = value < vehicle.current_odometer;
-    if (lower && reason.trim().length < 3) return setError(t('odometer.reasonHint'));
     setSaving(true);
     setError('');
-    const { error: e1 } = await supabase.from('vehicles').update({ current_odometer: value }).eq('id', vehicle.id);
-    const { error: e2 } = lower
-      ? await supabase.from('maintenance_logs').insert({
-          vehicle_id: vehicle.id,
-          title: t('odometer.logTitle'),
-          description: reason.trim(),
-          odometer_reading: value,
-          service_date: format(new Date(), 'yyyy-MM-dd'),
-          source: 'manual',
-          status: 'needs_review',
-        })
-      : { error: null };
+    const { error: e } = await supabase.from('vehicles').update({ current_odometer: value }).eq('id', vehicle.id);
     setSaving(false);
-    if (e1 || e2) return setError(t('odometer.error'));
+    if (e) return setError(errorText(e));
     qc.invalidateQueries({ queryKey: ['vehicles'] });
     qc.invalidateQueries({ queryKey: ['logs'] });
     qc.invalidateQueries({ queryKey: ['expenses'] });
@@ -128,10 +114,8 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
           <ArrowRight size={14} color={c.muted} />
         </View>
 
-        {scanned === reading ? <Text variant="caption" className="text-center text-teal">{t('odometer.scan.read')}</Text> : null}
-
         {lower ? (
-          <Field label={t('odometer.reason')} value={reason} onChangeText={setReason} placeholder={t('odometer.noteBody')} multiline />
+          <Text variant="caption" className="text-center text-danger">{t('errors.lowerReading')}</Text>
         ) : delta > 0 ? (
           <View className="flex-row items-center justify-center gap-2">
             <TrendingUp size={16} color={c.teal} />
@@ -144,7 +128,7 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
         {error ? <Text variant="caption" className="text-danger">{error}</Text> : null}
       </ScrollView>
       <View className="px-6 pb-4 pt-2">
-        <Button title={t('odometer.cta')} onPress={() => save()} loading={saving} />
+        <Button title={t('odometer.cta')} onPress={() => save()} loading={saving} disabled={lower} />
       </View>
       {scanning ? (
         <OdometerScanner
@@ -153,11 +137,8 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
           unit={shortUnit}
           onConfirm={(v) => {
             setScanning(false);
-            // A lower reading needs its reason first (Q19.2): it lands on the page instead of saving.
-            if (v < vehicle.current_odometer) {
-              setScanned(v);
-              return rollTo(v);
-            }
+            // A lower reading is refused: it lands on the page, with the reason why, instead of saving.
+            if (v < vehicle.current_odometer) return rollTo(v);
             shown.set(v);
             save(v);
           }}

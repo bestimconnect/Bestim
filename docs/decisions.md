@@ -1172,3 +1172,24 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 - Next: the CEO picks between our own small model and the Anyline SDK for segment displays (phase 3), with the AI cost table alongside.
 **Why:** On the founder's iPhone the reader failed on every dashboard type, even with the AI on.
 - **Round 2 (founder test, 2026-10-11: better, but inconsistent and slow):** reads are combined digit by digit (the most common digit at each position across the last 6 reads, 2/3 majority, at least 3 reads), so a flickering segment digit no longer blocks the reading. The same believable number (5+ digits, at or just above the saved reading) twice in a row counts at once. iPhone reads every 200 ms. While nothing is found, the exposure cycles normal → darker → brighter every 1.2 s, for backlit LCDs, glare and night. No test text under the camera window any more; in test builds a long-press on the window shares what was read.
+
+### Q98: + opens one quick-add sheet (founder, 2026-10-12)
+**Decision:** The + button opens a single sheet for maintenance, running costs and (on the same form) the reading: a "say it" row, the owner's most used services as chips, amount, date, and the rest under "More details". Saving closes it with "Saved · Undo". The voice/manual chooser, the review screen and the success screen are gone for hand entry. Voice keeps its review list.
+**Why:** The founder found the app needed someone who already knew it. An oil change went from 5 screens and 8 taps to 1 sheet and 3 taps. Layout approved from the mock-up in `../docs/ux-mockup/`.
+
+### Q99: Edit freely for 24 hours, then with a reason (founder, 2026-10-12)
+**Decision:** A record can be changed directly during its first 24 hours. After that a short reason is asked and the original stays visible, as before. Expenses can be opened and edited.
+**Why:** Fixing a typo should not need an explanation; changing old history should leave a trace.
+
+**Spec for dev:** `guard_log_edit` trigger + `correct_log` (`20261012090000_edit_delete_rules.sql`); `isFresh()` in `src/lib/quickAdd.ts`.
+
+### Q100: Records and expenses can be deleted, with Undo (founder, 2026-10-12)
+**Decision:** Delete removes the row at once with "Deleted · Undo" for five seconds. Deleting a record removes its automatic expense and steps the car's reading back if that record set it. The car counts records removed after their first day, so a shared history can say how many were removed.
+**Spec for dev:** `src/lib/removeRecord.ts`; `log_removed` trigger; `vehicles.removed_records` (not shown anywhere yet).
+
+### Q101: A car's reading never goes down by hand (founder, 2026-10-12)
+**Decision:** A new reading cannot be lower than the current one, and a record dated today cannot carry a lower reading (an older-dated record can). A wrong reading is fixed by editing or deleting the record that set it. This replaces "a lower reading needs a reason" (Q20).
+
+### Q102: First run in three screens, and guests can add records by hand (dev, 2026-10-12; founder can overrule)
+**Decision:** Intro → add car (brand, model, year chained; reading on the same screen) → Home. No language screen (the phone's language, with a switch on the intro), no "first log", "save your car" or success screens; guests get a dismissible "save your car with an account" card on Home. A guest can open + and save by hand; voice, the other tabs, export, sharing and reminders still need an account. This replaces the order of Q87 and the guest limits of Q17 for +.
+**Why:** With the car first, blocking a guest's first record with a sign-up form would undo the gain.

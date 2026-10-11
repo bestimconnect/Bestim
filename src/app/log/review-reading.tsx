@@ -67,7 +67,7 @@ export default function ReviewReadingScreen() {
         </View>
       </View>
       <View className="gap-3 pb-4">
-        <Button title={t('log.review.correct')} onPress={() => router.push({ pathname: '/capture/manual', params: { logId: id } })} />
+        <Button title={t('log.review.correct')} onPress={() => router.push({ pathname: '/capture', params: { logId: id } })} />
         <Button variant="secondary" title={t('log.review.ok')} loading={confirm.isPending} onPress={() => confirm.mutate()} />
       </View>
     </SafeAreaView>

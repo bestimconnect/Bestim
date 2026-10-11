@@ -137,8 +137,8 @@ export type Database = {
           description: string | null
           expense_date: string
           from_log: boolean
-          id: string
           full_tank: boolean
+          id: string
           liters: number | null
           log_id: string | null
           odometer_reading: number | null
@@ -154,8 +154,8 @@ export type Database = {
           description?: string | null
           expense_date?: string
           from_log?: boolean
-          id?: string
           full_tank?: boolean
+          id?: string
           liters?: number | null
           log_id?: string | null
           odometer_reading?: number | null
@@ -171,8 +171,8 @@ export type Database = {
           description?: string | null
           expense_date?: string
           from_log?: boolean
-          id?: string
           full_tank?: boolean
+          id?: string
           liters?: number | null
           log_id?: string | null
           odometer_reading?: number | null
@@ -654,6 +654,7 @@ export type Database = {
           odometer_updated_at: string
           photo_url: string | null
           plate_number: string | null
+          removed_records: number
           updated_at: string
           user_id: string
           vehicle_type: string
@@ -674,6 +675,7 @@ export type Database = {
           odometer_updated_at?: string
           photo_url?: string | null
           plate_number?: string | null
+          removed_records?: number
           updated_at?: string
           user_id?: string
           vehicle_type?: string
@@ -694,6 +696,7 @@ export type Database = {
           odometer_updated_at?: string
           photo_url?: string | null
           plate_number?: string | null
+          removed_records?: number
           updated_at?: string
           user_id?: string
           vehicle_type?: string

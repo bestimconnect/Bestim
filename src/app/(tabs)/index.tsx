@@ -4,8 +4,8 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import * as Icons from 'lucide-react-native';
-import { Bell, Car, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Fuel, Plus, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
-import { useEffect, useRef } from 'react';
+import { Bell, Car, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Fuel, Plus, RefreshCw, Sparkles, X, type LucideIcon } from 'lucide-react-native';
+import { useEffect, useRef, useState } from 'react';
 import { FlatList, I18nManager, Pressable, ScrollView, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,7 +17,9 @@ import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { useLightStatusBar } from '@/components/Hero';
 import { OfflineHome } from '@/components/OfflineHome';
 import { VoiceQueueCard } from '@/components/VoiceQueueCard';
-import { Button, Item, PressableScale, Rise, Text } from '@/components/ui';
+import { Button, GoogleIcon, Note, PressableScale, Rise, Text } from '@/components/ui';
+import { signInWithGoogle, useGoogleAvailable } from '@/lib/auth';
+import { errorText } from '@/lib/errors';
 import { needsAttention, useCurrentVehicle, useExpenses, useFuelFills, useIsGuest, useVehicleParts, useVehicles, vehicleName, type Part, type Vehicle, useProfile } from '@/lib/queries';
 import { consumption } from '@/lib/fuel';
 import { EASE_OUT, POP, SWAP } from '@/lib/motion';
@@ -71,6 +73,52 @@ function Bell_() {
       <Bell size={20} color={c.ink} />
       {unread ? <View className="absolute end-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-white bg-coral" /> : null}
     </PressableScale>
+  );
+}
+
+let saveCardHidden = false; // dismissed for this session only: a new launch shows it again until there is an account
+
+/** A guest's reminder to keep the car in an account (stage 3). Google links to this guest, so the car stays. */
+function SaveCard() {
+  const { t } = useTranslation();
+  const guest = useIsGuest();
+  const google = useGoogleAvailable();
+  const [hidden, setHidden] = useState(saveCardHidden);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  if (!guest || hidden) return null;
+  const withGoogle = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await signInWithGoogle();
+    } catch (e) {
+      setError(errorText(e, 'errors.google'));
+    }
+    setBusy(false);
+  };
+  return (
+    <View className="gap-3 rounded-item bg-sky p-4">
+      <View className="flex-row items-start gap-3">
+        <View className="flex-1 gap-1">
+          <Text variant="label">{t('home.guest.title')}</Text>
+          <Text variant="caption" className="text-muted">{t('home.guest.body')}</Text>
+        </View>
+        <PressableScale
+          accessibilityRole="button"
+          accessibilityLabel={t('home.guest.dismiss')}
+          hitSlop={8}
+          onPress={() => {
+            saveCardHidden = true;
+            setHidden(true);
+          }}>
+          <X size={18} color="#222E29" />
+        </PressableScale>
+      </View>
+      {error ? <Note tone="warning" text={error} /> : null}
+      {google ? <Button title={t('home.guest.google')} icon={<GoogleIcon />} onPress={withGoogle} loading={busy} /> : null}
+      <Button title={t('home.guest.email')} variant={google ? 'secondary' : 'primary'} onPress={() => router.push('/register')} disabled={busy} />
+    </View>
   );
 }
 
@@ -208,6 +256,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
       </View>
 
       <View className="gap-3 px-6 pt-4">
+        <SaveCard />
         <VoiceQueueCard vehicleId={vehicle.id} />
         <View className="flex-row items-center justify-between">
           <Text variant="heading">{t('home.priority')}</Text>
@@ -339,49 +388,7 @@ function Empty() {
   );
 }
 
-// Screen 36 — Home / Guest; ar-light 36/الرئيسية/زائر.png
-function Guest({ vehicle }: { vehicle: Vehicle | null }) {
-  const refresh = useRefresh();
-  const { t, i18n } = useTranslation();
-  const insets = useSafeAreaInsets();
-  const { parts } = useVehicleParts(vehicle);
-  const gate = (feature: string) => router.push({ pathname: '/feature-gate', params: { feature, vehicleId: vehicle?.id } });
-  return (
-    <ScrollView refreshControl={refresh} className="flex-1 bg-paper" contentContainerStyle={{ paddingBottom: 120, paddingTop: insets.top + 16 }}>
-      <View className="gap-4 px-6">
-        <View className="gap-1 rounded-field bg-sky p-4">
-          <Text variant="label">{t('home.guest.welcomeTitle')}</Text>
-          <Text variant="caption" className="text-muted">{t('home.guest.welcomeBody')}</Text>
-        </View>
-        <Button title={t('home.guest.create')} variant="dark" onPress={() => router.push('/register')} />
-        {vehicle ? (
-          <>
-            <Text variant="title" className="mt-2">{t('home.guest.yourCar')}</Text>
-            <Item icon={Car} title={vehicleName(vehicle)} subtitle={String(vehicle.year)} onPress={() => gate('car')} />
-          </>
-        ) : null}
-        {parts.length ? (
-          <>
-            <Text variant="heading" className="mt-2">{t('home.guest.upcoming')}</Text>
-            {parts.slice(0, 2).map((p) => (
-              <Item
-                key={p.serviceType.id}
-                icon={iconOf(p.serviceType.icon)}
-                tone={p.status.state === 'ok' ? 'mint' : 'amber'}
-                title={partName(i18n.language, p)}
-                subtitle={subtitle(t, i18n.language, p, vehicle!.odometer_unit)}
-                onPress={() => gate('reminders')}
-              />
-            ))}
-          </>
-        ) : null}
-      </View>
-    </ScrollView>
-  );
-}
-
 export default function HomeScreen() {
-  const guest = useIsGuest();
   const { vehicle, isPending, isError, data, dataUpdatedAt, refetch, isRefetching } = useCurrentVehicle();
   const online = useOnline();
   const showSaved = useShowSaved((s) => s.since);
@@ -389,7 +396,6 @@ export default function HomeScreen() {
   useEffect(() => {
     if (showSaved && online && dataUpdatedAt > showSaved) useShowSaved.getState().set(null); // Q46: cleared by the next successful fetch
   }, [showSaved, dataUpdatedAt, online]);
-  if (guest) return <Guest vehicle={vehicle} />;
   if (isError && !data) return <ErrorState onRetry={refetch} retrying={isRefetching} onShowSaved={onShowSaved} />;
   if (isPending) return <View className="flex-1 bg-paper" />;
   if (vehicle && (!online || showSaved != null)) return <OfflineHome vehicle={vehicle} />; // Q45 / Q46

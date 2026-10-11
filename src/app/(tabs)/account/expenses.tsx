@@ -1,5 +1,6 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { Redirect, router } from 'expo-router';
-import { Plus, Wallet } from 'lucide-react-native';
+import { Plus, Receipt, Trash2, Wallet } from 'lucide-react-native';
 import { I18nManager, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -7,8 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { FuelCard } from '@/components/FuelCard';
 import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
-import { Button, Header, Text } from '@/components/ui';
-import { useCurrentVehicle, useExpenses, useIsGuest, useVehicles } from '@/lib/queries';
+import { Button, Header, Item, Text } from '@/components/ui';
+import { useCurrentVehicle, useExpenses, useIsGuest, useRecordCategories, useVehicles } from '@/lib/queries';
+import { removeRecord } from '@/lib/removeRecord';
 import { useColors } from '@/lib/theme';
 
 // Screen 23 — Expenses (167:67034) + empty 40 (167:67235); decisions Q26, Q27, Q30, Q31.
@@ -25,8 +27,10 @@ const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
 
 export default function Expenses() {
   const refresh = useRefresh();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const c = useColors();
+  const queryClient = useQueryClient();
+  const tree = useRecordCategories().data ?? [];
   const guest = useIsGuest();
   const query = useExpenses();
   const expenses = query.data ?? [];
@@ -104,6 +108,32 @@ export default function Expenses() {
                   <Text variant="body" className="text-muted">{t(`expenses.row.${key}`)}</Text>
                 </View>
               ) : null;
+            })}
+            <Text variant="heading">{t('expenses.recent')}</Text>
+            {thisYear.slice(0, 20).map((e) => {
+              const sub = tree.find((y) => y.expense_code === e.category);
+              return (
+                <View key={e.id} className="flex-row items-center gap-2">
+                  <View className="flex-1">
+                    <Item
+                      icon={Receipt}
+                      title={sub ? (i18n.language === 'ar' ? sub.name_ar : sub.name_en) : t(`expenses.chip.${e.category}`)}
+                      subtitle={[`${fmt(Number(e.amount))} ${t('expenses.currency')}`, e.expense_date, e.description].filter(Boolean).join(' · ')}
+                      // A cost that came from a maintenance log is changed (or deleted) through that log.
+                      onPress={() => router.push(e.from_log && e.log_id ? { pathname: '/log/[id]', params: { id: e.log_id } } : { pathname: '/capture', params: { expenseId: e.id } })}
+                    />
+                  </View>
+                  {e.from_log ? null : (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t('capture.quick.delete')}
+                      onPress={() => removeRecord(queryClient, 'expenses', e.id)}
+                      className="h-11 w-11 items-center justify-center">
+                      <Trash2 size={20} color={c.muted} />
+                    </Pressable>
+                  )}
+                </View>
+              );
             })}
           </>
         )}

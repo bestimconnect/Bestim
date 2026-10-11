@@ -15,12 +15,12 @@ const labels: Record<string, string> = { index: 'home', vehicles: 'vehicles', re
 
 /**
  * Custom ink nav (spec §10): 68px, 28 radius, floating lime capture button in the centre.
- * The capture button isn't a tab: it opens the "new record" sheet (13). Guests get the feature gate (Q17).
+ * The capture button isn't a tab: it opens the "new record" sheet (13). Guests can add by hand; the sheet's voice row asks them for an account (Q17).
  */
 export function TabBar({ state, navigation }: BottomTabBarProps) {
   const { t } = useTranslation();
   const guest = useIsGuest();
-  const capture = () => router.push(guest ? { pathname: '/feature-gate', params: { feature: 'capture' } } : '/capture');
+  const capture = () => router.push('/capture');
   const c = useColors();
   const { bottom } = useSafeAreaInsets();
   return (

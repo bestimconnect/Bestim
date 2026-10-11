@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { Image } from 'expo-image';
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button, Header, Text } from '@/components/ui';
 import { useLog } from '@/lib/queries';
+import { removeRecord } from '@/lib/removeRecord';
 import { LOG_FIELDS } from '@/lib/saveLog';
 import { supabase } from '@/lib/supabase';
 
@@ -17,6 +18,7 @@ export default function LogDetailScreen() {
   const { t, i18n } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: log } = useLog(id);
+  const queryClient = useQueryClient();
   const corrections = useQuery({
     queryKey: ['log-corrections', id],
     queryFn: async () => {
@@ -111,12 +113,17 @@ export default function LogDetailScreen() {
           <Text variant="caption" className="text-muted">{t('log.originalBody')}</Text>
         </View>
       </ScrollView>
-      <View className="pb-4 pt-2">
-        <Button
-          variant="secondary"
-          title={t('log.addCorrection')}
-          onPress={() => router.push({ pathname: '/capture/manual', params: { logId: id } })}
-        />
+      <View className="gap-1 pb-4 pt-2">
+        <Button variant="secondary" title={t('log.edit')} onPress={() => router.push({ pathname: '/capture', params: { logId: id } })} />
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => {
+            router.back();
+            removeRecord(queryClient, 'maintenance_logs', id);
+          }}
+          className="h-11 items-center justify-center">
+          <Text variant="label" className="text-danger">{t('capture.quick.delete')}</Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );

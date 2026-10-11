@@ -5,6 +5,7 @@ import { Tajawal_400Regular, Tajawal_700Bold } from '@expo-google-fonts/tajawal'
 import { onlineManager } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
+import { getLocales } from 'expo-localization';
 import { useURL } from 'expo-linking';
 import { useLastNotificationResponse } from 'expo-notifications';
 import { type ErrorBoundaryProps, router, Stack } from 'expo-router';
@@ -116,10 +117,12 @@ function App() {
 
   useEffect(() => {
     if (!ready) return;
-    if (!language) router.replace('/language');
+    // No language chosen yet: take the phone's (Arabic unless it is English). Saving it re-runs this effect, which applies it once;
+    // after a right-to-left reload the saved language matches the layout, so nothing reloads again.
+    if (!language) useSettings.getState().setLanguage(getLocales()[0]?.languageCode === 'en' ? 'en' : 'ar');
     else {
       applyLanguage(language);
-      // Flow (Q87): language → intro → car → odometer → save car → first log → home. Intro's "Get started" opens a guest session.
+      // Flow (stage 3): intro → add car (odometer included) → home. Intro's "Get started" opens a guest session.
       // Guests (anonymous accounts, Q17) have no name and skip the profile step.
       if (!userId) router.replace('/intro');
       else if (profile.data && !profile.data.full_name.trim() && !session?.user.is_anonymous) router.replace('/profile-setup'); // Q7
