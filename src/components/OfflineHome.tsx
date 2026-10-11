@@ -7,15 +7,13 @@ import { useTranslation } from 'react-i18next';
 import { Button, Item, Text } from '@/components/ui';
 import { vehicleName, type Vehicle } from '@/lib/queries';
 import { shadows } from '@/lib/theme';
-import { useLogDraft } from '@/stores/logDraft';
 
 // Screen 47 — Home offline, PNG 47/الرئيسية/دون اتصال (Q45). Rendered from the persisted cache.
 export function OfflineHome({ vehicle }: { vehicle: Vehicle }) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const write = () => {
-    useLogDraft.getState().reset({ vehicleId: vehicle.id, source: 'manual' });
-    router.push('/capture/manual');
+    router.push({ pathname: '/capture', params: { vehicleId: vehicle.id } });
   };
   return (
     <ScrollView className="flex-1 bg-paper" contentContainerClassName="gap-4 px-6" contentContainerStyle={{ paddingTop: insets.top + 16, paddingBottom: 120 }}>

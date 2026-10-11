@@ -482,6 +482,20 @@
       "size": "المقاس (مثل 205/55 R16)",
       "count": "العدد",
       "warranty_months": "الضمان · شهور"
+    },
+    "quick": {
+      "say": "قلها بصوتك",
+      "mostUsed": "الأكثر استخداماً",
+      "more": "المزيد",
+      "moreDetails": "تفاصيل أكثر",
+      "today": "اليوم",
+      "yesterday": "أمس",
+      "other": "يوم آخر",
+      "runningCost": "مصروف تشغيل",
+      "save": "احفظ",
+      "saved": "تم الحفظ",
+      "undo": "تراجع",
+      "close": "إغلاق"
     }
   },
   "history": {

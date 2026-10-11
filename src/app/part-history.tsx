@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Button, Header, Text } from '@/components/ui';
 import { useServiceTypes, useVehicle, useVehicleLogs } from '@/lib/queries';
-import { useLogDraft } from '@/stores/logDraft';
 
 // Screen 12 — Part history, Figma ar-light 12/تاريخ القطع.
 const n = (x: number) => x.toLocaleString('en-US');
@@ -59,8 +58,7 @@ export default function PartHistory() {
         <Button
           title={t('parts.history.log')}
           onPress={() => {
-            useLogDraft.getState().reset({ vehicleId, serviceTypeId, title: name });
-            router.push('/capture/manual');
+            router.push({ pathname: '/capture', params: { vehicleId, serviceTypeId } });
           }}
         />
       </View>

@@ -141,7 +141,7 @@ function App() {
     <View className="flex-1 bg-paper" style={themeVars[scheme]}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="capture/index" options={sheetOptions} />
+        <Stack.Screen name="capture/index" options={{ ...sheetOptions, sheetAllowedDetents: [0.92] }} />
         <Stack.Screen name="sheet" options={sheetOptions} />
         <Stack.Screen name="switch-vehicle" options={sheetOptions} />
         <Stack.Screen name="feature-gate" options={{ presentation: 'modal' }} />

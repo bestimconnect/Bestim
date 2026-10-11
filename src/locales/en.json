@@ -482,6 +482,20 @@
       "size": "Size (e.g. 205/55 R16)",
       "count": "Count",
       "warranty_months": "Warranty · months"
+    },
+    "quick": {
+      "say": "Say it",
+      "mostUsed": "Most used",
+      "more": "More",
+      "moreDetails": "More details",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "other": "Other day",
+      "runningCost": "Running cost",
+      "save": "Save",
+      "saved": "Saved",
+      "undo": "Undo",
+      "close": "Close"
     }
   },
   "history": {

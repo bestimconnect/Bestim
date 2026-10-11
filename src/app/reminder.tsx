@@ -13,7 +13,6 @@ import { Button, Header, Text } from '@/components/ui';
 import { useIsGuest, useVehicle, useVehicleParts } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/components/Toast';
-import { useLogDraft } from '@/stores/logDraft';
 
 // Screen 22 — Reminder detail (Q24); ar-light 22/تفاصيل موعد الصيانة.png
 const n = (x: number) => x.toLocaleString('en-US');
@@ -52,8 +51,7 @@ export default function ReminderScreen() {
   const how = km != null && months != null ? 'both' : km != null ? 'km' : 'months';
 
   const done = () => {
-    useLogDraft.getState().reset({ vehicleId: vehicle.id, serviceTypeId: st.id, title: name, source: 'manual' });
-    router.push('/capture/manual');
+    router.push({ pathname: '/capture', params: { vehicleId: vehicle.id, serviceTypeId: st.id } });
   };
   const snooze = async () => {
     setBusy(true);
