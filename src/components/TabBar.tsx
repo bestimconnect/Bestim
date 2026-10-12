@@ -1,10 +1,10 @@
-import { router } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/tabs';
 import { Bell, CarFront, House, Plus, UserRound, type LucideIcon } from 'lucide-react-native';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { openCapture } from '@/lib/reading';
 import { shadows, useColors } from '@/lib/theme';
 import { PressableScale } from './ui/PressableScale';
 import { Text } from './ui/Text';
@@ -18,7 +18,7 @@ const labels: Record<string, string> = { index: 'home', vehicles: 'vehicles', re
  */
 export function TabBar({ state, navigation }: BottomTabBarProps) {
   const { t } = useTranslation();
-  const capture = () => router.push('/capture');
+  const capture = () => openCapture();
   const c = useColors();
   const { bottom } = useSafeAreaInsets();
   return (

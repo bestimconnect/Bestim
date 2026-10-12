@@ -44,6 +44,8 @@ export default function LogDetailScreen() {
     log.status === 'needs_review' ? { k: 'review', box: 'bg-amber' }
     : log.status === 'corrected' ? { k: 'corrected', box: 'bg-sky' }
     : { k: log.source === 'voice' ? 'voice' : 'manual', box: 'bg-mint' };
+  const review = log.status === 'needs_review';
+  const fixReading = () => router.push({ pathname: '/log/review-reading', params: { id } });
   const bannerBody = (
     <>
       <Text variant="label">{t(`log.${banner.k}Title`)}</Text>
@@ -73,10 +75,10 @@ export default function LogDetailScreen() {
     <SafeAreaView className="flex-1 bg-paper px-6">
       <Header title={t('log.header')} />
       <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-4 pb-4" showsVerticalScrollIndicator={false}>
-        {log.status === 'needs_review' ? (
+        {review ? (
           <Pressable
             accessibilityRole="button"
-            onPress={() => router.push({ pathname: '/log/review-reading', params: { id } })}
+            onPress={fixReading}
             className={`gap-1 rounded-field p-4 active:opacity-80 ${banner.box}`}>
             {bannerBody}
           </Pressable>
@@ -116,7 +118,8 @@ export default function LogDetailScreen() {
         </View>
       </ScrollView>
       <View className="gap-1 pb-4 pt-2">
-        <Button variant="secondary" title={t('log.edit')} onPress={() => router.push({ pathname: '/capture', params: { logId: id } })} />
+        {review ? <Button title={t('log.fixReading')} onPress={fixReading} /> : null}
+        <Button variant={review ? 'secondary' : 'primary'} title={t('log.edit')} onPress={() => router.push({ pathname: '/capture', params: { logId: id } })} />
         <Pressable
           accessibilityRole="button"
           onPress={() => {

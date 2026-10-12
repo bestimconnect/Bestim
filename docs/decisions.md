@@ -1203,3 +1203,22 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 **Decision:** Three beats. (1) The splash builds the logo in about 2 seconds (lime slash sweeps in, the B settles, wordmark and tagline rise, fade). (2) Onboarding shows every time the app opens signed out: the slides with "Next" / "Get started" and a "Skip" link (hidden on the last slide). (3) It ends on Sign in, with a link to Create account. "Continue with Google" is the last element on both account screens, under the "or" divider.
 **Why:** With the slides and the account buttons on one screen it no longer read as onboarding.
 **Adjusts:** Q103's welcome screen.
+
+### Q105: The first reading can wait, records cannot (founder, 2026-10-13)
+**Decision:** When adding a car, the odometer reading is optional ("Don't have it now? You can add it later, before your first record."). Until the car has a reading, Home shows an "Add your car's reading" card, and the + button (and voice) asks for the reading first instead of opening the record sheet. Once the reading is saved, everything works as usual.
+**Why:** The owner may not be next to the car when adding it. But records without a starting reading would make reminders and the history unreliable, so records wait for it.
+**Spec for dev:** "no reading yet" = `vehicles.odometer_updated_at` is null (`current_odometer` stays 0, so a real 0 is still allowed); `hasReading()` and `openCapture()` in `src/lib/reading.ts`; migration `20261013090000_vehicle_reading_optional.sql` (drops NOT NULL on that column; apply it before release).
+
+### Q106: Every screen has one clear next step (founder, 2026-10-13)
+**Decision:** Four rules for every screen.
+1. One main (lime) button per screen: what the owner came to do. It is pinned at the bottom and always visible.
+2. Looking things up ("view history") is never the main button. It becomes a secondary button or a text link.
+3. A screen that reports a problem offers the fix on the same screen (for example "Done, log it" and "Snooze a week" on a part that is due).
+4. An empty screen always says what to do next, with a button.
+**Why:** Screens that inform but do not lead lose the user: they read the screen and then do not know what to press.
+**Spec for dev:** part, car page (pinned "Add a record" / "Update reading"), reminders, record, car log, export, share, notifications, check-your-email and success screens follow it. Snooze lives in `src/lib/snooze.ts`.
+
+### Q107: A status screen shows a picture, one number and one button (founder, 2026-10-12)
+**Decision:** The part screen reads like a picture, not a receipt: one ring (coloured by on time / due soon / late / snoozed), one big number with two words under it, three small icon tiles (last done, every, spent), and one big button ("Done", or "Add the last time" when never logged). Snooze is a small icon button next to it, only when due. History is an icon in the header. Words are the last resort. The old Part screen and Reminder screen were the same page twice, so they are now one screen (`/part`).
+**Why:** Owners glance at the screen in a hurry; sentences and five label/value rows were too much to read.
+**Spec for dev:** `src/app/part.tsx`, `src/components/PartStatus.tsx` (SVG ring, mirrored in RTL); `src/app/reminder.tsx` deleted, its callers (Reminders tab, success screen, notification links) now open `/part`. About 12 words on screen.

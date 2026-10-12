@@ -61,7 +61,10 @@
       "subtitle": "We sent a link to your email. Open it on this phone.",
       "subtitleWithEmail": "We sent a link to\n{{email}}\nOpen it on this phone.",
       "resendTitle": "Didn't receive the email?",
-      "resendBody": "Check your spam folder, or try again in a minute."
+      "resendBody": "Check your spam folder, or try again in a minute.",
+      "openMail": "Open my email app",
+      "sendAgain": "Send it again",
+      "sent": "We sent the link again"
     },
     "profileSetup": {
       "title": "Your profile",
@@ -138,7 +141,8 @@
         "label": "Current odometer reading",
         "unit": {
           "km": "km"
-        }
+        },
+        "later": "Don't have it now? You can add it later, before your first record."
       }
     }
   },
@@ -184,7 +188,8 @@
       "body": "Log a service and we will remind you of the next one"
     },
     "fuelHint": "Add 2 full tanks",
-    "loading": "Loading"
+    "loading": "Loading",
+    "update": "Update"
   },
   "odometer": {
     "header": "Update odometer",
@@ -213,7 +218,8 @@
       "asking": "Taking a closer look. Hold still for a moment…",
       "zoom": "Zoom in on small digits",
       "focus": "Tap to focus on the digits"
-    }
+    },
+    "first": "Enter the car's first reading"
   },
   "vehicles": {
     "title": "My cars",
@@ -243,8 +249,8 @@
     },
     "attention": "Parts needing attention",
     "yourParts": "Your parts",
-    "emptyParts": "Add a record to see part schedules",
-    "emptyLog": "No records yet",
+    "emptyParts": "Tap \"Add a record\" below to see part schedules",
+    "emptyLog": "No records yet. Tap \"Add a record\" below.",
     "tireHistory": "Tire history",
     "allRecords": "Car log",
     "status": {
@@ -253,7 +259,9 @@
       "days": "{{d}} days left",
       "overdueKm": "Overdue by {{km}} {{u}}",
       "overdueDays": "Overdue by {{d}} days"
-    }
+    },
+    "addRecord": "Add a record",
+    "updateReading": "Update reading"
   },
   "pick": {
     "search": "Search",
@@ -262,20 +270,7 @@
     "type": "Not on our list yet. Type the name and tap it below."
   },
   "parts": {
-    "untilChange": "Until the next change",
-    "overdueLabel": "Overdue for change",
-    "leftBoth": "{{u}} left · or {{d}} days",
-    "left": "{{u}} left",
-    "daysLeft": "days left",
-    "overdue": "{{u}} past due",
-    "daysOverdue": "days past due",
-    "inUse": "Currently in use",
-    "brand": "Brand",
-    "installDate": "Install date",
-    "odoThen": "Odometer then",
-    "interval": "Change interval",
     "months": "{{m}} months",
-    "totalSpent": "Total spent",
     "viewHistory": "View change history",
     "history": {
       "title": "Every set has its journey",
@@ -288,7 +283,10 @@
       "reason": "Reason for replacement: {{reason}}.",
       "empty": "No records for this part",
       "log": "Log a part replacement"
-    }
+    },
+    "lastDone": "Last done",
+    "every": "Every",
+    "spent": "Spent"
   },
   "capture": {
     "newRecord": "New record",
@@ -414,7 +412,8 @@
       "service": "Service"
     },
     "odometerUpdated": "Odometer updated",
-    "liters": "{{n}} L"
+    "liters": "{{n}} L",
+    "clearFilter": "Clear the filter"
   },
   "log": {
     "header": "Record details",
@@ -471,7 +470,8 @@
     "next": "Next maintenance after",
     "notes": "Notes",
     "standard": "standard",
-    "edit": "Edit"
+    "edit": "Edit",
+    "fixReading": "Fix the reading"
   },
   "reminders": {
     "title": "Your next step is clear",
@@ -489,19 +489,10 @@
       "body": "Log a service and set its interval. We'll line up your next date.",
       "cta": "Log your first service"
     },
-    "lastService": "Last service",
-    "nextDue": "Next due",
-    "howTitle": "How is the date calculated?",
-    "standardSchedule": "the standard schedule",
-    "yourSchedule": "your schedule",
-    "how": {
-      "both": "Based on your latest reading of {{odo}} {{unit}} and {{schedule}} for this part: every {{km}} {{unit}} or {{m}} months, whichever comes first.",
-      "km": "Based on your latest reading of {{odo}} {{unit}} and the interval: every {{km}} {{unit}}.",
-      "months": "Based on the last service date and the interval: every {{m}} months."
-    },
-    "done": "I did the service",
     "snooze": "Snooze a week",
-    "snoozeFailed": "Couldn't snooze. Try again."
+    "snoozeFailed": "Couldn't snooze. Try again.",
+    "snoozed": "Snoozed for a week",
+    "onSchedule": "All on schedule"
   },
   "expenses": {
     "title": "Expenses",
@@ -803,5 +794,31 @@
     "manageTitle": "Saved recording",
     "retry": "Try again",
     "delete": "Delete recording"
+  },
+  "common": {
+    "done": "Done"
+  },
+  "reading": {
+    "prompt": {
+      "title": "Add the car's reading first, then you can add records",
+      "add": "Add reading",
+      "later": "Not now"
+    },
+    "card": {
+      "title": "Add your car's reading",
+      "body": "Needed before your first record.",
+      "cta": "Add reading"
+    }
+  },
+  "partStatus": {
+    "ok": "On time",
+    "soon": "Due soon",
+    "overdue": "Late",
+    "snoozed": "Snoozed",
+    "none": "Add the last time",
+    "left": "{{unit}} left",
+    "late": "{{unit}} late",
+    "days": "days",
+    "until": "until {{date}}"
   }
 }

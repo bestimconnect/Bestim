@@ -9,6 +9,7 @@ import { FuelCard } from '@/components/FuelCard';
 import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { Button, Header, Item, Text } from '@/components/ui';
+import { openCapture } from '@/lib/reading';
 import { useCurrentVehicle, useExpenses, useRecordCategories, useVehicles } from '@/lib/queries';
 import { removeRecord } from '@/lib/removeRecord';
 import { useColors } from '@/lib/theme';
@@ -49,7 +50,7 @@ export default function Expenses() {
     return { label: key.slice(5), sum, current: i === 5 };
   });
   const max = Math.max(...months.map((m) => m.sum), 1);
-  const add = () => router.push('/capture');
+  const add = () => openCapture();
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>

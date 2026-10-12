@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { VoiceQueueCard } from '@/components/VoiceQueueCard';
 import { Button, Choice, Header, Item, Text } from '@/components/ui';
+import { openCapture } from '@/lib/reading';
 import { carLog, scopeOf, type Kind } from '@/lib/carLog';
 import { consumption } from '@/lib/fuel';
 import { useCurrentVehicle, useExpenses, useFuelFills, useOdometerReadings, useRecordCategories, useServiceTypes, useVehicleLogs } from '@/lib/queries';
@@ -87,7 +88,7 @@ export default function HistoryScreen() {
     else groups.push({ month, items: [e] });
   }
   const empty = logs.isSuccess && !carLog(logs.data, costs, readings, 'all', null).length && !queued.length;
-  const add = () => router.push('/capture');
+  const add = () => openCapture();
 
   if (logs.isError && !logs.data) return <ErrorState onRetry={logs.refetch} retrying={logs.isRefetching} onShowSaved={onShowSaved} />;
   return (
@@ -146,7 +147,10 @@ export default function HistoryScreen() {
               </View>
             ))}
             {groups.length === 0 && !queued.length && logs.isSuccess ? (
-              <Text variant="body" className="mt-6 text-center text-muted">{t('history.emptyCategory')}</Text>
+              <View className="mt-6 gap-4">
+                <Text variant="body" className="text-center text-muted">{t('history.emptyCategory')}</Text>
+                <Button variant="secondary" title={t('history.clearFilter')} onPress={() => { setFilterId(null); setKind('all'); }} />
+              </View>
             ) : null}
             {groups.map((g) => (
               <View key={g.month} className="gap-3">

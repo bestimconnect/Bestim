@@ -651,7 +651,7 @@ export type Database = {
           model: string
           nickname: string | null
           odometer_unit: string
-          odometer_updated_at: string
+          odometer_updated_at: string | null
           photo_url: string | null
           plate_number: string | null
           removed_records: number
@@ -672,7 +672,7 @@ export type Database = {
           model: string
           nickname?: string | null
           odometer_unit?: string
-          odometer_updated_at?: string
+          odometer_updated_at?: string | null
           photo_url?: string | null
           plate_number?: string | null
           removed_records?: number
@@ -693,7 +693,7 @@ export type Database = {
           model?: string
           nickname?: string | null
           odometer_unit?: string
-          odometer_updated_at?: string
+          odometer_updated_at?: string | null
           photo_url?: string | null
           plate_number?: string | null
           removed_records?: number

@@ -68,9 +68,10 @@ export default function NotificationsScreen() {
         <Header title={t('notifPrefs.title')} />
         <Text variant="title" className="mb-1">{t('notifPrefs.heading')}</Text>
         {!allowed ? (
-          <Pressable accessibilityRole="button" onPress={enable}>
-            <Note tone="alert" text={`${t('notifPrefs.bannerOff')} ${t('notifPrefs.bannerAction')}`} />
-          </Pressable>
+          <>
+            <Note tone="alert" text={t('notifPrefs.bannerOff')} />
+            <Button title={t('notifPrefs.bannerAction')} onPress={enable} />
+          </>
         ) : null}
         {TOGGLES.map((k) => (
           <View key={k} className="min-h-[64px] flex-row items-center gap-3 rounded-item bg-white px-4 py-3" style={{ boxShadow: shadows.soft }}>
@@ -109,7 +110,7 @@ export default function NotificationsScreen() {
         </Pressable>
         <Text variant="caption" className="px-1 text-muted">{t('notifPrefs.footnote')}</Text>
         {saved ? <Note tone="success" text={t('notifPrefs.saved')} /> : null}
-        <Button title={t('notifPrefs.save')} onPress={save} loading={saving} />
+        <Button title={t('notifPrefs.save')} variant={allowed ? 'primary' : 'secondary'} onPress={save} loading={saving} />
       </ScrollView>
     </SafeAreaView>
   );

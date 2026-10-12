@@ -9,6 +9,7 @@ import { Item, PressableScale, Rise, Text } from '@/components/ui';
 import { needsAttention, useVehicleParts, useVehicles, vehicleName, type Vehicle } from '@/lib/queries';
 import { useVehiclePick } from '@/lib/sheet';
 import { useColors } from '@/lib/theme';
+import { hasReading } from '@/lib/reading';
 import { vehicleArt } from '@/lib/vehicleArt';
 
 function VehicleRow({ vehicle, current, onPress }: { vehicle: Vehicle; current: boolean; onPress: () => void }) {
@@ -16,7 +17,7 @@ function VehicleRow({ vehicle, current, onPress }: { vehicle: Vehicle; current: 
   const { parts } = useVehicleParts(vehicle);
   const overdue = needsAttention(parts).some((p) => p.status.state === 'overdue');
   const title = vehicleName(vehicle);
-  const subtitle = `${vehicle.year} · ${vehicle.current_odometer.toLocaleString('en-US')} ${t(`vehicles.unit.${vehicle.odometer_unit}`)}`;
+  const subtitle = hasReading(vehicle) ? `${vehicle.year} · ${vehicle.current_odometer.toLocaleString('en-US')} ${t(`vehicles.unit.${vehicle.odometer_unit}`)}` : String(vehicle.year);
   return (
     <Item
       image={vehicleArt(vehicle.vehicle_type)}

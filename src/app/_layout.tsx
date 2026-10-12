@@ -16,6 +16,7 @@ import { AppState, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 
+import { KeyboardDone } from '@/components/KeyboardDone';
 import { SplashOverlay } from '@/components/SplashOverlay';
 import { Toast } from '@/components/Toast';
 import { Button, Text } from '@/components/ui';
@@ -154,6 +155,7 @@ function App() {
         <Stack.Screen name="pick" options={{ presentation: 'modal' }} />
         <Stack.Screen name="notify-permission" options={{ presentation: 'modal' }} />
       </Stack>
+      <KeyboardDone />
       <Toast />
       {splashDone ? null : <SplashOverlay onDone={endSplash} />}
     </View>

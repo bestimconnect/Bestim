@@ -91,7 +91,7 @@ export default function AddVehicleInfoScreen() {
     });
 
   const save = useMutation({
-    mutationFn: async (km: number) => {
+    mutationFn: async (km: number | null) => {
       if (!created.current) {
         const d = useVehicleDraft.getState();
         const { data, error } = await supabase
@@ -101,7 +101,8 @@ export default function AddVehicleInfoScreen() {
             model: d.model,
             car_model_id: d.carModelId,
             year: d.year!,
-            current_odometer: km,
+            current_odometer: km ?? 0,
+            odometer_updated_at: km == null ? null : new Date().toISOString(), // null = no reading yet (Q105)
             odometer_unit: 'km',
             nickname: d.nickname || null,
             vehicle_type: d.vehicleType,
@@ -209,6 +210,7 @@ export default function AddVehicleInfoScreen() {
               // Arabic-Indic digits become Latin, everything else but digits is dropped (same as the record sheet).
               onChangeText={(v) => setOdometer(v.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660)).replace(/\D/g, ''))}
               keyboardType="number-pad"
+              returnKeyType="done"
             />
             <PressableScale
               accessibilityRole="button"
@@ -218,6 +220,7 @@ export default function AddVehicleInfoScreen() {
               <Camera size={22} color={c.teal} />
             </PressableScale>
           </View>
+          <Text variant="caption" className="-mt-1 text-muted">{t('onboarding.addVehicle.odometer.later')}</Text>
           <Field
             label={t('onboarding.addVehicle.info.nickname')}
             value={draft.nickname}
@@ -227,9 +230,9 @@ export default function AddVehicleInfoScreen() {
         {save.error ? <Note tone="warning" text={errorText(save.error)} /> : null}
         <Button
           title={t('onboarding.addVehicle.info.cta')}
-          disabled={!draft.make || !draft.model || !draft.year || !odometer}
+          disabled={!draft.make || !draft.model || !draft.year}
           loading={save.isPending}
-          onPress={() => !save.isPending && save.mutate(Number(odometer))}
+          onPress={() => !save.isPending && save.mutate(odometer ? Number(odometer) : null)}
         />
       </ScrollView>
       {scanning ? (

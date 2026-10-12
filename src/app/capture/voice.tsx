@@ -18,6 +18,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming, type SharedValu
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { KEYBOARD_DONE_ID } from '@/components/KeyboardDone';
 import { Button, Header, Text } from '@/components/ui';
 import { rise, SWAP } from '@/lib/motion';
 import { useServiceTypes, useVehicles } from '@/lib/queries';
@@ -270,6 +271,7 @@ export default function Voice() {
               value={transcript}
               onChangeText={say}
               multiline
+              inputAccessoryViewID={KEYBOARD_DONE_ID}
               placeholderTextColor={c.muted}
               className="min-h-[80px] rounded-field border border-line bg-white p-4 text-body text-ink"
               style={{ textAlign: 'auto' }}

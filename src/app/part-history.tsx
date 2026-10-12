@@ -1,5 +1,5 @@
 import { useRefresh } from '@/components/Refresh';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { ScrollView, View } from 'react-native';
@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Header, Text } from '@/components/ui';
+import { openCapture } from '@/lib/reading';
 import { useServiceTypes, useVehicle, useVehicleLogs } from '@/lib/queries';
 
 // Screen 12 — Part history, Figma ar-light 12/تاريخ القطع.
@@ -60,7 +61,7 @@ export default function PartHistory() {
         <Button
           title={t('parts.history.log')}
           onPress={() => {
-            router.push({ pathname: '/capture', params: { vehicleId, serviceTypeId } });
+            openCapture({ vehicleId, serviceTypeId });
           }}
         />
       </View>

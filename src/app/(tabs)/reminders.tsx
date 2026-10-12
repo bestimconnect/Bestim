@@ -6,6 +6,7 @@ import { Bell, CalendarCheck, ChevronDown, Gauge, type LucideIcon } from 'lucide
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
+import { openCapture } from '@/lib/reading';
 import { pickVehicle } from '@/lib/sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -56,7 +57,7 @@ function Empty() {
       </View>
       <Text variant="title">{t('reminders.empty.title')}</Text>
       <Text variant="body" className="text-muted">{t('reminders.empty.body')}</Text>
-      <Button title={t('reminders.empty.cta')} onPress={() => router.push('/capture')} />
+      <Button title={t('reminders.empty.cta')} onPress={() => openCapture()} />
     </View>
   );
 }
@@ -77,7 +78,7 @@ export default function RemindersScreen() {
   if (isError && !data) return <ErrorState onRetry={refetch} retrying={isRefetching} onShowSaved={onShowSaved} />;
   const unit = vehicle?.odometer_unit ?? 'km';
   const name = vehicle ? vehicleName(vehicle) : '';
-  const staleDays = vehicle ? differenceInCalendarDays(new Date(), parseISO(vehicle.odometer_updated_at)) : 0;
+  const staleDays = vehicle?.odometer_updated_at ? differenceInCalendarDays(new Date(), parseISO(vehicle.odometer_updated_at)) : 0;
   const stale = parts.length > 0 && staleDays >= STALE_ODOMETER_DAYS;
   const list =
     seg === 'attention'
@@ -129,11 +130,16 @@ export default function RemindersScreen() {
                 tone={tones[p.status.state]}
                 title={i18n.language === 'ar' ? p.serviceType.name_ar : p.serviceType.name_en}
                 subtitle={subtitle(t, i18n.language, p, unit)}
-                onPress={() => router.push({ pathname: '/reminder', params: { vehicleId: vehicle.id, serviceTypeId: p.serviceType.id } })}
+                onPress={() => router.push({ pathname: '/part', params: { vehicleId: vehicle.id, serviceTypeId: p.serviceType.id } })}
               />
               </Rise>
             ))}
-            {!list.length && !showStale ? <Text variant="body" className="text-muted">{t('reminders.calm')}</Text> : null}
+            {!list.length && !showStale ? (
+              <View className="gap-4">
+                <Text variant="body" className="text-muted">{t('reminders.onSchedule')}</Text>
+                <Button title={t('vehicles.addRecord')} onPress={() => openCapture({ vehicleId: vehicle.id })} />
+              </View>
+            ) : null}
           </>
         )}
       </View>

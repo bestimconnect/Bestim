@@ -9,6 +9,7 @@ import { Platform, Pressable, ScrollView, UIManager, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { KeyboardDone } from '@/components/KeyboardDone';
 import { toast } from '@/components/Toast';
 import { Button, Field, Item, Note, PressableScale, Text, Toggle } from '@/components/ui';
 import { errorText } from '@/lib/errors';
@@ -427,8 +428,8 @@ export default function CaptureSheet() {
         {chip ? (
           <>
             <View className="flex-row gap-4">
-              <Field className="flex-1" label={t('expenses.amount')} value={amount} onChangeText={(v) => setAmount(clean(v, true))} keyboardType="decimal-pad" placeholder="0" autoFocus />
-              {fuel ? <Field className="flex-1" label={t('expenses.liters')} value={liters} onChangeText={(v) => setLiters(clean(v, true))} keyboardType="decimal-pad" placeholder={t('expenses.optional')} /> : null}
+              <Field className="flex-1" label={t('expenses.amount')} value={amount} onChangeText={(v) => setAmount(clean(v, true))} keyboardType="decimal-pad" returnKeyType="done" placeholder="0" autoFocus />
+              {fuel ? <Field className="flex-1" label={t('expenses.liters')} value={liters} onChangeText={(v) => setLiters(clean(v, true))} keyboardType="decimal-pad" returnKeyType="done" placeholder={t('expenses.optional')} /> : null}
             </View>
             {fuel ? (
               <>
@@ -439,7 +440,7 @@ export default function CaptureSheet() {
                   </View>
                   <Toggle value={fullTank} onChange={setFullTank} label={t('expenses.fullTank')} />
                 </View>
-                <Field label={t('expenses.reading')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" placeholder={t('expenses.optional')} error={tooLow ? t('errors.lowerReading') : undefined} />
+                <Field label={t('expenses.reading')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" returnKeyType="done" placeholder={t('expenses.optional')} error={tooLow ? t('errors.lowerReading') : undefined} />
               </>
             ) : null}
             <View className="gap-2">
@@ -467,7 +468,7 @@ export default function CaptureSheet() {
             {more ? (
               <View className="gap-4">
                 {fuel ? null : service ? (
-                  <Field label={t('capture.manual.odometer')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" placeholder={t('capture.manual.optional')} error={tooLow ? t('errors.lowerReading') : undefined} />
+                  <Field label={t('capture.manual.odometer')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" returnKeyType="done" placeholder={t('capture.manual.optional')} error={tooLow ? t('errors.lowerReading') : undefined} />
                 ) : null}
                 <Field
                   label={t(service ? 'capture.manual.workshop' : 'expenses.place')}
@@ -490,7 +491,7 @@ export default function CaptureSheet() {
                     label={t('capture.manual.interval')}
                     value={every}
                     onChangeText={(v) => setEvery(clean(v))}
-                    keyboardType="number-pad"
+                    keyboardType="number-pad" returnKeyType="done"
                     placeholder={service.default_interval_km != null ? service.default_interval_km.toLocaleString('en-US') : t('capture.manual.optional')}
                   />
                 ) : null}
@@ -523,6 +524,7 @@ export default function CaptureSheet() {
             <Text variant="label" className="text-danger">{t('capture.quick.delete')}</Text>
           </Pressable>
         ) : null}
+        <KeyboardDone />
     </ScrollView>
   );
 }

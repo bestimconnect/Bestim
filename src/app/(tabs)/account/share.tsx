@@ -9,6 +9,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { openCapture } from '@/lib/reading';
 import { Button, Choice, Field, Header, Item, Note, Text } from '@/components/ui';
 import { SITE } from '@/lib/links';
 import { useCurrentVehicle, useVehicleLogs, useVehicleParts, useVehicles, vehicleName } from '@/lib/queries';
@@ -92,7 +93,11 @@ export default function ShareScreen() {
         {vehicle?.removed_records ? <Text variant="caption" className="text-muted">{t('share.removed', { n: vehicle.removed_records })}</Text> : null}
         {empty ? <Text variant="caption" className="text-muted">{t('share.empty')}</Text> : null}
         {error ? <Note tone="warning" text={t('share.error')} /> : null}
-        <Button title={link ? t('share.send') : t('share.prepare')} loading={busy} disabled={!vehicle || !logs.isSuccess || empty} onPress={link ? send : prepare} />
+        {empty ? (
+          <Button title={t('history.emptyCta')} onPress={() => openCapture({ vehicleId: vehicle?.id })} />
+        ) : (
+          <Button title={link ? t('share.send') : t('share.prepare')} loading={busy} disabled={!vehicle || !logs.isSuccess} onPress={link ? send : prepare} />
+        )}
         <View className="gap-3 pt-4">
           <Text variant="label">{t('share.received')}</Text>
           <Field label={t('share.paste')} value={pasted} onChangeText={setPasted} autoCapitalize="none" autoCorrect={false} style={{ textAlign: I18nManager.isRTL ? 'right' : 'left' }} />

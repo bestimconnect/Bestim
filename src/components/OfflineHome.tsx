@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Item, Text } from '@/components/ui';
+import { hasReading, openCapture } from '@/lib/reading';
 import { vehicleName, type Vehicle } from '@/lib/queries';
 import { shadows } from '@/lib/theme';
 
@@ -13,7 +14,7 @@ export function OfflineHome({ vehicle }: { vehicle: Vehicle }) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const write = () => {
-    router.push({ pathname: '/capture', params: { vehicleId: vehicle.id } });
+    openCapture({ vehicleId: vehicle.id });
   };
   return (
     <ScrollView className="flex-1 bg-paper" contentContainerClassName="gap-4 px-6" contentContainerStyle={{ paddingTop: insets.top + 16, paddingBottom: 120 }}>
@@ -30,7 +31,7 @@ export function OfflineHome({ vehicle }: { vehicle: Vehicle }) {
       />
       <View className="gap-1 rounded-metric bg-panel p-5" style={{ boxShadow: shadows.soft }}>
         <Text variant="caption" className="text-onpanel">{t('feedback.offline.cardLabel')}</Text>
-        <Text variant="number" className="text-onpanel" numberOfLines={1}>{vehicle.current_odometer.toLocaleString('en-US')}</Text>
+        <Text variant="number" className="text-onpanel" numberOfLines={1}>{hasReading(vehicle) ? vehicle.current_odometer.toLocaleString('en-US') : '—'}</Text>
         <Text variant="caption" className="text-onpanel">
           {t('feedback.offline.cardNote', { unit: t(`home.${vehicle.odometer_unit}`) })}
         </Text>

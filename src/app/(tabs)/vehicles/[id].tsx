@@ -10,9 +10,10 @@ import { useTranslation } from 'react-i18next';
 import { FuelCard } from '@/components/FuelCard';
 import { useRefresh } from '@/components/Refresh';
 import { useLightStatusBar } from '@/components/Hero';
-import { Choice, Item, Metric, PressableScale, Rise, Text } from '@/components/ui';
+import { Button, Choice, Item, Metric, PressableScale, Rise, Text } from '@/components/ui';
 import { ErrorState } from '@/components/ErrorState';
 import { needsAttention, useExpenses, useRecordCategories, useVehicle, useVehicleParts, vehicleName, type Part } from '@/lib/queries';
+import { hasReading, openCapture } from '@/lib/reading';
 import { useColors } from '@/lib/theme';
 import { vehicleArt } from '@/lib/vehicleArt';
 
@@ -40,6 +41,8 @@ export default function VehicleDetail() {
   const currency = t('vehicles.currency');
   const year = new Date().getFullYear().toString();
   const spent = expenses.filter((e) => e.vehicle_id === vehicle.id && e.expense_date.startsWith(year)).reduce((s, e) => s + e.amount, 0);
+  const tabTop = Math.max(insets.bottom, 16) + 68; // the floating tab bar's top edge
+  const barBottom = tabTop + 36; // clears the lifted + button
   const Back = I18nManager.isRTL ? ChevronRight : ChevronLeft;
 
   const partItem = (p: Part) => {
@@ -62,7 +65,8 @@ export default function VehicleDetail() {
   const empty = <Text variant="body" className="text-muted">{t('vehicles.emptyParts')}</Text>;
 
   return (
-    <ScrollView refreshControl={refresh} className="flex-1 bg-paper" contentContainerClassName="pb-[120px]">
+    <View className="flex-1 bg-paper">
+    <ScrollView refreshControl={refresh} className="flex-1" contentContainerStyle={{ paddingBottom: barBottom + 52 + 24 }}>
       <View className="gap-4 rounded-b-[28px] bg-panel px-6 pb-6" style={{ paddingTop: insets.top + 8 }}>
         <PressableScale
           accessibilityRole="button"
@@ -86,7 +90,7 @@ export default function VehicleDetail() {
             size="small"
             tone="glass"
             label={t('vehicles.odometer', { unit })}
-            value={n(vehicle.current_odometer)}
+            value={hasReading(vehicle) ? n(vehicle.current_odometer) : '—'}
           />
           <PressableScale accessibilityRole="button" onPress={() => router.push('/account/expenses')} className="flex-1">
             <Metric size="small" label={t('vehicles.yearExpenses')} value={n(spent)} caption={currency} />
@@ -139,5 +143,10 @@ export default function VehicleDetail() {
         </View>
       </View>
     </ScrollView>
+    <View className="absolute inset-x-6 flex-row gap-3" style={{ bottom: barBottom }}>
+      <Button className="flex-1 px-3" title={t('vehicles.addRecord')} onPress={() => openCapture({ vehicleId: vehicle.id })} />
+      <Button className="flex-1 px-3" variant="secondary" title={t('vehicles.updateReading')} onPress={() => router.push({ pathname: '/update-odometer', params: { vehicleId: vehicle.id } })} />
+    </View>
+    </View>
   );
 }

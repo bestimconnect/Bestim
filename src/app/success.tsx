@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Item, Rise, Text } from '@/components/ui';
+import { openCapture } from '@/lib/reading';
 import { POP } from '@/lib/motion';
 import { useVehicle, useProfile } from '@/lib/queries';
 import { useColors } from '@/lib/theme';
@@ -72,9 +73,7 @@ export default function Success() {
         ? t('feedback.success.reviewBody')
         : t(next ? 'feedback.success.logBody' : 'feedback.success.logBodyPlain');
 
-  const another = () => {
-    router.replace({ pathname: '/capture', params: { vehicleId: p.vehicleId } });
-  };
+  const another = () => openCapture({ vehicleId: p.vehicleId });
 
   return (
     <SafeAreaView className="flex-1 bg-paper px-6" edges={['top', 'bottom']}>
@@ -95,14 +94,14 @@ export default function Success() {
             icon={CalendarCheck}
             title={t('feedback.success.nextTitle')}
             subtitle={next}
-            onPress={() => p.vehicleId && p.serviceTypeId && router.push({ pathname: '/reminder', params: { vehicleId: p.vehicleId, serviceTypeId: p.serviceTypeId } })}
+            onPress={() => p.vehicleId && p.serviceTypeId && router.push({ pathname: '/part', params: { vehicleId: p.vehicleId, serviceTypeId: p.serviceTypeId } })}
           />
           </Rise>
         ) : null}
       </View>
       <View className="gap-2 pb-4">
-        <Button title={t('feedback.success.home')} onPress={home} />
-        <Button title={t('feedback.success.another')} variant="secondary" onPress={another} />
+        <Button title={t('feedback.success.another')} onPress={another} />
+        <Button title={t('feedback.success.home')} variant="secondary" onPress={home} />
       </View>
     </SafeAreaView>
   );

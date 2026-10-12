@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import * as Icons from 'lucide-react-native';
-import { Bell, Car, Check, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Fuel, Plus, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
+import { Bell, Car, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Fuel, Plus, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
 import { FlatList, I18nManager, Pressable, ScrollView, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -18,6 +18,7 @@ import { useLightStatusBar } from '@/components/Hero';
 import { OfflineHome } from '@/components/OfflineHome';
 import { VoiceQueueCard } from '@/components/VoiceQueueCard';
 import { Button, PressableScale, Rise, Text } from '@/components/ui';
+import { hasReading, openCapture } from '@/lib/reading';
 import { needsAttention, useCurrentVehicle, useExpenses, useFuelFills, useVehicleParts, useVehicles, vehicleName, type Part, type Vehicle, useProfile } from '@/lib/queries';
 import { consumption } from '@/lib/fuel';
 import { EASE_OUT, POP, SWAP } from '@/lib/motion';
@@ -84,7 +85,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
   const setCurrent = useSettings((s) => s.setCurrentVehicle);
   const { parts, isPending: partsLoading } = useVehicleParts(vehicle);
   const expenses = (useExpenses().data ?? []).filter((e) => e.vehicle_id === vehicle.id);
-  const days = differenceInCalendarDays(new Date(), parseISO(vehicle.odometer_updated_at));
+  const days = vehicle.odometer_updated_at ? differenceInCalendarDays(new Date(), parseISO(vehicle.odometer_updated_at)) : 0;
   const urgent = needsAttention(parts).slice(0, 3);
 
   // Q14/Q32: last 6 calendar months of this vehicle's expenses (a log's cost is an expense too), oldest to newest.
@@ -129,7 +130,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
     // with the spinner on it (a dark filler view on top of the content would cover the spinner).
     <ScrollView refreshControl={refresh} className="flex-1 bg-panel" contentContainerClassName="grow bg-paper" contentContainerStyle={{ paddingBottom: 120 }}>
       <LightBar />
-      {/* Q95: one column, top to bottom: who → the car → which car (name + dots) → its odometer. */}
+      {/* One column, top to bottom: who → which car (name) → the car → dots → its odometer. */}
       <View className="gap-3 rounded-b-[28px] bg-panel px-6 pb-4" style={{ paddingTop: insets.top + 12 }}>
         <View className="flex-row items-center gap-3">
           <View className="flex-1 gap-0.5">
@@ -139,6 +140,19 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
             <Text variant="heading" className="text-onpanel">{t('home.title')}</Text>
           </View>
           <Bell_ />
+        </View>
+        <View className="items-center">
+          <Pressable
+            onPress={pick}
+            disabled={vehicles.length < 2}
+            accessibilityRole={vehicles.length > 1 ? 'button' : undefined}
+            accessibilityLabel={vehicles.length > 1 ? t('home.switchVehicle') : undefined}
+            className="h-8 flex-row items-center gap-1.5 rounded-full bg-[#FFFFFF1F] px-3.5">
+            <Text variant="caption" className="text-onpanel" style={{ fontFamily: i18n.language === 'ar' ? 'Tajawal_700Bold' : 'Poppins_700Bold' }}>
+              {`${vehicleName(vehicle)} · ${vehicle.year}`}
+            </Text>
+            {vehicles.length > 1 ? <ChevronDown size={16} color={c.lime} /> : null}
+          </Pressable>
         </View>
         <FlatList
           ref={pager}
@@ -164,17 +178,6 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
           )}
         />
         <View className="items-center gap-2">
-          <Pressable
-            onPress={pick}
-            disabled={vehicles.length < 2}
-            accessibilityRole={vehicles.length > 1 ? 'button' : undefined}
-            accessibilityLabel={vehicles.length > 1 ? t('home.switchVehicle') : undefined}
-            className="h-8 flex-row items-center gap-1.5 rounded-full bg-[#FFFFFF1F] px-3.5">
-            <Text variant="caption" className="text-onpanel" style={{ fontFamily: i18n.language === 'ar' ? 'Tajawal_700Bold' : 'Poppins_700Bold' }}>
-              {`${vehicleName(vehicle)} · ${vehicle.year}`}
-            </Text>
-            {vehicles.length > 1 ? <ChevronDown size={16} color={c.lime} /> : null}
-          </Pressable>
           {vehicles.length > 1 ? (
             <View className="flex-row justify-center gap-1.5">
               {vehicles.map((v) => (
@@ -189,6 +192,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
         </View>
         {/* Keyed by vehicle: the odometer fades in fresh when the vehicle changes instead of popping. */}
         <Animated.View key={vehicle.id} entering={SWAP} className="flex-row items-center gap-3 rounded-metric bg-[#FFFFFF1A] px-4 py-3">
+          {hasReading(vehicle) ? (
           <View className="flex-1 gap-0.5">
             <Text variant="caption" className="text-onpanel" style={{ opacity: 0.75 }}>
               {days > 0 ? t('home.lastReading', { count: days }) : t('home.lastReadingToday')}
@@ -198,12 +202,20 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
               <Text variant="caption" className="text-onpanel" style={{ opacity: 0.75 }}>{unit}</Text>
             </View>
           </View>
+          ) : (
+            // Q105: no first reading yet; records wait for it.
+            <View className="flex-1 gap-0.5">
+              <Text variant="label" className="text-onpanel">{t('reading.card.title')}</Text>
+              <Text variant="caption" className="text-onpanel" style={{ opacity: 0.75 }}>{t('reading.card.body')}</Text>
+            </View>
+          )}
           <PressableScale
             accessibilityRole="button"
-            accessibilityLabel={t('home.updateOdometer')}
-            onPress={() => router.push('/update-odometer')}
-            className="h-11 w-11 items-center justify-center rounded-full bg-lime">
-            <RefreshCw size={20} color="#222E29" />
+            accessibilityLabel={t(hasReading(vehicle) ? 'home.updateOdometer' : 'reading.card.cta')}
+            onPress={() => router.push({ pathname: '/update-odometer', params: { vehicleId: vehicle.id } })}
+            className="h-11 shrink-0 flex-row items-center gap-1.5 rounded-full bg-lime px-4">
+            {hasReading(vehicle) ? <RefreshCw size={18} color="#222E29" /> : <Plus size={18} color="#222E29" />}
+            <Text variant="label" className="text-[#222E29]">{t(hasReading(vehicle) ? 'home.update' : 'reading.card.cta')}</Text>
           </PressableScale>
         </Animated.View>
       </View>
@@ -246,14 +258,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
                       <Text variant="label">{t(overdue ? 'home.overdueTitle' : 'home.soonTitle', { part: partName(i18n.language, p) })}</Text>
                       <Text variant="caption" className={overdue ? 'text-danger' : 'text-muted'}>{subtitle(t, i18n.language, p, vehicle.odometer_unit)}</Text>
                     </View>
-                    <PressableScale
-                      accessibilityRole="button"
-                      accessibilityLabel={t('reminders.done')}
-                      hitSlop={6}
-                      onPress={() => router.push({ pathname: '/capture', params: { vehicleId: vehicle.id, serviceTypeId: p.serviceType.id } })}
-                      className="h-9 w-9 items-center justify-center rounded-full bg-mint">
-                      <Check size={18} color={c.teal} />
-                    </PressableScale>
+                    <Chevron size={18} color={c.muted} />
                   </PressableScale>
                 );
               })
@@ -261,7 +266,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
               <PressableScale
                 accessibilityRole="button"
                 scale={0.98}
-                onPress={() => (parts.length ? router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id, tab: 'reminders' } }) : router.push('/capture'))}
+                onPress={() => (parts.length ? router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id, tab: 'reminders' } }) : openCapture())}
                 className="min-h-[56px] flex-row items-center gap-3 py-2">
                 <View className={`h-9 w-9 items-center justify-center rounded-full ${parts.length ? 'bg-mint' : 'bg-sky'}`}>
                   {parts.length ? <CircleCheck size={18} color={c.teal} /> : <Plus size={18} color={c.teal} />}

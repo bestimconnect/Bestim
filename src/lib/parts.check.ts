@@ -1,7 +1,7 @@
 // Run: node --experimental-strip-types src/lib/parts.check.ts
 import assert from 'node:assert/strict';
 
-import { latestPerType, partStatus } from './parts.ts';
+import { latestPerType, lifeFraction, partStatus } from './parts.ts';
 
 const today = new Date('2026-09-29');
 const base = { odometer: 134550, unit: 'km' as const, lastDate: '2026-06-07', today };
@@ -29,6 +29,11 @@ assert.equal(partStatus({ ...base, unit: 'h', odometer: 1240, lastReading: 1200,
 assert.equal(partStatus({ ...base, lastReading: 1, intervalKm: null, intervalMonths: null }), null);
 // Overdue sorts before soon.
 assert.ok(late.urgency < soon.urgency);
+
+// Life bar: 450 of 10000 km left = 95.5% used; overdue is full + over; time-only is tracked by days.
+assert.deepEqual(lifeFraction(soon, 10000), { used: 0.955, over: false, by: 'km' });
+assert.deepEqual(lifeFraction(late, 40000), { used: 1, over: true, by: 'km' });
+assert.equal(lifeFraction(partStatus({ ...base, lastDate: '2026-04-20', lastReading: null, intervalKm: null, intervalMonths: 6 })!, null).by, 'days');
 
 assert.deepEqual(
   latestPerType([

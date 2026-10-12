@@ -94,7 +94,7 @@ export async function syncNotifications() {
         });
       }
       // Q23: only nudge for the odometer when the vehicle has parts that depend on it.
-      if (parts.some((p) => p.vehicleId === v.id)) planVehicles.push({ id: v.id, name: vehicleName(v), odometerUpdatedAt: v.odometer_updated_at });
+      if (v.odometer_updated_at && parts.some((p) => p.vehicleId === v.id)) planVehicles.push({ id: v.id, name: vehicleName(v), odometerUpdatedAt: v.odometer_updated_at });
     }
 
     const sent = JSON.parse((await AsyncStorage.getItem(SENT_KEY)) ?? '{}');
@@ -129,7 +129,7 @@ export async function syncNotifications() {
         {
           title: t(p.kind === 'overdue' ? 'notify.overdueTitle' : 'notify.soonTitle', { part: name }),
           body,
-          data: { url: `/reminder?vehicleId=${vehicleId}&serviceTypeId=${serviceTypeId}` },
+          data: { url: `/part?vehicleId=${vehicleId}&serviceTypeId=${serviceTypeId}` },
         },
         trigger,
       );

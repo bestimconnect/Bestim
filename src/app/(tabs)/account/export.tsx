@@ -9,6 +9,7 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { openCapture } from '@/lib/reading';
 import { Button, Choice, Header, Note, Text, Toggle } from '@/components/ui';
 import { toCsv, toHtml, toJson, type ExportLabels, type ExportLog, type ExportOptions } from '@/lib/export';
 import { useCurrentVehicle, useVehicleLogs, useVehicles, vehicleName } from '@/lib/queries';
@@ -91,7 +92,11 @@ export default function ExportScreen() {
         <Text variant="caption" className="text-muted">{t('export.footnote')}</Text>
         {empty ? <Text variant="caption" className="text-muted">{t('export.empty')}</Text> : null}
         {error ? <Note tone="warning" text={t('export.error')} /> : null}
-        <Button title={t('export.prepare')} loading={busy} disabled={!vehicle || !logs.isSuccess || empty} onPress={prepare} className="mt-4" />
+        {empty ? (
+          <Button title={t('history.emptyCta')} onPress={() => openCapture()} className="mt-4" />
+        ) : (
+          <Button title={t('export.prepare')} loading={busy} disabled={!vehicle || !logs.isSuccess} onPress={prepare} className="mt-4" />
+        )}
       </ScrollView>
     </SafeAreaView>
   );

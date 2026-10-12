@@ -7,6 +7,7 @@ import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { Button, Header, Item, Rise, Text } from '@/components/ui';
 import { useVehicles, vehicleName } from '@/lib/queries';
+import { hasReading } from '@/lib/reading';
 import { vehicleArt } from '@/lib/vehicleArt';
 
 // Screen 08 — My vehicles, Figma ar-light 08/سياراتي ومعداتي.
@@ -28,7 +29,7 @@ export default function VehiclesScreen() {
             image={vehicleArt(v.vehicle_type)}
             tone={v.is_primary ? 'mint' : 'paper'}
             title={vehicleName(v)}
-            subtitle={`${v.make} ${v.year} · ${v.current_odometer.toLocaleString('en-US')} ${t(`vehicles.unit.${v.odometer_unit}`)}`}
+            subtitle={hasReading(v) ? `${v.make} ${v.year} · ${v.current_odometer.toLocaleString('en-US')} ${t(`vehicles.unit.${v.odometer_unit}`)}` : `${v.make} ${v.year}`}
             onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: v.id } })}
           />
           </Rise>

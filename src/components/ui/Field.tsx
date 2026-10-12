@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 import { TextInput, View, type TextInputProps } from 'react-native';
 
+import { KEYBOARD_DONE_ID } from '../KeyboardDone';
 import { shadows, useColors } from '@/lib/theme';
 import { Text } from './Text';
 
@@ -15,7 +16,7 @@ export const Field = forwardRef<TextInput, Props>(function Field({ label, error,
         className={`rounded-field border bg-white px-4 pb-3 pt-2.5 ${error ? 'border-danger' : 'border-line'}`}
         style={{ boxShadow: shadows.field }}>
         <Text variant="caption" className="text-muted">{label}</Text>
-        <TextInput ref={ref} placeholderTextColor={c.muted} className="p-0 text-body text-ink" style={{ textAlign: 'auto' }} {...rest} />
+        <TextInput ref={ref} inputAccessoryViewID={KEYBOARD_DONE_ID} returnKeyType={rest.multiline ? undefined : 'done'} placeholderTextColor={c.muted} className="p-0 text-body text-ink" style={{ textAlign: 'auto' }} {...rest} />
       </View>
       {error ? <Text variant="caption" className="text-danger">{error}</Text> : null}
     </View>

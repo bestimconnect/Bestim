@@ -40,7 +40,7 @@ export default function ReviewReadingScreen() {
   // Previous = latest other log with a reading on or before this one, else the vehicle's odometer.
   const prevLog = logs?.find((l) => l.id !== log.id && l.odometer_reading != null && l.service_date <= log.service_date);
   const previous = prevLog?.odometer_reading ?? vehicle.current_odometer;
-  const prevDate = prevLog?.service_date ?? vehicle.odometer_updated_at;
+  const prevDate = prevLog?.service_date ?? vehicle.odometer_updated_at ?? log.service_date;
   const days = Math.max(differenceInCalendarDays(parseISO(log.service_date), parseISO(prevDate)), 1);
   const km = (n: number) => t('log.review.km', { n: n.toLocaleString('en-US') });
 
