@@ -49,7 +49,7 @@
         "expo-speech-recognition",
         {
           "microphonePermission": "Bestim uses the microphone so you can log maintenance by voice.",
-          "speechRecognitionPermission": "Bestim turns what you say into a maintenance record.",
+          "speechRecognitionPermission": "Bestim turns what you say into a record, using Google AI.",
           "androidSpeechServicePackages": [
             "com.google.android.googlequicksearchbox"
           ]
@@ -58,7 +58,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Bestim attaches receipt photos to your maintenance records.",
+          "photosPermission": "Bestim attaches receipt photos to your records.",
           "cameraPermission": "Bestim uses the camera to read your odometer."
         }
       ],

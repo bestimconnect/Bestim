@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Camera, ChevronDown, Mic, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Platform, Pressable, ScrollView, UIManager, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -24,6 +24,11 @@ import { useColors } from '@/lib/theme';
 import { useLogDraft } from '@/stores/logDraft';
 import { useVoiceBatch } from '@/stores/voiceBatch';
 import type { ExpenseCategory } from '@/lib/voiceRecords';
+
+function IosDatePicker({ date, onChange, locale }: { date: string; onChange: (d: Date) => void; locale: string }) {
+  const Picker = require('@react-native-community/datetimepicker').default;
+  return <Picker value={new Date(`${date}T00:00:00`)} mode="date" display="inline" maximumDate={new Date()} locale={locale} onChange={(_: unknown, d?: Date) => d && onChange(d)} />;
+}
 
 // The + button: one sheet that saves a maintenance record or a running cost in one step (docs/ux-mockup, states #sheet and #fuel).
 // Opened with ?serviceTypeId (+ ?vehicleId) to start on one service, e.g. from a reminder.
@@ -72,6 +77,7 @@ export default function CaptureSheet() {
   const [chip, setChip] = useState<string | null>(serviceTypeId ?? null);
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(daysAgo(0));
+  const [showPicker, setShowPicker] = useState(false);
   const [liters, setLiters] = useState('');
   const [fullTank, setFullTank] = useState(true); // consumption is measured between full tanks (Q91)
   const [more, setMore] = useState(false);
@@ -175,8 +181,20 @@ export default function CaptureSheet() {
       onPick: ({ id }) => choose(id!),
     });
 
-  // ponytail: the "Other" day is a list of the last 30 days; a native date picker later (expo-ui DateTimePicker).
-  const otherDay = () =>
+  // The phone's own date picker. A build without the native module (older dev build) falls back to the last-30-days list.
+  // ponytail: the 30-day list stays only as that fallback; drop it once every build has the picker.
+  const otherDay = () => {
+    let picker: typeof import('@react-native-community/datetimepicker') | null = null;
+    try {
+      if (UIManager.hasViewManagerConfig?.('RNDateTimePicker') || Platform.OS === 'android') picker = require('@react-native-community/datetimepicker');
+    } catch {}
+    if (picker) {
+      const value = new Date(`${date}T00:00:00`);
+      const onChange = (_: unknown, d?: Date) => d && setDate(d.toLocaleDateString('en-CA'));
+      if (Platform.OS === 'android') picker.DateTimePickerAndroid.open({ value, maximumDate: new Date(), onChange });
+      else setShowPicker(!showPicker);
+      return;
+    }
     pickOption({
       title: t('expenses.date'),
       allowCustom: false,
@@ -186,6 +204,7 @@ export default function CaptureSheet() {
       }),
       onPick: ({ id }) => setDate(id!),
     });
+  };
 
   const attach = async () => {
     const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
@@ -439,6 +458,7 @@ export default function CaptureSheet() {
                   </Pressable>
                 ))}
               </View>
+              {showPicker && Platform.OS === 'ios' ? <IosDatePicker date={date} onChange={(d) => setDate(d.toLocaleDateString('en-CA'))} locale={ar ? 'ar' : 'en'} /> : null}
             </View>
             <Pressable accessibilityRole="button" onPress={() => setMore(!more)} className="h-11 flex-row items-center justify-between">
               <Text variant="label">{t('capture.quick.moreDetails')}</Text>

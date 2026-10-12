@@ -158,7 +158,6 @@
     "expenses": "This month's expenses",
     "currency": "EGP",
     "km": "km",
-    "h": "h",
     "mi": "mi",
     "soonTitle": "{{part}} is coming up",
     "overdueTitle": "{{part}} needs attention",
@@ -190,11 +189,6 @@
   "odometer": {
     "header": "Update odometer",
     "label": "New reading",
-    "unit": {
-      "km": "Kilometers",
-      "mi": "Miles",
-      "h": "Hours"
-    },
     "last": "Last reading: {{value}} {{unit}} · {{count}} days ago",
     "lastToday": "Last reading: {{value}} {{unit}} · today",
     "cta": "Save reading",
@@ -237,8 +231,7 @@
     },
     "unit": {
       "km": "km",
-      "mi": "mi",
-      "h": "h"
+      "mi": "mi"
     },
     "odometer": "Odometer · {{unit}}",
     "yearExpenses": "Year expenses",
@@ -264,7 +257,7 @@
   },
   "pick": {
     "search": "Search",
-    "custom": "My car isn't here: use “{{text}}”",
+    "custom": "Not listed: use “{{text}}”",
     "empty": "No matches",
     "type": "Not on our list yet. Type the name and tap it below."
   },
@@ -274,7 +267,6 @@
     "leftBoth": "{{u}} left · or {{d}} days",
     "left": "{{u}} left",
     "daysLeft": "days left",
-    "overdueBoth": "{{u}} past due · or {{d}} days",
     "overdue": "{{u}} past due",
     "daysOverdue": "days past due",
     "inUse": "Currently in use",
@@ -300,16 +292,6 @@
   },
   "capture": {
     "newRecord": "New record",
-    "index": {
-      "title": "What did you do?",
-      "subtitle": "Choose whichever suits you best.",
-      "voice": "By voice",
-      "voiceSub": "Quick and easy",
-      "manual": "Myself",
-      "manualSub": "Available offline",
-      "noteTitle": "You're in charge",
-      "noteBody": "You'll review the details before any record is saved."
-    },
     "voice": {
       "header": "Log by voice",
       "listening": "Listening...",
@@ -404,11 +386,10 @@
   "history": {
     "header": "Car log",
     "title": "Every step, saved",
-    "saved": "Record saved",
     "emptyCategory": "Nothing here for this choice",
     "add": "Add a record",
     "needsReview": "Needs review",
-    "corrected": "Corrected",
+    "corrected": "Edited",
     "receipt": "Receipt attached",
     "manual": "Logged by you",
     "voice": "Logged by voice",
@@ -416,7 +397,7 @@
     "rowNoCost": "{{reading}} km",
     "emptyTitle": "Your car's history starts here",
     "emptyBody": "Every oil change, inspection or new part deserves to stay saved.",
-    "emptyCta": "Log your first step",
+    "emptyCta": "Add your first record",
     "cardTitle": "Saved record",
     "cardBody": "Every step has a history",
     "kind": {
@@ -442,25 +423,25 @@
     "parts": "Parts",
     "workshop": "Workshop",
     "receipt": "Receipt",
-    "viewCorrections": "View corrections ({{count}})",
+    "viewCorrections": "View edits ({{count}})",
     "manualTitle": "Logged by you",
     "manualBody": "You added this record manually.",
     "voiceTitle": "Logged by voice",
     "voiceBody": "Created from what you said, reviewed by you.",
-    "correctedTitle": "This record was corrected",
-    "correctedBody": "Corrections appear next to the original.",
+    "correctedTitle": "This record was edited",
+    "correctedBody": "Edits appear next to the original.",
     "reviewTitle": "Reading needs review",
     "reviewBody": "Tap to review the reading.",
     "originalTitle": "The original stays saved",
-    "originalBody": "You can add a correction with a reason. The correction appears next to the original record.",
+    "originalBody": "You can edit this record. After 24 hours, add a reason. The original stays visible.",
     "egp": "{{cost}} EGP",
     "corrections": {
-      "header": "Corrections",
+      "header": "Edits",
       "title": "Details improve.\nThe original stays.",
       "original": "Original · {{date}}",
-      "correction": "Correction · {{date}}",
+      "correction": "Edit · {{date}}",
       "reason": "Reason: {{reason}}",
-      "footnote": "The number of corrections shows when sharing car history, for transparency.",
+      "footnote": "The number of edits shows when sharing car history, for transparency.",
       "back": "Back to record",
       "fields": {
         "title": "Title",
@@ -482,7 +463,7 @@
       "km": "{{n}} km",
       "noteTitle": "The note stays visible",
       "noteBody": "Confirming doesn't remove the note from the record.",
-      "correct": "Correct the reading",
+      "correct": "Edit the reading",
       "ok": "The reading is correct",
       "bodyLower": "This reading is {{diff}} km lower than the previous one. We saved the record with a note for you to review."
     },
@@ -725,7 +706,7 @@
       "cardLabel": "Last saved reading",
       "cardNote": "{{unit}} · check your connection to update schedules",
       "write": "Write a new record",
-      "voice": "Voice recording needs a connection."
+      "voice": "Voice recordings are saved on your phone and written up when you're back online."
     },
     "pending": "Waiting to sync",
     "success": {
