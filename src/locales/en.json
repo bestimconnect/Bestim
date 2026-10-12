@@ -8,13 +8,8 @@
     "account": "Account"
   },
   "language": {
-    "title": "Let's start with your language",
     "ar": "العربية",
-    "en": "English",
-    "body": "Your journey is easier when details are clear.",
-    "arRegion": "مصر والخليج",
-    "enRegion": "English",
-    "cta": "Let's start"
+    "en": "English"
   },
   "splash": {
     "tagline": "Take care of your car. And go."
@@ -30,7 +25,6 @@
       "noAccount": "Don't have an account?",
       "createAccount": "Create one",
       "heading": "Welcome back",
-      "continueAsGuest": "Continue as guest",
       "passwordUpdated": "Password updated. You can sign in now.",
       "linkExpired": "This link doesn't work. Open it on the same phone you asked from, or request a new one."
     },
@@ -66,9 +60,11 @@
       "title": "Check your email",
       "subtitle": "We sent a link to your email. Open it on this phone.",
       "subtitleWithEmail": "We sent a link to\n{{email}}\nOpen it on this phone.",
-      "backToLogin": "Go to sign in",
       "resendTitle": "Didn't receive the email?",
-      "resendBody": "Check your spam folder, or try again in a minute."
+      "resendBody": "Check your spam folder, or try again in a minute.",
+      "openMail": "Open my email app",
+      "sendAgain": "Send it again",
+      "sent": "We sent the link again"
     },
     "profileSetup": {
       "title": "Your profile",
@@ -78,8 +74,8 @@
       "heading": "Let's get to know you"
     },
     "common": {
-      "or": "or continue with",
-      "google": "Google",
+      "or": "or use email",
+      "googleContinue": "Continue with Google",
       "errors": {
         "email": "Enter a valid email address",
         "passwordMin": "Password must be at least 8 characters",
@@ -90,11 +86,10 @@
     }
   },
   "onboarding": {
+    "next": "Next",
+    "start": "Get started",
+    "skip": "Skip",
     "intro": {
-      "next": "Next",
-      "start": "Get started",
-      "skip": "Skip",
-      "haveAccount": "I already have an account",
       "voice": {
         "title": "Say what you did.\nWe'll write it down.",
         "body": "Just say \"changed the oil\" and it lands in your car's logbook.",
@@ -119,14 +114,6 @@
         "share": "Share record"
       }
     },
-    "saveCar": {
-      "title": "Save your {{name}}",
-      "yourCar": "car",
-      "body": "Create an account to keep your car's history safe, get reminders on time and log by voice.",
-      "google": "Continue with Google",
-      "email": "Continue with email",
-      "later": "Later"
-    },
     "addVehicle": {
       "info": {
         "header": "Your first car",
@@ -134,9 +121,7 @@
         "make": "Make",
         "model": "Model",
         "year": "Year",
-        "required": "This field is required",
-        "yearInvalid": "Enter a valid year",
-        "cta": "Next: Odometer reading",
+        "cta": "Save my car",
         "nickname": "Your nickname for it",
         "type": {
           "pickup": "Pickup",
@@ -152,38 +137,11 @@
         "choose": "Choose"
       },
       "odometer": {
-        "header": "Odometer reading",
-        "title": "This is where we start calculating",
         "label": "Current odometer reading",
-        "body": "This reading will help us calculate your upcoming maintenance schedule.",
         "unit": {
           "km": "km"
         },
-        "invalid": "Enter a valid number",
-        "cta": "Save my car"
-      },
-      "firstLog": {
-        "header": "First record",
-        "title": "What was your last maintenance?",
-        "body": "One record is enough to start scheduling.",
-        "cost": "Cost (optional)",
-        "finish": "Log by voice",
-        "save": "Save the record",
-        "skip": "Log later",
-        "buckets": {
-          "oil": {
-            "label": "Engine oil",
-            "subtitle": "Oil or filter change"
-          },
-          "brakes": {
-            "label": "Brakes",
-            "subtitle": "Inspection or replacement"
-          },
-          "tiresBattery": {
-            "label": "Tires & battery",
-            "subtitle": "Or any other maintenance"
-          }
-        }
+        "later": "Don't have it now? You can add it later, before your first record."
       }
     }
   },
@@ -203,32 +161,13 @@
     "expenses": "This month's expenses",
     "currency": "EGP",
     "km": "km",
-    "h": "h",
     "mi": "mi",
-    "soonTitle": "{{part}} is coming up",
-    "overdueTitle": "{{part}} needs attention",
-    "soonBoth": "{{km}} {{unit}} or {{d}} days left",
-    "soonDist": "{{km}} {{unit}} left",
-    "soonDays": "{{d}} days left",
-    "overdueDist": "Overdue by {{km}} {{unit}}",
-    "overdueDays": "Overdue by {{d}} days",
-    "dueAt": "Due at {{km}} {{unit}}",
-    "dueOn": "Due on {{date}}",
     "empty": {
       "title": "A simple start. A big difference.",
       "heading": "Start with one car",
       "body": "Add your car, then log your first service. Everything will be ready for your next trip.",
       "cta": "Add my car"
     },
-    "guest": {
-      "welcomeTitle": "Welcome, visitor",
-      "welcomeBody": "Create an account to save your data and unlock features.",
-      "create": "Create account",
-      "yourCar": "Your car ahead of you",
-      "upcoming": "Upcoming dates"
-    },
-    "carLog": "Car log",
-    "carLogSub": "Services, costs and odometer readings",
     "kmL": "km/L",
     "perKm": "{{n}} EGP per km",
     "allGoodTitle": "All on schedule",
@@ -237,39 +176,15 @@
       "body": "Log a service and we will remind you of the next one"
     },
     "fuelHint": "Add 2 full tanks",
-    "loading": "Loading"
-  },
-  "gate": {
-    "title": {
-      "vehicles": "My cars",
-      "capture": "Add a record",
-      "reminders": "Reminders",
-      "account": "Account",
-      "expenses": "Expenses",
-      "receive": "Receive car history"
-    },
-    "heading": "All the details, in your account",
-    "body": "Create an account to keep your maintenance history and track parts and expenses.",
-    "create": "Create my account",
-    "keep": "Keep browsing",
-    "deleteGuest": "Delete my guest data"
+    "loading": "Loading",
+    "update": "Update"
   },
   "odometer": {
     "header": "Update odometer",
     "label": "New reading",
-    "unit": {
-      "km": "Kilometers",
-      "mi": "Miles",
-      "h": "Hours"
-    },
     "last": "Last reading: {{value}} {{unit}} · {{count}} days ago",
     "lastToday": "Last reading: {{value}} {{unit}} · today",
-    "noteBody": "We'll ask for a reason, like a replaced odometer or a corrected reading, before saving.",
-    "reason": "Reason",
-    "reasonHint": "Write at least 3 characters",
     "cta": "Save reading",
-    "logTitle": "Odometer update",
-    "error": "Couldn't save, try again.",
     "since": "+{{value}} {{unit}} since last update",
     "swipe": "Swipe to adjust",
     "scan": {
@@ -283,16 +198,16 @@
       "denied": "Camera access is turned off. Allow it in your phone's settings, or type the number yourself.",
       "deniedAction": "Open settings",
       "unavailable": "The camera isn't available on this device. Use the slider or type the number.",
-      "read": "Read from the camera. Add the reason, then save.",
       "confirm": "Confirm and save",
       "use": "Use this number",
       "again": "Look again",
-      "lowerNote": "Lower than the saved reading ({{current}}). We'll ask for a reason before saving.",
+      "lowerNote": "Lower than the saved reading ({{current}}). It can't be saved.",
       "higherNote": "Much higher than the saved reading ({{current}}). Check it before you confirm.",
       "asking": "Taking a closer look. Hold still for a moment…",
       "zoom": "Zoom in on small digits",
       "focus": "Tap to focus on the digits"
-    }
+    },
+    "first": "Enter the car's first reading"
   },
   "vehicles": {
     "title": "My cars",
@@ -310,8 +225,7 @@
     },
     "unit": {
       "km": "km",
-      "mi": "mi",
-      "h": "h"
+      "mi": "mi"
     },
     "odometer": "Odometer · {{unit}}",
     "yearExpenses": "Year expenses",
@@ -323,40 +237,21 @@
     },
     "attention": "Parts needing attention",
     "yourParts": "Your parts",
-    "emptyParts": "Add a record to see part schedules",
+    "emptyParts": "No parts yet",
     "emptyLog": "No records yet",
     "tireHistory": "Tire history",
     "allRecords": "Car log",
-    "status": {
-      "both": "{{km}} {{u}} or {{d}} days left",
-      "km": "{{km}} {{u}} left",
-      "days": "{{d}} days left",
-      "overdueKm": "Overdue by {{km}} {{u}}",
-      "overdueDays": "Overdue by {{d}} days"
-    }
+    "addRecord": "Add a record",
+    "updateReading": "Update reading"
   },
   "pick": {
     "search": "Search",
-    "custom": "My car isn't here: use “{{text}}”",
+    "custom": "Not listed: use “{{text}}”",
     "empty": "No matches",
     "type": "Not on our list yet. Type the name and tap it below."
   },
   "parts": {
-    "untilChange": "Until the next change",
-    "overdueLabel": "Overdue for change",
-    "leftBoth": "{{u}} left · or {{d}} days",
-    "left": "{{u}} left",
-    "daysLeft": "days left",
-    "overdueBoth": "{{u}} past due · or {{d}} days",
-    "overdue": "{{u}} past due",
-    "daysOverdue": "days past due",
-    "inUse": "Currently in use",
-    "brand": "Brand",
-    "installDate": "Install date",
-    "odoThen": "Odometer then",
-    "interval": "Change interval",
     "months": "{{m}} months",
-    "totalSpent": "Total spent",
     "viewHistory": "View change history",
     "history": {
       "title": "Every set has its journey",
@@ -369,20 +264,13 @@
       "reason": "Reason for replacement: {{reason}}.",
       "empty": "No records for this part",
       "log": "Log a part replacement"
-    }
+    },
+    "lastDone": "Last done",
+    "every": "Every",
+    "spent": "Spent"
   },
   "capture": {
     "newRecord": "New record",
-    "index": {
-      "title": "What did you do?",
-      "subtitle": "Choose whichever suits you best.",
-      "voice": "By voice",
-      "voiceSub": "Quick and easy",
-      "manual": "Myself",
-      "manualSub": "Available offline",
-      "noteTitle": "You're in charge",
-      "noteBody": "You'll review the details before any record is saved."
-    },
     "voice": {
       "header": "Log by voice",
       "listening": "Listening...",
@@ -430,49 +318,20 @@
       "dailyLimit": "You've reached today's voice recording limit. Enter the record yourself, and voice will be back tomorrow.",
       "longHint": "You're near the time limit. We'll finish the recording automatically.",
       "partialFail": "We saved {{saved}} of {{total}}. The rest couldn't be saved and are still in the list.",
-      "doneEdit": "Done",
       "successOne": "We saved your record.",
       "successMany": "We saved your records ({{count}}).",
       "successReview": "One reading looked unusual, so it's marked for review.",
       "liters": "{{value}} L"
     },
-    "review": {
-      "header": "Review the details",
-      "title": "One last step, then save",
-      "fromVoice": "From your voice recording",
-      "tapEdit": "Tap to edit the activity",
-      "odometer": "Odometer",
-      "cost": "Cost",
-      "date": "Date",
-      "suggestedDate": "Suggested date",
-      "workshop": "Workshop",
-      "notMentioned": "Not mentioned",
-      "next": "Suggested next",
-      "months": "{{n}} months",
-      "noteTitle": "Check the suggested date",
-      "noteBody": "You didn't mention a date. We used today's date. You can edit it.",
-      "confirm": "Confirm and save",
-      "km": "km",
-      "egp": "EGP"
-    },
     "manual": {
-      "what": "What did you do?",
       "serviceType": "Service type",
       "odometer": "Reading · km",
-      "cost": "Cost · EGP",
-      "date": "Service date",
-      "dateError": "Use the format YYYY-MM-DD",
       "workshop": "Workshop name",
       "notes": "Notes",
       "optional": "Optional",
       "attach": "Attach receipt photo",
       "attachSub": "Helps document the record",
       "attached": "Photo attached, tap to change",
-      "review": "Review and save",
-      "correctionHeader": "Correct record",
-      "reason": "Reason for correction",
-      "reasonError": "Enter a reason (at least 3 characters)",
-      "saveCorrection": "Save correction",
       "interval": "Next maintenance after (km)"
     },
     "fields": {
@@ -482,16 +341,34 @@
       "size": "Size (e.g. 205/55 R16)",
       "count": "Count",
       "warranty_months": "Warranty · months"
+    },
+    "quick": {
+      "say": "Say it",
+      "mostUsed": "Most used",
+      "more": "More",
+      "moreDetails": "More details",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "other": "Other day",
+      "runningCost": "Running cost",
+      "save": "Save",
+      "saved": "Saved",
+      "undo": "Undo",
+      "close": "Close",
+      "editTitle": "Edit record",
+      "why": "Why the change?",
+      "originalStays": "The original stays visible next to the change.",
+      "delete": "Delete",
+      "deleted": "Deleted"
     }
   },
   "history": {
     "header": "Car log",
     "title": "Every step, saved",
-    "saved": "Record saved",
     "emptyCategory": "Nothing here for this choice",
     "add": "Add a record",
     "needsReview": "Needs review",
-    "corrected": "Corrected",
+    "corrected": "Edited",
     "receipt": "Receipt attached",
     "manual": "Logged by you",
     "voice": "Logged by voice",
@@ -499,7 +376,7 @@
     "rowNoCost": "{{reading}} km",
     "emptyTitle": "Your car's history starts here",
     "emptyBody": "Every oil change, inspection or new part deserves to stay saved.",
-    "emptyCta": "Log your first step",
+    "emptyCta": "Add your first record",
     "cardTitle": "Saved record",
     "cardBody": "Every step has a history",
     "kind": {
@@ -516,35 +393,20 @@
       "service": "Service"
     },
     "odometerUpdated": "Odometer updated",
-    "liters": "{{n}} L"
+    "liters": "{{n}} L",
+    "clearFilter": "Clear the filter"
   },
   "log": {
     "header": "Record details",
-    "meta": "{{date}} · {{reading}} km",
-    "cost": "Cost",
     "parts": "Parts",
-    "workshop": "Workshop",
-    "receipt": "Receipt",
-    "viewCorrections": "View corrections ({{count}})",
-    "manualTitle": "Logged by you",
-    "manualBody": "You added this record manually.",
-    "voiceTitle": "Logged by voice",
-    "voiceBody": "Created from what you said, reviewed by you.",
-    "correctedTitle": "This record was corrected",
-    "correctedBody": "Corrections appear next to the original.",
-    "reviewTitle": "Reading needs review",
-    "reviewBody": "Tap to review the reading.",
-    "originalTitle": "The original stays saved",
-    "originalBody": "You can add a correction with a reason. The correction appears next to the original record.",
-    "addCorrection": "Add a correction",
     "egp": "{{cost}} EGP",
     "corrections": {
-      "header": "Corrections",
+      "header": "Edits",
       "title": "Details improve.\nThe original stays.",
       "original": "Original · {{date}}",
-      "correction": "Correction · {{date}}",
+      "correction": "Edit · {{date}}",
       "reason": "Reason: {{reason}}",
-      "footnote": "The number of corrections shows when sharing car history, for transparency.",
+      "footnote": "The number of edits shows when sharing car history, for transparency.",
       "back": "Back to record",
       "fields": {
         "title": "Title",
@@ -566,23 +428,27 @@
       "km": "{{n}} km",
       "noteTitle": "The note stays visible",
       "noteBody": "Confirming doesn't remove the note from the record.",
-      "correct": "Correct the reading",
+      "correct": "Edit the reading",
       "ok": "The reading is correct",
       "bodyLower": "This reading is {{diff}} km lower than the previous one. We saved the record with a note for you to review."
     },
-    "service": "Service",
     "next": "Next maintenance after",
     "notes": "Notes",
-    "standard": "standard"
+    "standard": "standard",
+    "edit": "Edit",
+    "fixReading": "Fix the reading",
+    "byVoice": "By voice",
+    "edited": "Edited",
+    "checkReading": "Check the reading"
   },
   "reminders": {
     "title": "Your next step is clear",
     "attention": "Needs attention",
     "all": "All dates",
-    "calm": "Nothing needs attention right now.",
-    "snoozedUntil": "Snoozed until {{date}}",
-    "okDate": "Within the recorded schedule · {{date}}",
-    "okOdo": "Within the recorded schedule · at {{odo}} {{unit}}",
+    "group": {
+      "attention": "Needs attention",
+      "onTime": "On time"
+    },
     "staleTitle": "{{vehicle}}: update the odometer",
     "staleBody": "Last reading {{n}} days ago",
     "empty": {
@@ -591,19 +457,10 @@
       "body": "Log a service and set its interval. We'll line up your next date.",
       "cta": "Log your first service"
     },
-    "lastService": "Last service",
-    "nextDue": "Next due",
-    "howTitle": "How is the date calculated?",
-    "standardSchedule": "the standard schedule",
-    "yourSchedule": "your schedule",
-    "how": {
-      "both": "Based on your latest reading of {{odo}} {{unit}} and {{schedule}} for this part: every {{km}} {{unit}} or {{m}} months, whichever comes first.",
-      "km": "Based on your latest reading of {{odo}} {{unit}} and the interval: every {{km}} {{unit}}.",
-      "months": "Based on the last service date and the interval: every {{m}} months."
-    },
-    "done": "I did the service",
     "snooze": "Snooze a week",
-    "snoozeFailed": "Couldn't snooze. Try again."
+    "snoozeFailed": "Couldn't snooze. Try again.",
+    "snoozed": "Snoozed for a week",
+    "onSchedule": "All on schedule"
   },
   "expenses": {
     "title": "Expenses",
@@ -638,18 +495,13 @@
     },
     "amount": "Amount · Egyptian pound",
     "date": "Date",
-    "dateError": "Use the format YYYY-MM-DD",
     "place": "Place",
     "optional": "Optional",
-    "link": "Linked to a maintenance log",
-    "linkPick": "Choose a record",
-    "noLink": "No link",
-    "linkHint": "Added as an extra cost for this record.",
-    "save": "Save expense",
     "liters": "Litres",
     "reading": "Odometer reading · km",
     "fullTank": "Full tank",
-    "fullTankHint": "Turn off if you didn’t fill it to the top"
+    "fullTankHint": "Turn off if you didn’t fill it to the top",
+    "recent": "Latest expenses"
   },
   "notify": {
     "soonTitle": "{{part}} is coming up",
@@ -773,6 +625,7 @@
     "prepare": "Prepare the share",
     "send": "Share link",
     "valid": "Valid for 7 days.",
+    "removed": "{{n}} records were removed from this history.",
     "empty": "Add at least one record to share.",
     "error": "We couldn't prepare the share. Try again.",
     "message": "I shared the maintenance history of {{vehicle}} on Bestim: {{link}}",
@@ -812,8 +665,7 @@
       "cardLabel": "Last saved reading",
       "cardNote": "{{unit}} · check your connection to update schedules",
       "write": "Write a new record",
-      "voice": "Voice recording needs a connection.",
-      "voiceSheet": "Voice recording needs a connection for guests."
+      "voice": "Voice recordings are saved on your phone and written up when you're back online."
     },
     "pending": "Waiting to sync",
     "success": {
@@ -828,11 +680,8 @@
       "nextBoth": "At {{km}} {{unit}} or after {{m}} months",
       "nextKm": "At {{km}} {{unit}}",
       "nextDate": "On {{date}}",
-      "vehicleTitle": "Your car is with us",
-      "vehicleBody": "Next step? Log your last service and we'll arrange its reminders.",
       "home": "To Home",
-      "another": "Add another record",
-      "firstService": "Log my first service"
+      "another": "Add another record"
     },
     "notify": {
       "title": "Let us remind you on time",
@@ -857,19 +706,12 @@
       "body": "Your account and all your cars, records, reminders and expenses will be deleted. You won't be able to get them back.",
       "keep": "Keep my account",
       "error": "We couldn't delete your account. Try again."
-    },
-    "deleteGuest": {
-      "header": "Delete data",
-      "title": "Delete your guest data permanently?",
-      "body": "Your car and its records, reminders and expenses will be deleted. You won't be able to get them back.",
-      "keep": "Keep my data"
     }
   },
   "toast": {
     "vehicleDeleted": "Car deleted",
     "accountDeleted": "Your account was deleted",
-    "photoOffline": "Photos need a connection.",
-    "guestDeleted": "Your data was deleted"
+    "photoOffline": "Photos need a connection."
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -880,7 +722,9 @@
     "tooMany": "Too many attempts. Wait a little and try again.",
     "weakPassword": "That password is too weak. Use at least 8 characters.",
     "samePassword": "Choose a password different from your old one.",
-    "google": "Google sign-in didn't work. Try again or use your email."
+    "google": "Google sign-in didn't work. Try again or use your email.",
+    "lowerReading": "It can't be lower than the current reading",
+    "needsReason": "This record is over a day old. Add a reason for the change."
   },
   "errorScreen": {
     "title": "Something went wrong",
@@ -918,5 +762,32 @@
     "manageTitle": "Saved recording",
     "retry": "Try again",
     "delete": "Delete recording"
+  },
+  "common": {
+    "done": "Done"
+  },
+  "reading": {
+    "prompt": {
+      "title": "Add the car's reading first, then you can add records",
+      "add": "Add reading",
+      "later": "Not now"
+    },
+    "card": {
+      "title": "Add your car's reading",
+      "body": "Needed before your first record.",
+      "cta": "Add reading"
+    }
+  },
+  "partStatus": {
+    "ok": "On time",
+    "soon": "Due soon",
+    "overdue": "Late",
+    "snoozed": "Snoozed",
+    "none": "Add the last time",
+    "life": "left",
+    "left": "{{unit}} left",
+    "late": "{{unit}} late",
+    "days": "days",
+    "until": "until {{date}}"
   }
 }

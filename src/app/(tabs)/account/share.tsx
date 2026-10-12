@@ -1,4 +1,6 @@
-import { Redirect, router } from 'expo-router';
+import { useTabBarSpace } from '@/components/TabBar';
+import { useRefresh } from '@/components/Refresh';
+import { router } from 'expo-router';
 import { Car, Repeat } from 'lucide-react-native';
 import { useState } from 'react';
 import { I18nManager, ScrollView, Share, View } from 'react-native';
@@ -8,9 +10,11 @@ import QRCode from 'react-native-qrcode-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { ErrorState } from '@/components/ErrorState';
+import { openCapture } from '@/lib/reading';
 import { Button, Choice, Field, Header, Item, Note, Text } from '@/components/ui';
 import { SITE } from '@/lib/links';
-import { useCurrentVehicle, useIsGuest, useVehicleLogs, useVehicleParts, useVehicles, vehicleName } from '@/lib/queries';
+import { useCurrentVehicle, useVehicleLogs, useVehicleParts, useVehicles, vehicleName } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { useColors } from '@/lib/theme';
 
@@ -22,8 +26,9 @@ const tokenOf = (s: string) => s.trim().match(/token=([^&\s#]+)/)?.[1] ?? s.trim
 
 export default function ShareScreen() {
   const { t } = useTranslation();
+  const refresh = useRefresh();
+  const space = useTabBarSpace();
   const c = useColors();
-  const guest = useIsGuest();
   const vehicles = useVehicles();
   const { vehicle: current } = useCurrentVehicle();
   const [pickedId, setPickedId] = useState<string | null>(null);
@@ -35,7 +40,6 @@ export default function ShareScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const [pasted, setPasted] = useState('');
-  if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'account' } }} />;
 
   const name = vehicle ? vehicleName(vehicle) : '';
   const count = logs.data?.length ?? 0;
@@ -61,10 +65,11 @@ export default function ShareScreen() {
   };
   const send = () => link && Share.share({ message: t('share.message', { vehicle: name, link }) });
 
+  if (logs.isError && !logs.data) return <ErrorState onRetry={logs.refetch} retrying={logs.isRefetching} />;
   return (
     <SafeAreaView className="flex-1 bg-paper px-6" edges={['top']}>
       <Header title={t('share.header')} />
-      <ScrollView contentContainerClassName="gap-5 pb-[120px] pt-4" showsVerticalScrollIndicator={false}>
+      <ScrollView refreshControl={refresh} contentContainerClassName="gap-5 pt-4" contentContainerStyle={{ paddingBottom: space }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets showsVerticalScrollIndicator={false}>
         <View className="h-[60px] w-[60px] items-center justify-center self-center rounded-full bg-mint">
           <Repeat size={26} color={c.teal} />
         </View>
@@ -89,9 +94,14 @@ export default function ShareScreen() {
           </View>
         ) : null}
         <Note tone="info" text={t('share.note')} />
+        {vehicle?.removed_records ? <Text variant="caption" className="text-muted">{t('share.removed', { n: vehicle.removed_records })}</Text> : null}
         {empty ? <Text variant="caption" className="text-muted">{t('share.empty')}</Text> : null}
         {error ? <Note tone="warning" text={t('share.error')} /> : null}
-        <Button title={link ? t('share.send') : t('share.prepare')} loading={busy} disabled={!vehicle || !logs.isSuccess || empty} onPress={link ? send : prepare} />
+        {empty ? (
+          <Button title={t('history.emptyCta')} onPress={() => openCapture({ vehicleId: vehicle?.id })} />
+        ) : (
+          <Button title={link ? t('share.send') : t('share.prepare')} loading={busy} disabled={!vehicle || !logs.isSuccess} onPress={link ? send : prepare} />
+        )}
         <View className="gap-3 pt-4">
           <Text variant="label">{t('share.received')}</Text>
           <Field label={t('share.paste')} value={pasted} onChangeText={setPasted} autoCapitalize="none" autoCorrect={false} style={{ textAlign: I18nManager.isRTL ? 'right' : 'left' }} />

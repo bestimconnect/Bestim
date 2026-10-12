@@ -25,16 +25,23 @@ export async function notificationsAllowed() {
   return (await Notifications.getPermissionsAsync()).granted;
 }
 
-/** Q39: show screen 45 once, after a saved log, to full accounts the OS hasn't asked yet. */
+/** Q39: show screen 45 once, after a saved log, to signed-in users the OS hasn't asked yet. */
 export async function shouldAskNotifications() {
   const { useSettings } = await import('@/stores/settingsStore');
   const { data } = await supabase.auth.getSession();
-  if (useSettings.getState().notifyAsked || !data.session || data.session.user.is_anonymous) return false;
+  if (useSettings.getState().notifyAsked || !data.session) return false;
   return (await Notifications.getPermissionsAsync()).status === 'undetermined';
+}
+
+/** Android files every reminder under this category in the phone's settings (re-set each sync so the name follows the language). Android 13+ only shows the permission prompt once a channel exists. */
+async function ensureChannel() {
+  if (Platform.OS === 'android')
+    await Notifications.setNotificationChannelAsync('default', { name: i18n.t('notify.channel'), importance: Notifications.AndroidImportance.DEFAULT });
 }
 
 /** Ask the OS (screen 45 / the banner on 28). Returns whether notifications are allowed now. */
 export async function requestNotifications() {
+  await ensureChannel();
   const granted = (await Notifications.requestPermissionsAsync()).granted;
   if (granted) await syncNotifications();
   return granted;
@@ -47,13 +54,11 @@ export async function syncNotifications() {
     const user = auth.session?.user;
     await Notifications.cancelAllScheduledNotificationsAsync();
     // Notifications page (Q92): what was scheduled and is now past has been shown, so it joins the list.
-    if (!user || user.is_anonymous) return useInbox.getState().clear(); // signed out: the list belongs to that account
+    if (!user) return useInbox.getState().clear(); // signed out: the list belongs to that account
     useInbox.getState().deliver();
     useInbox.getState().setScheduled([]);
+    await ensureChannel();
     if (!(await notificationsAllowed())) return;
-    // Android files every reminder under this category in the phone's settings (re-set each sync so the name follows the language).
-    if (Platform.OS === 'android')
-      await Notifications.setNotificationChannelAsync('default', { name: i18n.t('notify.channel'), importance: Notifications.AndroidImportance.DEFAULT });
 
     const today = new Date().toLocaleDateString('en-CA');
     const [profile, vehicles, logs, snoozes] = await Promise.all([
@@ -94,7 +99,7 @@ export async function syncNotifications() {
         });
       }
       // Q23: only nudge for the odometer when the vehicle has parts that depend on it.
-      if (parts.some((p) => p.vehicleId === v.id)) planVehicles.push({ id: v.id, name: vehicleName(v), odometerUpdatedAt: v.odometer_updated_at });
+      if (v.odometer_updated_at && parts.some((p) => p.vehicleId === v.id)) planVehicles.push({ id: v.id, name: vehicleName(v), odometerUpdatedAt: v.odometer_updated_at });
     }
 
     const sent = JSON.parse((await AsyncStorage.getItem(SENT_KEY)) ?? '{}');
@@ -129,7 +134,7 @@ export async function syncNotifications() {
         {
           title: t(p.kind === 'overdue' ? 'notify.overdueTitle' : 'notify.soonTitle', { part: name }),
           body,
-          data: { url: `/reminder?vehicleId=${vehicleId}&serviceTypeId=${serviceTypeId}` },
+          data: { url: `/part?vehicleId=${vehicleId}&serviceTypeId=${serviceTypeId}` },
         },
         trigger,
       );

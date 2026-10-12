@@ -137,8 +137,8 @@ export type Database = {
           description: string | null
           expense_date: string
           from_log: boolean
-          id: string
           full_tank: boolean
+          id: string
           liters: number | null
           log_id: string | null
           odometer_reading: number | null
@@ -154,8 +154,8 @@ export type Database = {
           description?: string | null
           expense_date?: string
           from_log?: boolean
-          id?: string
           full_tank?: boolean
+          id?: string
           liters?: number | null
           log_id?: string | null
           odometer_reading?: number | null
@@ -171,8 +171,8 @@ export type Database = {
           description?: string | null
           expense_date?: string
           from_log?: boolean
-          id?: string
           full_tank?: boolean
+          id?: string
           liters?: number | null
           log_id?: string | null
           odometer_reading?: number | null
@@ -651,9 +651,10 @@ export type Database = {
           model: string
           nickname: string | null
           odometer_unit: string
-          odometer_updated_at: string
+          odometer_updated_at: string | null
           photo_url: string | null
           plate_number: string | null
+          removed_records: number
           updated_at: string
           user_id: string
           vehicle_type: string
@@ -671,9 +672,10 @@ export type Database = {
           model: string
           nickname?: string | null
           odometer_unit?: string
-          odometer_updated_at?: string
+          odometer_updated_at?: string | null
           photo_url?: string | null
           plate_number?: string | null
+          removed_records?: number
           updated_at?: string
           user_id?: string
           vehicle_type?: string
@@ -691,9 +693,10 @@ export type Database = {
           model?: string
           nickname?: string | null
           odometer_unit?: string
-          odometer_updated_at?: string
+          odometer_updated_at?: string | null
           photo_url?: string | null
           plate_number?: string | null
+          removed_records?: number
           updated_at?: string
           user_id?: string
           vehicle_type?: string
@@ -769,6 +772,7 @@ export type Database = {
           model: string
           nickname: string
           own: boolean
+          removed_records: number
           shared_by_name: string
           vehicle_id: string
           vehicle_type: string

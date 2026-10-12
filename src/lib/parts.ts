@@ -69,3 +69,13 @@ export function latestPerType<T extends { service_type_id: string | null }>(logs
   const seen = new Set<string>();
   return logs.filter((l) => l.service_type_id != null && !seen.has(l.service_type_id) && seen.add(l.service_type_id));
 }
+
+/** How much of the interval is used (0..1), whether it is past due, and which measure is closer to due. */
+export function lifeFraction(s: PartStatus, intervalKm: number | null): { used: number; over: boolean; by: 'km' | 'days' } {
+  const kmLeft = s.remainingKm != null && intervalKm ? s.remainingKm / intervalKm : Infinity;
+  return {
+    used: Math.min(Math.max(1 - s.urgency, 0), 1),
+    over: s.state === 'overdue',
+    by: kmLeft <= s.urgency ? 'km' : 'days', // same division as partStatus, so equal when km is the closer one
+  };
+}

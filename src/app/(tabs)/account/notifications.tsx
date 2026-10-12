@@ -1,5 +1,6 @@
+import { useTabBarSpace } from '@/components/TabBar';
+import { useRefresh } from '@/components/Refresh';
 import { useQueryClient } from '@tanstack/react-query';
-import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Linking, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from '@/components/Toast';
 import { Button, Header, Note, Text, Toggle } from '@/components/ui';
 import { notificationsAllowed, requestNotifications, syncNotifications } from '@/lib/notifications';
-import { useIsGuest, useProfile } from '@/lib/queries';
+import { useProfile } from '@/lib/queries';
 import { DEFAULT_PREFS, type Prefs } from '@/lib/reminderPlan.ts';
 import { useSession } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
@@ -22,9 +23,10 @@ const KEYS = { due_soon: 'dueSoon', overdue: 'overdue', odometer: 'odometer', we
 // Screen 28 — Notification preferences (Q37, Q38); Figma 167:59817
 export default function NotificationsScreen() {
   const { t } = useTranslation();
+  const refresh = useRefresh();
+  const space = useTabBarSpace();
   const c = useColors();
   const qc = useQueryClient();
-  const guest = useIsGuest();
   const userId = useSession()?.user.id;
   const [edits, setEdits] = useState<Partial<Prefs>>({});
   const [open, setOpen] = useState(false);
@@ -38,7 +40,6 @@ export default function NotificationsScreen() {
     notificationsAllowed().then(setAllowed);
   }, []);
 
-  if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'account' } }} />;
 
   const p: Prefs = { ...DEFAULT_PREFS, ...((profile?.notification_prefs as Partial<Prefs> | null) ?? {}), ...edits };
   const setPrefs = (n: Prefs) => setEdits(n);
@@ -65,13 +66,14 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
-      <ScrollView contentContainerClassName="gap-3 px-6" contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView refreshControl={refresh} contentContainerClassName="gap-3 px-6" contentContainerStyle={{ paddingBottom: space }}>
         <Header title={t('notifPrefs.title')} />
         <Text variant="title" className="mb-1">{t('notifPrefs.heading')}</Text>
         {!allowed ? (
-          <Pressable accessibilityRole="button" onPress={enable}>
-            <Note tone="alert" text={`${t('notifPrefs.bannerOff')} ${t('notifPrefs.bannerAction')}`} />
-          </Pressable>
+          <>
+            <Note tone="alert" text={t('notifPrefs.bannerOff')} />
+            <Button title={t('notifPrefs.bannerAction')} onPress={enable} />
+          </>
         ) : null}
         {TOGGLES.map((k) => (
           <View key={k} className="min-h-[64px] flex-row items-center gap-3 rounded-item bg-white px-4 py-3" style={{ boxShadow: shadows.soft }}>
@@ -110,7 +112,7 @@ export default function NotificationsScreen() {
         </Pressable>
         <Text variant="caption" className="px-1 text-muted">{t('notifPrefs.footnote')}</Text>
         {saved ? <Note tone="success" text={t('notifPrefs.saved')} /> : null}
-        <Button title={t('notifPrefs.save')} onPress={save} loading={saving} />
+        <Button title={t('notifPrefs.save')} variant={allowed ? 'primary' : 'secondary'} onPress={save} loading={saving} />
       </ScrollView>
     </SafeAreaView>
   );

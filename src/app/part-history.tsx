@@ -1,4 +1,5 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useRefresh } from '@/components/Refresh';
+import { useLocalSearchParams } from 'expo-router';
 import { format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { ScrollView, View } from 'react-native';
@@ -6,19 +7,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Header, Text } from '@/components/ui';
+import { openCapture } from '@/lib/reading';
 import { useServiceTypes, useVehicle, useVehicleLogs } from '@/lib/queries';
-import { useLogDraft } from '@/stores/logDraft';
 
 // Screen 12 — Part history, Figma ar-light 12/تاريخ القطع.
 const n = (x: number) => x.toLocaleString('en-US');
 
 export default function PartHistory() {
   const { t, i18n } = useTranslation();
+  const refresh = useRefresh();
   const { vehicleId, serviceTypeId } = useLocalSearchParams<{ vehicleId: string; serviceTypeId: string }>();
   const { vehicle } = useVehicle(vehicleId);
   const st = useServiceTypes().data?.find((s) => s.id === serviceTypeId);
   const logs = (useVehicleLogs(vehicleId).data ?? []).filter((l) => l.service_type_id === serviceTypeId); // newest first
-  if (!vehicle || !st) return <View className="flex-1 bg-paper" />;
+  if (!vehicle || !st) return <SafeAreaView className="flex-1 bg-paper px-6"><Header title="" /></SafeAreaView>;
 
   const unit = t(`vehicles.unit.${vehicle.odometer_unit}`);
   const name = i18n.language === 'ar' ? st.name_ar : st.name_en;
@@ -28,7 +30,7 @@ export default function PartHistory() {
       <View className="px-6">
         <Header title={name} />
       </View>
-      <ScrollView contentContainerClassName="gap-4 px-6 pb-4">
+      <ScrollView refreshControl={refresh} contentContainerClassName="gap-4 px-6 pb-4">
         <Text variant="title">{t('parts.history.title')}</Text>
         <Text variant="body" className="text-muted">{t('parts.history.subtitle')}</Text>
         {logs.length ? (
@@ -59,8 +61,7 @@ export default function PartHistory() {
         <Button
           title={t('parts.history.log')}
           onPress={() => {
-            useLogDraft.getState().reset({ vehicleId, serviceTypeId, title: name });
-            router.push('/capture/manual');
+            openCapture({ vehicleId, serviceTypeId });
           }}
         />
       </View>

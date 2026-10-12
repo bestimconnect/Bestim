@@ -23,7 +23,7 @@ export function VoiceQueueCard({ vehicleId }: { vehicleId: string }) {
   if (!items.length) return null;
 
   const review = (item: QueuedVoice) => {
-    useLogDraft.getState().reset({ vehicleId: item.vehicleId, source: 'voice' });
+    useLogDraft.getState().reset({ vehicleId: item.vehicleId });
     useVoiceBatch.getState().start(
       item.transcript ?? '',
       normalizeRecords(item.records, {

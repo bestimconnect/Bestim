@@ -1,3 +1,4 @@
+import { useRefresh } from '@/components/Refresh';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router, type Href } from 'expo-router';
@@ -16,6 +17,7 @@ const ICONS: Record<InboxKind, LucideIcon> = { soon: CalendarCheck, overdue: Ala
 
 export default function NotificationsScreen() {
   const { t, i18n } = useTranslation();
+  const refresh = useRefresh();
   const c = useColors();
   const { items, markRead, markAllRead } = useInbox();
   const locale = i18n.language === 'ar' ? ar : enUS;
@@ -46,7 +48,7 @@ export default function NotificationsScreen() {
           <Text variant="body" className="text-center text-muted">{t('inbox.emptyBody')}</Text>
         </View>
       ) : (
-        <ScrollView className="flex-1" contentContainerClassName="gap-4 pb-4 pt-2" showsVerticalScrollIndicator={false}>
+        <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-4 pb-4 pt-2" showsVerticalScrollIndicator={false}>
           {groups.map((g) => (
             <View key={g.day} className="gap-3">
               <Text variant="label" className="text-muted">{g.day}</Text>

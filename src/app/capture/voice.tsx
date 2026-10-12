@@ -13,11 +13,12 @@ import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-spe
 import { onlineManager } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { KEYBOARD_DONE_ID } from '@/components/KeyboardDone';
 import { Button, Header, Text } from '@/components/ui';
 import { rise, SWAP } from '@/lib/motion';
 import { useServiceTypes, useVehicles } from '@/lib/queries';
@@ -74,6 +75,7 @@ export default function Voice() {
   const audioUri = useRef<string | null>(null);
   const said = useRef(''); // the latest transcript, for handlers that run after the state they closed over
   const waitingForEnd = useRef(false);
+  const scroller = useRef<ScrollView>(null);
   const doneAt = useRef(0); // when the owner tapped Done, to time the wait in development
   const [transcript, setTranscript] = useState('');
   const [seconds, setSeconds] = useState(0);
@@ -84,12 +86,16 @@ export default function Voice() {
   const [direct, setDirect] = useState(false); // Q79: recording directly, so no live text
   const [busy, setBusy] = useState(false);
 
-  const toManual = (notice = 'micDenied') => router.replace({ pathname: '/capture/manual', params: { notice } });
+  // The quick-add sheet is the fallback. A sheet is closed with back(), so go back first, then push it.
+  const toManual = (notice?: string) => {
+    router.back();
+    router.push({ pathname: '/capture', params: { notice, vehicleId: useLogDraft.getState().vehicleId ?? undefined } });
+  };
 
   const startDirect = async () => {
     if (__DEV__ && Platform.OS === 'ios') return setTyped(true);
     try {
-      if (!(await requestRecordingPermissionsAsync()).granted) return toManual();
+      if (!(await requestRecordingPermissionsAsync()).granted) return toManual('micDenied');
       await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
       await recorder.prepareToRecordAsync();
       recorder.record();
@@ -107,7 +113,7 @@ export default function Voice() {
     if (!onlineManager.isOnline() || !ExpoSpeechRecognitionModule.isRecognitionAvailable() || (Platform.OS === 'android' && Platform.Version < 33))
       return startDirect();
     const perm = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
-    if (!perm.granted) return toManual();
+    if (!perm.granted) return toManual('micDenied');
     ExpoSpeechRecognitionModule.start({
       lang: await speechLang(i18n.language),
       interimResults: true,
@@ -195,7 +201,7 @@ export default function Voice() {
   });
   useSpeechRecognitionEvent('error', (e) => {
     if (e.error === 'no-speech') setNoSpeech(true);
-    else if (e.error === 'not-allowed') toManual();
+    else if (e.error === 'not-allowed') toManual('micDenied');
     else if (e.error === 'service-not-allowed' || e.error === 'language-not-supported' || e.error === 'network') startDirect();
   });
 
@@ -266,21 +272,22 @@ export default function Voice() {
               value={transcript}
               onChangeText={say}
               multiline
+              inputAccessoryViewID={KEYBOARD_DONE_ID}
               placeholderTextColor={c.muted}
               className="min-h-[80px] rounded-field border border-line bg-white p-4 text-body text-ink"
               style={{ textAlign: 'auto' }}
             />
           </View>
-        ) : transcript ? (
-          <Text variant="heading">«{transcript}»</Text>
-        ) : direct && !busy ? (
-          <Text variant="heading">{t('capture.voice.noPreview')}</Text>
+        ) : transcript || (direct && !busy) ? (
+          <ScrollView ref={scroller} className="flex-1" onContentSizeChange={() => scroller.current?.scrollToEnd({ animated: true })}>
+            <Text variant="heading">{transcript ? `«${transcript}»` : t('capture.voice.noPreview')}</Text>
+          </ScrollView>
         ) : null}
         {direct && listening ? <DirectMeter recorder={recorder} level={level} /> : null}
         {noSpeech ? (
           <View className="gap-2">
-            <Pressable onPress={retry}><Text className="text-muted">{t('capture.voice.noSpeech')}</Text></Pressable>
-            <Pressable onPress={() => router.replace('/capture/manual')}><Text variant="label" className="text-teal">{t('capture.voice.manualLink')}</Text></Pressable>
+            <Pressable onPress={retry} className="min-h-11 justify-center"><Text className="text-muted">{t('capture.voice.noSpeech')}</Text></Pressable>
+            <Pressable onPress={() => toManual()} className="min-h-11 justify-center"><Text variant="label" className="text-teal">{t('capture.voice.manualLink')}</Text></Pressable>
           </View>
         ) : busy ? (
           <Animated.View entering={rise()}>
@@ -290,7 +297,7 @@ export default function Voice() {
           <Text className="text-muted">{t(seconds >= HINT_SECONDS ? 'capture.batch.longHint' : 'capture.voice.hint')}</Text>
         )}
         <Text variant="caption" className="text-muted">{t('capture.voice.aiNotice')}</Text>
-        <View className="flex-1" />
+        {typed || !(transcript || (direct && !busy)) ? <View className="flex-1" /> : null}
         <Button title={t('capture.voice.done')} onPress={finish} loading={busy} />
         <Button variant="secondary" title={t('capture.voice.cancel')} onPress={cancel} />
       </View>

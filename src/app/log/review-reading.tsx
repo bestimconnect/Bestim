@@ -34,13 +34,13 @@ export default function ReviewReadingScreen() {
       router.back();
     },
   });
-  if (!log || !vehicle) return <SafeAreaView className="flex-1 bg-paper" />;
+  if (!log || !vehicle) return <SafeAreaView className="flex-1 bg-paper px-6"><Header title="" /></SafeAreaView>;
 
   const current = log.odometer_reading ?? 0;
   // Previous = latest other log with a reading on or before this one, else the vehicle's odometer.
   const prevLog = logs?.find((l) => l.id !== log.id && l.odometer_reading != null && l.service_date <= log.service_date);
   const previous = prevLog?.odometer_reading ?? vehicle.current_odometer;
-  const prevDate = prevLog?.service_date ?? vehicle.odometer_updated_at;
+  const prevDate = prevLog?.service_date ?? vehicle.odometer_updated_at ?? log.service_date;
   const days = Math.max(differenceInCalendarDays(parseISO(log.service_date), parseISO(prevDate)), 1);
   const km = (n: number) => t('log.review.km', { n: n.toLocaleString('en-US') });
 
@@ -67,7 +67,7 @@ export default function ReviewReadingScreen() {
         </View>
       </View>
       <View className="gap-3 pb-4">
-        <Button title={t('log.review.correct')} onPress={() => router.push({ pathname: '/capture/manual', params: { logId: id } })} />
+        <Button title={t('log.review.correct')} onPress={() => router.push({ pathname: '/capture', params: { logId: id } })} />
         <Button variant="secondary" title={t('log.review.ok')} loading={confirm.isPending} onPress={() => confirm.mutate()} />
       </View>
     </SafeAreaView>

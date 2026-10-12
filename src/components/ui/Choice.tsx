@@ -43,7 +43,7 @@ export function Choice<T extends string>({
           onPress={() => onChange(o.value)}
           // Until the track is measured the selected segment paints itself, so there's no empty first frame.
           className={`h-full flex-1 items-center justify-center rounded-nav ${!seg && value === o.value ? 'bg-ink' : ''}`}>
-          <Text variant="caption" className={value === o.value ? 'text-paper' : 'text-muted'}>{o.label}</Text>
+          <Text variant="caption" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} className={value === o.value ? 'text-paper' : 'text-muted'}>{o.label}</Text>
         </Pressable>
       ))}
     </View>

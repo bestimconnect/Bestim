@@ -9,6 +9,7 @@ import { Item, PressableScale, Rise, Text } from '@/components/ui';
 import { needsAttention, useVehicleParts, useVehicles, vehicleName, type Vehicle } from '@/lib/queries';
 import { useVehiclePick } from '@/lib/sheet';
 import { useColors } from '@/lib/theme';
+import { hasReading } from '@/lib/reading';
 import { vehicleArt } from '@/lib/vehicleArt';
 
 function VehicleRow({ vehicle, current, onPress }: { vehicle: Vehicle; current: boolean; onPress: () => void }) {
@@ -16,7 +17,7 @@ function VehicleRow({ vehicle, current, onPress }: { vehicle: Vehicle; current: 
   const { parts } = useVehicleParts(vehicle);
   const overdue = needsAttention(parts).some((p) => p.status.state === 'overdue');
   const title = vehicleName(vehicle);
-  const subtitle = `${vehicle.year} · ${vehicle.current_odometer.toLocaleString('en-US')} ${t(`vehicles.unit.${vehicle.odometer_unit}`)}`;
+  const subtitle = hasReading(vehicle) ? `${vehicle.year} · ${vehicle.current_odometer.toLocaleString('en-US')} ${t(`vehicles.unit.${vehicle.odometer_unit}`)}` : String(vehicle.year);
   return (
     <Item
       image={vehicleArt(vehicle.vehicle_type)}
@@ -64,7 +65,7 @@ export default function SwitchVehicle() {
     <View className="gap-4 rounded-t-screen border-t border-line bg-sheet px-6 pt-6" style={{ paddingBottom: bottom + 16 }}>
       <View className="min-h-11 flex-row items-center gap-3">
         <Text variant="heading" className="flex-1">{t('home.switchVehicle')}</Text>
-        <PressableScale accessibilityRole="button" onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white">
+        <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white">
           <X size={20} color={c.ink} />
         </PressableScale>
       </View>

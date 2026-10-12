@@ -16,6 +16,7 @@ export type ExportVehicle = {
   plate_number?: string | null;
   vin?: string | null;
   current_odometer: number;
+  odometer_updated_at?: string | null; // null = no reading yet (Q105)
   odometer_unit: string;
 };
 
@@ -102,7 +103,7 @@ export function toJson(v: ExportVehicle, logs: ExportLog[], o: ExportOptions) {
         model: v.model,
         year: v.year,
         nickname: v.nickname ?? null,
-        odometer: v.current_odometer,
+        odometer: v.odometer_updated_at === null ? null : v.current_odometer,
         odometer_unit: v.odometer_unit,
         ...(o.identifiers ? { plate_number: v.plate_number ?? null, vin: v.vin ?? null } : {}),
       },
@@ -138,7 +139,7 @@ table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12px}
 th,td{text-align:start;padding:8px 6px;border-bottom:1px solid #DEE5DF}th{color:#5B6860;font-weight:600}
 </style></head><body>
 <h1>${esc(t.title)}</h1>
-<p>${esc(v.nickname || `${v.make} ${v.model}`)} · ${v.year} · ${v.current_odometer.toLocaleString('en-US')} ${esc(v.odometer_unit)}</p>
+<p>${esc(v.nickname || `${v.make} ${v.model}`)} · ${v.year}${v.odometer_updated_at === null ? '' : ` · ${v.current_odometer.toLocaleString('en-US')} ${esc(v.odometer_unit)}`}</p>
 ${ids ? `<p>${ids}</p>` : ''}
 <table><thead><tr>${cols.map((c) => `<th>${esc(c.label)}</th>`).join('')}</tr></thead>
 <tbody>${logs.map((l) => `<tr>${cols.map((c) => `<td>${esc(c.value(l))}</td>`).join('')}</tr>`).join('')}</tbody></table>

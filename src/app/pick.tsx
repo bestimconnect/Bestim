@@ -6,6 +6,7 @@ import { FlatList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { KeyboardDone } from '@/components/KeyboardDone';
 import { Field, Header, Item, Text } from '@/components/ui';
 import { fold, matches } from '@/lib/search';
 import { usePick } from '@/lib/sheet';
@@ -49,6 +50,7 @@ export default function Pick() {
           }
         />
       </View>
+      <KeyboardDone />
     </SafeAreaView>
   );
 }

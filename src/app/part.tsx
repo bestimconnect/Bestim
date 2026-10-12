@@ -1,65 +1,106 @@
-import { router, useLocalSearchParams } from 'expo-router';
 import { format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
-import { View } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { router, useLocalSearchParams } from 'expo-router';
+import { AlarmClock, Calendar, Check, History, Repeat, Wallet } from 'lucide-react-native';
+import { useState } from 'react';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { PartMetric } from '@/components/PartMetric';
-
-import { Button, Header, Text } from '@/components/ui';
+import { PartStatus } from '@/components/PartStatus';
+import { useRefresh } from '@/components/Refresh';
+import { Button, Header, PressableScale, Text } from '@/components/ui';
+import { openCapture } from '@/lib/reading';
+import { snoozePart } from '@/lib/snooze';
 import { useServiceTypes, useVehicle, useVehicleParts } from '@/lib/queries';
+import { useColors } from '@/lib/theme';
 
-// Screen 11 — Part detail, Figma ar-light 11/تفاصيل قطعة/الزيت.
+// One screen for a part's status (Part detail + Reminder detail, merged: Q107).
 const n = (x: number) => x.toLocaleString('en-US');
 
 export default function PartScreen() {
   const { t, i18n } = useTranslation();
+  const c = useColors();
+  const refresh = useRefresh();
   const params = useLocalSearchParams<{ vehicleId: string; serviceTypeId: string }>();
   const { vehicle } = useVehicle(params.vehicleId);
   const { data: logs, parts } = useVehicleParts(vehicle);
   const st = useServiceTypes().data?.find((s) => s.id === params.serviceTypeId);
-  if (!vehicle || !st) return <View className="flex-1 bg-paper" />;
+  const [busy, setBusy] = useState(false);
+  if (!vehicle || !st) return <SafeAreaView className="flex-1 bg-paper px-6"><Header title="" /></SafeAreaView>;
 
   const unit = t(`vehicles.unit.${vehicle.odometer_unit}`);
   const mine = (logs ?? []).filter((l) => l.service_type_id === st.id); // newest first
   const last = mine[0];
-  const status = parts.find((p) => p.serviceType.id === st.id)?.status;
+  const part = parts.find((p) => p.serviceType.id === st.id);
+  const status = part?.status;
   const km = last?.interval_km ?? st.default_interval_km;
   const months = last?.interval_months ?? st.default_interval_months;
-  const brand = (last?.parts_replaced as { name?: string }[] | null)?.[0]?.name || '—';
   const spent = mine.reduce((s, l) => s + (l.cost ?? 0), 0);
 
-  const over = status?.state === 'overdue';
+  const snoozedUntil = part?.snoozedUntil;
+  const canSnooze = status != null && status.state !== 'ok' && !snoozedUntil;
+  const name = i18n.language === 'ar' ? st.name_ar : st.name_en;
+  const snooze = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setBusy(true);
+    await snoozePart(vehicle.id, st.id, name);
+    setBusy(false);
+  };
+  const done = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    openCapture({ vehicleId: vehicle.id, serviceTypeId: st.id });
+  };
 
-  const rows: [string, string][] = [
-    [t('parts.brand'), brand],
-    [t('parts.installDate'), last ? format(new Date(last.service_date), 'd MMMM yyyy', { locale: i18n.language === 'ar' ? ar : enUS }) : '—'],
-    [t('parts.odoThen'), last?.odometer_reading != null ? `${n(last.odometer_reading)} ${unit}` : '—'],
-    [t('parts.interval'), [km != null ? `${n(km)} ${unit}` : '', months != null ? t('parts.months', { m: months }) : ''].filter(Boolean).join(' / ') || '—'],
-    [t('parts.totalSpent'), `${n(spent)} ${t('vehicles.currency')}`],
-  ];
+  const tiles = [
+    [Calendar, last ? format(new Date(last.service_date), 'd MMM', { locale: i18n.language === 'ar' ? ar : enUS }) : '—', t('parts.lastDone')],
+    [Repeat, km != null ? `${n(km)} ${unit}` : months != null ? t('parts.months', { m: months }) : '—', t('parts.every')],
+    [Wallet, `${n(spent)} ${t('vehicles.currency')}`, t('parts.spent')],
+  ] as const;
 
   return (
     <SafeAreaView className="flex-1 bg-paper">
-      <View className="flex-1 gap-4 px-6">
-        <Header title={i18n.language === 'ar' ? st.name_ar : st.name_en} />
-        {status ? (
-          <PartMetric status={status} unit={unit} label={t(over ? 'parts.overdueLabel' : 'parts.untilChange')} />
-        ) : null}
-        <Text variant="heading">{t('parts.inUse')}</Text>
-        {rows.map(([label, v]) => (
-          <View key={label} className="min-h-10 flex-row items-center justify-between gap-3">
-            <Text variant="body" className="text-muted">{label}</Text>
-            <Text variant="label" className="shrink text-end">{v}</Text>
-          </View>
-        ))}
-      </View>
-      <View className="px-6 pb-4">
-        <Button
-          title={t('parts.viewHistory')}
-          onPress={() => router.push({ pathname: '/part-history', params: params })}
+      <View className="px-6">
+        <Header
+          title={name}
+          right={
+            <PressableScale
+              accessibilityRole="button"
+              accessibilityLabel={t('parts.viewHistory')}
+              onPress={() => router.push({ pathname: '/part-history', params })}
+              className="h-11 w-11 items-center justify-center rounded-field bg-white">
+              <History size={22} color={c.ink} />
+            </PressableScale>
+          }
         />
+      </View>
+      <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="grow justify-center gap-8 px-6 py-4">
+        <PartStatus status={status} unit={unit} intervalKm={km} snoozedUntil={snoozedUntil} nameEn={st.name_en} />
+        {last ? (
+          <View className="flex-row gap-3">
+            {tiles.map(([Icon, value, caption]) => (
+              <View key={caption} className="flex-1 items-center gap-1 rounded-item bg-white p-3">
+                <Icon size={22} color={c.teal} />
+                <Text variant="label" numberOfLines={1} adjustsFontSizeToFit>{value}</Text>
+                <Text variant="caption" className="text-muted">{caption}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+      </ScrollView>
+      <View className="flex-row items-center gap-3 px-6 pb-4">
+        <Button className="flex-1" icon={last ? <Check size={20} color="#222E29" /> : undefined} title={t(last ? 'common.done' : 'partStatus.none')} onPress={done} />
+        {canSnooze ? (
+          <PressableScale
+            accessibilityRole="button"
+            accessibilityLabel={t('reminders.snooze')}
+            disabled={busy}
+            onPress={snooze}
+            className="h-[52px] w-[52px] items-center justify-center rounded-field border border-line bg-white">
+            {busy ? <ActivityIndicator color={c.ink} /> : <AlarmClock size={24} color={c.ink} />}
+          </PressableScale>
+        ) : null}
       </View>
     </SafeAreaView>
   );

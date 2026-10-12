@@ -1,8 +1,9 @@
+import { useRefresh } from '@/components/Refresh';
 import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
-import { useMutationState } from '@tanstack/react-query';
+import { useMutationState, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
-import { BadgeCheck, ListFilter, X } from 'lucide-react-native';
+import { BadgeCheck, ListFilter, Trash2, X } from 'lucide-react-native';
 import * as Icons from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
@@ -11,11 +12,14 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { VoiceQueueCard } from '@/components/VoiceQueueCard';
+import { PartArt } from '@/components/PartArt';
 import { Button, Choice, Header, Item, Text } from '@/components/ui';
+import { openCapture } from '@/lib/reading';
 import { carLog, scopeOf, type Kind } from '@/lib/carLog';
 import { consumption } from '@/lib/fuel';
 import { useCurrentVehicle, useExpenses, useFuelFills, useOdometerReadings, useRecordCategories, useServiceTypes, useVehicleLogs } from '@/lib/queries';
 import { SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
+import { removeRecord } from '@/lib/removeRecord';
 import { pickOption, type PickOption } from '@/lib/sheet';
 import { shadows, useColors } from '@/lib/theme';
 
@@ -23,11 +27,12 @@ import { shadows, useColors } from '@/lib/theme';
 // Maintenance logs, running costs and odometer readings in one list (merge + filter: src/lib/carLog.ts).
 const n = (x: number) => x.toLocaleString('en-US');
 const KINDS: Kind[] = ['all', 'maintenance', 'cost', 'reading'];
-const icon = (name?: string | null, fallback = Icons.Wrench) => (name && (Icons as any)[name]) || fallback;
 
 export default function HistoryScreen() {
   const { t, i18n } = useTranslation();
+  const refresh = useRefresh();
   const c = useColors();
+  const qc = useQueryClient();
   const p = useLocalSearchParams<{ vehicleId?: string; filter?: string }>(); // filter: a category, subcategory or service id
   const { vehicle: current } = useCurrentVehicle();
   const vehicleId = p.vehicleId ?? current?.id;
@@ -67,6 +72,11 @@ export default function HistoryScreen() {
     const f = fuel?.byFill.get(id);
     return f ? t('fuel.perFill', { n: f.kmPerLiter.toLocaleString('en-US', { maximumFractionDigits: 1 }) }) : null;
   };
+  const trash = (table: 'maintenance_logs' | 'expenses', id: string) => (
+    <Pressable accessibilityRole="button" accessibilityLabel={t('capture.quick.delete')} hitSlop={13} onPress={() => removeRecord(qc, table, id)}>
+      <Trash2 size={18} color={c.muted} />
+    </Pressable>
+  );
   const chip = options.find((o) => o.id === filterId);
 
   const entries = carLog(logs.data ?? [], costs, readings, kind, scopeOf(filterId, tree, services));
@@ -78,7 +88,7 @@ export default function HistoryScreen() {
     else groups.push({ month, items: [e] });
   }
   const empty = logs.isSuccess && !carLog(logs.data, costs, readings, 'all', null).length && !queued.length;
-  const add = () => router.push('/capture');
+  const add = () => openCapture();
 
   if (logs.isError && !logs.data) return <ErrorState onRetry={logs.refetch} retrying={logs.isRefetching} onShowSaved={onShowSaved} />;
   return (
@@ -102,7 +112,7 @@ export default function HistoryScreen() {
         </View>
       ) : (
         <>
-          <ScrollView className="flex-1" contentContainerClassName="gap-3 pb-4" showsVerticalScrollIndicator={false}>
+          <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-3 pb-4" showsVerticalScrollIndicator={false}>
             <Text variant="title">{t('history.title')}</Text>
             {vehicleId ? <VoiceQueueCard vehicleId={vehicleId} /> : null}
             <Choice
@@ -137,7 +147,10 @@ export default function HistoryScreen() {
               </View>
             ))}
             {groups.length === 0 && !queued.length && logs.isSuccess ? (
-              <Text variant="body" className="mt-6 text-center text-muted">{t('history.emptyCategory')}</Text>
+              <View className="mt-6 gap-4">
+                <Text variant="body" className="text-center text-muted">{t('history.emptyCategory')}</Text>
+                <Button variant="secondary" title={t('history.clearFilter')} onPress={() => { setFilterId(null); setKind('all'); }} />
+              </View>
             ) : null}
             {groups.map((g) => (
               <View key={g.month} className="gap-3">
@@ -151,11 +164,12 @@ export default function HistoryScreen() {
                     return (
                       <Item
                         key={`c${x.id}`}
-                        icon={icon(sub?.icon, Icons.Receipt)}
+                        leading={<PartArt nameEn={sub?.name_en} size={28} />}
                         title={sub ? name(sub) : t(`expenses.chip.${x.category}`)}
                         subtitle={[`${n(x.amount)} ${t('expenses.currency')}`, x.description, x.liters != null ? t('history.liters', { n: n(x.liters) }) : null, perFill(x.id)].filter(Boolean).join(' · ')}
                         chevron={false}
                         disabled
+                        aside={x.from_log ? undefined : trash('expenses', x.id)}
                       />
                     );
                   }
@@ -172,10 +186,11 @@ export default function HistoryScreen() {
                         <Text variant="caption" className={l.status === 'needs_review' ? 'text-[#B7791F]' : 'text-teal'}>{caption}</Text>
                       ) : null}
                       <Item
-                        icon={icon(l.service_types?.icon)}
+                        leading={<PartArt nameEn={l.service_types?.name_en} size={28} />}
                         title={l.title}
                         subtitle={`${base} · ${suffix}`}
                         onPress={() => router.push({ pathname: '/log/[id]', params: { id: l.id } })}
+                        aside={trash('maintenance_logs', l.id)}
                       />
                     </View>
                   );

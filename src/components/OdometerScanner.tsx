@@ -26,7 +26,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Button, Text } from '@/components/ui';
 import { candidates, decide, NO_READS, pickOutlier, pickReading, type Reads } from '@/lib/odometerScan';
-import { useIsGuest } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 
 const WINDOW_H = 120; // the camera window: a wide strip, the shape of an odometer display
@@ -108,7 +107,6 @@ function Shell({ onClose, corner, footer, children }: { onClose: () => void; cor
 /** The camera itself: only rendered once there is a camera and the permission to use it. */
 function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType, onClose }: Props & { device: CameraDevice }) {
   const { t } = useTranslation();
-  const guest = useIsGuest();
   const [torch, setTorch] = useState(false);
   const [started, setStarted] = useState(false);
   const [slow, setSlow] = useState(false);
@@ -211,14 +209,13 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
   // Full HD frames (Q97): small LCD digits are only a few dozen pixels tall at the default 720p.
   const frames = useFrameOutput({ targetResolution: CommonResolutions.FHD_16_9, pixelFormat: Platform.OS === 'android' ? 'rgb' : 'yuv', onFrame });
   const photo = usePhotoOutput({ targetResolution: CommonResolutions.FHD_16_9, containerFormat: 'jpeg', qualityPrioritization: 'speed' });
-  // Guests never ask the AI, so their camera does without the photo stream.
-  const outputs = useMemo(() => (guest || !AI_ON ? [frames] : [frames, photo]), [guest, frames, photo]);
+  const outputs = useMemo(() => (AI_ON ? [frames, photo] : [frames]), [frames, photo]);
   const onStarted = useCallback(() => setStarted(true), []);
 
   // The AI backup (off unless AI_ON, Q97): with no number after AI_AFTER, a still goes to the AI, retried a few times
   // while nothing is found. Its answer is doubted like the phone's own read, and the owner still confirms it.
   useEffect(() => {
-    if (!AI_ON || !started || found != null || guest) return;
+    if (!AI_ON || !started || found != null) return;
     const mine = look.current;
     let tries = 0;
     let stop = false;
@@ -231,7 +228,7 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
         const { data, error } = await supabase.functions.invoke('read-odometer', { body: { image_base64: await still(photo) } });
         if (__DEV__) console.log(`odometer AI: ${Date.now() - asked} ms`, error ? `error ${error.context?.status ?? error.message}` : data);
         const status = error?.context?.status;
-        if (status === 403 || status === 429) return void (stop = true); // switched off, a guest, or today's limit: no retry
+        if (status === 403 || status === 429) return void (stop = true); // switched off, or today's limit: no retry
         const n: unknown = data?.reading;
         const reading = typeof n === 'number' && Number.isInteger(n) ? (current == null ? n : pick([String(n)]) ?? n) : null;
         if (reading != null && mine === look.current && !paused.current) return show(reading);
@@ -247,7 +244,7 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
       stop = true;
       clearTimeout(timer);
     };
-  }, [started, found, guest, photo, current, pick, show]);
+  }, [started, found, photo, current, pick, show]);
 
   // Q97: a different exposure every EXPOSURE_MS while nothing is found; back to normal once a number shows.
   useEffect(() => {

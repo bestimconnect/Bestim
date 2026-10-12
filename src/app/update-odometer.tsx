@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { differenceInCalendarDays, format, parseISO } from 'date-fns';
-import { router } from 'expo-router';
+import { differenceInCalendarDays, parseISO } from 'date-fns';
+import { router, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, ArrowRight, Camera, TrendingUp } from 'lucide-react-native';
 import { useState } from 'react';
 import { I18nManager, Pressable, ScrollView, TextInput, View } from 'react-native';
@@ -11,12 +11,15 @@ import { useTranslation } from 'react-i18next';
 import { OdometerRuler } from '@/components/OdometerRuler';
 import { OdometerScanner } from '@/components/OdometerScanner';
 import { RollingNumber } from '@/components/RollingNumber';
-import { Button, Field, Header, Item, Text } from '@/components/ui';
+import { Button, Header, Item, Text } from '@/components/ui';
+import { errorText } from '@/lib/errors';
 import { easeOut } from '@/lib/motion';
 import { maxJump } from '@/lib/odometerScan';
-import { useCurrentVehicle, type Vehicle } from '@/lib/queries';
+import { useCurrentVehicle, useVehicle, type Vehicle } from '@/lib/queries';
+import { hasReading } from '@/lib/reading';
 import { supabase } from '@/lib/supabase';
 import { useColors } from '@/lib/theme';
+import { KEYBOARD_DONE_ID } from '@/components/KeyboardDone';
 
 const MAX = 9_999_999;
 
@@ -31,8 +34,6 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
   const [reading, setReading] = useState(vehicle.current_odometer);
   const [typing, setTyping] = useState<string | null>(null); // the digits being typed; null = the rolling number shows
   const [scanning, setScanning] = useState(false);
-  const [scanned, setScanned] = useState<number | null>(null); // what the camera read; the note shows while it still stands
-  const [reason, setReason] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -48,33 +49,21 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
     shown.set(still ? to : withTiming(to, { duration: 900, easing: easeOut }));
   };
 
+  const first = !hasReading(vehicle); // Q105: the car was added without a reading, so nothing to compare against
   const unit = vehicle.odometer_unit;
   const shortUnit = t(`home.${unit}`);
   const last = vehicle.current_odometer.toLocaleString('en-US');
   const delta = reading - vehicle.current_odometer;
-  const lower = delta < 0;
-  const days = differenceInCalendarDays(new Date(), parseISO(vehicle.odometer_updated_at));
+  const lower = !first && delta < 0;
+  const days = vehicle.odometer_updated_at ? differenceInCalendarDays(new Date(), parseISO(vehicle.odometer_updated_at)) : 0;
 
   /** `value`: the camera's confirmed number saves straight away, before the rolling number has caught up. */
   const save = async (value = reading) => {
-    const lower = value < vehicle.current_odometer;
-    if (lower && reason.trim().length < 3) return setError(t('odometer.reasonHint'));
     setSaving(true);
     setError('');
-    const { error: e1 } = await supabase.from('vehicles').update({ current_odometer: value }).eq('id', vehicle.id);
-    const { error: e2 } = lower
-      ? await supabase.from('maintenance_logs').insert({
-          vehicle_id: vehicle.id,
-          title: t('odometer.logTitle'),
-          description: reason.trim(),
-          odometer_reading: value,
-          service_date: format(new Date(), 'yyyy-MM-dd'),
-          source: 'manual',
-          status: 'needs_review',
-        })
-      : { error: null };
+    const { error: e } = await supabase.from('vehicles').update(first ? { current_odometer: value, odometer_updated_at: new Date().toISOString() } : { current_odometer: value }).eq('id', vehicle.id);
     setSaving(false);
-    if (e1 || e2) return setError(t('odometer.error'));
+    if (e) return setError(errorText(e));
     qc.invalidateQueries({ queryKey: ['vehicles'] });
     qc.invalidateQueries({ queryKey: ['logs'] });
     qc.invalidateQueries({ queryKey: ['expenses'] });
@@ -86,7 +75,7 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
       <ScrollView className="flex-1" contentContainerClassName="gap-4 p-6" keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         <Header title={t('odometer.header')} />
         <Text variant="caption" className="text-muted">
-          {days > 0 ? t('odometer.last', { value: last, unit: shortUnit, count: days }) : t('odometer.lastToday', { value: last, unit: shortUnit })}
+          {first ? t('odometer.first') : days > 0 ? t('odometer.last', { value: last, unit: shortUnit, count: days }) : t('odometer.lastToday', { value: last, unit: shortUnit })}
         </Text>
 
         <View className="items-center gap-1 pt-4">
@@ -108,6 +97,8 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
               }}
               onBlur={() => setTyping(null)}
               keyboardType="number-pad"
+              returnKeyType="done"
+              inputAccessoryViewID={KEYBOARD_DONE_ID}
               maxLength={7}
               placeholder={reading.toLocaleString('en-US')}
               placeholderTextColor={c.line}
@@ -128,11 +119,9 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
           <ArrowRight size={14} color={c.muted} />
         </View>
 
-        {scanned === reading ? <Text variant="caption" className="text-center text-teal">{t('odometer.scan.read')}</Text> : null}
-
         {lower ? (
-          <Field label={t('odometer.reason')} value={reason} onChangeText={setReason} placeholder={t('odometer.noteBody')} multiline />
-        ) : delta > 0 ? (
+          <Text variant="caption" className="text-center text-danger">{t('errors.lowerReading')}</Text>
+        ) : !first && delta > 0 ? (
           <View className="flex-row items-center justify-center gap-2">
             <TrendingUp size={16} color={c.teal} />
             <Text variant="caption" className="text-teal">{t('odometer.since', { value: delta.toLocaleString('en-US'), unit: shortUnit })}</Text>
@@ -144,20 +133,17 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
         {error ? <Text variant="caption" className="text-danger">{error}</Text> : null}
       </ScrollView>
       <View className="px-6 pb-4 pt-2">
-        <Button title={t('odometer.cta')} onPress={() => save()} loading={saving} />
+        <Button title={t('odometer.cta')} onPress={() => save()} loading={saving} disabled={lower} />
       </View>
       {scanning ? (
         <OdometerScanner
-          current={vehicle.current_odometer}
-          jump={maxJump(unit, days)}
+          current={first ? undefined : vehicle.current_odometer}
+          jump={first ? undefined : maxJump(unit, days)}
           unit={shortUnit}
           onConfirm={(v) => {
             setScanning(false);
-            // A lower reading needs its reason first (Q19.2): it lands on the page instead of saving.
-            if (v < vehicle.current_odometer) {
-              setScanned(v);
-              return rollTo(v);
-            }
+            // A lower reading is refused: it lands on the page, with the reason why, instead of saving.
+            if (!first && v < vehicle.current_odometer) return rollTo(v);
             shown.set(v);
             save(v);
           }}
@@ -173,6 +159,8 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
 }
 
 export default function UpdateOdometerScreen() {
-  const { vehicle } = useCurrentVehicle();
-  return vehicle ? <Form vehicle={vehicle} /> : null;
+  const { vehicleId } = useLocalSearchParams<{ vehicleId?: string }>();
+  const current = useCurrentVehicle().vehicle;
+  const vehicle = useVehicle(vehicleId).vehicle ?? current;
+  return vehicle ? <Form vehicle={vehicle} /> : <SafeAreaView className="flex-1 bg-paper px-6"><Header title="" /></SafeAreaView>;
 }

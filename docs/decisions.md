@@ -1172,3 +1172,58 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 - Next: the CEO picks between our own small model and the Anyline SDK for segment displays (phase 3), with the AI cost table alongside.
 **Why:** On the founder's iPhone the reader failed on every dashboard type, even with the AI on.
 - **Round 2 (founder test, 2026-10-11: better, but inconsistent and slow):** reads are combined digit by digit (the most common digit at each position across the last 6 reads, 2/3 majority, at least 3 reads), so a flickering segment digit no longer blocks the reading. The same believable number (5+ digits, at or just above the saved reading) twice in a row counts at once. iPhone reads every 200 ms. While nothing is found, the exposure cycles normal → darker → brighter every 1.2 s, for backlit LCDs, glare and night. No test text under the camera window any more; in test builds a long-press on the window shares what was read.
+
+### Q98: + opens one quick-add sheet (founder, 2026-10-12)
+**Decision:** The + button opens a single sheet for maintenance, running costs and (on the same form) the reading: a "say it" row, the owner's most used services as chips, amount, date, and the rest under "More details". Saving closes it with "Saved · Undo". The voice/manual chooser, the review screen and the success screen are gone for hand entry. Voice keeps its review list.
+**Why:** The founder found the app needed someone who already knew it. An oil change went from 5 screens and 8 taps to 1 sheet and 3 taps. Layout approved from the mock-up in `../docs/ux-mockup/`.
+
+### Q99: Edit freely for 24 hours, then with a reason (founder, 2026-10-12)
+**Decision:** A record can be changed directly during its first 24 hours. After that a short reason is asked and the original stays visible, as before. Expenses can be opened and edited.
+**Why:** Fixing a typo should not need an explanation; changing old history should leave a trace.
+
+**Spec for dev:** `guard_log_edit` trigger + `correct_log` (`20261012090000_edit_delete_rules.sql`); `isFresh()` in `src/lib/quickAdd.ts`.
+
+### Q100: Records and expenses can be deleted, with Undo (founder, 2026-10-12)
+**Decision:** Delete removes the row at once with "Deleted · Undo" for five seconds. Deleting a record removes its automatic expense and steps the car's reading back if that record set it. The car counts records removed after their first day, so a shared history can say how many were removed.
+**Spec for dev:** `src/lib/removeRecord.ts`; `log_removed` trigger; `vehicles.removed_records` (not shown anywhere yet).
+
+### Q101: A car's reading never goes down by hand (founder, 2026-10-12)
+**Decision:** A new reading cannot be lower than the current one, and a record dated today cannot carry a lower reading (an older-dated record can). A wrong reading is fixed by editing or deleting the record that set it. This replaces "a lower reading needs a reason" (Q20).
+
+### Q102: First run in three screens, and guests can add records by hand (dev, 2026-10-12; founder can overrule)
+**Decision:** Intro → add car (brand, model, year chained; reading on the same screen) → Home. No language screen (the phone's language, with a switch on the intro), no "first log", "save your car" or success screens; guests get a dismissible "save your car with an account" card on Home. A guest can open + and save by hand; voice, the other tabs, export, sharing and reminders still need an account. This replaces the order of Q87 and the guest limits of Q17 for +.
+**Why:** With the car first, blocking a guest's first record with a sign-up form would undo the gain.
+
+### Q103: No guest mode: sign in or sign up at the door (founder, 2026-10-12)
+**Decision:** The welcome screen is the intro slides plus two buttons, "Create account" and "Sign in". Nothing in the app is usable without an account. A new person signs up first, then adds the car. "Continue with Google" is on both screens: an existing account is signed in, a new one is created. Old guest sessions from test builds are taken to Create account and keep their car.
+**Why:** The founder found the app always treated him as new and wants a clear door. It also closes the gap where anyone could make unlimited guest accounts.
+**Replaces:** the guest parts of Q17 (guest limits and the feature gate), Q77 (guest data deletion), Q87 (the order of first run) and Q102 (guests adding records by hand and the "save your car" card).
+
+### Q104: Splash animation, then onboarding, then sign in (founder, 2026-10-12)
+**Decision:** Three beats. (1) The splash builds the logo in about 2 seconds (lime slash sweeps in, the B settles, wordmark and tagline rise, fade). (2) Onboarding shows every time the app opens signed out: the slides with "Next" / "Get started" and a "Skip" link (hidden on the last slide). (3) It ends on Sign in, with a link to Create account. "Continue with Google" is the last element on both account screens, under the "or" divider.
+**Why:** With the slides and the account buttons on one screen it no longer read as onboarding.
+**Adjusts:** Q103's welcome screen.
+
+### Q105: The first reading can wait, records cannot (founder, 2026-10-13)
+**Decision:** When adding a car, the odometer reading is optional ("Don't have it now? You can add it later, before your first record."). Until the car has a reading, Home shows an "Add your car's reading" card, and the + button (and voice) asks for the reading first instead of opening the record sheet. Once the reading is saved, everything works as usual.
+**Why:** The owner may not be next to the car when adding it. But records without a starting reading would make reminders and the history unreliable, so records wait for it.
+**Spec for dev:** "no reading yet" = `vehicles.odometer_updated_at` is null (`current_odometer` stays 0, so a real 0 is still allowed); `hasReading()` and `openCapture()` in `src/lib/reading.ts`; migration `20261013090000_vehicle_reading_optional.sql` (drops NOT NULL on that column; apply it before release).
+
+### Q106: Every screen has one clear next step (founder, 2026-10-13)
+**Decision:** Four rules for every screen.
+1. One main (lime) button per screen: what the owner came to do. It is pinned at the bottom and always visible.
+2. Looking things up ("view history") is never the main button. It becomes a secondary button or a text link.
+3. A screen that reports a problem offers the fix on the same screen (for example "Done, log it" and "Snooze a week" on a part that is due).
+4. An empty screen always says what to do next, with a button.
+**Why:** Screens that inform but do not lead lose the user: they read the screen and then do not know what to press.
+**Spec for dev:** part, car page (pinned "Add a record" / "Update reading"), reminders, record, car log, export, share, notifications, check-your-email and success screens follow it. Snooze lives in `src/lib/snooze.ts`.
+
+### Q107: A status screen shows a picture, one number and one button (founder, 2026-10-12)
+**Decision:** The part screen reads like a picture, not a receipt: one ring (coloured by on time / due soon / late / snoozed), one big number with two words under it, three small icon tiles (last done, every, spent), and one big button ("Done", or "Add the last time" when never logged). Snooze is a small icon button next to it, only when due. History is an icon in the header. Words are the last resort. The old Part screen and Reminder screen were the same page twice, so they are now one screen (`/part`).
+**Why:** Owners glance at the screen in a hurry; sentences and five label/value rows were too much to read.
+**Spec for dev:** `src/app/part.tsx`, `src/components/PartStatus.tsx` (SVG ring, mirrored in RTL); `src/app/reminder.tsx` deleted, its callers (Reminders tab, success screen, notification links) now open `/part`. About 12 words on screen.
+**Applied (2026-10-12):** the same rule now covers part rows (40pt state ring in place of the chevron, subtitle is just the number and unit: Home, Reminders, car page), the record screen (badge, title, cost, one chip, three tiles, one button + trash) and the car page (log rows with cost, picture empty states, pill links, icon-only Update reading).
+**Update (2026-10-12):** the ring was replaced by the Bestim part library: drawings that fill like a tank, coloured lime (on time), amber (due soon) or coral (late), grey when snoozed. The part screen shows the drawing with the percentage of life left; rows show a 44pt drawing and "8%" or "Late"; record screens and log rows show the drawing without a gauge. Source in `assets/images/parts/source/`.
+**Update (2026-10-12, mock-up):** Home and car-page part rows are "design 1" (tinted drawing square, name with the percentage or Late, life bar); Reminders is a two-column grid of "design 2" picture tiles; the fill never drops below a fifth of the drawing and the empty part is tinted in the state colour.
+
+**Update (2026-10-13, style 6):** the part pictures are now rendered pictures ("style 6") in three status colours (lime, amber, red), sized in proportion to their card (a small card gets a small picture). Home shows ring badges, Reminders a grouped list (needs attention / on time / snoozed), the service page a dashboard arc. The tank fill is gone. Masters in `../assets/parts-3d/style 6/`.
