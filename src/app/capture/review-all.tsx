@@ -154,7 +154,7 @@ export default function ReviewAll() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <ScrollView contentContainerClassName="gap-4 p-6" keyboardShouldPersistTaps="handled" className="flex-1">
+      <ScrollView contentContainerClassName="gap-4 p-6" keyboardShouldPersistTaps="handled" className="flex-1" automaticallyAdjustKeyboardInsets>
         <Header title={t('capture.batch.header')} />
         <Text variant="title">{t(records.length ? 'capture.batch.title' : 'capture.batch.emptyTitle')}</Text>
         {transcript ? (

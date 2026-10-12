@@ -5,6 +5,7 @@ import { I18nManager, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { useTabBarSpace } from '@/components/TabBar';
 import { FuelCard } from '@/components/FuelCard';
 import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
@@ -28,6 +29,7 @@ const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
 
 export default function Expenses() {
   const refresh = useRefresh();
+  const space = useTabBarSpace();
   const { t, i18n } = useTranslation();
   const c = useColors();
   const queryClient = useQueryClient();
@@ -54,7 +56,7 @@ export default function Expenses() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
-      <ScrollView refreshControl={refresh} contentContainerClassName="gap-5 px-6 pt-2 pb-[120px] grow">
+      <ScrollView refreshControl={refresh} contentContainerClassName="gap-5 px-6 pt-2 grow" contentContainerStyle={{ paddingBottom: space }}>
         <Header
           title={t('expenses.title')}
           right={

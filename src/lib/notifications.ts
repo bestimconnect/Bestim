@@ -33,8 +33,15 @@ export async function shouldAskNotifications() {
   return (await Notifications.getPermissionsAsync()).status === 'undetermined';
 }
 
+/** Android files every reminder under this category in the phone's settings (re-set each sync so the name follows the language). Android 13+ only shows the permission prompt once a channel exists. */
+async function ensureChannel() {
+  if (Platform.OS === 'android')
+    await Notifications.setNotificationChannelAsync('default', { name: i18n.t('notify.channel'), importance: Notifications.AndroidImportance.DEFAULT });
+}
+
 /** Ask the OS (screen 45 / the banner on 28). Returns whether notifications are allowed now. */
 export async function requestNotifications() {
+  await ensureChannel();
   const granted = (await Notifications.requestPermissionsAsync()).granted;
   if (granted) await syncNotifications();
   return granted;
@@ -50,10 +57,8 @@ export async function syncNotifications() {
     if (!user) return useInbox.getState().clear(); // signed out: the list belongs to that account
     useInbox.getState().deliver();
     useInbox.getState().setScheduled([]);
+    await ensureChannel();
     if (!(await notificationsAllowed())) return;
-    // Android files every reminder under this category in the phone's settings (re-set each sync so the name follows the language).
-    if (Platform.OS === 'android')
-      await Notifications.setNotificationChannelAsync('default', { name: i18n.t('notify.channel'), importance: Notifications.AndroidImportance.DEFAULT });
 
     const today = new Date().toLocaleDateString('en-CA');
     const [profile, vehicles, logs, snoozes] = await Promise.all([

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { VoiceQueueCard } from '@/components/VoiceQueueCard';
+import { PartArt } from '@/components/PartArt';
 import { Button, Choice, Header, Item, Text } from '@/components/ui';
 import { openCapture } from '@/lib/reading';
 import { carLog, scopeOf, type Kind } from '@/lib/carLog';
@@ -26,7 +27,6 @@ import { shadows, useColors } from '@/lib/theme';
 // Maintenance logs, running costs and odometer readings in one list (merge + filter: src/lib/carLog.ts).
 const n = (x: number) => x.toLocaleString('en-US');
 const KINDS: Kind[] = ['all', 'maintenance', 'cost', 'reading'];
-const icon = (name?: string | null, fallback = Icons.Wrench) => (name && (Icons as any)[name]) || fallback;
 
 export default function HistoryScreen() {
   const { t, i18n } = useTranslation();
@@ -73,7 +73,7 @@ export default function HistoryScreen() {
     return f ? t('fuel.perFill', { n: f.kmPerLiter.toLocaleString('en-US', { maximumFractionDigits: 1 }) }) : null;
   };
   const trash = (table: 'maintenance_logs' | 'expenses', id: string) => (
-    <Pressable accessibilityRole="button" accessibilityLabel={t('capture.quick.delete')} hitSlop={8} onPress={() => removeRecord(qc, table, id)}>
+    <Pressable accessibilityRole="button" accessibilityLabel={t('capture.quick.delete')} hitSlop={13} onPress={() => removeRecord(qc, table, id)}>
       <Trash2 size={18} color={c.muted} />
     </Pressable>
   );
@@ -164,7 +164,7 @@ export default function HistoryScreen() {
                     return (
                       <Item
                         key={`c${x.id}`}
-                        icon={icon(sub?.icon, Icons.Receipt)}
+                        leading={<PartArt nameEn={sub?.name_en} size={28} />}
                         title={sub ? name(sub) : t(`expenses.chip.${x.category}`)}
                         subtitle={[`${n(x.amount)} ${t('expenses.currency')}`, x.description, x.liters != null ? t('history.liters', { n: n(x.liters) }) : null, perFill(x.id)].filter(Boolean).join(' · ')}
                         chevron={false}
@@ -186,7 +186,7 @@ export default function HistoryScreen() {
                         <Text variant="caption" className={l.status === 'needs_review' ? 'text-[#B7791F]' : 'text-teal'}>{caption}</Text>
                       ) : null}
                       <Item
-                        icon={icon(l.service_types?.icon)}
+                        leading={<PartArt nameEn={l.service_types?.name_en} size={28} />}
                         title={l.title}
                         subtitle={`${base} · ${suffix}`}
                         onPress={() => router.push({ pathname: '/log/[id]', params: { id: l.id } })}

@@ -162,5 +162,5 @@ export default function UpdateOdometerScreen() {
   const { vehicleId } = useLocalSearchParams<{ vehicleId?: string }>();
   const current = useCurrentVehicle().vehicle;
   const vehicle = useVehicle(vehicleId).vehicle ?? current;
-  return vehicle ? <Form vehicle={vehicle} /> : null;
+  return vehicle ? <Form vehicle={vehicle} /> : <SafeAreaView className="flex-1 bg-paper px-6"><Header title="" /></SafeAreaView>;
 }

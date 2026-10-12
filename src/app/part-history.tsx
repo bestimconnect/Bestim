@@ -20,7 +20,7 @@ export default function PartHistory() {
   const { vehicle } = useVehicle(vehicleId);
   const st = useServiceTypes().data?.find((s) => s.id === serviceTypeId);
   const logs = (useVehicleLogs(vehicleId).data ?? []).filter((l) => l.service_type_id === serviceTypeId); // newest first
-  if (!vehicle || !st) return <View className="flex-1 bg-paper" />;
+  if (!vehicle || !st) return <SafeAreaView className="flex-1 bg-paper px-6"><Header title="" /></SafeAreaView>;
 
   const unit = t(`vehicles.unit.${vehicle.odometer_unit}`);
   const name = i18n.language === 'ar' ? st.name_ar : st.name_en;

@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { X } from 'lucide-react-native';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 import { Button, PressableScale, Text } from '@/components/ui';
 import { useSheet, type SheetAction } from '@/lib/sheet';
@@ -10,6 +11,7 @@ import { useColors } from '@/lib/theme';
 // Confirmations (formSheet, same frame as screen 13). Opened with `sheet()` from src/lib/sheet.ts.
 export default function Sheet() {
   const c = useColors();
+  const { t } = useTranslation();
   const { bottom } = useSafeAreaInsets();
   const { title, body, actions } = useSheet();
   const choices = actions.filter((a) => a.style !== 'cancel');
@@ -23,7 +25,7 @@ export default function Sheet() {
     <View className="gap-4 rounded-t-screen border-t border-line bg-sheet px-6 pt-6" style={{ paddingBottom: bottom + 16 }}>
       <View className="min-h-11 flex-row items-center gap-3">
         <Text variant="heading" className="flex-1">{title}</Text>
-        <PressableScale accessibilityRole="button" onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white">
+        <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white">
           <X size={20} color={c.ink} />
         </PressableScale>
       </View>

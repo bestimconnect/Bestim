@@ -65,7 +65,7 @@ export default function RegisterScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <ScrollView className="flex-1" contentContainerClassName="pb-10" keyboardShouldPersistTaps="handled">
+      <ScrollView className="flex-1" contentContainerClassName="pb-10" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <View className="px-6 pt-3">
           <Header title={t('auth.register.title')} />
         </View>
@@ -147,9 +147,9 @@ export default function RegisterScreen() {
           />
         </Text>
 
-        <View className="flex-row justify-center gap-1.5 pt-2">
+        <View className="flex-row items-center justify-center gap-1.5 pt-2">
           <Text className="text-muted">{t('auth.register.haveAccount')}</Text>
-          <Pressable onPress={() => router.replace('/login')}>
+          <Pressable onPress={() => router.replace('/login')} className="min-h-11 justify-center">
             <Text variant="label" className="text-teal">{t('auth.register.signIn')}</Text>
           </Pressable>
         </View>

@@ -1,3 +1,4 @@
+import { useTabBarSpace } from '@/components/TabBar';
 import { useRefresh } from '@/components/Refresh';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -23,6 +24,7 @@ const KEYS = { due_soon: 'dueSoon', overdue: 'overdue', odometer: 'odometer', we
 export default function NotificationsScreen() {
   const { t } = useTranslation();
   const refresh = useRefresh();
+  const space = useTabBarSpace();
   const c = useColors();
   const qc = useQueryClient();
   const userId = useSession()?.user.id;
@@ -64,7 +66,7 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
-      <ScrollView refreshControl={refresh} contentContainerClassName="gap-3 px-6" contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView refreshControl={refresh} contentContainerClassName="gap-3 px-6" contentContainerStyle={{ paddingBottom: space }}>
         <Header title={t('notifPrefs.title')} />
         <Text variant="title" className="mb-1">{t('notifPrefs.heading')}</Text>
         {!allowed ? (

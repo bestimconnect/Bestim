@@ -137,7 +137,7 @@ export default function AddVehicleInfoScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <ScrollView className="flex-1" contentContainerClassName="gap-5 p-6" keyboardShouldPersistTaps="handled">
+      <ScrollView className="flex-1" contentContainerClassName="gap-5 p-6" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Header title={t(mode === 'extra' ? 'vehicles.add' : 'onboarding.addVehicle.info.header')} />
         <Text variant="title">{t('onboarding.addVehicle.info.title')}</Text>
         <Rise>

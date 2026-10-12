@@ -34,7 +34,7 @@ export default function ReviewReadingScreen() {
       router.back();
     },
   });
-  if (!log || !vehicle) return <SafeAreaView className="flex-1 bg-paper" />;
+  if (!log || !vehicle) return <SafeAreaView className="flex-1 bg-paper px-6"><Header title="" /></SafeAreaView>;
 
   const current = log.odometer_reading ?? 0;
   // Previous = latest other log with a reading on or before this one, else the vehicle's odometer.

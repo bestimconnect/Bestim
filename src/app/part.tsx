@@ -28,7 +28,7 @@ export default function PartScreen() {
   const { data: logs, parts } = useVehicleParts(vehicle);
   const st = useServiceTypes().data?.find((s) => s.id === params.serviceTypeId);
   const [busy, setBusy] = useState(false);
-  if (!vehicle || !st) return <View className="flex-1 bg-paper" />;
+  if (!vehicle || !st) return <SafeAreaView className="flex-1 bg-paper px-6"><Header title="" /></SafeAreaView>;
 
   const unit = t(`vehicles.unit.${vehicle.odometer_unit}`);
   const mine = (logs ?? []).filter((l) => l.service_type_id === st.id); // newest first
@@ -76,7 +76,7 @@ export default function PartScreen() {
         />
       </View>
       <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="grow justify-center gap-8 px-6 py-4">
-        {status || !last ? <PartStatus status={status} unit={unit} intervalKm={km} snoozedUntil={snoozedUntil} /> : null}
+        <PartStatus status={status} unit={unit} intervalKm={km} snoozedUntil={snoozedUntil} nameEn={st.name_en} />
         {last ? (
           <View className="flex-row gap-3">
             {tiles.map(([Icon, value, caption]) => (
@@ -97,7 +97,7 @@ export default function PartScreen() {
             accessibilityLabel={t('reminders.snooze')}
             disabled={busy}
             onPress={snooze}
-            className="h-14 w-14 items-center justify-center rounded-field border border-line bg-white">
+            className="h-[52px] w-[52px] items-center justify-center rounded-field border border-line bg-white">
             {busy ? <ActivityIndicator color={c.ink} /> : <AlarmClock size={24} color={c.ink} />}
           </PressableScale>
         ) : null}

@@ -1,13 +1,17 @@
+import { format, parseISO } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
-import * as Icons from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, CircleDot, ClipboardList, Gauge, List, Plus, Wrench, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
-import { I18nManager, Pressable, ScrollView, View } from 'react-native';
+import { I18nManager, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { useTabBarSpace } from '@/components/TabBar';
 import { FuelCard } from '@/components/FuelCard';
+import { PartArt } from '@/components/PartArt';
+import { PartRow } from '@/components/PartStatus';
 import { useRefresh } from '@/components/Refresh';
 import { useLightStatusBar } from '@/components/Hero';
 import { Button, Choice, Item, Metric, PressableScale, Rise, Text } from '@/components/ui';
@@ -20,10 +24,10 @@ import { vehicleArt } from '@/lib/vehicleArt';
 // Screen 09 — Vehicle detail, Figma ar-light 09/تفاصيل السيارة (segments per decisions Q15, links Q16).
 type Tab = 'overview' | 'log' | 'reminders';
 const n = (x: number) => x.toLocaleString('en-US');
-const icon = (name?: string) => (Icons as any)[name ?? ''] ?? Icons.Wrench;
 
 export default function VehicleDetail() {
   const refresh = useRefresh();
+  const space = useTabBarSpace();
   useLightStatusBar();
   const { t, i18n } = useTranslation();
   const c = useColors();
@@ -35,38 +39,43 @@ export default function VehicleDetail() {
   const expenses = useExpenses().data ?? [];
   const tyres = useRecordCategories().data?.find((c) => !c.parent_id && c.name_en === 'Tyres & wheels');
   if (isError && !all) return <ErrorState onRetry={refetch} retrying={isRefetching} />;
-  if (!vehicle) return <View className="flex-1 bg-paper" />;
+  if (!vehicle)
+    return (
+      <View className="flex-1 bg-paper px-6" style={{ paddingTop: insets.top + 8 }}>
+        <PressableScale accessibilityRole="button" accessibilityLabel={t('back')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white">
+          {I18nManager.isRTL ? <ChevronRight size={22} color={c.ink} /> : <ChevronLeft size={22} color={c.ink} />}
+        </PressableScale>
+      </View>
+    );
 
   const unit = t(`vehicles.unit.${vehicle.odometer_unit}`);
   const currency = t('vehicles.currency');
   const year = new Date().getFullYear().toString();
   const spent = expenses.filter((e) => e.vehicle_id === vehicle.id && e.expense_date.startsWith(year)).reduce((s, e) => s + e.amount, 0);
-  const tabTop = Math.max(insets.bottom, 16) + 68; // the floating tab bar's top edge
-  const barBottom = tabTop + 36; // clears the lifted + button
   const Back = I18nManager.isRTL ? ChevronRight : ChevronLeft;
 
-  const partItem = (p: Part) => {
-    const { state, remainingKm: km, remainingDays: d } = p.status;
-    const tKey = state === 'overdue' ? (km != null && km <= 0 ? 'overdueKm' : 'overdueDays') : km != null && d != null ? 'both' : km != null ? 'km' : 'days';
-    return (
-      <Item
-        key={p.serviceType.id}
-        icon={icon(p.serviceType.icon)}
-        tone={state === 'overdue' ? 'blush' : state === 'soon' ? 'amber' : 'mint'}
-        title={i18n.language === 'ar' ? p.serviceType.name_ar : p.serviceType.name_en}
-        subtitle={t(`vehicles.status.${tKey}`, { km: n(Math.abs(km ?? 0)), d: n(Math.abs(d ?? 0)), u: unit })}
-        onPress={() => router.push({ pathname: '/part', params: { vehicleId: vehicle.id, serviceTypeId: p.serviceType.id } })}
-      />
-    );
-  };
+  const partItem = (p: Part) => (
+    <PartRow
+      key={p.serviceType.id}
+      part={p}
+      name={i18n.language === 'ar' ? p.serviceType.name_ar : p.serviceType.name_en}
+      unit={unit}
+      onPress={() => router.push({ pathname: '/part', params: { vehicleId: vehicle.id, serviceTypeId: p.serviceType.id } })}
+    />
+  );
 
   const attention = needsAttention(parts);
   const overview = attention.length ? attention : parts.slice(0, 3);
-  const empty = <Text variant="body" className="text-muted">{t('vehicles.emptyParts')}</Text>;
+  const empty = (Icon: LucideIcon, key: string) => (
+    <View className="items-center gap-3 py-8">
+      <Icon size={64} color={c.muted} />
+      <Text variant="label" className="text-muted">{t(key)}</Text>
+    </View>
+  );
 
   return (
     <View className="flex-1 bg-paper">
-    <ScrollView refreshControl={refresh} className="flex-1" contentContainerStyle={{ paddingBottom: barBottom + 52 + 24 }}>
+    <ScrollView refreshControl={refresh} className="flex-1" contentContainerStyle={{ paddingBottom: space + 52 + 12 + 24 }}>
       <View className="gap-4 rounded-b-[28px] bg-panel px-6 pb-6" style={{ paddingTop: insets.top + 8 }}>
         <PressableScale
           accessibilityRole="button"
@@ -108,7 +117,7 @@ export default function VehicleDetail() {
         {seg === 'overview' ? (
           <>
             <Text variant="heading">{t(attention.length ? 'vehicles.attention' : 'vehicles.yourParts')}</Text>
-            {overview.length ? overview.map((p, i) => <Rise key={p.serviceType.id} index={i}>{partItem(p)}</Rise>) : empty}
+            {overview.length ? overview.map((p, i) => <Rise key={p.serviceType.id} index={i}>{partItem(p)}</Rise>) : empty(Wrench, 'vehicles.emptyParts')}
             <FuelCard vehicleId={vehicle.id} hint />
           </>
         ) : seg === 'log' ? (
@@ -116,36 +125,58 @@ export default function VehicleDetail() {
             logs.slice(0, 10).map((l, i) => (
               <Rise key={l.id} index={i}>
               <Item
-                icon={icon(l.service_types?.icon)}
+                leading={<PartArt nameEn={l.service_types?.name_en} size={28} />}
                 title={l.title}
-                subtitle={`${l.odometer_reading != null ? `${n(l.odometer_reading)} ${unit}` : '—'}${l.cost != null ? ` · ${n(l.cost)} ${currency}` : ''}`}
+                subtitle={[format(parseISO(l.service_date), 'd MMM', { locale: i18n.language === 'ar' ? ar : enUS }), l.odometer_reading != null ? `${n(l.odometer_reading)} ${unit}` : ''].filter(Boolean).join(' · ')}
+                aside={
+                  l.cost != null ? (
+                    <View className="flex-row items-baseline gap-1">
+                      <Text variant="label">{n(l.cost)}</Text>
+                      <Text variant="caption" className="text-muted">{currency}</Text>
+                    </View>
+                  ) : undefined
+                }
                 onPress={() => router.push({ pathname: '/log/[id]', params: { id: l.id } })}
               />
               </Rise>
             ))
           ) : (
-            <Text variant="body" className="text-muted">{t('vehicles.emptyLog')}</Text>
+            empty(ClipboardList, 'vehicles.emptyLog')
           )
         ) : parts.length ? (
           parts.map((p, i) => <Rise key={p.serviceType.id} index={i}>{partItem(p)}</Rise>)
         ) : (
-          empty
+          empty(Wrench, 'vehicles.emptyParts')
         )}
-        <View className="flex-row justify-between pt-2">
-          <Pressable
-            accessibilityRole="link"
-            onPress={() => router.push({ pathname: '/history', params: { vehicleId: vehicle.id, filter: tyres?.id } })}>
-            <Text variant="label" className="text-teal">{t('vehicles.tireHistory')}</Text>
-          </Pressable>
-          <Pressable accessibilityRole="link" onPress={() => router.push({ pathname: '/history', params: { vehicleId: vehicle.id } })}>
-            <Text variant="label" className="text-teal">{t('vehicles.allRecords')}</Text>
-          </Pressable>
+        <View className="flex-row gap-3 pt-2">
+          {(
+            [
+              [CircleDot, 'vehicles.tireHistory', { vehicleId: vehicle.id, filter: tyres?.id }],
+              [List, 'vehicles.allRecords', { vehicleId: vehicle.id }],
+            ] as const
+          ).map(([Icon, key, params]) => (
+            <PressableScale
+              key={key}
+              accessibilityRole="button"
+              onPress={() => router.push({ pathname: '/history', params })}
+              className="h-11 flex-row items-center gap-2 rounded-full border border-line bg-white px-4">
+              <Icon size={18} color={c.teal} />
+              <Text variant="caption">{t(key)}</Text>
+            </PressableScale>
+          ))}
         </View>
       </View>
     </ScrollView>
-    <View className="absolute inset-x-6 flex-row gap-3" style={{ bottom: barBottom }}>
-      <Button className="flex-1 px-3" title={t('vehicles.addRecord')} onPress={() => openCapture({ vehicleId: vehicle.id })} />
-      <Button className="flex-1 px-3" variant="secondary" title={t('vehicles.updateReading')} onPress={() => router.push({ pathname: '/update-odometer', params: { vehicleId: vehicle.id } })} />
+    {/* A solid footer down to the screen edge, so the list never shows through behind the buttons and the tab bar. */}
+    <View className="absolute inset-x-0 bottom-0 flex-row gap-3 border-t border-line bg-paper px-6 pt-3" style={{ paddingBottom: space }}>
+      <Button className="flex-1 px-3" icon={<Plus size={20} color="#222E29" />} title={t('vehicles.addRecord')} onPress={() => openCapture({ vehicleId: vehicle.id })} />
+      <PressableScale
+        accessibilityRole="button"
+        accessibilityLabel={t('vehicles.updateReading')}
+        onPress={() => router.push({ pathname: '/update-odometer', params: { vehicleId: vehicle.id } })}
+        className="h-[52px] w-[52px] items-center justify-center rounded-field border border-line bg-white">
+        <Gauge size={24} color={c.ink} />
+      </PressableScale>
     </View>
     </View>
   );

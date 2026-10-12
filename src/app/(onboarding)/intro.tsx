@@ -142,11 +142,11 @@ export default function IntroScreen() {
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
       <View className="h-12 flex-row items-center justify-between px-6">
         {/* The language comes from the phone; this is the way to the other one (the gate applies it and flips the layout). */}
-        <PressableScale accessibilityRole="button" onPress={() => useSettings.getState().setLanguage(other)} className="px-2 py-2">
+        <PressableScale accessibilityRole="button" onPress={() => useSettings.getState().setLanguage(other)} className="min-h-11 justify-center px-2">
           <Text variant="label" className="text-muted">{t(`language.${other}`)}</Text>
         </PressableScale>
         {last ? null : (
-          <PressableScale accessibilityRole="button" onPress={() => router.push('/login')} className="px-2 py-2">
+          <PressableScale accessibilityRole="button" onPress={() => router.push('/login')} className="min-h-11 justify-center px-2">
             <Text variant="label" className="text-muted">{t('onboarding.skip')}</Text>
           </PressableScale>
         )}

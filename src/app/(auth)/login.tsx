@@ -51,7 +51,7 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <ScrollView className="flex-1" contentContainerClassName="pb-10" keyboardShouldPersistTaps="handled">
+      <ScrollView className="flex-1" contentContainerClassName="pb-10" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <View className="px-6 pt-3">
           <Header title={t('auth.login.title')} />
         </View>
@@ -93,7 +93,7 @@ export default function LoginScreen() {
               />
             )}
           />
-          <Pressable onPress={() => router.push('/forgot-password')} className="self-end">
+          <Pressable onPress={() => router.push('/forgot-password')} className="min-h-11 justify-center self-end">
             <Text variant="label" className="text-teal">{t('auth.login.forgotPassword')}</Text>
           </Pressable>
 
@@ -101,9 +101,9 @@ export default function LoginScreen() {
 
           <Button title={t('auth.login.submit')} loading={loading} onPress={handleSubmit(onSubmit)} />
 
-          <View className="flex-row justify-center gap-1.5 pt-2">
+          <View className="flex-row items-center justify-center gap-1.5 pt-2">
             <Text className="text-muted">{t('auth.login.noAccount')}</Text>
-            <Pressable onPress={() => router.replace('/register')}>
+            <Pressable onPress={() => router.replace('/register')} className="min-h-11 justify-center">
               <Text variant="label" className="text-teal">{t('auth.login.createAccount')}</Text>
             </Pressable>
           </View>

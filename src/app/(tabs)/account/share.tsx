@@ -1,3 +1,4 @@
+import { useTabBarSpace } from '@/components/TabBar';
 import { useRefresh } from '@/components/Refresh';
 import { router } from 'expo-router';
 import { Car, Repeat } from 'lucide-react-native';
@@ -9,6 +10,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { ErrorState } from '@/components/ErrorState';
 import { openCapture } from '@/lib/reading';
 import { Button, Choice, Field, Header, Item, Note, Text } from '@/components/ui';
 import { SITE } from '@/lib/links';
@@ -25,6 +27,7 @@ const tokenOf = (s: string) => s.trim().match(/token=([^&\s#]+)/)?.[1] ?? s.trim
 export default function ShareScreen() {
   const { t } = useTranslation();
   const refresh = useRefresh();
+  const space = useTabBarSpace();
   const c = useColors();
   const vehicles = useVehicles();
   const { vehicle: current } = useCurrentVehicle();
@@ -62,10 +65,11 @@ export default function ShareScreen() {
   };
   const send = () => link && Share.share({ message: t('share.message', { vehicle: name, link }) });
 
+  if (logs.isError && !logs.data) return <ErrorState onRetry={logs.refetch} retrying={logs.isRefetching} />;
   return (
     <SafeAreaView className="flex-1 bg-paper px-6" edges={['top']}>
       <Header title={t('share.header')} />
-      <ScrollView refreshControl={refresh} contentContainerClassName="gap-5 pb-[120px] pt-4" showsVerticalScrollIndicator={false}>
+      <ScrollView refreshControl={refresh} contentContainerClassName="gap-5 pt-4" contentContainerStyle={{ paddingBottom: space }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets showsVerticalScrollIndicator={false}>
         <View className="h-[60px] w-[60px] items-center justify-center self-center rounded-full bg-mint">
           <Repeat size={26} color={c.teal} />
         </View>

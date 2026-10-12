@@ -75,7 +75,6 @@
     },
     "common": {
       "or": "or use email",
-      "google": "Google",
       "googleContinue": "Continue with Google",
       "errors": {
         "email": "Enter a valid email address",
@@ -163,23 +162,12 @@
     "currency": "EGP",
     "km": "km",
     "mi": "mi",
-    "soonTitle": "{{part}} is coming up",
-    "overdueTitle": "{{part}} needs attention",
-    "soonBoth": "{{km}} {{unit}} or {{d}} days left",
-    "soonDist": "{{km}} {{unit}} left",
-    "soonDays": "{{d}} days left",
-    "overdueDist": "Overdue by {{km}} {{unit}}",
-    "overdueDays": "Overdue by {{d}} days",
-    "dueAt": "Due at {{km}} {{unit}}",
-    "dueOn": "Due on {{date}}",
     "empty": {
       "title": "A simple start. A big difference.",
       "heading": "Start with one car",
       "body": "Add your car, then log your first service. Everything will be ready for your next trip.",
       "cta": "Add my car"
     },
-    "carLog": "Car log",
-    "carLogSub": "Services, costs and odometer readings",
     "kmL": "km/L",
     "perKm": "{{n}} EGP per km",
     "allGoodTitle": "All on schedule",
@@ -249,17 +237,10 @@
     },
     "attention": "Parts needing attention",
     "yourParts": "Your parts",
-    "emptyParts": "Tap \"Add a record\" below to see part schedules",
-    "emptyLog": "No records yet. Tap \"Add a record\" below.",
+    "emptyParts": "No parts yet",
+    "emptyLog": "No records yet",
     "tireHistory": "Tire history",
     "allRecords": "Car log",
-    "status": {
-      "both": "{{km}} {{u}} or {{d}} days left",
-      "km": "{{km}} {{u}} left",
-      "days": "{{d}} days left",
-      "overdueKm": "Overdue by {{km}} {{u}}",
-      "overdueDays": "Overdue by {{d}} days"
-    },
     "addRecord": "Add a record",
     "updateReading": "Update reading"
   },
@@ -417,22 +398,7 @@
   },
   "log": {
     "header": "Record details",
-    "meta": "{{date}} · {{reading}} km",
-    "cost": "Cost",
     "parts": "Parts",
-    "workshop": "Workshop",
-    "receipt": "Receipt",
-    "viewCorrections": "View edits ({{count}})",
-    "manualTitle": "Logged by you",
-    "manualBody": "You added this record manually.",
-    "voiceTitle": "Logged by voice",
-    "voiceBody": "Created from what you said, reviewed by you.",
-    "correctedTitle": "This record was edited",
-    "correctedBody": "Edits appear next to the original.",
-    "reviewTitle": "Reading needs review",
-    "reviewBody": "Tap to review the reading.",
-    "originalTitle": "The original stays saved",
-    "originalBody": "You can edit this record. After 24 hours, add a reason. The original stays visible.",
     "egp": "{{cost}} EGP",
     "corrections": {
       "header": "Edits",
@@ -466,21 +432,23 @@
       "ok": "The reading is correct",
       "bodyLower": "This reading is {{diff}} km lower than the previous one. We saved the record with a note for you to review."
     },
-    "service": "Service",
     "next": "Next maintenance after",
     "notes": "Notes",
     "standard": "standard",
     "edit": "Edit",
-    "fixReading": "Fix the reading"
+    "fixReading": "Fix the reading",
+    "byVoice": "By voice",
+    "edited": "Edited",
+    "checkReading": "Check the reading"
   },
   "reminders": {
     "title": "Your next step is clear",
     "attention": "Needs attention",
     "all": "All dates",
-    "calm": "Nothing needs attention right now.",
-    "snoozedUntil": "Snoozed until {{date}}",
-    "okDate": "Within the recorded schedule · {{date}}",
-    "okOdo": "Within the recorded schedule · at {{odo}} {{unit}}",
+    "group": {
+      "attention": "Needs attention",
+      "onTime": "On time"
+    },
     "staleTitle": "{{vehicle}}: update the odometer",
     "staleBody": "Last reading {{n}} days ago",
     "empty": {
@@ -816,6 +784,7 @@
     "overdue": "Late",
     "snoozed": "Snoozed",
     "none": "Add the last time",
+    "life": "left",
     "left": "{{unit}} left",
     "late": "{{unit}} late",
     "days": "days",

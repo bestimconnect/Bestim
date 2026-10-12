@@ -1,20 +1,19 @@
 import { differenceInCalendarDays, format, parseISO, startOfMonth, subMonths } from 'date-fns';
-import { ar, enUS } from 'date-fns/locale';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import * as Icons from 'lucide-react-native';
-import { Bell, Car, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Fuel, Plus, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
+import { Bell, Car, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Fuel, Plus, RefreshCw, Sparkles } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
 import { FlatList, I18nManager, Pressable, ScrollView, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
 
+import { useTabBarSpace } from '@/components/TabBar';
 import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { useLightStatusBar } from '@/components/Hero';
+import { PartBadge } from '@/components/PartStatus';
 import { OfflineHome } from '@/components/OfflineHome';
 import { VoiceQueueCard } from '@/components/VoiceQueueCard';
 import { Button, PressableScale, Rise, Text } from '@/components/ui';
@@ -30,25 +29,10 @@ import { useInbox } from '@/stores/notifyInbox';
 import { useSettings } from '@/stores/settingsStore';
 
 const num = (n: number) => Math.abs(Math.round(n)).toLocaleString('en-US');
-const iconOf = (name?: string | null): LucideIcon => (name && (Icons as any)[name]) || Icons.Wrench;
 
 function LightBar() {
   useLightStatusBar();
   return null;
-}
-
-/** Part subtitle per decisions Q10 (overdue: km if past due in km, else days; soon: both when known). */
-function subtitle(t: TFunction, lang: string, p: Part, unit: string) {
-  const u = t(`home.${unit}`);
-  const { state, remainingKm: km, remainingDays: d, dueOdometer, dueDate } = p.status;
-  if (state === 'overdue') return km != null && km <= 0 ? t('home.overdueDist', { km: num(km), unit: u }) : t('home.overdueDays', { d: num(d!) });
-  if (state === 'soon') {
-    if (km != null && d != null) return t('home.soonBoth', { km: num(km), unit: u, d: num(d) });
-    return km != null ? t('home.soonDist', { km: num(km), unit: u }) : t('home.soonDays', { d: num(d!) });
-  }
-  return dueOdometer != null
-    ? t('home.dueAt', { km: num(dueOdometer), unit: u })
-    : t('home.dueOn', { date: format(parseISO(dueDate!), 'd MMM yyyy', { locale: lang === 'ar' ? ar : enUS }) });
 }
 
 const partName = (lang: string, p: Part) => (lang === 'ar' ? p.serviceType.name_ar : p.serviceType.name_en);
@@ -67,7 +51,7 @@ function Bell_() {
       accessibilityRole="button"
       accessibilityLabel={unread ? `${t('home.notifications')}, ${t('inbox.unread')}` : t('home.notifications')}
       onPress={() => router.push('/notifications')}
-      className="h-10 w-10 items-center justify-center rounded-full bg-white">
+      className="h-11 w-11 items-center justify-center rounded-full bg-white">
       <Bell size={20} color={c.ink} />
       {unread ? <View className="absolute end-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-white bg-coral" /> : null}
     </PressableScale>
@@ -80,6 +64,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
   const c = useColors();
   const insets = useSafeAreaInsets();
   const refresh = useRefresh(insets.top, '#D3F53D'); // Home draws under the status bar: keep the spinner clear of the notch
+  const space = useTabBarSpace();
   const name = useFirstName();
   const vehicles = useVehicles().data ?? [];
   const setCurrent = useSettings((s) => s.setCurrentVehicle);
@@ -128,7 +113,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
   return (
     // The scroll area itself is dark and the content is the page colour: pulling down shows more of the dark top
     // with the spinner on it (a dark filler view on top of the content would cover the spinner).
-    <ScrollView refreshControl={refresh} className="flex-1 bg-panel" contentContainerClassName="grow bg-paper" contentContainerStyle={{ paddingBottom: 120 }}>
+    <ScrollView refreshControl={refresh} className="flex-1 bg-panel" contentContainerClassName="grow bg-paper" contentContainerStyle={{ paddingBottom: space }}>
       <LightBar />
       {/* One column, top to bottom: who → which car (name) → the car → dots → its odometer. */}
       <View className="gap-3 rounded-b-[28px] bg-panel px-6 pb-4" style={{ paddingTop: insets.top + 12 }}>
@@ -147,8 +132,8 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
             disabled={vehicles.length < 2}
             accessibilityRole={vehicles.length > 1 ? 'button' : undefined}
             accessibilityLabel={vehicles.length > 1 ? t('home.switchVehicle') : undefined}
-            className="h-8 flex-row items-center gap-1.5 rounded-full bg-[#FFFFFF1F] px-3.5">
-            <Text variant="caption" className="text-onpanel" style={{ fontFamily: i18n.language === 'ar' ? 'Tajawal_700Bold' : 'Poppins_700Bold' }}>
+            className="h-8 max-w-full flex-row items-center gap-1.5 rounded-full bg-[#FFFFFF1F] px-3.5">
+            <Text variant="caption" numberOfLines={1} className="shrink text-onpanel" style={{ fontFamily: i18n.language === 'ar' ? 'Tajawal_700Bold' : 'Poppins_700Bold' }}>
               {`${vehicleName(vehicle)} · ${vehicle.year}`}
             </Text>
             {vehicles.length > 1 ? <ChevronDown size={16} color={c.lime} /> : null}
@@ -224,61 +209,53 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
         <VoiceQueueCard vehicleId={vehicle.id} />
         <View className="flex-row items-center justify-between">
           <Text variant="heading">{t('home.priority')}</Text>
-          <Pressable onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id, tab: 'reminders' } })} hitSlop={8}>
+          <Pressable onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id, tab: 'reminders' } })} className="min-h-11 justify-center">
             <Text variant="caption" className="text-teal">{t('home.viewAll')}</Text>
           </Pressable>
         </View>
         {/* Q95/Q96: the same card for every car and every state: loading, the top 3 (Q10) split by lines
             (an overdue line in red), all on schedule, or no services logged yet. */}
         <Rise key={vehicle.id}>
-          <View className="rounded-item bg-white px-3.5" style={{ boxShadow: shadows.card }}>
-            {partsLoading ? (
-              <View className="min-h-[56px] flex-row items-center gap-3 py-2" accessibilityLabel={t('home.loading')}>
-                <View className="h-9 w-9 rounded-full bg-line" />
-                <View className="flex-1 gap-1.5">
-                  <View className="h-3.5 w-3/5 rounded-full bg-line" />
-                  <View className="h-3 w-2/5 rounded-full bg-line" />
+          {urgent.length && !partsLoading ? (
+            <View className="flex-row justify-around">
+              {urgent.map((p) => (
+                <PartBadge
+                  key={p.serviceType.id}
+                  part={p}
+                  name={partName(i18n.language, p)}
+                  unit={t(`vehicles.unit.${vehicle.odometer_unit}`)}
+                  onPress={() => router.push({ pathname: '/part', params: { vehicleId: vehicle.id, serviceTypeId: p.serviceType.id } })}
+                />
+              ))}
+            </View>
+          ) : (
+            <View className="rounded-item bg-white px-3.5" style={{ boxShadow: shadows.card }}>
+              {partsLoading ? (
+                <View className="min-h-[56px] flex-row items-center gap-3 py-2" accessibilityLabel={t('home.loading')}>
+                  <View className="h-9 w-9 rounded-full bg-line" />
+                  <View className="flex-1 gap-1.5">
+                    <View className="h-3.5 w-3/5 rounded-full bg-line" />
+                    <View className="h-3 w-2/5 rounded-full bg-line" />
+                  </View>
                 </View>
-              </View>
-            ) : urgent.length ? (
-              urgent.map((p, i) => {
-                const overdue = p.status.state === 'overdue';
-                const Icon = iconOf(p.serviceType.icon);
-                return (
-                  <PressableScale
-                    key={p.serviceType.id}
-                    accessibilityRole="button"
-                    scale={0.98}
-                    onPress={() => router.push({ pathname: '/part', params: { vehicleId: vehicle.id, serviceTypeId: p.serviceType.id } })}
-                    className={`min-h-[56px] flex-row items-center gap-3 py-2 ${i < urgent.length - 1 ? 'border-b border-line' : ''}`}>
-                    <View className={`h-9 w-9 items-center justify-center rounded-full ${overdue ? 'bg-blush' : 'bg-amber'}`}>
-                      <Icon size={18} color={c.teal} />
-                    </View>
-                    <View className="flex-1">
-                      <Text variant="label">{t(overdue ? 'home.overdueTitle' : 'home.soonTitle', { part: partName(i18n.language, p) })}</Text>
-                      <Text variant="caption" className={overdue ? 'text-danger' : 'text-muted'}>{subtitle(t, i18n.language, p, vehicle.odometer_unit)}</Text>
-                    </View>
-                    <Chevron size={18} color={c.muted} />
-                  </PressableScale>
-                );
-              })
-            ) : (
-              <PressableScale
-                accessibilityRole="button"
-                scale={0.98}
-                onPress={() => (parts.length ? router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id, tab: 'reminders' } }) : openCapture())}
-                className="min-h-[56px] flex-row items-center gap-3 py-2">
-                <View className={`h-9 w-9 items-center justify-center rounded-full ${parts.length ? 'bg-mint' : 'bg-sky'}`}>
-                  {parts.length ? <CircleCheck size={18} color={c.teal} /> : <Plus size={18} color={c.teal} />}
-                </View>
-                <View className="flex-1">
-                  <Text variant="label">{t(parts.length ? 'home.allGoodTitle' : 'home.noParts.title')}</Text>
-                  <Text variant="caption" className="text-muted">{t(parts.length ? 'home.allGood' : 'home.noParts.body')}</Text>
-                </View>
-                <Chevron size={18} color={c.muted} />
-              </PressableScale>
-            )}
-          </View>
+              ) : (
+                <PressableScale
+                  accessibilityRole="button"
+                  scale={0.98}
+                  onPress={() => (parts.length ? router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id, tab: 'reminders' } }) : openCapture())}
+                  className="min-h-[56px] flex-row items-center gap-3 py-2">
+                  <View className={`h-9 w-9 items-center justify-center rounded-full ${parts.length ? 'bg-mint' : 'bg-sky'}`}>
+                    {parts.length ? <CircleCheck size={18} color={c.teal} /> : <Plus size={18} color={c.teal} />}
+                  </View>
+                  <View className="flex-1">
+                    <Text variant="label">{t(parts.length ? 'home.allGoodTitle' : 'home.noParts.title')}</Text>
+                    <Text variant="caption" className="text-muted">{t(parts.length ? 'home.allGood' : 'home.noParts.body')}</Text>
+                  </View>
+                  <Chevron size={18} color={c.muted} />
+                </PressableScale>
+              )}
+            </View>
+          )}
         </Rise>
 
         {/* Q95: this month's expenses (Q14: the 6 bars never animate) and fuel (Q91) in one card. */}
@@ -320,12 +297,13 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
 // Screen 07 — Home / Empty; ar-light 07/الرئيسية/البداية.png
 function Empty() {
   const refresh = useRefresh();
+  const space = useTabBarSpace();
   const { t } = useTranslation();
   const c = useColors();
   const insets = useSafeAreaInsets();
   const name = useFirstName();
   return (
-    <ScrollView refreshControl={refresh} className="flex-1 bg-paper" contentContainerStyle={{ paddingBottom: 120, paddingTop: insets.top + 16 }}>
+    <ScrollView refreshControl={refresh} className="flex-1 bg-paper" contentContainerStyle={{ paddingBottom: space, paddingTop: insets.top + 16 }}>
       <View className="gap-6 px-6">
         <View className="flex-row items-center gap-3">
           <View className="flex-1 gap-0.5">
