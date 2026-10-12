@@ -25,11 +25,11 @@ export async function notificationsAllowed() {
   return (await Notifications.getPermissionsAsync()).granted;
 }
 
-/** Q39: show screen 45 once, after a saved log, to full accounts the OS hasn't asked yet. */
+/** Q39: show screen 45 once, after a saved log, to signed-in users the OS hasn't asked yet. */
 export async function shouldAskNotifications() {
   const { useSettings } = await import('@/stores/settingsStore');
   const { data } = await supabase.auth.getSession();
-  if (useSettings.getState().notifyAsked || !data.session || data.session.user.is_anonymous) return false;
+  if (useSettings.getState().notifyAsked || !data.session) return false;
   return (await Notifications.getPermissionsAsync()).status === 'undetermined';
 }
 
@@ -47,7 +47,7 @@ export async function syncNotifications() {
     const user = auth.session?.user;
     await Notifications.cancelAllScheduledNotificationsAsync();
     // Notifications page (Q92): what was scheduled and is now past has been shown, so it joins the list.
-    if (!user || user.is_anonymous) return useInbox.getState().clear(); // signed out: the list belongs to that account
+    if (!user) return useInbox.getState().clear(); // signed out: the list belongs to that account
     useInbox.getState().deliver();
     useInbox.getState().setScheduled([]);
     if (!(await notificationsAllowed())) return;

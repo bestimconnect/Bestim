@@ -4,8 +4,8 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import * as Icons from 'lucide-react-native';
-import { Bell, Car, Check, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Fuel, Plus, RefreshCw, Sparkles, X, type LucideIcon } from 'lucide-react-native';
-import { useEffect, useRef, useState } from 'react';
+import { Bell, Car, Check, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Fuel, Plus, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react-native';
+import { useEffect, useRef } from 'react';
 import { FlatList, I18nManager, Pressable, ScrollView, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,10 +17,8 @@ import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { useLightStatusBar } from '@/components/Hero';
 import { OfflineHome } from '@/components/OfflineHome';
 import { VoiceQueueCard } from '@/components/VoiceQueueCard';
-import { Button, GoogleIcon, Note, PressableScale, Rise, Text } from '@/components/ui';
-import { signInWithGoogle, useGoogleAvailable } from '@/lib/auth';
-import { errorText } from '@/lib/errors';
-import { needsAttention, useCurrentVehicle, useExpenses, useFuelFills, useIsGuest, useVehicleParts, useVehicles, vehicleName, type Part, type Vehicle, useProfile } from '@/lib/queries';
+import { Button, PressableScale, Rise, Text } from '@/components/ui';
+import { needsAttention, useCurrentVehicle, useExpenses, useFuelFills, useVehicleParts, useVehicles, vehicleName, type Part, type Vehicle, useProfile } from '@/lib/queries';
 import { consumption } from '@/lib/fuel';
 import { EASE_OUT, POP, SWAP } from '@/lib/motion';
 import { useOnline, useShowSaved } from '@/lib/online';
@@ -62,13 +60,12 @@ function useFirstName() {
 function Bell_() {
   const c = useColors();
   const { t } = useTranslation();
-  const guest = useIsGuest();
   const unread = useInbox((s) => s.items.some((i) => !i.read)); // Q92 (replaces Q13's "no badge")
   return (
     <PressableScale
       accessibilityRole="button"
       accessibilityLabel={unread ? `${t('home.notifications')}, ${t('inbox.unread')}` : t('home.notifications')}
-      onPress={() => (guest ? router.push({ pathname: '/feature-gate', params: { feature: 'reminders' } }) : router.push('/notifications'))}
+      onPress={() => router.push('/notifications')}
       className="h-10 w-10 items-center justify-center rounded-full bg-white">
       <Bell size={20} color={c.ink} />
       {unread ? <View className="absolute end-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-white bg-coral" /> : null}
@@ -76,58 +73,12 @@ function Bell_() {
   );
 }
 
-let saveCardHidden = false; // dismissed for this session only: a new launch shows it again until there is an account
-
-/** A guest's reminder to keep the car in an account (stage 3). Google links to this guest, so the car stays. */
-function SaveCard() {
-  const { t } = useTranslation();
-  const guest = useIsGuest();
-  const google = useGoogleAvailable();
-  const [hidden, setHidden] = useState(saveCardHidden);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  if (!guest || hidden) return null;
-  const withGoogle = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      await signInWithGoogle();
-    } catch (e) {
-      setError(errorText(e, 'errors.google'));
-    }
-    setBusy(false);
-  };
-  return (
-    <View className="gap-3 rounded-item bg-sky p-4">
-      <View className="flex-row items-start gap-3">
-        <View className="flex-1 gap-1">
-          <Text variant="label">{t('home.guest.title')}</Text>
-          <Text variant="caption" className="text-muted">{t('home.guest.body')}</Text>
-        </View>
-        <PressableScale
-          accessibilityRole="button"
-          accessibilityLabel={t('home.guest.dismiss')}
-          hitSlop={8}
-          onPress={() => {
-            saveCardHidden = true;
-            setHidden(true);
-          }}>
-          <X size={18} color="#222E29" />
-        </PressableScale>
-      </View>
-      {error ? <Note tone="warning" text={error} /> : null}
-      {google ? <Button title={t('home.guest.google')} icon={<GoogleIcon />} onPress={withGoogle} loading={busy} /> : null}
-      <Button title={t('home.guest.email')} variant={google ? 'secondary' : 'primary'} onPress={() => router.push('/register')} disabled={busy} />
-    </View>
-  );
-}
-
 // Screen 06 — Home / Today; ar-light 06/الرئيسية/سيارتي اليوم.png
 function Today({ vehicle }: { vehicle: Vehicle }) {
-  const refresh = useRefresh();
   const { t, i18n } = useTranslation();
   const c = useColors();
   const insets = useSafeAreaInsets();
+  const refresh = useRefresh(insets.top, '#D3F53D'); // Home draws under the status bar: keep the spinner clear of the notch
   const name = useFirstName();
   const vehicles = useVehicles().data ?? [];
   const setCurrent = useSettings((s) => s.setCurrentVehicle);
@@ -174,7 +125,9 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
   const fmt = (x: number, d = 2) => x.toLocaleString('en-US', { maximumFractionDigits: d });
 
   return (
-    <ScrollView refreshControl={refresh} className="flex-1 bg-paper" contentContainerStyle={{ paddingBottom: 120 }}>
+    // The scroll area itself is dark and the content is the page colour: pulling down shows more of the dark top
+    // with the spinner on it (a dark filler view on top of the content would cover the spinner).
+    <ScrollView refreshControl={refresh} className="flex-1 bg-panel" contentContainerClassName="grow bg-paper" contentContainerStyle={{ paddingBottom: 120 }}>
       <LightBar />
       {/* Q95: one column, top to bottom: who → the car → which car (name + dots) → its odometer. */}
       <View className="gap-3 rounded-b-[28px] bg-panel px-6 pb-4" style={{ paddingTop: insets.top + 12 }}>
@@ -256,7 +209,6 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
       </View>
 
       <View className="gap-3 px-6 pt-4">
-        <SaveCard />
         <VoiceQueueCard vehicleId={vehicle.id} />
         <View className="flex-row items-center justify-between">
           <Text variant="heading">{t('home.priority')}</Text>

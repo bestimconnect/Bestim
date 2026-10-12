@@ -76,22 +76,7 @@ export default function ReviewAll() {
 
   const edit = (r: BatchRecord) => {
     if (r.kind === 'odometer') return setEditing(editing === r.key ? null : r.key);
-    if (r.kind === 'expense') return router.push({ pathname: '/add-expense', params: { batch: r.key, vehicleId: r.vehicleId } });
-    useLogDraft.getState().reset({
-      vehicleId: r.vehicleId,
-      serviceTypeId: typeOf(r)?.id ?? null,
-      title: title(r),
-      odometer: r.odometer,
-      cost: r.cost,
-      serviceDate: r.date ?? today,
-      location: r.location,
-      notes: r.notes,
-      source: 'voice',
-      intervalKm: r.intervalKm,
-      details: Object.fromEntries(Object.entries(r.details ?? {}).map(([k, v]) => [k, String(v)])),
-      photoUri: r.photoUri,
-    });
-    router.push({ pathname: '/capture/manual', params: { batch: r.key } });
+    router.push({ pathname: '/capture', params: { batch: r.key } }); // the quick-add sheet, filled from the card
   };
 
   const save = useMutation({
@@ -162,9 +147,9 @@ export default function ReviewAll() {
 
   // Q62/Q63: nothing left to save. Start clean, on the same vehicle.
   const restart = (source: 'voice' | 'manual') => {
-    const d = useLogDraft.getState();
-    d.reset({ vehicleId: d.vehicleId, source });
-    router.replace(source === 'voice' ? '/capture/voice' : '/capture/manual');
+    if (source === 'voice') return router.replace('/capture/voice');
+    router.back(); // a sheet is closed with back(); this screen sits on the home screen
+    router.push({ pathname: '/capture', params: { vehicleId: useLogDraft.getState().vehicleId ?? undefined } });
   };
 
   return (

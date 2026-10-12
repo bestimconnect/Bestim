@@ -1193,3 +1193,13 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 ### Q102: First run in three screens, and guests can add records by hand (dev, 2026-10-12; founder can overrule)
 **Decision:** Intro → add car (brand, model, year chained; reading on the same screen) → Home. No language screen (the phone's language, with a switch on the intro), no "first log", "save your car" or success screens; guests get a dismissible "save your car with an account" card on Home. A guest can open + and save by hand; voice, the other tabs, export, sharing and reminders still need an account. This replaces the order of Q87 and the guest limits of Q17 for +.
 **Why:** With the car first, blocking a guest's first record with a sign-up form would undo the gain.
+
+### Q103: No guest mode: sign in or sign up at the door (founder, 2026-10-12)
+**Decision:** The welcome screen is the intro slides plus two buttons, "Create account" and "Sign in". Nothing in the app is usable without an account. A new person signs up first, then adds the car. "Continue with Google" is on both screens: an existing account is signed in, a new one is created. Old guest sessions from test builds are taken to Create account and keep their car.
+**Why:** The founder found the app always treated him as new and wants a clear door. It also closes the gap where anyone could make unlimited guest accounts.
+**Replaces:** the guest parts of Q17 (guest limits and the feature gate), Q77 (guest data deletion), Q87 (the order of first run) and Q102 (guests adding records by hand and the "save your car" card).
+
+### Q104: Splash animation, then onboarding, then sign in (founder, 2026-10-12)
+**Decision:** Three beats. (1) The splash builds the logo in about 2 seconds (lime slash sweeps in, the B settles, wordmark and tagline rise, fade). (2) Onboarding shows every time the app opens signed out: the slides with "Next" / "Get started" and a "Skip" link (hidden on the last slide). (3) It ends on Sign in, with a link to Create account. "Continue with Google" is the last element on both account screens, under the "or" divider.
+**Why:** With the slides and the account buttons on one screen it no longer read as onboarding.
+**Adjusts:** Q103's welcome screen.

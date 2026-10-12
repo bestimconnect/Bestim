@@ -14,7 +14,7 @@ import { Button, Field, Item, Note, PressableScale, Text, Toggle } from '@/compo
 import { errorText } from '@/lib/errors';
 import { shouldAskNotifications } from '@/lib/notifications';
 import { useOnline } from '@/lib/online';
-import { useCurrentVehicle, useExpenses, useIsGuest, useLog, useRecordCategories, useServiceTypes, useVehicle, useVehicleLogs } from '@/lib/queries';
+import { useCurrentVehicle, useExpenses, useLog, useRecordCategories, useServiceTypes, useVehicle, useVehicleLogs } from '@/lib/queries';
 import { expenseChip, isFresh, topChips } from '@/lib/quickAdd';
 import { refreshRecords, removeRecord } from '@/lib/removeRecord';
 import { cleanDetails, LOG_FIELDS, SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
@@ -22,12 +22,17 @@ import { pickOption } from '@/lib/sheet';
 import { supabase } from '@/lib/supabase';
 import { useColors } from '@/lib/theme';
 import { useLogDraft } from '@/stores/logDraft';
+import { useVoiceBatch } from '@/stores/voiceBatch';
+import type { ExpenseCategory } from '@/lib/voiceRecords';
 
 // The + button: one sheet that saves a maintenance record or a running cost in one step (docs/ux-mockup, states #sheet and #fuel).
 // Opened with ?serviceTypeId (+ ?vehicleId) to start on one service, e.g. from a reminder.
 // Opened with ?logId or ?expenseId it edits that record instead: free for 24 hours, then with a reason (correct_log); Delete has Undo.
+// Opened with ?batch=<key> it edits one card of the voice review list (capture/review-all) and Save writes back to that list, not the database.
+// Opened with ?notice=<micDenied|aiFailed|dailyLimit> (voice fallbacks) it shows that line on top.
 // Chips by identity: a service is its service_types id; a running cost is `x:<expense_code>` (fuel, wash …). Defaults by name_en / code.
 const DEFAULTS = ['Oil Change', expenseChip('fuel'), expenseChip('wash'), 'Tire Replacement', 'Brake Pad Replacement', 'Battery Replacement'];
+const NOTICES = { micDenied: 'capture.micDenied', aiFailed: 'capture.batch.aiFailed', dailyLimit: 'capture.batch.dailyLimit' } as const;
 const num = (s: string) => (s.trim() && !isNaN(Number(s)) ? Number(s) : null);
 // Typed numbers: Arabic-Indic digits become Latin, everything but digits (and one point, if `dec`) is dropped.
 const clean = (s: string, dec = false) => {
@@ -45,17 +50,17 @@ export default function CaptureSheet() {
   const c = useColors();
   const { bottom } = useSafeAreaInsets();
   const queryClient = useQueryClient();
-  const { serviceTypeId, vehicleId, logId, expenseId } = useLocalSearchParams<{ serviceTypeId?: string; vehicleId?: string; logId?: string; expenseId?: string }>();
-  const editing = !!(logId || expenseId);
+  const { serviceTypeId, vehicleId, logId, expenseId, batch, notice } = useLocalSearchParams<{ serviceTypeId?: string; vehicleId?: string; logId?: string; expenseId?: string; batch?: string; notice?: keyof typeof NOTICES }>();
+  const [card] = useState(() => useVoiceBatch.getState().records.find((r) => r.key === batch)); // odometer cards are edited in the list itself
+  const editing = !!(logId || expenseId || card);
+  const costKind = expenseId ? true : logId ? false : card ? card.kind === 'expense' : undefined; // a record keeps its kind
   const log = useLog(logId).data;
   const allSpent = useExpenses().data ?? [];
   const expense = allSpent.find((e) => e.id === expenseId);
   const current = useCurrentVehicle().vehicle;
-  const picked = useVehicle(vehicleId ?? log?.vehicle_id ?? expense?.vehicle_id).vehicle;
+  const picked = useVehicle(vehicleId ?? log?.vehicle_id ?? expense?.vehicle_id ?? card?.vehicleId).vehicle;
   const vehicle = picked ?? current;
   const connected = useOnline();
-  const guest = useIsGuest();
-  const online = connected || !guest; // Q93: full accounts can record offline (it waits on the phone); guests can't
   const services = (useServiceTypes().data ?? []).filter((s) => s.category_id); // a retired one (Car Wash) is never offered
   const tree = useRecordCategories().data ?? [];
   const costs = tree.filter((x) => x.expense_code);
@@ -87,6 +92,8 @@ export default function CaptureSheet() {
   const reasonMode = !!log && (!isFresh(log.created_at) || needsReason);
   const fuel = chip === expenseChip('fuel');
   const fields = (service?.fields ?? []).filter((f) => f in LOG_FIELDS);
+  const cardChip = card?.kind === 'maintenance' ? (services.find((s) => s.name_en === card.serviceType)?.id ?? null) : card?.kind === 'expense' && card.category ? expenseChip(card.category) : null;
+  const ready = services.length > 0;
   const label = (id: string) => {
     const s = services.find((x) => x.id === id);
     const x = costs.find((k) => expenseChip(k.expense_code!) === id);
@@ -100,7 +107,7 @@ export default function CaptureSheet() {
     logs.filter((l) => l.service_type_id && known.has(l.service_type_id)),
     spent.filter((e) => known.has(expenseChip(e.category))),
     defaults.filter((id) => label(id)),
-  ).filter((id) => !editing || id.startsWith('x:') === !!expenseId); // a record keeps its kind
+  ).filter((id) => costKind === undefined || id.startsWith('x:') === costKind);
   if (chip && !chips.includes(chip) && label(chip)) chips.push(chip); // chosen from "More"
 
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -124,10 +131,28 @@ export default function CaptureSheet() {
       setFullTank(expense.full_tank ?? true);
       setOdo(s(expense.odometer_reading));
       setWorkshop(expense.description ?? '');
+    } else if (card?.kind === 'maintenance') {
+      if (!ready) return; // the service is found by name
+      setChip(cardChip);
+      setAmount(s(card.cost));
+      setDate(card.date ?? daysAgo(0));
+      setOdo(s(card.odometer));
+      setWorkshop(card.location);
+      setDetails(Object.fromEntries(Object.entries(card.details ?? {}).map(([k, v]) => [k, String(v)])));
+      setEvery(s(card.intervalKm));
+      setNotes(card.notes);
+      setPhotoUri(card.photoUri);
+    } else if (card?.kind === 'expense') {
+      setChip(cardChip);
+      setAmount(s(card.amount));
+      setDate(card.date ?? daysAgo(0));
+      setLiters(s(card.liters));
+      setOdo(s(card.odometer));
+      setWorkshop(card.place);
     } else return;
     setMore(true);
     setFilled(true);
-  }, [log, expense, filled]);
+  }, [log, expense, card, cardChip, ready, filled]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const choose = (id: string) => {
@@ -140,12 +165,12 @@ export default function CaptureSheet() {
       title: t('capture.manual.serviceType'),
       allowCustom: false,
       options: [
-        ...(expenseId ? [] : services).map((s) => {
+        ...(costKind ? [] : services).map((s) => {
           const where = [s.parentCategory, s.subcategory].filter(Boolean).map((x) => name(x!)).join(' · ');
           const other = [s.parentCategory, s.subcategory].filter(Boolean).map((x) => (ar ? x!.name_en : x!.name_ar)).join(' · ');
           return { id: s.id, label: name(s), hint: where, also: `${ar ? s.name_en : s.name_ar} ${other}` };
         }),
-        ...(logId ? [] : costs).map((x) => ({ id: expenseChip(x.expense_code!), label: name(x), hint: t('capture.quick.runningCost'), also: ar ? x.name_en : x.name_ar })),
+        ...(costKind === false ? [] : costs).map((x) => ({ id: expenseChip(x.expense_code!), label: name(x), hint: t('capture.quick.runningCost'), also: ar ? x.name_en : x.name_ar })),
       ],
       onPick: ({ id }) => choose(id!),
     });
@@ -168,11 +193,7 @@ export default function CaptureSheet() {
   };
 
   const voice = () => {
-    if (guest) {
-      router.back();
-      return router.push({ pathname: '/feature-gate', params: { feature: 'capture' } }); // voice is for full accounts (Q17)
-    }
-    useLogDraft.getState().reset({ vehicleId: vehicle?.id ?? null, source: 'voice' });
+    useLogDraft.getState().reset({ vehicleId: vehicle?.id ?? null });
     // replace() from a formSheet only closes the sheet on iOS, so close it, then push the full screen.
     router.back();
     router.push('/capture/voice');
@@ -240,6 +261,28 @@ export default function CaptureSheet() {
     setError(null);
     if (!vehicle || !chip) return;
     if (logId) return editLog();
+    if (batch) {
+      const fillUp = fuel && Number(liters) > 0 ? Number(liters) : null;
+      useVoiceBatch.getState().update(
+        batch,
+        code
+          ? { category: code as ExpenseCategory, amount: Number(amount), date, place: workshop.trim(), liters: fillUp, odometer: fuel && odo.trim() && Number(odo) >= 0 ? Math.round(Number(odo)) : null, error: undefined }
+          : {
+              serviceType: service!.name_en,
+              title: card?.kind === 'maintenance' && card.serviceType === service!.name_en ? card.title : '',
+              odometer: num(odo),
+              cost: num(amount),
+              date,
+              location: workshop.trim(),
+              notes: notes.trim(),
+              photoUri,
+              intervalKm: service!.has_reminder ? num(every) : null,
+              details: cleanDetails(details, service!.fields),
+              error: undefined,
+            },
+      );
+      return router.back();
+    }
     if (code) {
       setBusy(true);
       const l = fuel && Number(liters) > 0 ? Number(liters) : null;
@@ -336,14 +379,14 @@ export default function CaptureSheet() {
           <X size={20} color={c.ink} />
         </PressableScale>
       </View>
+        {notice && NOTICES[notice] ? <Note tone="info" text={t(NOTICES[notice])} /> : null}
         {editing ? null : (
         <PressableScale
           accessibilityRole="button"
           onPress={voice}
-          disabled={!online}
-          className={`h-14 flex-row items-center justify-center gap-3 rounded-item bg-panel ${online ? '' : 'opacity-50'}`}>
+          className="h-14 flex-row items-center justify-center gap-3 rounded-item bg-panel">
           <Mic size={22} color="#D3F53D" />
-          <Text variant="label" className="text-onpanel">{t(online ? 'capture.quick.say' : 'feedback.offline.voiceSheet')}</Text>
+          <Text variant="label" className="text-onpanel">{t('capture.quick.say')}</Text>
         </PressableScale>
         )}
         {editing ? null : <Text variant="caption" className="text-muted">{t('capture.quick.mostUsed')}</Text>}
@@ -455,7 +498,7 @@ export default function CaptureSheet() {
         ) : null}
         {error ? <Note tone="warning" text={error} /> : null}
         <Button title={t('capture.quick.save')} onPress={submit} disabled={!valid} loading={busy || save.isPending} />
-        {editing && filled ? (
+        {(logId || expenseId) && filled ? (
           <Pressable accessibilityRole="button" onPress={remove} className="h-11 items-center justify-center">
             <Text variant="label" className="text-danger">{t('capture.quick.delete')}</Text>
           </Pressable>

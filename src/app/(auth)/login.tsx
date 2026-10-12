@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { continueAsGuest, signInWithGoogle, useGoogleAvailable } from '@/lib/auth';
+import { signInWithGoogle, useGoogleAvailable } from '@/lib/auth';
 import { errorText } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
 import { Button, Divider, Field, Header, Note, Text, GoogleIcon } from '@/components/ui';
@@ -101,23 +101,19 @@ export default function LoginScreen() {
 
           <Button title={t('auth.login.submit')} loading={loading} onPress={handleSubmit(onSubmit)} />
 
-          {google ? (
-            <>
-              <Divider label={t('auth.common.or')} />
-              <View className="flex-row gap-2.5">
-                <Button title={t('auth.common.google')} icon={<GoogleIcon />} variant="secondary" className="flex-1" onPress={() => social(signInWithGoogle, 'errors.google')} />
-              </View>
-            </>
-          ) : null}
-
           <View className="flex-row justify-center gap-1.5 pt-2">
             <Text className="text-muted">{t('auth.login.noAccount')}</Text>
-            <Pressable onPress={() => router.push('/register')}>
+            <Pressable onPress={() => router.replace('/register')}>
               <Text variant="label" className="text-teal">{t('auth.login.createAccount')}</Text>
             </Pressable>
           </View>
 
-          <Button title={t('auth.login.continueAsGuest')} variant="secondary" onPress={() => social(async () => (await continueAsGuest(), true))} />
+          {google ? (
+            <>
+              <Divider label={t('auth.common.or')} />
+              <Button title={t('auth.common.googleContinue')} icon={<GoogleIcon />} variant="secondary" onPress={() => social(signInWithGoogle, 'errors.google')} />
+            </>
+          ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>

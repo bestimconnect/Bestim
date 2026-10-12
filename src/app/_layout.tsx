@@ -68,6 +68,7 @@ function App() {
   const userId = session?.user.id;
   const profile = useProfile();
   const [splashDone, setSplashDone] = useState(false); // lives here, not in the overlay: the tree unmounts while a new sign-in loads
+  const oldGuest = useRef<string | null>(null); // the guest sent to /register already, so a refetch doesn't pull them back from /login
   const endSplash = useCallback(() => setSplashDone(true), []);
   const ready = fontsLoaded && hydrated && session !== undefined && (!userId || !profile.isPending);
 
@@ -83,7 +84,7 @@ function App() {
       .then((type) => type === 'recovery' && router.replace('/reset-password'))
       .catch(() => router.replace({ pathname: '/login', params: { notice: 'linkExpired' } }));
   }, [ready, url]);
-  // A share link opened while signed out (or as a guest) waits here until there's a full account (Q44).
+  // A share link opened while signed out waits here until there's a full account (Q44; an old guest session counts as signed out).
   const shareToken = url?.match(/receive\?token=([\w-]+)/)?.[1];
   const fullAccount = !!userId && !session?.user.is_anonymous;
   useEffect(() => {
@@ -122,10 +123,13 @@ function App() {
     if (!language) useSettings.getState().setLanguage(getLocales()[0]?.languageCode === 'en' ? 'en' : 'ar');
     else {
       applyLanguage(language);
-      // Flow (stage 3): intro → add car (odometer included) → home. Intro's "Get started" opens a guest session.
-      // Guests (anonymous accounts, Q17) have no name and skip the profile step.
+      // Flow: welcome (intro) → sign up / sign in → name (if empty) → add car (odometer included) → home. No guest mode.
+      // An old guest (anonymous account, Q17) is sent once to Create account, which upgrades them in place; Sign in stays reachable.
       if (!userId) router.replace('/intro');
-      else if (profile.data && !profile.data.full_name.trim() && !session?.user.is_anonymous) router.replace('/profile-setup'); // Q7
+      else if (session?.user.is_anonymous) {
+        if (oldGuest.current !== userId) router.replace('/register');
+        oldGuest.current = userId;
+      } else if (profile.data && !profile.data.full_name.trim()) router.replace('/profile-setup'); // Q7
       else if (profile.data && !profile.data.onboarding_completed) router.replace('/add-vehicle');
     }
   }, [ready, language, userId, profile.data, session?.user.is_anonymous]);
@@ -147,7 +151,6 @@ function App() {
         <Stack.Screen name="capture/index" options={{ ...sheetOptions, sheetAllowedDetents: [0.92] }} />
         <Stack.Screen name="sheet" options={sheetOptions} />
         <Stack.Screen name="switch-vehicle" options={sheetOptions} />
-        <Stack.Screen name="feature-gate" options={{ presentation: 'modal' }} />
         <Stack.Screen name="pick" options={{ presentation: 'modal' }} />
         <Stack.Screen name="notify-permission" options={{ presentation: 'modal' }} />
       </Stack>

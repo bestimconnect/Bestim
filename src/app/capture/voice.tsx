@@ -84,12 +84,16 @@ export default function Voice() {
   const [direct, setDirect] = useState(false); // Q79: recording directly, so no live text
   const [busy, setBusy] = useState(false);
 
-  const toManual = (notice = 'micDenied') => router.replace({ pathname: '/capture/manual', params: { notice } });
+  // The quick-add sheet is the fallback. A sheet is closed with back(), so go back first, then push it.
+  const toManual = (notice?: string) => {
+    router.back();
+    router.push({ pathname: '/capture', params: { notice, vehicleId: useLogDraft.getState().vehicleId ?? undefined } });
+  };
 
   const startDirect = async () => {
     if (__DEV__ && Platform.OS === 'ios') return setTyped(true);
     try {
-      if (!(await requestRecordingPermissionsAsync()).granted) return toManual();
+      if (!(await requestRecordingPermissionsAsync()).granted) return toManual('micDenied');
       await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
       await recorder.prepareToRecordAsync();
       recorder.record();
@@ -107,7 +111,7 @@ export default function Voice() {
     if (!onlineManager.isOnline() || !ExpoSpeechRecognitionModule.isRecognitionAvailable() || (Platform.OS === 'android' && Platform.Version < 33))
       return startDirect();
     const perm = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
-    if (!perm.granted) return toManual();
+    if (!perm.granted) return toManual('micDenied');
     ExpoSpeechRecognitionModule.start({
       lang: await speechLang(i18n.language),
       interimResults: true,
@@ -195,7 +199,7 @@ export default function Voice() {
   });
   useSpeechRecognitionEvent('error', (e) => {
     if (e.error === 'no-speech') setNoSpeech(true);
-    else if (e.error === 'not-allowed') toManual();
+    else if (e.error === 'not-allowed') toManual('micDenied');
     else if (e.error === 'service-not-allowed' || e.error === 'language-not-supported' || e.error === 'network') startDirect();
   });
 
@@ -280,7 +284,7 @@ export default function Voice() {
         {noSpeech ? (
           <View className="gap-2">
             <Pressable onPress={retry}><Text className="text-muted">{t('capture.voice.noSpeech')}</Text></Pressable>
-            <Pressable onPress={() => router.replace('/capture/manual')}><Text variant="label" className="text-teal">{t('capture.voice.manualLink')}</Text></Pressable>
+            <Pressable onPress={() => toManual()}><Text variant="label" className="text-teal">{t('capture.voice.manualLink')}</Text></Pressable>
           </View>
         ) : busy ? (
           <Animated.View entering={rise()}>

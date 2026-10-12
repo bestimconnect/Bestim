@@ -1,3 +1,4 @@
+import { useRefresh } from '@/components/Refresh';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
@@ -16,6 +17,7 @@ import { supabase } from '@/lib/supabase';
 // Screen 18 — Record details. Banner per decisions Q12 (replaces "verified by service center").
 export default function LogDetailScreen() {
   const { t, i18n } = useTranslation();
+  const refresh = useRefresh();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: log } = useLog(id);
   const queryClient = useQueryClient();
@@ -70,7 +72,7 @@ export default function LogDetailScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper px-6">
       <Header title={t('log.header')} />
-      <ScrollView className="flex-1" contentContainerClassName="gap-4 pb-4" showsVerticalScrollIndicator={false}>
+      <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-4 pb-4" showsVerticalScrollIndicator={false}>
         {log.status === 'needs_review' ? (
           <Pressable
             accessibilityRole="button"

@@ -1,12 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Car, CloudOff } from 'lucide-react-native';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Header, Item, Text } from '@/components/ui';
-import { useIsGuest } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { useColors } from '@/lib/theme';
 import { useSettings } from '@/stores/settingsStore';
@@ -16,11 +15,10 @@ export default function ReceiveScreen() {
   const { t } = useTranslation();
   const c = useColors();
   const qc = useQueryClient();
-  const guest = useIsGuest();
   const { token } = useLocalSearchParams<{ token?: string }>();
   const share = useQuery({
     queryKey: ['share', token],
-    enabled: !!token && !guest,
+    enabled: !!token,
     retry: false,
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_share', { token: token! });
@@ -40,8 +38,6 @@ export default function ReceiveScreen() {
       router.replace('/');
     },
   });
-  if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'receive' } }} />;
-
   const home = () => router.replace('/');
   const s = share.data;
   // Invalid / expired / used (no row), or own share, or accept failed: the 48-style state.
@@ -77,6 +73,7 @@ export default function ReceiveScreen() {
           <Text variant="caption" className="text-muted">{t('receive.by')}</Text>
           <Text variant="label">{s?.shared_by_name || t('receive.fallbackName')}</Text>
         </View>
+        {s?.removed_records ? <Text variant="caption" className="text-muted">{t('share.removed', { n: s.removed_records })}</Text> : null}
         <Text variant="body" className="text-muted">{t('receive.body')}</Text>
       </View>
       <View className="gap-3 pb-6">

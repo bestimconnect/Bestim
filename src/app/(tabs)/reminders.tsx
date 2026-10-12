@@ -1,6 +1,6 @@
 import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
-import { Redirect, router } from 'expo-router';
+import { router } from 'expo-router';
 import * as Icons from 'lucide-react-native';
 import { Bell, CalendarCheck, ChevronDown, Gauge, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
@@ -14,7 +14,7 @@ import type { TFunction } from 'i18next';
 import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { Button, Choice, Item, Text, Rise } from '@/components/ui';
-import { needsAttention, useCurrentVehicle, useIsGuest, useVehicleParts, useVehicles, vehicleName, type Part } from '@/lib/queries';
+import { needsAttention, useCurrentVehicle, useVehicleParts, useVehicles, vehicleName, type Part } from '@/lib/queries';
 import { shadows, useColors } from '@/lib/theme';
 import { useSettings } from '@/stores/settingsStore';
 
@@ -67,14 +67,12 @@ export default function RemindersScreen() {
   const { t, i18n } = useTranslation();
   const c = useColors();
   const insets = useSafeAreaInsets();
-  const guest = useIsGuest();
   const { vehicle } = useCurrentVehicle();
   const vehicles = useVehicles().data ?? [];
   const setCurrent = useSettings((s) => s.setCurrentVehicle);
   const { parts, isError, data, refetch, isRefetching } = useVehicleParts(vehicle);
   const onShowSaved = useShowSavedAction();
   const [seg, setSeg] = useState<'attention' | 'all'>('attention');
-  if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'reminders' } }} />;
 
   if (isError && !data) return <ErrorState onRetry={refetch} retrying={isRefetching} onShowSaved={onShowSaved} />;
   const unit = vehicle?.odometer_unit ?? 'km';

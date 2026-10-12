@@ -1,7 +1,8 @@
+import { useRefresh } from '@/components/Refresh';
 import { useQueryClient } from '@tanstack/react-query';
 import { addDays, format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { PartMetric } from '@/components/PartMetric';
 
 import { Button, Header, Text } from '@/components/ui';
-import { useIsGuest, useVehicle, useVehicleParts } from '@/lib/queries';
+import { useVehicle, useVehicleParts } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/components/Toast';
 
@@ -19,13 +20,12 @@ const n = (x: number) => x.toLocaleString('en-US');
 
 export default function ReminderScreen() {
   const { t, i18n } = useTranslation();
+  const refresh = useRefresh();
   const qc = useQueryClient();
-  const guest = useIsGuest();
   const { vehicleId, serviceTypeId } = useLocalSearchParams<{ vehicleId: string; serviceTypeId: string }>();
   const { vehicle } = useVehicle(vehicleId);
   const part = useVehicleParts(vehicle).parts.find((p) => p.serviceType.id === serviceTypeId);
   const [busy, setBusy] = useState(false);
-  if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'reminders' } }} />;
   if (!vehicle || !part) return <View className="flex-1 bg-paper" />;
 
   const { serviceType: st, log, status } = part;
@@ -68,7 +68,7 @@ export default function ReminderScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper">
-      <ScrollView className="flex-1" contentContainerClassName="gap-4 px-6">
+      <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-4 px-6">
         <Header title={name} />
         {status ? (
           <PartMetric status={status} unit={unit} label={t(over ? 'home.overdueTitle' : 'home.soonTitle', { part: name })} />

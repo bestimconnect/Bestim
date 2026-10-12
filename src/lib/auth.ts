@@ -6,11 +6,6 @@ import { supabase } from './supabase';
 // Native Google sign-in → identity token → Supabase session (spec §6). Returns false when the user
 // cancels. The module loads lazily so builds without it still start.
 
-export async function continueAsGuest() {
-  const { error } = await supabase.auth.signInAnonymously();
-  if (error) throw error;
-}
-
 /** False on Android phones without Google services (Huawei): the Google button is hidden there (Q76). */
 export function useGoogleAvailable() {
   const [available, setAvailable] = useState(Platform.OS !== 'android');
@@ -37,7 +32,12 @@ export async function signInWithGoogle(): Promise<boolean> {
   const { data } = await supabase.auth.getUser();
   if (data.user?.is_anonymous) {
     const { error } = await supabase.auth.linkIdentity(credentials);
-    if (error) throw error;
+    // This Google account already has a Bestim account: sign into it (the guest's trial car is left behind).
+    if (error) {
+      const { error: signInError } = await supabase.auth.signInWithIdToken(credentials);
+      if (signInError) throw signInError;
+      return true;
+    }
     if (res.data.user.name)
       await supabase.from('profiles').update({ full_name: res.data.user.name }).eq('id', data.user.id);
     return true;

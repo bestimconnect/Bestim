@@ -1,4 +1,5 @@
-import { Redirect, router } from 'expo-router';
+import { useRefresh } from '@/components/Refresh';
+import { router } from 'expo-router';
 import { Car, Repeat } from 'lucide-react-native';
 import { useState } from 'react';
 import { I18nManager, ScrollView, Share, View } from 'react-native';
@@ -10,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button, Choice, Field, Header, Item, Note, Text } from '@/components/ui';
 import { SITE } from '@/lib/links';
-import { useCurrentVehicle, useIsGuest, useVehicleLogs, useVehicleParts, useVehicles, vehicleName } from '@/lib/queries';
+import { useCurrentVehicle, useVehicleLogs, useVehicleParts, useVehicles, vehicleName } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { useColors } from '@/lib/theme';
 
@@ -22,8 +23,8 @@ const tokenOf = (s: string) => s.trim().match(/token=([^&\s#]+)/)?.[1] ?? s.trim
 
 export default function ShareScreen() {
   const { t } = useTranslation();
+  const refresh = useRefresh();
   const c = useColors();
-  const guest = useIsGuest();
   const vehicles = useVehicles();
   const { vehicle: current } = useCurrentVehicle();
   const [pickedId, setPickedId] = useState<string | null>(null);
@@ -35,7 +36,6 @@ export default function ShareScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const [pasted, setPasted] = useState('');
-  if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'account' } }} />;
 
   const name = vehicle ? vehicleName(vehicle) : '';
   const count = logs.data?.length ?? 0;
@@ -64,7 +64,7 @@ export default function ShareScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper px-6" edges={['top']}>
       <Header title={t('share.header')} />
-      <ScrollView contentContainerClassName="gap-5 pb-[120px] pt-4" showsVerticalScrollIndicator={false}>
+      <ScrollView refreshControl={refresh} contentContainerClassName="gap-5 pb-[120px] pt-4" showsVerticalScrollIndicator={false}>
         <View className="h-[60px] w-[60px] items-center justify-center self-center rounded-full bg-mint">
           <Repeat size={26} color={c.teal} />
         </View>

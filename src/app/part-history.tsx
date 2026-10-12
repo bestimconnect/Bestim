@@ -1,3 +1,4 @@
+import { useRefresh } from '@/components/Refresh';
 import { router, useLocalSearchParams } from 'expo-router';
 import { format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
@@ -13,6 +14,7 @@ const n = (x: number) => x.toLocaleString('en-US');
 
 export default function PartHistory() {
   const { t, i18n } = useTranslation();
+  const refresh = useRefresh();
   const { vehicleId, serviceTypeId } = useLocalSearchParams<{ vehicleId: string; serviceTypeId: string }>();
   const { vehicle } = useVehicle(vehicleId);
   const st = useServiceTypes().data?.find((s) => s.id === serviceTypeId);
@@ -27,7 +29,7 @@ export default function PartHistory() {
       <View className="px-6">
         <Header title={name} />
       </View>
-      <ScrollView contentContainerClassName="gap-4 px-6 pb-4">
+      <ScrollView refreshControl={refresh} contentContainerClassName="gap-4 px-6 pb-4">
         <Text variant="title">{t('parts.history.title')}</Text>
         <Text variant="body" className="text-muted">{t('parts.history.subtitle')}</Text>
         {logs.length ? (

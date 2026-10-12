@@ -8,21 +8,21 @@ Updated 2026-10-11. Read this first in any new session. The spec is `docs/BESTIM
 |---|---|---|
 | 1 · Foundation | Expo scaffold, tokens, Supabase, i18n/RTL, UI kit, root layout | ✅ Done |
 | 2 · Auth & onboarding | Screens 01, 02, 03–05, 30–35, 49, 50 + reset password; email + Google login | ✅ Done (Apple deferred: decisions Q6) |
-| 3 · Core features | Home (06/07/36), vehicles (08/09), parts (11/12), capture (13–17), history (10/18/19/20/39), feature gate (37), guest mode | ✅ Done |
+| 3 · Core features | Home (06/07/36), vehicles (08/09), parts (11/12), capture (13–17), history (10/18/19/20/39) | ✅ Done |
 | 4 · Reminders & expenses | Reminders (21/22/38), update odometer (25), expenses (23/24/40) | ✅ Done |
 | 5 · Account & polish | Account (26), notification prefs (28), export (27), share/receive (41/42), feedback (43–48), on-device reminders, offline, delete vehicle/account | ✅ Built (QA gaps below) |
 | 6 · Release | Needs the Apple Developer account: Sign in with Apple, server push, TestFlight, Android Google key, universal links, store submission | ⏭ Next |
 
 ## App flow (decisions Q8)
-Splash (native, then `SplashOverlay` animation) → Intro (`(onboarding)/intro`, 3 swipeable slides; "Get started" opens a guest session, "I already have an account" → Sign in 30) → Add car (saves the car, sets `onboarding_completed`) → Home (tabs). Guests can add records by hand. A signed-in user with an empty name goes to Your profile (32) first. Q87, Q98–Q102.
+Splash (native, then `SplashOverlay`: the logo builds itself in about 2 s, Q104) → Onboarding (`(onboarding)/intro`, 3 swipeable slides, "Next" / "Get started" button, "Skip" top corner; shown every time the app opens signed out; no guest mode, nothing is usable without an account, Q103) → Sign in (link to Create account; "Continue with Google" is the last element on both account screens)  → Your profile (32) if the name is empty → Add car (saves the car, sets `onboarding_completed`) → Home (tabs). An old guest session from a test build is sent once to Create account and keeps its car. Q87, Q98–Q104.
 The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "first vehicle added".
 
 ## What exists (Phases 1–5)
 - **UI kit** (`src/components/ui/`): Text, Button, Field, Card, Item, Header, Note, Divider, Progress, Choice (`className` for the track), Metric, GoogleIcon. Also `Hero`, `TourSlide`, `TabBar`, `PartMetric` in `src/components/`.
-- **Data hooks** (`src/lib/queries.ts`): vehicles, current vehicle, logs, log, service types, parts (`useVehicleParts` + `needsAttention`), snoozes, expenses, `useIsGuest`. Part status math: `src/lib/parts.ts` (pure, checked by `npm run check`). Voice: see "Voice logging" below.
+- **Data hooks** (`src/lib/queries.ts`): vehicles, current vehicle, logs, log, service types, parts (`useVehicleParts` + `needsAttention`), snoozes, expenses. Part status math: `src/lib/parts.ts` (pure, checked by `npm run check`). Voice: see "Voice logging" below.
 - **Flow stores:** `settingsStore` (language, theme, skipSplash, currentVehicleId), `vehicleDraft` (onboarding / `?mode=extra` add vehicle), `logDraft` (capture → review → save, and corrections).
 - **Tabs:** Home, Vehicles (stack: 08 → 09), Reminders (21), Account (Phase 5 placeholder with an Expenses row; stack → 23). The center + opens the capture sheet (13).
-- **Guest mode:** "Continue as guest" = Supabase anonymous user. Guests see Home (36); everything else opens the gate (37). Register/Google upgrade the same user (`updateUser` / `linkIdentity`). A guest can't merge into an account that already exists.
+- **No guest mode (Q103):** signed out, only the welcome, sign-in and create-account screens are reachable. The only guest-aware code left: the gate in `src/app/_layout.tsx` sends an old anonymous session to Create account, `register.tsx` upgrades it in place (`updateUser`), and `signInWithGoogle` in `src/lib/auth.ts` links Google to it.
 - **DB** (migrations in `supabase/migrations/`):
   - odometer trigger (flags suspicious readings as needs_review and moves the vehicle odometer, decisions Q9/Q20);
   - `correct_log` RPC (atomic corrections);
@@ -30,7 +30,7 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
   - snooze = a `reminders` row with status dismissed + due_date;
   - private `receipts` storage bucket;
   - `vehicles.odometer_updated_at`.
-- **Auth:** email/password, Google, anonymous (guest), email-link deep links, reset password.
+- **Auth:** email/password, Google, email-link deep links, reset password.
 - **Theme:** the user setting (Account → Dark mode). Auth + first-run onboarding are always light. **The dark theme is our own palette, not Figma's** (decisions Q50): `bg-paper` < `bg-white` < `bg-panel`; `bg-sheet` for sheets/modals.
 - **Phase 5:**
   - Account (theme, language, sign out, delete account);
@@ -57,7 +57,7 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
   - Switching the model: secret `GEMINI_MODEL` (default `gemini-3.8-flash`). Another provider means rewriting `understand()` in that one file; the app does not change.
   - Model test: `scripts/voice-eval.ts` + `scripts/voice-eval.cases.json` (21 written sentences; real voice notes go in the git-ignored `scripts/voice-eval/`).
   - **Status (2026-10-03): live.** Migration applied, function deployed, `GEMINI_API_KEY` set. Checked on the iPhone 16 simulator with a typed English sentence (the simulator has no speech recognition): 4 records came back right (oil change with reading, cost and interval; oil filter; fuel; an insurance expense with no amount, blocked until filled), edit an expense card, remove a card, save all, success screen, Home shows the new reading and the month's expenses without double counting. The function refuses callers who are not signed in.
-  - **Not checked yet:** a real recording (needs a phone), Arabic and mixed speech, editing a maintenance card and the odometer card, the daily limit and the guest refusal, a partly failed save, Android, and the written test (`scripts/voice-eval.ts` needs a test account's email and password).
+  - **Not checked yet:** a real recording (needs a phone), Arabic and mixed speech, editing a maintenance card and the odometer card, the daily limit, a partly failed save, Android, and the written test (`scripts/voice-eval.ts` needs a test account's email and password).
   - The old keyword parser, the one-question screen (17) and `USE_MOCK` are gone. `src/lib/voice.ts` only keeps `parseReading` for the update-odometer screen.
 
 ## Round of 2026-10-11 (decisions Q90–Q93)
@@ -71,9 +71,15 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 ## UX round of 2026-10-12 (Q98–Q102)
 **Built (four stages):** a quick-add sheet for records and costs (the "+" and the voice button open it); one-tap "Done" on Home's Today's priority rows (opens the sheet for that service); edit a record with a reason, the original stays visible; delete with Undo (also from the car log rows); an honest line "N records were removed from this history" on the share screen; old flow screens and unused text removed.
 
-**Deliberately simple for now:** the date is today / yesterday / last 30 days until a native date picker arrives with the next build; delete waits 5 seconds in memory (closing the app inside those seconds keeps the record); no swipe-to-delete; the notify-permission step is still its own screen; the receive screen does not show the removed-records line yet (the `get_share` function does not return it, needs a small database change); `capture/review` and `capture/manual` still exist for the voice fallback, and `add-expense` for editing a voice card.
+**Deliberately simple for now:** the date is today / yesterday / last 30 days until a native date picker arrives with the next build; delete waits 5 seconds in memory (closing the app inside those seconds keeps the record); no swipe-to-delete; the notify-permission step is still its own screen; the old long form (`capture/review`, `capture/manual`, `add-expense`) is gone: voice fallbacks and voice-card edits now use the quick-add sheet (`?notice`, `?batch`); the receive screen shows the removed-records line.
 
 **Not verified yet:** Android; the English pass; saving from the sheet while offline; Undo on an offline save that is still queued.
+
+**Guest mode removed (Q103, later the same day):** the welcome screen has "Create account" and "Sign in"; the "save your car" card on Home, the feature-gate screen, the guest delete-data path and every guest check in the tabs and screens are gone. Not run by anyone yet: the whole door (sign in, Google from either screen, create account, an old guest session being taken to Create account), Part F and row G2 of the retest sheet.
+
+**To do outside the code:**
+- Turn off anonymous sign-ins in the Supabase dashboard (Authentication → Sign In / Providers), once old test builds are no longer in use.
+- The website's privacy, terms and delete-account pages and the store answers (Apple privacy labels, Google data safety) still describe guest mode and need rewording.
 
 ## Open items
 - **Not verified yet (QA):**
@@ -89,7 +95,7 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 A full pass for Google Play and Huawei AppGallery. Store texts and form answers: `../docs/store/`. Pictures: `../assets/store/`.
 
 **Done in code (merged into `main` 2026-10-08, PR 1; not built). The website side is live on `bestim-eg.com` (privacy text, `/receive`, AppGallery button):**
-- Store rules: Privacy · Terms · Support links in Account and a consent line at sign-up (`src/lib/links.ts`, no env setting any more); AI notice on the voice screen; guests can delete their data from the gate screen; account deletion removes every receipt photo; camera permission text matches what the camera does; Android backups off; unneeded permissions blocked; notification icon and category name.
+- Store rules: Privacy · Terms · Support links in Account and a consent line at sign-up (`src/lib/links.ts`, no env setting any more); AI notice on the voice screen; account deletion removes every receipt photo; camera permission text matches what the camera does; Android backups off; unneeded permissions blocked; notification icon and category name.
 - Security: email links use a one-time code tied to the phone (`flowType: 'pkce'`, `src/lib/session.ts`); the cache is cleared whenever the signed-in user changes (`src/lib/queryClient.ts`); passwords 8+; CSV formulas defused; `process-voice-log` hardened.
 - Huawei and older Android: Google button hidden without Google services (`useGoogleAvailable`); voice records directly with `expo-audio` when there is no speech service or on Android 12 and older (`capture/voice.tsx`, sends `audio/aac`); Android back closes the odometer camera.
 - Polish: `errorText()` (`src/lib/errors.ts`) instead of raw server messages; root `ErrorBoundary`; dead "add photo" button removed.
@@ -106,7 +112,7 @@ A full pass for Google Play and Huawei AppGallery. Store texts and form answers:
 **Applied to the live project (2026-10-08):** migration `20261005090000_release_hardening.sql` (listed as applied); `process-voice-log` version 2 (refuses callers who are not signed in; a spoken test in the simulator came back with the right record: oil change, 251,500 km, 900 EGP); `src/types/database.ts` regenerated. No test value of `VOICE_DAILY_LIMIT` is set.
 
 **Not verified yet:**
-- English and dark for the screens above; the guest "delete my data" path; the "something went wrong" screen (it only shows on a crash).
+- English and dark for the screens above; the "something went wrong" screen (it only shows on a crash).
 - Nothing has run on Android or Huawei. The new direct voice recording has not been heard by the AI yet (format `audio/aac`): first thing to try on the Android phone.
 - The email-link flow end to end (needs the live settings above).
 

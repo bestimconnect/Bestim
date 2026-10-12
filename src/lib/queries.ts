@@ -37,11 +37,6 @@ export function vehicleName(v: Pick<Vehicle, 'nickname' | 'make' | 'model' | 'ca
   return `${m.car_makes[k]} ${m[k]}`;
 }
 
-/** Anonymous Supabase user = guest (decisions Q17). */
-export function useIsGuest() {
-  return !!useSession()?.user.is_anonymous;
-}
-
 /** The signed-in user's profile row. Key ['profile', userId]. */
 export function useProfile() {
   const userId = useSession()?.user.id;

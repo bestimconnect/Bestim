@@ -1,6 +1,6 @@
+import { useRefresh } from '@/components/Refresh';
 import { File, Paths } from 'expo-file-system';
 import * as Print from 'expo-print';
-import { Redirect } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button, Choice, Header, Note, Text, Toggle } from '@/components/ui';
 import { toCsv, toHtml, toJson, type ExportLabels, type ExportLog, type ExportOptions } from '@/lib/export';
-import { useCurrentVehicle, useIsGuest, useVehicleLogs, useVehicles, vehicleName } from '@/lib/queries';
+import { useCurrentVehicle, useVehicleLogs, useVehicles, vehicleName } from '@/lib/queries';
 
 // Screen 27 — Export (decisions Q42); ar-light 27/تصدير السجل.png
 type Format = 'pdf' | 'csv' | 'json';
@@ -19,7 +19,7 @@ const ROWS = ['costs', 'workshops', 'identifiers', 'notes'] as const;
 
 export default function ExportScreen() {
   const { t, i18n } = useTranslation();
-  const guest = useIsGuest();
+  const refresh = useRefresh();
   const { vehicle } = useCurrentVehicle();
   const vehicles = useVehicles();
   const logs = useVehicleLogs(vehicle?.id);
@@ -27,7 +27,6 @@ export default function ExportScreen() {
   const [opts, setOpts] = useState<ExportOptions>({ costs: true, workshops: true, identifiers: false, notes: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
-  if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'account' } }} />;
 
   const empty = logs.isSuccess && logs.data.length === 0;
   const prepare = async () => {
@@ -81,7 +80,7 @@ export default function ExportScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper px-6" edges={['top']}>
       <Header title={t('export.header')} />
-      <ScrollView contentContainerClassName="gap-4 pb-[120px]" showsVerticalScrollIndicator={false}>
+      <ScrollView refreshControl={refresh} contentContainerClassName="gap-4 pb-[120px]" showsVerticalScrollIndicator={false}>
         <Text variant="title">{t('export.title')}</Text>
         {(vehicles.data?.length ?? 0) > 1 && vehicle ? <Text variant="caption" className="text-muted">{vehicleName(vehicle)}</Text> : null}
         <Choice<Format> className="bg-line" value={fmt} onChange={setFmt} options={[{ value: 'pdf', label: 'PDF' }, { value: 'csv', label: 'CSV' }, { value: 'json', label: 'JSON' }]} />

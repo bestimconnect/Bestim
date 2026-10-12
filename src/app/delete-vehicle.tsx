@@ -1,4 +1,4 @@
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { toast } from '@/components/Toast';
@@ -6,7 +6,7 @@ import { toast } from '@/components/Toast';
 import { DeleteConfirm } from '@/components/DeleteConfirm';
 import { queryClient } from '@/lib/queryClient';
 import { syncNotifications } from '@/lib/notifications';
-import { useIsGuest, useVehicles, vehicleName } from '@/lib/queries';
+import { useVehicles, vehicleName } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { useSettings } from '@/stores/settingsStore';
 
@@ -14,10 +14,8 @@ import { useSettings } from '@/stores/settingsStore';
 export default function DeleteVehicle() {
   const { t } = useTranslation();
   const { vehicleId } = useLocalSearchParams<{ vehicleId: string }>();
-  const guest = useIsGuest();
   const vehicles = useVehicles().data ?? [];
   const vehicle = vehicles.find((v) => v.id === vehicleId);
-  if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'account' } }} />;
 
   const remove = async () => {
     // Receipt files first (best effort), then the row; logs, expenses, reminders and shares cascade.

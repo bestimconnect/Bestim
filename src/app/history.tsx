@@ -1,3 +1,4 @@
+import { useRefresh } from '@/components/Refresh';
 import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { useMutationState, useQueryClient } from '@tanstack/react-query';
@@ -28,6 +29,7 @@ const icon = (name?: string | null, fallback = Icons.Wrench) => (name && (Icons 
 
 export default function HistoryScreen() {
   const { t, i18n } = useTranslation();
+  const refresh = useRefresh();
   const c = useColors();
   const qc = useQueryClient();
   const p = useLocalSearchParams<{ vehicleId?: string; filter?: string }>(); // filter: a category, subcategory or service id
@@ -109,7 +111,7 @@ export default function HistoryScreen() {
         </View>
       ) : (
         <>
-          <ScrollView className="flex-1" contentContainerClassName="gap-3 pb-4" showsVerticalScrollIndicator={false}>
+          <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-3 pb-4" showsVerticalScrollIndicator={false}>
             <Text variant="title">{t('history.title')}</Text>
             {vehicleId ? <VoiceQueueCard vehicleId={vehicleId} /> : null}
             <Choice

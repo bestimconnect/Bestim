@@ -25,7 +25,6 @@
       "noAccount": "Don't have an account?",
       "createAccount": "Create one",
       "heading": "Welcome back",
-      "continueAsGuest": "Continue as guest",
       "passwordUpdated": "Password updated. You can sign in now.",
       "linkExpired": "This link doesn't work. Open it on the same phone you asked from, or request a new one."
     },
@@ -72,8 +71,9 @@
       "heading": "Let's get to know you"
     },
     "common": {
-      "or": "or continue with",
+      "or": "or use email",
       "google": "Google",
+      "googleContinue": "Continue with Google",
       "errors": {
         "email": "Enter a valid email address",
         "passwordMin": "Password must be at least 8 characters",
@@ -84,9 +84,10 @@
     }
   },
   "onboarding": {
+    "next": "Next",
+    "start": "Get started",
+    "skip": "Skip",
     "intro": {
-      "start": "Get started",
-      "haveAccount": "I already have an account",
       "voice": {
         "title": "Say what you did.\nWe'll write it down.",
         "body": "Just say \"changed the oil\" and it lands in your car's logbook.",
@@ -174,13 +175,6 @@
       "body": "Add your car, then log your first service. Everything will be ready for your next trip.",
       "cta": "Add my car"
     },
-    "guest": {
-      "title": "Save your car with an account",
-      "body": "Lose your phone, keep your car and its records.",
-      "google": "Continue with Google",
-      "email": "Continue with email",
-      "dismiss": "Hide"
-    },
     "carLog": "Car log",
     "carLogSub": "Services, costs and odometer readings",
     "kmL": "km/L",
@@ -192,21 +186,6 @@
     },
     "fuelHint": "Add 2 full tanks",
     "loading": "Loading"
-  },
-  "gate": {
-    "title": {
-      "vehicles": "My cars",
-      "capture": "Voice records",
-      "reminders": "Reminders",
-      "account": "Account",
-      "expenses": "Expenses",
-      "receive": "Receive car history"
-    },
-    "heading": "All the details, in your account",
-    "body": "Create an account to keep your maintenance history and track parts and expenses.",
-    "create": "Create my account",
-    "keep": "Keep browsing",
-    "deleteGuest": "Delete my guest data"
   },
   "odometer": {
     "header": "Update odometer",
@@ -378,45 +357,20 @@
       "dailyLimit": "You've reached today's voice recording limit. Enter the record yourself, and voice will be back tomorrow.",
       "longHint": "You're near the time limit. We'll finish the recording automatically.",
       "partialFail": "We saved {{saved}} of {{total}}. The rest couldn't be saved and are still in the list.",
-      "doneEdit": "Done",
       "successOne": "We saved your record.",
       "successMany": "We saved your records ({{count}}).",
       "successReview": "One reading looked unusual, so it's marked for review.",
       "liters": "{{value}} L"
     },
-    "review": {
-      "header": "Review the details",
-      "title": "One last step, then save",
-      "fromVoice": "From your voice recording",
-      "tapEdit": "Tap to edit the activity",
-      "odometer": "Odometer",
-      "cost": "Cost",
-      "date": "Date",
-      "suggestedDate": "Suggested date",
-      "workshop": "Workshop",
-      "notMentioned": "Not mentioned",
-      "next": "Suggested next",
-      "months": "{{n}} months",
-      "noteTitle": "Check the suggested date",
-      "noteBody": "You didn't mention a date. We used today's date. You can edit it.",
-      "confirm": "Confirm and save",
-      "km": "km",
-      "egp": "EGP"
-    },
     "manual": {
-      "what": "What did you do?",
       "serviceType": "Service type",
       "odometer": "Reading · km",
-      "cost": "Cost · EGP",
-      "date": "Service date",
-      "dateError": "Use the format YYYY-MM-DD",
       "workshop": "Workshop name",
       "notes": "Notes",
       "optional": "Optional",
       "attach": "Attach receipt photo",
       "attachSub": "Helps document the record",
       "attached": "Photo attached, tap to change",
-      "review": "Review and save",
       "interval": "Next maintenance after (km)"
     },
     "fields": {
@@ -601,14 +555,8 @@
     },
     "amount": "Amount · Egyptian pound",
     "date": "Date",
-    "dateError": "Use the format YYYY-MM-DD",
     "place": "Place",
     "optional": "Optional",
-    "link": "Linked to a maintenance log",
-    "linkPick": "Choose a record",
-    "noLink": "No link",
-    "linkHint": "Added as an extra cost for this record.",
-    "save": "Save expense",
     "liters": "Litres",
     "reading": "Odometer reading · km",
     "fullTank": "Full tank",
@@ -777,8 +725,7 @@
       "cardLabel": "Last saved reading",
       "cardNote": "{{unit}} · check your connection to update schedules",
       "write": "Write a new record",
-      "voice": "Voice recording needs a connection.",
-      "voiceSheet": "Voice recording needs a connection for guests."
+      "voice": "Voice recording needs a connection."
     },
     "pending": "Waiting to sync",
     "success": {
@@ -819,19 +766,12 @@
       "body": "Your account and all your cars, records, reminders and expenses will be deleted. You won't be able to get them back.",
       "keep": "Keep my account",
       "error": "We couldn't delete your account. Try again."
-    },
-    "deleteGuest": {
-      "header": "Delete data",
-      "title": "Delete your guest data permanently?",
-      "body": "Your car and its records, reminders and expenses will be deleted. You won't be able to get them back.",
-      "keep": "Keep my data"
     }
   },
   "toast": {
     "vehicleDeleted": "Car deleted",
     "accountDeleted": "Your account was deleted",
-    "photoOffline": "Photos need a connection.",
-    "guestDeleted": "Your data was deleted"
+    "photoOffline": "Photos need a connection."
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",

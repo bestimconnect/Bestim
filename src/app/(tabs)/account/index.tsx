@@ -1,3 +1,4 @@
+import { useRefresh } from '@/components/Refresh';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { Bell, Download, Moon, Repeat, User, Wallet, LogOut } from 'lucide-react-native';
@@ -20,6 +21,7 @@ import { useSettings } from '@/stores/settingsStore';
 // Screen 26 — Account & settings (Q33, Q35, Q36, Q48); Figma 167:59659
 export default function AccountScreen() {
   const { t } = useTranslation();
+  const refresh = useRefresh();
   const c = useColors();
   const userId = useSession()?.user.id;
   const { language, setLanguage, theme, setTheme } = useSettings();
@@ -48,7 +50,7 @@ export default function AccountScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
-      <ScrollView contentContainerClassName="gap-3 px-6 pt-6" contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView refreshControl={refresh} contentContainerClassName="gap-3 px-6 pt-6" contentContainerStyle={{ paddingBottom: 120 }}>
         <View className="flex-row items-center gap-4 pb-3">
           <View className="h-16 w-16 items-center justify-center rounded-full bg-lime">
             <User size={28} color="#222E29" />

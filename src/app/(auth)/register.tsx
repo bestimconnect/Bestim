@@ -147,21 +147,19 @@ export default function RegisterScreen() {
           />
         </Text>
 
-        {google ? (
-          <>
-            <Divider label={t('auth.common.or')} />
-            <View className="flex-row gap-2.5">
-              <Button title={t('auth.common.google')} icon={<GoogleIcon />} variant="secondary" className="flex-1" onPress={() => social(signInWithGoogle)} />
-            </View>
-          </>
-        ) : null}
-
         <View className="flex-row justify-center gap-1.5 pt-2">
           <Text className="text-muted">{t('auth.register.haveAccount')}</Text>
-          <Pressable onPress={() => router.push('/login')}>
+          <Pressable onPress={() => router.replace('/login')}>
             <Text variant="label" className="text-teal">{t('auth.register.signIn')}</Text>
           </Pressable>
         </View>
+
+        {google ? (
+          <>
+            <Divider label={t('auth.common.or')} />
+            <Button title={t('auth.common.googleContinue')} icon={<GoogleIcon />} variant="secondary" onPress={() => social(signInWithGoogle)} />
+          </>
+        ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>

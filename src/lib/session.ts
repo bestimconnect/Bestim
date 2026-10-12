@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { supabase } from './supabase';
 
-/** undefined = still loading, null = signed out (guest). */
+/** undefined = still loading, null = signed out. */
 export function useSession() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   useEffect(() => {

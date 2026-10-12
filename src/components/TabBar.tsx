@@ -5,7 +5,6 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { useIsGuest } from '@/lib/queries';
 import { shadows, useColors } from '@/lib/theme';
 import { PressableScale } from './ui/PressableScale';
 import { Text } from './ui/Text';
@@ -15,11 +14,10 @@ const labels: Record<string, string> = { index: 'home', vehicles: 'vehicles', re
 
 /**
  * Custom ink nav (spec §10): 68px, 28 radius, floating lime capture button in the centre.
- * The capture button isn't a tab: it opens the "new record" sheet (13). Guests can add by hand; the sheet's voice row asks them for an account (Q17).
+ * The capture button isn't a tab: it opens the "new record" sheet (13).
  */
 export function TabBar({ state, navigation }: BottomTabBarProps) {
   const { t } = useTranslation();
-  const guest = useIsGuest();
   const capture = () => router.push('/capture');
   const c = useColors();
   const { bottom } = useSafeAreaInsets();
@@ -31,8 +29,6 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
         const focused = state.index === i;
         const Icon = icons[route.name];
         const onPress = () => {
-          if (guest && route.name !== 'index')
-            return router.push({ pathname: '/feature-gate', params: { feature: route.name } });
           const e = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
           if (!focused && !e.defaultPrevented) navigation.navigate(route.name);
         };

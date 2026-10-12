@@ -13,7 +13,6 @@ import { Button, Item, Rise, Text } from '@/components/ui';
 import { POP } from '@/lib/motion';
 import { useVehicle, useProfile } from '@/lib/queries';
 import { useColors } from '@/lib/theme';
-import { useLogDraft } from '@/stores/logDraft';
 
 type Params = {
   kind?: 'log' | 'batch'; // batch = several records from one voice recording (Q67)
@@ -74,8 +73,7 @@ export default function Success() {
         : t(next ? 'feedback.success.logBody' : 'feedback.success.logBodyPlain');
 
   const another = () => {
-    useLogDraft.getState().reset({ vehicleId: p.vehicleId ?? null, source: 'manual' });
-    router.replace('/capture');
+    router.replace({ pathname: '/capture', params: { vehicleId: p.vehicleId } });
   };
 
   return (

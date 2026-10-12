@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { Redirect, router } from 'expo-router';
+import { router } from 'expo-router';
 import { Plus, Receipt, Trash2, Wallet } from 'lucide-react-native';
 import { I18nManager, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,7 +9,7 @@ import { FuelCard } from '@/components/FuelCard';
 import { useRefresh } from '@/components/Refresh';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { Button, Header, Item, Text } from '@/components/ui';
-import { useCurrentVehicle, useExpenses, useIsGuest, useRecordCategories, useVehicles } from '@/lib/queries';
+import { useCurrentVehicle, useExpenses, useRecordCategories, useVehicles } from '@/lib/queries';
 import { removeRecord } from '@/lib/removeRecord';
 import { useColors } from '@/lib/theme';
 
@@ -31,13 +31,11 @@ export default function Expenses() {
   const c = useColors();
   const queryClient = useQueryClient();
   const tree = useRecordCategories().data ?? [];
-  const guest = useIsGuest();
   const query = useExpenses();
   const expenses = query.data ?? [];
   const onShowSaved = useShowSavedAction();
   const vehicleCount = useVehicles().data?.length ?? 0;
   const car = useCurrentVehicle().vehicle;
-  if (guest) return <Redirect href={{ pathname: '/feature-gate', params: { feature: 'expenses' } }} />;
 
   if (query.isError && !query.data) return <ErrorState onRetry={query.refetch} retrying={query.isRefetching} onShowSaved={onShowSaved} />;
   const now = new Date();

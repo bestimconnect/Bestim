@@ -772,6 +772,7 @@ export type Database = {
           model: string
           nickname: string
           own: boolean
+          removed_records: number
           shared_by_name: string
           vehicle_id: string
           vehicle_type: string
