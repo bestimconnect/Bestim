@@ -2,17 +2,19 @@ import { useTabBarSpace } from '@/components/TabBar';
 import { useRefresh } from '@/components/Refresh';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { Bell, Download, Moon, Repeat, User, Wallet, LogOut } from 'lucide-react-native';
-import { Fragment } from 'react';
+import { Bell, Camera, Coins, Download, Languages, Moon, Repeat, LogOut } from 'lucide-react-native';
+import { Fragment, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Item, Text, Toggle, PressableScale } from '@/components/ui';
+import { Avatar } from '@/components/Avatar';
+import { Group, Header, Item, Text, Toggle, PressableScale } from '@/components/ui';
+import { useAvatarActions } from '@/lib/avatar';
 import { signOut } from '@/lib/auth';
 import { applyLanguage } from '@/lib/i18n';
 import { openPage } from '@/lib/links';
-import { useCurrentVehicle, useProfile } from '@/lib/queries';
+import { useCurrentVehicle, useProfile, useVehicles } from '@/lib/queries';
 import { useSession } from '@/lib/session';
 import { sheet } from '@/lib/sheet';
 import { supabase } from '@/lib/supabase';
@@ -25,7 +27,10 @@ export default function AccountScreen() {
   const refresh = useRefresh();
   const space = useTabBarSpace();
   const c = useColors();
-  const userId = useSession()?.user.id;
+  const session = useSession();
+  const userId = session?.user.id;
+  const cars = useVehicles().data?.length ?? 0;
+  const [error, setError] = useState('');
   const { language, setLanguage, theme, setTheme } = useSettings();
   const { vehicle } = useCurrentVehicle();
   const { data: profile } = useProfile();
@@ -44,6 +49,19 @@ export default function AccountScreen() {
       },
     ]);
 
+  const photo = useAvatarActions(userId, profile?.avatar_url);
+  const run = (job: () => Promise<unknown>) => () => {
+    setError('');
+    job().catch(() => setError(t('account.photo.failed')));
+  };
+  const photoMenu = () =>
+    sheet(t('account.photo.title'), undefined, [
+      { text: t('account.photo.take'), onPress: run(() => photo.pick('camera')) },
+      { text: t('account.photo.choose'), onPress: run(() => photo.pick('library')) },
+      ...(profile?.avatar_url ? [{ text: t('account.photo.remove'), style: 'destructive' as const, onPress: run(photo.remove) }] : []),
+      { text: t('account.cancel'), style: 'cancel' as const },
+    ]);
+
   const confirmSignOut = () =>
     sheet(t('account.signOutTitle'), t('account.signOutBody'), [
       { text: t('account.cancel'), style: 'cancel' },
@@ -52,47 +70,45 @@ export default function AccountScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
-      <ScrollView refreshControl={refresh} contentContainerClassName="gap-3 px-6 pt-6" contentContainerStyle={{ paddingBottom: space }}>
-        <View className="flex-row items-center gap-4 pb-3">
-          <View className="h-16 w-16 items-center justify-center rounded-full bg-lime">
-            <User size={28} color="#222E29" />
+      <ScrollView refreshControl={refresh} contentContainerClassName="gap-3 px-6" contentContainerStyle={{ paddingBottom: space }}>
+        <Header title={t('tabs.account')} back={false} />
+        <View className="gap-4 rounded-item bg-white p-4" style={{ boxShadow: shadows.soft }}>
+          <View className="flex-row items-center gap-4">
+            <PressableScale accessibilityRole="button" accessibilityLabel={t('account.photo.title')} onPress={photoMenu}>
+              <Avatar path={profile?.avatar_url} name={profile?.full_name} size={64} />
+              <View className="absolute -bottom-1 -end-1 h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-lime">
+                <Camera size={14} color="#222E29" />
+              </View>
+            </PressableScale>
+            <View className="flex-1 gap-0.5">
+              <Text variant="heading" numberOfLines={1}>{profile?.full_name?.trim() || t('account.myAccount')}</Text>
+              <Text variant="caption" className="text-muted" numberOfLines={1}>{session?.user.email}</Text>
+            </View>
           </View>
-          <View className="flex-1 gap-1">
-            <Text variant="title">{profile?.full_name?.trim() || t('account.myAccount')}</Text>
-            <Text variant="caption" className="text-muted">{t('account.subtitle')}</Text>
-          </View>
-        </View>
-
-        <View className="flex-row gap-3">
-          <PressableScale
-            accessibilityRole="button"
-            onPress={switchLanguage}
-            className="flex-1 gap-1 rounded-item bg-white p-4"
-            style={{ boxShadow: shadows.soft }}>
-            <Text variant="caption" className="text-muted">{t('account.language')}</Text>
-            <Text variant="label">{t('account.languageName')}</Text>
-          </PressableScale>
-          <View className="flex-1 gap-1 rounded-item bg-white p-4" style={{ boxShadow: shadows.soft }}>
-            <Text variant="caption" className="text-muted">{t('account.currency')}</Text>
-            <Text variant="label">{t('account.currencyName')}</Text>
+          <View className="flex-row gap-2">
+            <View className="h-9 justify-center rounded-full bg-paper px-4"><Text variant="caption">{t('account.cars', { count: cars })}</Text></View>
+            <PressableScale accessibilityRole="button" onPress={photoMenu} className="h-9 flex-1 items-center justify-center rounded-full bg-lime">
+              <Text variant="label" className="text-[#222E29]">{t('account.photo.edit')}</Text>
+            </PressableScale>
           </View>
         </View>
-
-        <Item icon={Wallet} tone="sky" title={t('expenses.title')} subtitle={t('account.expensesSub')} onPress={() => router.push('/account/expenses')} />
-        <Item icon={Bell} tone="mint" title={t('account.notifications')} subtitle={t('account.notificationsSub')} onPress={() => router.push('/account/notifications')} />
-        <Item icon={Download} tone="paper" title={t('account.export')} subtitle={t('account.exportSub')} onPress={() => router.push('/account/export')} />
-        <Item icon={Repeat} tone="paper" title={t('account.share')} subtitle={t('account.shareSub')} onPress={() => router.push('/account/share')} />
-        <View className="min-h-[72px] flex-row items-center gap-3 rounded-item bg-white p-3.5" style={{ boxShadow: shadows.soft }}>
-          <View className="h-11 w-11 items-center justify-center rounded-full bg-paper">
-            <Moon size={20} color={c.teal} />
-          </View>
-          <View className="flex-1 gap-0.5">
-            <Text variant="label">{t('account.dark')}</Text>
-            <Text variant="caption" className="text-muted">{t('account.darkSub')}</Text>
-          </View>
-          <Toggle value={theme === 'dark'} onChange={(v) => setTheme(v ? 'dark' : 'light')} label={t('account.dark')} />
-        </View>
-        <Item icon={LogOut} tone="paper" title={t('account.signOut')} chevron={false} onPress={confirmSignOut} />
+        {error ? <Text variant="caption" className="text-danger">{error}</Text> : null}
+        <Text variant="caption" className="mt-2 px-1 text-muted">{t('account.group.preferences')}</Text>
+        <Group>
+          <Item icon={Languages} tone="paper" title={t('account.language')} aside={<Text variant="label">{t('account.languageName')}</Text>} onPress={switchLanguage} />
+          <Item icon={Coins} tone="paper" title={t('account.currency')} aside={<Text variant="label">{t('account.currencyName')}</Text>} disabled />
+          <Item icon={Moon} tone="paper" title={t('account.dark')} subtitle={t('account.darkSub')} aside={<Toggle value={theme === 'dark'} onChange={(v) => setTheme(v ? 'dark' : 'light')} label={t('account.dark')} />} />
+          <Item icon={Bell} tone="mint" title={t('account.notifications')} subtitle={t('account.notificationsSub')} onPress={() => router.push('/account/notifications')} />
+        </Group>
+        <Text variant="caption" className="mt-2 px-1 text-muted">{t('account.group.data')}</Text>
+        <Group>
+          <Item icon={Download} tone="paper" title={t('account.export')} subtitle={t('account.exportSub')} onPress={() => router.push('/account/export')} />
+          <Item icon={Repeat} tone="paper" title={t('account.share')} subtitle={t('account.shareSub')} onPress={() => router.push('/account/share')} />
+        </Group>
+        <View className="mt-2" />
+        <Group>
+          <Item icon={LogOut} tone="paper" title={t('account.signOut')} chevron={false} onPress={confirmSignOut} />
+        </Group>
 
         <View className="mt-4 flex-row items-center gap-1">
           {(['privacy', 'terms', 'support'] as const).map((page, i) => (

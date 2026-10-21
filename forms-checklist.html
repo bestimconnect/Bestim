@@ -1,0 +1,72 @@
+<title>Bestim Forms Checklist</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Tajawal:wght@400;700&display=swap">
+<style>
+/* Layout: improvement cards you tick, then before/after mockups of the quick-add form. */
+:root{--bg:#EEF1EE;--fg:#222E29;--muted:#5B6860;--line:#D5DCD6;--card:#FFFFFF;--lime:#D3F53D;--panel:#222E29;--teal:#08736F;--bad:#E0455F;--ap:#F5F7F5;--ac:#FFFFFF;--al:#DEE5DF;--ai:#222E29;--pick:#08736F;--display:'Poppins','Tajawal',system-ui,sans-serif;--body:'Tajawal','Poppins',system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B100D;--fg:#E8EEEA;--muted:#93A39A;--line:#26332B;--card:#131A16;--panel:#212E27;--ap:#0E1411;--ac:#171F1B;--al:#2C3A32;--ai:#F2F5F3;--pick:#3ECFC0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B100D;--fg:#E8EEEA;--muted:#93A39A;--line:#26332B;--card:#131A16;--panel:#212E27;--ap:#0E1411;--ac:#171F1B;--al:#2C3A32;--ai:#F2F5F3;--pick:#3ECFC0;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1{font:700 28px/1.15 var(--display);margin:0}h2{font:700 19px var(--display);margin:0 0 6px}p{margin:0}.lead{color:var(--muted);max-width:68ch}
+.picks{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}.picks output{flex:1;min-width:200px;font-size:13px;color:var(--muted)}.picks button{font:600 13px var(--display);background:var(--pick);color:#fff;border:0;border-radius:10px;padding:8px 14px;cursor:pointer}
+.list{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.item{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:12px;align-items:flex-start;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px;min-width:0}
+.item:focus-visible,.picks button:focus-visible{outline:3px solid var(--pick);outline-offset:2px}.item[aria-pressed="true"]{border-color:var(--pick)}
+.box{flex:none;width:24px;height:24px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;font:700 14px var(--display);color:#fff}.item[aria-pressed="true"] .box{background:var(--pick);border-color:var(--pick)}
+.item b{font:600 14px var(--display);display:block}.item small{color:var(--muted);font-size:13px;line-height:1.45;display:block;margin-top:2px}.where{font-size:12px;color:var(--pick);margin-top:4px;display:block}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.col{display:flex;flex-direction:column;gap:8px;align-items:center}.col>b{font:600 13px var(--display);color:var(--muted)}
+.ph{width:100%;max-width:270px;background:var(--ap);border:1px solid var(--al);border-radius:26px;overflow:hidden;color:var(--ai);font-size:10px;padding:14px;display:flex;flex-direction:column;gap:9px;height:470px}
+.ph *{min-width:0}.ttl{font:700 14px var(--display)}.lab{font-size:9px;color:var(--muted)}
+.fld{background:var(--ac);border:1px solid var(--al);border-radius:13px;padding:8px 10px;display:grid;gap:2px}.fld.err{border-color:var(--bad)}.fld .v{font:700 12px var(--display)}.fld .e{color:var(--bad);font-size:9px}
+.chips{display:flex;gap:5px;flex-wrap:wrap}.chip{border-radius:99px;padding:5px 10px;font:600 9px var(--display);background:var(--al)}.chip.on{background:var(--panel);color:#F5F7F5}
+.btn{margin-top:auto;text-align:center;padding:12px;border-radius:13px;background:var(--lime);color:#222E29;font:700 11px var(--display)}.btn.off{opacity:.45}
+.kb{height:120px;border-radius:14px 14px 0 0;background:var(--al);margin:0 -14px -14px;display:grid;place-items:center;color:var(--muted);font-size:9px}
+.hint{font-size:9px;color:var(--muted)}
+</style>
+<div class="wrap">
+<header style="display:flex;flex-direction:column;gap:10px"><h1>Forms: what we improve</h1>
+<p class="lead">Tick what you want. Then see the quick-add form before and after. The list is in order of how often people hit each problem. I build the ticked ones, starting with the quick-add sheet, then Add car, then sign-in.</p></header>
+<div class="picks" role="status"><output id="sum">Nothing ticked yet</output><button id="copy" type="button">Copy list</button></div>
+<section><h2>Improvements</h2><div class="list" id="list"></div></section>
+<section><h2>Quick-add form, before and after</h2><div class="cmp">
+ <div class="col"><b>Today</b><div class="ph"><div class="ttl">New record</div>
+  <div class="chips"><span class="chip on">Oil change</span><span class="chip">Fuel</span><span class="chip">Wash</span></div>
+  <div class="fld"><span class="lab">Amount</span><span class="v">350</span></div>
+  <div class="fld"><span class="lab">Reading</span><span class="v">250500</span></div>
+  <div class="fld"><span class="lab">Date</span><span class="v">2026-10-17</span></div>
+  <div class="hint">Errors show after you press Save.</div>
+  <div class="kb">Keyboard covers the Save button</div></div></div>
+ <div class="col"><b>After</b><div class="ph"><div class="ttl">New record · Oil change</div>
+  <div class="chips"><span class="chip on">Oil change</span><span class="chip">Fuel</span><span class="chip">Wash</span></div>
+  <div class="fld"><span class="lab">Cost (EGP)</span><span class="v">350</span></div>
+  <div class="fld err"><span class="lab">Odometer (km)</span><span class="v">250,300</span><span class="e">Lower than your last reading, 250,500</span></div>
+  <div class="chips"><span class="chip on">Today</span><span class="chip">Yesterday</span><span class="chip">Other day</span></div>
+  <div class="hint">Defaults filled in: today, current odometer, last service.</div>
+  <div class="btn off" style="margin-top:auto">Save</div>
+  <div class="kb" style="height:80px">Save stays above the keyboard</div></div></div>
+</div></section></div>
+<script>
+(function(){
+var items=[
+['One look for every field','Odometer and plate screens use raw inputs; everything else uses Field. Make all of them the same box, label and error line.','Odometer, plate, add car, edit car'],
+['Right keyboard for each field','Numbers get the number pad, email gets the email keyboard, no auto-correct on plates and names, Arabic digits accepted.','All forms'],
+['Smart defaults','Date = today, odometer = the car’s current reading, service = the one you use most. Fewer taps to save.','Quick-add sheet'],
+['Friendly errors as you type','Say what is wrong under the field, in plain words, before Save: a lower odometer than before, an empty amount, a bad email.','Quick-add, add car, sign-in'],
+['Keyboard never hides the button','The Save button stays visible above the keyboard and the focused field scrolls into view (it moves today on the odometer page).','All forms'],
+['Next / Done flow','The keyboard’s next key jumps to the next field and Done on the last one saves or closes the keyboard.','All forms'],
+['Numbers formatted as you type','1250 shows as 1,250 and the odometer keeps its commas, so mistakes are easy to see.','Amount, odometer'],
+['Saved feedback','A short haptic tap and the green toast with Undo on every save, so it feels done.','Quick-add, odometer, edit car'],
+['Plate input made simple','Letters and digits in one tidy box that looks like the plate, with Arabic letters and digits switched automatically.','Add car, edit car']];
+var on={};try{on=JSON.parse(localStorage.getItem('bestim-forms')||'{}')||{}}catch(e){}
+var list=document.getElementById('list');
+list.innerHTML=items.map(function(x,i){return '<button class="item" data-i="'+i+'" aria-pressed="false"><span class="box">✓</span><span><b>'+x[0]+'</b><small>'+x[1]+'</small><span class="where">'+x[2]+'</span></span></button>'}).join('');
+var sum=document.getElementById('sum');
+function text(){return items.filter(function(x,i){return on[i]}).map(function(x){return x[0]}).join(' · ')}
+function paint(){list.querySelectorAll('.item').forEach(function(b){b.setAttribute('aria-pressed',String(!!on[b.dataset.i]))});sum.textContent=text()||'Nothing ticked yet'}
+list.addEventListener('click',function(e){var b=e.target.closest('.item');if(!b)return;on[b.dataset.i]=!on[b.dataset.i];try{localStorage.setItem('bestim-forms',JSON.stringify(on))}catch(x){};paint()});
+document.getElementById('copy').addEventListener('click',function(){var c=this;if(navigator.clipboard)navigator.clipboard.writeText(text()||'Nothing ticked').then(function(){c.textContent='Copied';setTimeout(function(){c.textContent='Copy list'},1500)},function(){})});
+paint()})();
+</script>

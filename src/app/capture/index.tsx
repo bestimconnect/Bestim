@@ -10,8 +10,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { KeyboardDone } from '@/components/KeyboardDone';
+import { StepsBar } from '@/components/StepsBar';
 import { toast } from '@/components/Toast';
-import { Button, Field, Item, Note, PressableScale, Text, Toggle } from '@/components/ui';
+import { Button, Field, Header, Item, Note, PressableScale, Text, Toggle } from '@/components/ui';
 import { errorText } from '@/lib/errors';
 import { shouldAskNotifications } from '@/lib/notifications';
 import { useOnline } from '@/lib/online';
@@ -54,11 +55,12 @@ const daysAgo = (n: number) => {
 export default function CaptureSheet() {
   const { t, i18n } = useTranslation();
   const c = useColors();
-  const { bottom } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
   const queryClient = useQueryClient();
-  const { serviceTypeId, vehicleId, logId, expenseId, batch, notice } = useLocalSearchParams<{ serviceTypeId?: string; vehicleId?: string; logId?: string; expenseId?: string; batch?: string; notice?: keyof typeof NOTICES }>();
+  const { serviceTypeId, vehicleId, logId, expenseId, batch, notice, guided, custom } = useLocalSearchParams<{ custom?: string; serviceTypeId?: string; vehicleId?: string; guided?: string; logId?: string; expenseId?: string; batch?: string; notice?: keyof typeof NOTICES }>();
   const [card] = useState(() => useVoiceBatch.getState().records.find((r) => r.key === batch)); // odometer cards are edited in the list itself
   const editing = !!(logId || expenseId || card);
+  const steps = !!guided && !editing; // opened as step 3 of the new-record flow: the item is already chosen
   const costKind = expenseId ? true : logId ? false : card ? card.kind === 'expense' : undefined; // a record keeps its kind
   const log = useLog(logId).data;
   const allSpent = useExpenses().data ?? [];
@@ -83,7 +85,7 @@ export default function CaptureSheet() {
   const [fullTank, setFullTank] = useState(true); // consumption is measured between full tanks (Q91)
   const [more, setMore] = useState(false);
   const [odo, setOdo] = useState('');
-  const [workshop, setWorkshop] = useState('');
+  const [workshop, setWorkshop] = useState(custom && serviceTypeId?.startsWith('x:') ? custom : ''); // a typed-in cost name is kept as the note
   const [details, setDetails] = useState<Record<string, string>>({});
   const [every, setEvery] = useState('');
   const [notes, setNotes] = useState('');
@@ -219,6 +221,7 @@ export default function CaptureSheet() {
     router.push('/capture/voice');
   };
 
+  const leave = () => (steps && router.canDismiss?.() ? router.dismiss(2) : router.back()); // step 3 closes the steps beneath it too
   const refresh = () => refreshRecords(queryClient);
   const undoToast = (undo: () => PromiseLike<unknown> | void) =>
     toast(t('capture.quick.saved'), {
@@ -232,7 +235,7 @@ export default function CaptureSheet() {
 
   const save = useMutation<{ id: string; status: string }, Error, SaveLogInput>({ mutationKey: SAVE_LOG_KEY });
   const finish = async (reminds: boolean, params: Record<string, string>) => {
-    router.back(); // not replace(): that only closes a formSheet
+    leave(); // not replace(): that only closes a formSheet
     if (reminds && (await shouldAskNotifications())) router.push({ pathname: '/notify-permission', params }); // Q39: once, after the first saved log
   };
 
@@ -323,7 +326,7 @@ export default function CaptureSheet() {
       setBusy(false);
       if (error) return setError(errorText(error));
       refresh();
-      router.back();
+      leave();
       if (expenseId) return toast(t('capture.quick.saved'));
       return undoToast(() => supabase.from('expenses').delete().eq('id', data.id));
     }
@@ -331,7 +334,7 @@ export default function CaptureSheet() {
     const input: SaveLogInput = {
       vehicleId: vehicle.id,
       serviceTypeId: service!.id,
-      title: name(service!),
+      title: custom?.trim() || name(service!),
       odometer: num(odo),
       cost: num(amount),
       serviceDate: date,
@@ -388,19 +391,23 @@ export default function CaptureSheet() {
   return (
     // A formSheet lays out one scroll view as its root; a header or footer beside it gets hidden under it.
     <ScrollView
-      className="flex-1 rounded-t-screen border-t border-line bg-sheet"
-      contentContainerClassName="gap-4 px-6 pt-8"
-      contentContainerStyle={{ paddingBottom: bottom + 16 }}
+      className={steps ? 'flex-1 bg-paper' : 'flex-1 rounded-t-screen border-t border-line bg-sheet'}
+      contentContainerClassName={steps ? 'gap-4 px-6' : 'gap-4 px-6 pt-8'}
+      contentContainerStyle={{ paddingBottom: bottom + 16, ...(steps ? { paddingTop: top } : null) }}
       keyboardShouldPersistTaps="handled"
       automaticallyAdjustKeyboardInsets>
-      <View className="flex-row items-center justify-between">
-        <Text variant="heading">{t(editing ? 'capture.quick.editTitle' : 'capture.newRecord')}</Text>
-        <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white">
-          <X size={20} color={c.ink} />
-        </PressableScale>
-      </View>
+      {steps ? (
+        <Header title={custom || (chip ? label(chip) : '')} sub={t('capture.new.stepOf', { n: 3 })} below={<StepsBar step={3} />} belowH={6} />
+      ) : (
+        <View className="flex-row items-center justify-between">
+          <Text variant="heading">{t(editing ? 'capture.quick.editTitle' : 'capture.newRecord')}</Text>
+          <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white">
+            <X size={20} color={c.ink} />
+          </PressableScale>
+        </View>
+      )}
         {notice && NOTICES[notice] ? <Note tone="info" text={t(NOTICES[notice])} /> : null}
-        {editing ? null : (
+        {editing || steps ? null : (
         <PressableScale
           accessibilityRole="button"
           onPress={voice}
@@ -409,8 +416,8 @@ export default function CaptureSheet() {
           <Text variant="label" className="text-onpanel">{t('capture.quick.say')}</Text>
         </PressableScale>
         )}
-        {editing ? null : <Text variant="caption" className="text-muted">{t('capture.quick.mostUsed')}</Text>}
-        <View className="flex-row flex-wrap gap-2">
+        {editing || steps ? null : <Text variant="caption" className="text-muted">{t('capture.quick.mostUsed')}</Text>}
+        {steps ? null : <View className="flex-row flex-wrap gap-2">
           {chips.map((id) => (
             <Pressable
               key={id}
@@ -424,7 +431,7 @@ export default function CaptureSheet() {
           <Pressable accessibilityRole="button" onPress={openMore} className="h-11 justify-center rounded-nav bg-line px-4">
             <Text variant="caption" className="text-muted">{t('capture.quick.more')}</Text>
           </Pressable>
-        </View>
+        </View>}
         {chip ? (
           <>
             <View className="flex-row gap-4">
@@ -461,6 +468,16 @@ export default function CaptureSheet() {
               </View>
               {showPicker && Platform.OS === 'ios' ? <IosDatePicker date={date} onChange={(d) => setDate(d.toLocaleDateString('en-CA'))} locale={ar ? 'ar' : 'en'} /> : null}
             </View>
+            {steps && service?.has_reminder ? (
+              <Field
+                label={t('capture.new.remind')}
+                value={every}
+                onChangeText={(v) => setEvery(clean(v))}
+                keyboardType="number-pad"
+                returnKeyType="done"
+                placeholder={service.default_interval_km != null ? service.default_interval_km.toLocaleString('en-US') : t('capture.manual.optional')}
+              />
+            ) : null}
             <Pressable accessibilityRole="button" onPress={() => setMore(!more)} className="h-11 flex-row items-center justify-between">
               <Text variant="label">{t('capture.quick.moreDetails')}</Text>
               <ChevronDown size={20} color={c.muted} style={{ transform: [{ rotate: more ? '180deg' : '0deg' }] }} />
@@ -486,7 +503,7 @@ export default function CaptureSheet() {
                     placeholder={t('capture.manual.optional')}
                   />
                 ))}
-                {service?.has_reminder ? (
+                {service?.has_reminder && !steps ? (
                   <Field
                     label={t('capture.manual.interval')}
                     value={every}
@@ -524,7 +541,7 @@ export default function CaptureSheet() {
             <Text variant="label" className="text-danger">{t('capture.quick.delete')}</Text>
           </Pressable>
         ) : null}
-        <KeyboardDone />
+        {steps ? null : <KeyboardDone />}
     </ScrollView>
   );
 }

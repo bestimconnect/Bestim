@@ -7,7 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { KeyboardDone } from '@/components/KeyboardDone';
-import { Field, Header, Item, Text } from '@/components/ui';
+import { Field, Item, Text } from '@/components/ui';
+import { PlainHeader } from '@/components/ui/Header';
 import { fold, matches } from '@/lib/search';
 import { usePick } from '@/lib/sheet';
 
@@ -30,7 +31,7 @@ export default function Pick() {
   return (
     <SafeAreaView className="flex-1 rounded-t-screen border-t border-line bg-sheet" edges={['top', 'bottom']}>
       <View className="flex-1 gap-4 px-6 pt-6">
-        <Header title={title} />
+        <PlainHeader title={title} />
         <Field label={t('pick.search')} value={query} onChangeText={setQuery} autoCorrect={false} returnKeyType="search" />
         <FlatList
           data={found}

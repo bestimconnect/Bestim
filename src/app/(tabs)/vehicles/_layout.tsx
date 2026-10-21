@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 
-// 08 list → 09 detail keep the tab bar, so they share a stack inside the Vehicles tab.
+// 08 My cars. The car page (09) is a root screen (app/vehicle/[id]) so it opens over the tabs from Home as well as from here.
 export default function VehiclesLayout() {
   return <Stack screenOptions={{ headerShown: false }} />;
 }

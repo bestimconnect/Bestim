@@ -1,0 +1,114 @@
+<title>Bestim Round 2 Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Tajawal:wght@400;700&display=swap">
+<style>
+/* Layout: three sections (add-record flow, car details, plates), three options each; the flow shows its 3 steps side by side. */
+:root{--bg:#EEF1EE;--fg:#222E29;--muted:#5B6860;--line:#D5DCD6;--card:#FFFFFF;--lime:#D3F53D;--panel:#222E29;--onpanel:#F5F7F5;--teal:#08736F;--ok:#8FC21E;--soon:#E8A317;--late:#E0455F;--ap:#F5F7F5;--ac:#FFFFFF;--al:#DEE5DF;--ai:#222E29;--am:#5B6860;--mint:#E4F3D9;--pick:#08736F;--display:'Poppins','Tajawal',system-ui,sans-serif;--body:'Tajawal','Poppins',system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B100D;--fg:#E8EEEA;--muted:#93A39A;--line:#26332B;--card:#131A16;--panel:#212E27;--ap:#0E1411;--ac:#171F1B;--al:#2C3A32;--ai:#F2F5F3;--am:#93A39A;--mint:#1E3326;--pick:#3ECFC0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B100D;--fg:#E8EEEA;--muted:#93A39A;--line:#26332B;--card:#131A16;--panel:#212E27;--ap:#0E1411;--ac:#171F1B;--al:#2C3A32;--ai:#F2F5F3;--am:#93A39A;--mint:#1E3326;--pick:#3ECFC0;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+h1{font:700 28px/1.15 var(--display);margin:0}h2{font:700 20px var(--display);margin:0 0 4px}p{margin:0}.lead,.sub{color:var(--muted);max-width:70ch}.sub{font-size:14px}
+.picks{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}.picks output{flex:1;min-width:200px;font-size:13px;color:var(--muted)}.picks button{font:600 13px var(--display);background:var(--pick);color:#fff;border:0;border-radius:10px;padding:8px 14px;cursor:pointer}
+section{display:flex;flex-direction:column;gap:14px}
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:10px;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px;min-width:0}
+.opt:focus-visible,.picks button:focus-visible{outline:3px solid var(--pick);outline-offset:2px}.opt[aria-pressed="true"]{border-color:var(--pick)}
+.cap{display:flex;gap:10px;align-items:flex-start}.tag{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line);font:700 13px var(--display)}.opt[aria-pressed="true"] .tag{background:var(--pick);color:#fff}
+.cap b{font:600 14px var(--display);display:block}.cap small{color:var(--muted);font-size:13px;line-height:1.4;display:block}
+.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.fl{grid-column:1/-1}
+.ph{width:100%;max-width:250px;margin:0 auto;height:520px;background:var(--ap);border:1px solid var(--al);border-radius:26px;overflow:hidden;color:var(--ai);font-size:10px;display:flex;flex-direction:column}
+.ph.s{max-width:none;height:400px;border-radius:16px;font-size:8px}
+.ph *{min-width:0}
+.gb{background:var(--panel);color:var(--onpanel);border-radius:0 0 22px 22px;padding:0 12px 12px;display:flex;flex-direction:column;gap:9px;flex:none}
+.sb{height:26px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 6px 3px;font:600 9px var(--display)}
+.row{display:flex;align-items:center;gap:7px}.sp{flex:1}
+.bk{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.15);display:grid;place-items:center;flex:none}
+.t1{font:700 13px/1.2 var(--display)}.t2{font:700 18px/1.15 var(--display)}.s1{font-size:9px;opacity:.7}
+.seg{display:flex;background:rgba(255,255,255,.14);border-radius:99px;padding:3px;gap:2px}.seg span{flex:1;text-align:center;padding:5px 0;border-radius:99px;font:600 9px var(--display)}.seg .on{background:var(--lime);color:#222E29}
+.body{padding:10px;display:flex;flex-direction:column;gap:7px;flex:1;overflow:hidden}
+.card{background:var(--ac);border-radius:13px;padding:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)}.cr{display:flex;gap:7px;align-items:center}
+.h{font:700 10px var(--display)}.m{color:var(--am);font-size:9px}
+.ph.s .h{font-size:8px}.ph.s .m{font-size:7px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tile{background:var(--ac);border:2px solid var(--al);border-radius:14px;padding:10px 6px;display:grid;gap:4px;justify-items:center;text-align:center}.tile.on{border-color:var(--teal);background:var(--mint)}.tile i{width:26px;height:26px;border-radius:50%;background:var(--al);display:block}.tile.on i{background:var(--teal)}
+.ph.s .tile{padding:6px 3px}.ph.s .tile i{width:18px;height:18px}
+.li{background:var(--ac);border-radius:12px;padding:8px 9px;display:flex;gap:7px;align-items:center;border:2px solid transparent}.li.on{border-color:var(--teal);background:var(--mint)}.li i{width:18px;height:18px;border-radius:6px;background:var(--al);flex:none}
+.fld{background:var(--ac);border:1px solid var(--al);border-radius:12px;padding:7px 9px;display:grid;gap:1px}.fld .v{font:700 11px var(--display)}
+.btn{margin-top:auto;text-align:center;padding:10px;border-radius:12px;background:var(--lime);color:#222E29;font:700 10px var(--display)}
+.dots{display:flex;gap:4px}.dots i{flex:1;height:4px;border-radius:2px;background:var(--al)}.dots i.on{background:var(--teal)}
+.tg{width:26px;height:15px;border-radius:99px;background:var(--teal);position:relative;flex:none}.tg::after{content:"";position:absolute;right:2px;top:2px;width:11px;height:11px;border-radius:50%;background:#fff}
+.chip{border-radius:99px;padding:4px 9px;font:600 9px var(--display);background:var(--al);white-space:nowrap}.chip.on{background:var(--panel);color:var(--onpanel)}
+.search{background:var(--ac);border:1px solid var(--al);border-radius:13px;padding:9px;color:var(--am)}
+.ring{--p:80;--c:var(--ok);width:44px;height:44px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p)*1%),var(--al) 0);display:grid;place-items:center;flex:none}.ring::before{content:"";width:33px;height:33px;border-radius:50%;background:var(--ac);grid-area:1/1}.ring b{grid-area:1/1;z-index:1;font:700 11px var(--display)}.late{--c:var(--late)}
+.ico{width:22px;height:22px;border-radius:7px;background:var(--al);flex:none}.pb{height:5px;border-radius:3px;background:var(--al);overflow:hidden;flex:1}.pb i{display:block;height:100%;background:var(--ok)}
+.art{width:100%;height:76px;border-radius:12px;background:rgba(255,255,255,.18)}
+.plate{background:#fff;color:#222E29;border:2px solid #222E29;border-radius:6px;overflow:hidden;display:inline-block;font:700 12px 'Tajawal',sans-serif}.plate i{display:block;background:#08736F;color:#fff;font:700 6px var(--display);text-align:center;font-style:normal}.plate b{display:block;padding:0 8px;text-align:center}
+.fab{display:flex;gap:7px;padding:8px 10px 12px;border-top:1px solid var(--al)}.fab .b{flex:1;text-align:center;padding:10px;border-radius:12px;font:700 10px var(--display);background:var(--lime);color:#222E29}
+.big{display:grid;place-items:center;height:130px;background:#EEF1EF;border-radius:16px;gap:12px;align-content:center}
+</style>
+<div class="wrap">
+<header style="display:flex;flex-direction:column;gap:10px"><h1>Round 2: add a record, car details, plates</h1>
+<p class="lead">New directions for all three. Pick one per section; your picks collect in the bar.</p></header>
+<div class="picks" role="status"><output id="sum">No picks yet</output><button id="copy" type="button">Copy picks</button></div>
+
+<section data-g="flow"><div><h2>1. Typing a record: step by step</h2><p class="sub">You choose what you are adding, then what exactly, then price, date and an optional reminder. Categories: Maintenance (parts that repeat, so they get reminders), Services (car wash and similar, no reminder), Accessories, Fuel, Other. Each option shows the 3 steps.</p></div>
+<div class="set" style="grid-template-columns:repeat(auto-fit,minmax(330px,1fr))" id="flowset"></div></section>
+
+<section data-g="details"><div><h2>2. Car details page</h2><p class="sub">Three new ideas, different from round 1.</p></div><div class="set" id="detset"></div></section>
+
+<section data-g="plate"><div><h2>3. License plate</h2><p class="sub">Three new looks, shown big and small (as in lists).</p></div><div class="set" id="plset"></div></section>
+</div>
+<script>
+(function(){
+var SB='<div class="sb"><span>9:41</span><span>●●●</span></div>';
+var tile=function(t,on){return '<div class="tile'+(on?' on':'')+'"><i></i><span class="h">'+t+'</span></div>'};
+var li=function(t,on,s){return '<div class="li'+(on?' on':'')+'"><i></i><div class="sp"><div class="h">'+t+'</div>'+(s?'<div class="m">'+s+'</div>':'')+'</div></div>'};
+var fld=function(l,v){return '<div class="fld"><span class="m">'+l+'</span><span class="v">'+v+'</span></div>'};
+var head=function(t,step,total){return '<div class="gb">'+SB+'<div class="row"><span class="bk">‹</span><div class="sp t1">'+t+'</div></div><div class="dots">'+Array.from({length:total}).map(function(_,i){return '<i class="'+(i<step?'on':'')+'"></i>'}).join('')+'</div></div>'};
+var sm=function(inner){return '<div class="ph s">'+inner+'</div>'};
+var flows=[
+ ['Three screens, one question each','Big tiles first, then a short list, then the details. Progress bar on top. Back keeps your answers.',
+  [sm(head('What are you adding?',1,3)+'<div class="body"><div class="tiles">'+tile('Maintenance',1)+tile('Services')+tile('Accessories')+tile('Fuel')+tile('Other')+'</div><div class="m" style="margin-top:4px">Maintenance gets reminders.</div><div class="btn">Next</div></div>'),
+   sm(head('Which maintenance?',2,3)+'<div class="body">'+li('Oil change',1,'Every 10,000 km')+li('Brake pads')+li('Tyres')+li('Battery')+li('Coolant')+li('Other part')+'<div class="btn">Next</div></div>'),
+   sm(head('Oil change',3,3)+'<div class="body">'+fld('Price (EGP)','350')+fld('Date','Today')+fld('Odometer','250,500')+'<div class="card cr"><div class="sp"><div class="h">Remind me again</div><div class="m">in 10,000 km</div></div><span class="tg"></span></div><div class="btn">Save</div></div>')]],
+ ['One sheet that opens as you go','Same questions on one page: each answer folds into a chip and the next question slides open below. Nothing to learn.',
+  [sm('<div class="gb">'+SB+'<div class="t1">New record</div></div><div class="body"><div class="h">What are you adding?</div><div class="chips" style="display:flex;gap:4px;flex-wrap:wrap"><span class="chip on">Maintenance</span><span class="chip">Services</span><span class="chip">Accessories</span><span class="chip">Fuel</span></div></div>'),
+   sm('<div class="gb">'+SB+'<div class="t1">New record</div></div><div class="body"><div class="cr"><span class="chip on">Maintenance ✓</span></div><div class="h">Which one?</div><div style="display:flex;gap:4px;flex-wrap:wrap"><span class="chip on">Oil change</span><span class="chip">Brakes</span><span class="chip">Tyres</span><span class="chip">Battery</span><span class="chip">Coolant</span></div></div>'),
+   sm('<div class="gb">'+SB+'<div class="t1">New record</div></div><div class="body"><div class="cr"><span class="chip on">Maintenance ✓</span><span class="chip on">Oil change ✓</span></div>'+fld('Price (EGP)','350')+fld('Date','Today')+'<div class="card cr"><div class="sp"><div class="h">Remind me in 10,000 km</div></div><span class="tg"></span></div><div class="btn">Save</div></div>')]],
+ ['Search first, categories below','A search box on top (type "oil", jump straight to the step), tiles for browsing, recent items under it. Fastest for people who know what they want.',
+  [sm('<div class="gb">'+SB+'<div class="t1">New record</div></div><div class="body"><div class="search">Search: oil, wash, tyres…</div><div class="h">Recent</div><div style="display:flex;gap:4px;flex-wrap:wrap"><span class="chip">Oil change</span><span class="chip">Fuel</span><span class="chip">Wash</span></div><div class="h">Browse</div><div class="tiles">'+tile('Maintenance')+tile('Services')+tile('Accessories')+tile('Other')+'</div></div>'),
+   sm('<div class="gb">'+SB+'<div class="t1">New record</div></div><div class="body"><div class="search" style="color:var(--ai)">oil</div>'+li('Oil change',1,'Maintenance')+li('Oil filter',0,'Maintenance')+li('Engine oil top-up',0,'Services')+'</div>'),
+   sm(head('Oil change',3,3)+'<div class="body">'+fld('Price (EGP)','350')+fld('Date','Today')+'<div class="card cr"><div class="sp"><div class="h">Remind me again</div></div><span class="tg"></span></div><div class="btn">Save</div></div>')]]];
+var fs=document.getElementById('flowset');
+fs.innerHTML=flows.map(function(f,i){var v='ABC'[i];return '<button class="opt" data-g="flow" data-v="'+v+'" aria-pressed="false"><div class="flow">'+f[2].join('')+'</div><div class="cap"><span class="tag">'+v+'</span><div><b>'+f[0]+'</b><small>'+f[1]+'</small></div></div></button>'}).join('');
+
+var det=[
+ ['Cockpit','A dashboard feel: the odometer as a big arc gauge, the plate on the dashboard, health and money as small dials under it.',
+  '<div class="gb">'+SB+'<div class="row"><span class="bk">‹</span><div class="sp t1">Car · 2020</div><span class="bk">✎</span></div><div class="seg"><span class="on">Overview</span><span>Log</span><span>Reminders</span></div></div><div class="body"><div class="card" style="display:grid;place-items:center;gap:2px;padding:12px"><svg viewBox="0 0 120 70" width="150"><path d="M14 62A46 46 0 0 1 106 62" fill="none" stroke="#DEE5DF" stroke-width="7" stroke-linecap="round"/><path d="M14 62A46 46 0 0 1 80 20" fill="none" stroke="#08736F" stroke-width="7" stroke-linecap="round"/></svg><div class="h" style="font-size:17px;margin-top:-28px">250,500</div><div class="m">km · updated 13 days ago</div><div class="plate" style="margin-top:6px"><i>EGYPT · مصر</i><b>أ ب ج ١٢٣٤</b></div></div><div class="cr"><div class="card sp cr"><div class="ring late" style="--p:68"><b>68</b></div><div class="h">Health</div></div><div class="card sp"><div class="m">This year</div><div class="h">1,800 EGP</div></div></div><div class="card cr"><span class="ico"></span><div class="sp"><div class="h">Wipers</div></div><span class="h" style="color:var(--late)">Late</span></div></div><div class="fab"><div class="b">+ Add a record</div></div>'],
+ ['Car first','The car picture takes the top of the page and the numbers float on it as three small badges. Calm, big, easy to scan. Plate sits on the car’s bumper line.',
+  '<div class="gb">'+SB+'<div class="row"><span class="bk">‹</span><div class="sp"></div><span class="bk">✎</span></div><div class="art" style="height:118px"></div><div class="row" style="justify-content:space-between"><div><div class="t2">Car</div><div class="s1">2020 · Sedan</div></div><div class="plate"><i>EGYPT · مصر</i><b>أ ب ج ١٢٣٤</b></div></div></div><div class="body"><div class="cr"><div class="card sp"><div class="m">Odometer</div><div class="h">250,500 km</div></div><div class="card sp"><div class="m">Health</div><div class="h" style="color:var(--late)">68 · 3 late</div></div><div class="card sp"><div class="m">Year</div><div class="h">1,800</div></div></div><div class="cr"><span class="chip on">Overview</span><span class="chip">Log</span><span class="chip">Reminders</span></div><div class="card cr"><span class="ico"></span><div class="sp"><div class="h">Wipers</div></div><span class="h" style="color:var(--late)">Late</span></div><div class="card cr"><span class="ico"></span><div class="sp"><div class="h">Coolant check</div></div><span class="h" style="color:var(--late)">Late</span></div></div><div class="fab"><div class="b">+ Add a record</div></div>'],
+ ['Next-up feed','The page opens on what to do next: a "needs you" card first, then a feed of recent activity. Numbers live in one slim line at the top.',
+  '<div class="gb">'+SB+'<div class="row"><span class="bk">‹</span><div class="sp t1">Car · 2020</div><span class="bk">✎</span></div><div class="row s1" style="opacity:1;justify-content:space-between"><span>250,500 km</span><span>68 health</span><span>1,800 EGP</span><span class="plate" style="font-size:9px;border-width:1.5px"><b style="padding:0 5px">أ ب ج ١٢٣٤</b></span></div><div class="seg"><span class="on">Overview</span><span>Log</span><span>Reminders</span></div></div><div class="body"><div class="card" style="background:var(--panel);color:var(--onpanel);display:grid;gap:3px"><div class="m" style="color:var(--lime)">Needs you now</div><div class="h" style="font-size:13px">Wipers are late</div><div class="m" style="color:#ccc">3 parts need attention</div><div class="btn" style="margin-top:4px;padding:6px">Log it done</div></div><div class="m">Recent</div><div class="card cr"><span class="ico"></span><div class="sp"><div class="h">Oil change</div><div class="m">Oct 12 · 350 EGP</div></div></div><div class="card cr"><span class="ico"></span><div class="sp"><div class="h">Fuel</div><div class="m">Oct 3 · 680 EGP</div></div></div></div><div class="fab"><div class="b">+ Add a record</div></div>']];
+document.getElementById('detset').innerHTML=det.map(function(d,i){var v='ABC'[i];return '<button class="opt" data-g="details" data-v="'+v+'" aria-pressed="false"><div class="ph">'+d[2]+'</div><div class="cap"><span class="tag">'+v+'</span><div><b>'+d[0]+'</b><small>'+d[1]+'</small></div></div></button>'}).join('');
+
+var pl=[
+ ['Two-line square','Letters on the first line, digits under them, like the older square Egyptian plates. Tall, compact, reads well in a list.',
+  function(s){return '<div style="background:#fff;color:#222E29;border:2px solid #222E29;border-radius:8px;text-align:center;font:700 '+(s?12:20)+'px Tajawal;padding:'+(s?'2px 8px':'4px 16px')+';line-height:1.2"><div style="letter-spacing:3px">أ ب ج</div><div style="border-top:1px solid #DEE5DF">١٢٣٤</div></div>'}],
+ ['Number tag','No frame, just a clean pill: a small teal Egypt cap, then letters and digits in Bestim’s fonts. It matches the app rather than copying a real plate.',
+  function(s){return '<div style="display:inline-flex;align-items:center;gap:'+(s?5:8)+'px;background:var(--ac);border:1.5px solid var(--al);border-radius:99px;padding:'+(s?'2px 9px 2px 3px':'5px 16px 5px 5px')+';font:700 '+(s?11:18)+'px Tajawal;color:var(--ai)"><span style="background:#08736F;color:#fff;border-radius:99px;font:700 '+(s?6:8)+'px Poppins;padding:'+(s?'3px 5px':'5px 8px')+'">EG</span>أ ب ج · ١٢٣٤</div>'}],
+ ['Embossed lime edge','White plate with a thick dark edge and a lime line along the bottom, the Bestim accent. Strong in the green header and on cards.',
+  function(s){return '<div style="background:#fff;color:#222E29;border:2.5px solid #222E29;border-bottom:'+(s?4:7)+'px solid #D3F53D;border-radius:9px;display:flex;align-items:center;gap:'+(s?6:10)+'px;font:700 '+(s?12:21)+'px Tajawal;padding:'+(s?'1px 9px':'3px 16px')+'"><span>أ ب ج</span><span style="width:1.5px;height:'+(s?12:22)+'px;background:#222E29"></span><span>١٢٣٤</span></div>'}]];
+document.getElementById('plset').innerHTML=pl.map(function(p,i){var v='ABC'[i];return '<button class="opt" data-g="plate" data-v="'+v+'" aria-pressed="false"><div class="big">'+p[2](0)+p[2](1)+'</div><div class="cap"><span class="tag">'+v+'</span><div><b>'+p[0]+'</b><small>'+p[1]+'</small></div></div></button>'}).join('');
+
+var names={flow:'Add-record flow',details:'Car details',plate:'Plate'},picks={};
+try{picks=JSON.parse(localStorage.getItem('bestim-r2')||'{}')||{}}catch(e){}
+var sum=document.getElementById('sum');
+function text(){return Object.keys(names).filter(function(k){return picks[k]}).map(function(k){return names[k]+': '+picks[k]}).join(' · ')}
+function paint(){document.querySelectorAll('.opt').forEach(function(b){b.setAttribute('aria-pressed',String(picks[b.dataset.g]===b.dataset.v))});sum.textContent=text()||'No picks yet'}
+document.addEventListener('click',function(e){var b=e.target.closest('.opt');if(!b)return;picks[b.dataset.g]=b.dataset.v;try{localStorage.setItem('bestim-r2',JSON.stringify(picks))}catch(x){};paint()});
+document.getElementById('copy').addEventListener('click',function(){var c=this;if(navigator.clipboard)navigator.clipboard.writeText(text()||'No picks').then(function(){c.textContent='Copied';setTimeout(function(){c.textContent='Copy picks'},1500)},function(){})});
+paint()})();
+</script>

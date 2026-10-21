@@ -3,6 +3,7 @@ export * from './Button';
 export * from './Choice';
 export * from './Divider';
 export * from './Field';
+export * from './Group';
 export * from './Header';
 export * from './Item';
 export * from './Metric';

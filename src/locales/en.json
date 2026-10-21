@@ -1,10 +1,15 @@
 {
   "back": "Back",
+  "plate": {
+    "edit": "Edit car",
+    "save": "Save",
+    "label": "License plate (optional)"
+  },
   "tabs": {
     "home": "Home",
     "vehicles": "Cars",
     "capture": "Log",
-    "reminders": "Reminders",
+    "expenses": "Expenses",
     "account": "Account"
   },
   "language": {
@@ -187,6 +192,7 @@
     "cta": "Save reading",
     "since": "+{{value}} {{unit}} since last update",
     "swipe": "Swipe to adjust",
+    "where": "Usually just under the speedometer, on the dashboard.",
     "scan": {
       "row": "Read with camera",
       "rowSub": "Point it at the number under the speedometer.",
@@ -233,7 +239,9 @@
     "seg": {
       "overview": "Overview",
       "log": "Log",
-      "reminders": "Reminders"
+      "reminders": "Reminders",
+      "parts": "Parts",
+      "logs": "Logs"
     },
     "attention": "Parts needing attention",
     "yourParts": "Your parts",
@@ -242,7 +250,48 @@
     "tireHistory": "Tire history",
     "allRecords": "Car log",
     "addRecord": "Add a record",
-    "updateReading": "Update reading"
+    "updateReading": "Update reading",
+    "summary": "{{count}} car(s) · {{km}} km in total",
+    "dash": {
+      "health": "Car health",
+      "counts": "{{late}} late · {{soon}} soon",
+      "distance": "Distance",
+      "spending": "Spending · 6 months",
+      "all": "All",
+      "allParts": "All parts",
+      "late": "Late",
+      "soon": "Soon",
+      "ok": "On time"
+    },
+    "facts": {
+      "thisYear": "This year",
+      "lastService": "Last service",
+      "colour": "Colour",
+      "totalPaid": "Total paid",
+      "updated": "Updated {{count}} days ago",
+      "updatedToday": "Updated today",
+      "partsHint": "Parts with records are lit. Tap any part to see or add records."
+    },
+    "color": {
+      "label": "Colour",
+      "white": "White",
+      "black": "Black",
+      "silver": "Silver",
+      "grey": "Grey",
+      "red": "Red",
+      "blue": "Blue",
+      "green": "Green",
+      "yellow": "Yellow",
+      "orange": "Orange",
+      "brown": "Brown",
+      "beige": "Beige",
+      "gold": "Gold"
+    },
+    "vin": {
+      "label": "Chassis number (VIN)",
+      "hint": "17 characters",
+      "error": "It has 17 letters and digits"
+    }
   },
   "pick": {
     "search": "Search",
@@ -267,21 +316,21 @@
     },
     "lastDone": "Last done",
     "every": "Every",
-    "spent": "Spent"
+    "spent": "Spent",
+    "viewLogs": "All logs"
   },
   "capture": {
     "newRecord": "New record",
     "voice": {
       "header": "Log by voice",
       "listening": "Listening...",
-      "hint": "Take your time. Tap done when you finish.",
+      "hint": "Take your time. You can say several things at once, like an oil change and a fuel fill-up. Tap done when you finish.",
       "done": "Done, review the details",
       "cancel": "Cancel recording",
       "noSpeech": "We didn't catch that. Try again.",
       "manualLink": "Enter manually",
       "typeHint": "Speech recognition is unavailable, type what you would say",
       "aiNotice": "Your recording is sent to an AI service to write your records. We don't keep it.",
-      "noPreview": "We're recording. Your records appear when you tap done.",
       "understanding": "Understanding what you said...",
       "understandingBody": "We're writing your records. This takes a few seconds."
     },
@@ -360,6 +409,33 @@
       "originalStays": "The original stays visible next to the change.",
       "delete": "Delete",
       "deleted": "Deleted"
+    },
+    "choose": {
+      "title": "New record",
+      "say": "Say it",
+      "sayBody": "Talk and we write it for you",
+      "type": "Type it",
+      "typeBody": "Answer a few short questions"
+    },
+    "new": {
+      "step1": "What are you adding?",
+      "step2": "Which one?",
+      "maintenance": "Maintenance",
+      "maintenanceSub": "Parts that repeat, with reminders",
+      "services": "Services",
+      "servicesSub": "Car wash, parking, repairs",
+      "accessories": "Accessories",
+      "accessoriesSub": "Things you added to the car",
+      "fuel": "Fuel",
+      "fuelSub": "A fill-up",
+      "other": "Other",
+      "otherSub": "Anything else you paid",
+      "remind": "Remind me again every (km)",
+      "stepOf": "Step {{n}} of 3",
+      "otherItem": "Other",
+      "otherItemSub": "Not in the list? Type what it is",
+      "nameIt": "What is it called?",
+      "next": "Next"
     }
   },
   "history": {
@@ -394,7 +470,8 @@
     },
     "odometerUpdated": "Odometer updated",
     "liters": "{{n}} L",
-    "clearFilter": "Clear the filter"
+    "clearFilter": "Clear the filter",
+    "count": "{{count}} records"
   },
   "log": {
     "header": "Record details",
@@ -464,9 +541,6 @@
   },
   "expenses": {
     "title": "Expenses",
-    "total": "Total expenses {{year}}",
-    "caption": "EGP · on {{count}} cars",
-    "captionOne": "EGP · on 1 car",
     "where": "Where does the money go?",
     "currency": "EGP",
     "row": {
@@ -501,7 +575,20 @@
     "reading": "Odometer reading · km",
     "fullTank": "Full tank",
     "fullTankHint": "Turn off if you didn’t fill it to the top",
-    "recent": "Latest expenses"
+    "recent": "Latest expenses",
+    "period": {
+      "month": "Month",
+      "year": "Year"
+    },
+    "avgDay": "Daily average",
+    "avgMonth": "Monthly average",
+    "topDay": "Highest day",
+    "topMonth": "Highest month",
+    "change": "Change",
+    "periodTotal": "Total",
+    "earlier": "Earlier",
+    "later": "Later",
+    "emptyPeriod": "No expenses in this period."
   },
   "notify": {
     "soonTitle": "{{part}} is coming up",
@@ -543,7 +630,20 @@
     "deleteVehicle": "Delete car data",
     "deleteAccount": "Delete my account",
     "terms": "Terms",
-    "support": "Support"
+    "support": "Support",
+    "photo": {
+      "title": "Profile photo",
+      "take": "Take a photo",
+      "choose": "Choose from gallery",
+      "remove": "Remove photo",
+      "edit": "Change photo",
+      "failed": "Couldn't save the photo. Try again."
+    },
+    "cars": "{{count}} cars",
+    "group": {
+      "preferences": "Preferences",
+      "data": "Your data"
+    }
   },
   "notifPrefs": {
     "title": "Notifications",
@@ -745,7 +845,9 @@
     "emptyTitle": "No notifications yet",
     "emptyBody": "Reminders about your car will show up here.",
     "markAll": "Mark all as read",
-    "unread": "New"
+    "unread": "New",
+    "all": "All",
+    "unreadOnly": "Unread"
   },
   "voiceQueue": {
     "savedBody": "Your recording is saved on this phone. We will write it up when you are back online, then you review it.",
@@ -789,5 +891,16 @@
     "late": "{{unit}} late",
     "days": "days",
     "until": "until {{date}}"
+  },
+  "car360": {
+    "open": "Open the 360° view",
+    "hint": "Drag to turn the car",
+    "group": {
+      "tyres": "Tyres",
+      "brakes": "Brakes",
+      "wipers": "Wipers",
+      "hood": "Under the hood"
+    },
+    "showOther": "show other parts"
   }
 }

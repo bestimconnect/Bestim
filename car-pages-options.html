@@ -1,0 +1,179 @@
+<title>Bestim Car Pages Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Tajawal:wght@400;700&display=swap">
+<style>
+/* Layout: four sections (Overview, Log, Reminders, My cars), three phone mockups each; mockups share the app's green bar, 12px gaps and 24px-radius cards. */
+:root{
+  --bg:#EEF1EE; --fg:#222E29; --muted:#5B6860; --line:#D5DCD6; --card:#FFFFFF;
+  --lime:#D3F53D; --panel:#222E29; --onpanel:#F5F7F5; --teal:#08736F;
+  --ok:#8FC21E; --soon:#E8A317; --late:#E0455F;
+  --app-paper:#F5F7F5; --app-card:#FFFFFF; --app-line:#DEE5DF; --app-ink:#222E29; --app-muted:#5B6860; --pick:#08736F;
+  --display:'Poppins','Tajawal',system-ui,sans-serif; --body:'Tajawal','Poppins',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B100D; --fg:#E8EEEA; --muted:#93A39A; --line:#26332B; --card:#131A16; --panel:#212E27;
+  --app-paper:#0E1411; --app-card:#171F1B; --app-line:#2C3A32; --app-ink:#F2F5F3; --app-muted:#93A39A; --pick:#3ECFC0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B100D; --fg:#E8EEEA; --muted:#93A39A; --line:#26332B; --card:#131A16; --panel:#212E27;
+  --app-paper:#0E1411; --app-card:#171F1B; --app-line:#2C3A32; --app-ink:#F2F5F3; --app-muted:#93A39A; --pick:#3ECFC0; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1{font:700 28px/1.15 var(--display);margin:0;text-wrap:balance}
+h2{font:700 19px/1.2 var(--display);margin:0 0 4px}
+p{margin:0}.lead,.sub{color:var(--muted);max-width:68ch}.sub{font-size:14px}
+.picks{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.picks output{flex:1;min-width:200px;font-size:13px;color:var(--muted)}
+.picks button{font:600 13px var(--display);background:var(--pick);color:#fff;border:0;border-radius:10px;padding:8px 14px;cursor:pointer}
+section{display:flex;flex-direction:column;gap:14px}
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:10px;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px;min-width:0}
+.opt:focus-visible,.picks button:focus-visible{outline:3px solid var(--pick);outline-offset:2px}
+.opt[aria-pressed="true"]{border-color:var(--pick)}
+.cap{display:flex;gap:10px;align-items:flex-start}
+.tag{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line);font:700 13px var(--display)}
+.opt[aria-pressed="true"] .tag{background:var(--pick);color:#fff}
+.cap b{font:600 14px var(--display);display:block}.cap small{color:var(--muted);font-size:13px;line-height:1.4;display:block}
+.note{font-size:12px;color:var(--muted)}
+
+/* mock phone */
+.ph{width:100%;max-width:240px;margin:0 auto;height:470px;background:var(--app-paper);border:1px solid var(--app-line);border-radius:26px;overflow:hidden;color:var(--app-ink);font-size:10px;display:flex;flex-direction:column}
+.ph *{min-width:0}
+.sc{flex:1;overflow:hidden;padding:12px;display:flex;flex-direction:column;gap:10px}
+.gb{background:var(--panel);color:var(--onpanel);border-radius:0 0 24px 24px;padding:0 14px 12px;display:flex;flex-direction:column;gap:10px;flex:none}
+.sb{height:28px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 6px 3px;font:600 9px var(--display)}
+.row{display:flex;align-items:center;gap:8px}
+.bk{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.15);display:grid;place-items:center;flex:none;font-size:13px}
+.t1{font:700 14px/1.2 var(--display)}.s1{font-size:9px;opacity:.7}
+.seg{display:flex;background:rgba(255,255,255,.14);border-radius:99px;padding:3px;gap:2px}
+.seg span{flex:1;text-align:center;padding:5px 0;border-radius:99px;font:600 9px var(--display);white-space:nowrap}
+.seg .on{background:var(--lime);color:#222E29}
+.chips{display:flex;gap:5px;overflow:hidden;flex:none}
+.chip{border-radius:99px;padding:4px 9px;font:600 9px var(--display);white-space:nowrap;background:var(--app-line);color:var(--app-ink)}
+.chip.on{background:var(--panel);color:var(--onpanel)}
+.gb .chip{background:rgba(255,255,255,.14);color:var(--onpanel)}.gb .chip.on{background:var(--lime);color:#222E29}
+.card{background:var(--app-card);border-radius:14px;padding:9px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.cardrow{display:flex;gap:8px;align-items:center}
+.h{font:700 11px var(--display)}
+.m{color:var(--app-muted);font-size:9px}
+.ring{--p:80;--c:var(--ok);width:54px;height:54px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p)*1%),var(--app-line) 0);display:grid;place-items:center;flex:none}
+.ring::before{content:"";width:42px;height:42px;border-radius:50%;background:var(--app-card);grid-area:1/1}
+.ring b{grid-area:1/1;font:700 12px var(--display);z-index:1}
+.ring.sm{width:34px;height:34px}.ring.sm::before{width:26px;height:26px}.ring.sm b{font-size:9px}
+.ring.lg{width:84px;height:84px}.ring.lg::before{width:68px;height:68px}.ring.lg b{font-size:20px}
+.late{--c:var(--late)}.soon{--c:var(--soon)}
+.pb{height:5px;border-radius:3px;background:var(--app-line);overflow:hidden;flex:1}.pb i{display:block;height:100%;background:var(--ok)}
+.pb.late i{background:var(--late)}.pb.soon i{background:var(--soon)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}.dot.late{background:var(--late)}.dot.soon{background:var(--soon)}
+.ico{width:26px;height:26px;border-radius:8px;background:var(--app-line);flex:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bars{display:flex;align-items:flex-end;gap:4px;height:36px}.bars i{flex:1;background:var(--app-line);border-radius:3px}.bars i.cur{background:var(--teal)}
+.stack{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px}.stack i{display:block;height:100%}
+.tile{border-radius:10px;aspect-ratio:1;display:grid;place-items:center;font:700 8px var(--display);color:#222E29;text-align:center;padding:2px}
+.t-ok{background:#DDEFB4}.t-soon{background:#FBE3A8}.t-late{background:#F8C2CB}
+.art{width:60px;height:32px;border-radius:9px;background:rgba(255,255,255,.2);flex:none}
+.artd{width:60px;height:32px;border-radius:9px;background:var(--app-line);flex:none}
+.plate{background:#fff;color:#222E29;border:2px solid #222E29;border-radius:5px;padding:0 6px;font:700 10px 'Tajawal',sans-serif;display:inline-block}
+.lime{background:var(--lime);color:#222E29}
+.dim{opacity:.7}
+.month{font:700 10px var(--display);color:var(--app-muted);margin-top:2px}
+.tl{display:flex;gap:8px}.tl .rail{width:2px;background:var(--app-line);border-radius:1px;margin:3px 4px}
+</style>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:10px">
+    <h1>Bestim car pages options</h1>
+    <p class="lead">Three ideas each for the car's Overview dashboard, the Log tab, the Reminders tab and the My cars cards. Part filters are part of every idea, so you can look at one part or all of them. Figures are example data. Tap one option per section; your picks collect in the bar and can be copied.</p>
+  </header>
+  <div class="picks" role="status"><output id="sum">No picks yet</output><button id="copy" type="button">Copy picks</button></div>
+  <div id="root" class="wrap" style="gap:44px"></div>
+</div>
+
+<script>
+(function(){
+  var SB='<div class="sb"><span>9:41</span><span>●●●</span></div>';
+  var BK='<span class="bk">‹</span>';
+  var ED='<span class="bk">✎</span>';
+  var seg=function(on){return '<div class="seg">'+['Overview','Log','Reminders'].map(function(x,i){return '<span'+(i===on?' class="on"':'')+'>'+x+'</span>'}).join('')+'</div>'};
+  var hero=function(on,extra){return '<div class="gb">'+SB+'<div class="row" style="justify-content:space-between">'+BK+ED+'</div>'+
+    '<div class="row"><div style="flex:1"><div class="t1" style="font-size:17px">Car · 2020</div><div class="s1">Sedan · 250,500 km</div></div><span class="plate">أ ب ج ١٢٣٤</span></div>'+(extra||'')+seg(on)+'</div>'};
+  var chips=function(a,on){return '<div class="chips">'+a.map(function(x,i){return '<span class="chip'+(i===(on||0)?' on':'')+'">'+x+'</span>'}).join('')+'</div>'};
+  var part=function(n,p,s,d){return '<div class="card cardrow"><span class="ico"></span><div style="flex:1;display:grid;gap:4px"><div class="h">'+n+'</div><div class="pb '+(s||'')+'"><i style="width:'+p+'%"></i></div></div><div style="text-align:end"><div class="h">'+(s==='late'?'Late':p+'%')+'</div><div class="m">'+d+'</div></div></div>'};
+  var spark='<svg viewBox="0 0 100 30" width="100%" height="34" preserveAspectRatio="none"><polyline fill="none" stroke="#08736F" stroke-width="2" points="0,26 18,22 36,19 54,15 72,9 100,4"/><circle cx="100" cy="4" r="3" fill="#D3F53D" stroke="#08736F"/></svg>';
+  var bars='<div class="bars"><i style="height:60%"></i><i style="height:80%"></i><i style="height:45%"></i><i style="height:35%"></i><i style="height:25%"></i><i class="cur" style="height:70%"></i></div>';
+  var tile=function(n,s){return '<div class="tile t-'+s+'">'+n+'</div>'};
+  var log=function(n,d,c){return '<div class="card cardrow"><span class="ico"></span><div style="flex:1"><div class="h">'+n+'</div><div class="m">'+d+'</div></div><div class="h">'+c+'</div></div>'};
+
+  var S=[
+  {id:'overview',name:'Car details: Overview tab',sub:'A real overview of the car: its health, what needs attention, money and distance, with a part filter inside it.',o:[
+    ['Health score first','One big health score, what needs attention as a short list, and part chips that filter the list.',
+      hero(0)+'<div class="sc"><div class="card cardrow"><div class="ring lg late" style="--p:68"><b>68</b></div><div style="flex:1;display:grid;gap:3px"><div class="h" style="font-size:13px">Car health</div><div class="m">3 late · 2 soon · 5 on time</div><div class="stack"><i style="flex:5;background:var(--ok)"></i><i style="flex:2;background:var(--soon)"></i><i style="flex:3;background:var(--late)"></i></div></div></div>'+
+      chips(['All parts','Engine','Brakes','Tyres'],0)+'<div class="h">Needs attention</div>'+part('Wipers',0,'late','124,500 km late')+part('Radiator fluid',0,'late','late')+part('Oil change',93,'','169 days')+'</div>'],
+    ['Dashboard tiles','Four chart tiles: health, distance, spending, fuel. Tap a tile to open its detail. Parts below.',
+      hero(0)+'<div class="sc"><div class="grid2"><div class="card" style="display:grid;gap:4px;place-items:center"><div class="ring late" style="--p:68"><b>68</b></div><div class="m">Health</div></div>'+
+      '<div class="card" style="display:grid;gap:3px"><div class="m">Distance · 6 mo</div>'+spark+'<div class="h">+3,200 km</div></div>'+
+      '<div class="card" style="display:grid;gap:3px"><div class="m">Spending · 6 mo</div>'+bars+'<div class="h">1,800 EGP</div></div>'+
+      '<div class="card" style="display:grid;gap:3px"><div class="m">Fuel</div><div class="h" style="font-size:15px">11.8</div><div class="m">km per litre</div></div></div>'+
+      chips(['All','Late','Soon','OK'],1)+part('Wipers',0,'late','late')+part('Radiator fluid',0,'late','late')+'</div>'],
+    ['Parts map','A strip that shows how many parts are late, soon and fine, then every part as a coloured tile you can tap to filter.',
+      hero(0)+'<div class="sc"><div class="card" style="display:grid;gap:7px"><div class="cardrow" style="justify-content:space-between"><span class="h">Health</span><span class="h" style="color:var(--late)">3 late</span></div><div class="stack" style="height:12px"><i style="flex:5;background:var(--ok)"></i><i style="flex:2;background:var(--soon)"></i><i style="flex:3;background:var(--late)"></i></div></div>'+
+      '<div class="h">All parts</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">'+tile('Oil','ok')+tile('Filter','ok')+tile('Brakes','soon')+tile('Tyres','ok')+tile('Wipers','late')+tile('Coolant','late')+tile('Gearbox','ok')+tile('Battery','soon')+'</div>'+
+      '<div class="card cardrow"><span class="ico"></span><div style="flex:1"><div class="h">Next due</div><div class="m">Brakes · in 1,200 km</div></div></div></div>']]},
+  {id:'log',name:'Car details: Log tab',sub:'Every record, with a way to look at all parts or just one.',o:[
+    ['Part chips on top','A row of part chips filters the timeline. Months group the records. Simple and fast.',
+      hero(1)+'<div class="sc">'+chips(['All parts','Oil','Brakes','Tyres'],1)+'<div class="month">October 2026</div>'+log('Oil change','Oct 12 · 250,500 km','350')+log('Oil filter','Oct 12 · 250,500 km','90')+'<div class="month">August 2026</div>'+log('Oil change','Aug 02 · 247,300 km','340')+log('Tyre rotation','Aug 02 · 247,300 km','—')+'</div>'],
+    ['Filter dropdown and totals','One "All parts" dropdown, a Service / Costs switch and a total line for what is shown.',
+      hero(1)+'<div class="sc"><div class="cardrow"><span class="chip on" style="flex:1;text-align:center;padding:7px">All parts ⌄</span><span class="chip" style="padding:7px">2026 ⌄</span></div>'+chips(['All','Service','Costs','Readings'],0)+
+      '<div class="card cardrow" style="justify-content:space-between"><span class="m">Showing 12 records</span><span class="h">4,860 EGP</span></div>'+log('Oil change','Oct 12 · 250,500 km','350')+log('Brake pads','Sep 03 · 249,100 km','1,200')+log('Fuel','Sep 01','680')+'</div>'],
+    ['Grouped by part','Records are grouped under each part with its last date and total cost. Tap a part to open its records.',
+      hero(1)+'<div class="sc"><div class="card" style="display:grid;gap:7px"><div class="cardrow"><span class="ico"></span><div style="flex:1"><div class="h">Oil change</div><div class="m">5 records · last Oct 12</div></div><div class="h">1,700</div></div><div class="m" style="padding-inline-start:34px">Oct 12 · Aug 02 · Jun 19 …</div></div>'+
+      '<div class="card cardrow"><span class="ico"></span><div style="flex:1"><div class="h">Brake pads</div><div class="m">2 records · last Sep 03</div></div><div class="h">2,300</div></div>'+
+      '<div class="card cardrow"><span class="ico"></span><div style="flex:1"><div class="h">Tyres</div><div class="m">3 records · last Mar 15</div></div><div class="h">5,400</div></div>'+
+      '<div class="card cardrow"><span class="ico"></span><div style="flex:1"><div class="h">Fuel</div><div class="m">14 fill-ups</div></div><div class="h">6,100</div></div></div>']]},
+  {id:'reminders',name:'Car details: Reminders tab',sub:'What is due, by urgency, with the same part filter.',o:[
+    ['By urgency','Late, soon and on time as a switch. A list of parts with their remaining distance, filtered by part chips.',
+      hero(2)+'<div class="sc"><div class="seg" style="background:var(--app-line);color:var(--app-ink)"><span class="on">Late 3</span><span>Soon 2</span><span>OK 5</span></div>'+chips(['All parts','Engine','Brakes'],0)+part('Wipers',0,'late','124,500 km')+part('Radiator fluid',0,'late','late')+part('Periodic check',0,'late','late')+'</div>'],
+    ['Timeline','A road map of what is coming: this week, this month, later. Each row has a Done button.',
+      hero(2)+'<div class="sc"><div class="month">Now · overdue</div>'+part('Wipers',0,'late','late')+'<div class="month">Within 1,500 km</div>'+part('Brake pads',22,'soon','1,200 km')+'<div class="month">Later</div>'+part('Oil change',93,'','9,300 km')+part('Tyres',76,'','18,000 km')+'</div>'],
+    ['Ring grid','Each part as a ring: quick to scan. Tap a ring for its page. Filter by part group.',
+      hero(2)+'<div class="sc">'+chips(['All','Engine','Brakes','Body'],0)+'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'+
+      ['Wipers|0|late','Coolant|0|late','Check|0|late','Brakes|22|soon','Battery|31|soon','Oil|93|','Filter|93|','Gearbox|98|','Tyres|76|'].map(function(x){var a=x.split('|');return '<div class="card" style="display:grid;gap:4px;place-items:center;padding:7px 3px"><div class="ring sm '+a[2]+'" style="--p:'+Math.max(a[1],6)+'"><b>'+(a[2]==='late'?'!':a[1])+'</b></div><div class="m" style="font-size:8px">'+a[0]+'</div></div>'}).join('')+'</div></div>']]},
+  {id:'cars',name:'My cars: car cards',sub:'How each car looks in the list.',o:[
+    ['Hero card','A big card per car: picture, name, plate, distance, health ring and the next thing due.',
+      '<div class="gb">'+SB+'<div class="t1" style="font-size:19px">My cars</div><div class="s1">2 cars · 501,500 km</div></div><div class="sc">'+
+      ['Car|2020|250,500|68|late','Toyota Hilux|2023|251,000|91|'].map(function(c){var a=c.split('|');return '<div class="card" style="display:grid;gap:8px"><div class="cardrow"><div class="artd" style="width:88px;height:48px"></div><div style="flex:1;display:grid;gap:3px"><div class="h" style="font-size:12px">'+a[0]+'</div><div class="m">'+a[1]+' · '+a[2]+' km</div><span class="plate" style="justify-self:start">أ ب ج ١٢٣٤</span></div><div class="ring sm '+a[4]+'" style="--p:'+a[3]+'"><b>'+a[3]+'</b></div></div><div class="cardrow m"><span class="dot '+(a[4]||'soon')+'"></span>Next: '+(a[4]?'Wipers · late':'Oil change · 2,100 km')+'</div></div>'}).join('')+'<div class="chip on" style="text-align:center;padding:9px;background:var(--lime);color:#222E29">+ Add car</div></div>'],
+    ['Compact health rows','Slim rows with a health bar and a late-count badge: many cars fit on screen.',
+      '<div class="gb">'+SB+'<div class="t1" style="font-size:19px">My cars</div><div class="s1">2 cars · 501,500 km</div></div><div class="sc">'+
+      ['Car|2020 · 250,500 km|68|late|3 late','Toyota Hilux|2023 · 251,000 km|91||All good'].map(function(c){var a=c.split('|');return '<div class="card cardrow"><div class="artd"></div><div style="flex:1;display:grid;gap:4px"><div class="cardrow" style="justify-content:space-between"><span class="h">'+a[0]+'</span><span class="chip" style="'+(a[3]?'background:#F8C2CB;color:#7A1F31':'background:#DDEFB4;color:#3A5A0A')+'">'+a[4]+'</span></div><div class="m">'+a[1]+'</div><div class="pb '+a[3]+'"><i style="width:'+a[2]+'%"></i></div></div></div>'}).join('')+'<div class="chip on" style="text-align:center;padding:9px;background:var(--lime);color:#222E29">+ Add car</div></div>'],
+    ['Dark cards with actions','Dark Bestim cards, car picture breaking out, big distance and two quick actions on each.',
+      '<div class="gb">'+SB+'<div class="t1" style="font-size:19px">My cars</div><div class="s1">2 cars · 501,500 km</div></div><div class="sc">'+
+      ['Car|2020|250,500|3 late','Toyota Hilux|2023|251,000|All good'].map(function(c){var a=c.split('|');return '<div style="background:var(--panel);color:var(--onpanel);border-radius:18px;padding:11px;display:grid;gap:8px"><div class="cardrow"><div style="flex:1;display:grid;gap:2px"><div class="t1">'+a[0]+' <span class="dim" style="font-weight:400;font-size:10px">'+a[1]+'</span></div><div style="font:700 20px var(--display)">'+a[2]+' <span class="s1" style="font-weight:400">km</span></div></div><div class="art" style="width:76px;height:42px"></div></div><div class="cardrow"><span class="chip" style="background:rgba(255,255,255,.14);color:var(--onpanel)">'+a[3]+'</span><span class="plate">أ ب ج ١٢٣٤</span><span style="flex:1"></span><span class="chip lime">Update km</span></div></div>'}).join('')+'<div class="chip on" style="text-align:center;padding:9px;background:var(--lime);color:#222E29">+ Add car</div></div>']]}
+  ];
+
+  var root=document.getElementById('root'),picks={};
+  try{picks=JSON.parse(localStorage.getItem('bestim-car-picks')||'{}')||{}}catch(e){}
+  root.innerHTML=S.map(function(p,pi){
+    return '<section><div><h2>'+(pi+1)+'. '+p.name+'</h2><p class="sub">'+p.sub+'</p></div><div class="set">'+
+      p.o.map(function(o,i){var v='ABC'[i];return '<button class="opt" data-g="'+p.id+'" data-v="'+v+'" aria-pressed="false"><div class="ph">'+o[2]+'</div><div class="cap"><span class="tag">'+v+'</span><div><b>'+o[0]+'</b><small>'+o[1]+'</small></div></div></button>'}).join('')+
+      '</div></section>';
+  }).join('');
+  var sum=document.getElementById('sum');
+  function text(){return S.filter(function(p){return picks[p.id]}).map(function(p){return p.name+': '+picks[p.id]}).join(' · ')}
+  function paint(){
+    root.querySelectorAll('.opt').forEach(function(b){b.setAttribute('aria-pressed',String(picks[b.dataset.g]===b.dataset.v))});
+    sum.textContent=text()||'No picks yet';
+  }
+  root.addEventListener('click',function(e){
+    var b=e.target.closest('.opt');if(!b)return;
+    picks[b.dataset.g]=b.dataset.v;
+    try{localStorage.setItem('bestim-car-picks',JSON.stringify(picks))}catch(x){}
+    paint();
+  });
+  document.getElementById('copy').addEventListener('click',function(){
+    var c=this,t=text()||'No picks yet';
+    if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){c.textContent='Copied';setTimeout(function(){c.textContent='Copy picks'},1500)},function(){});
+  });
+  paint();
+})();
+</script>

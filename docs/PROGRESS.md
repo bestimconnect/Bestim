@@ -1,6 +1,6 @@
 # Bestim: Build Progress
 
-Updated 2026-10-11. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
+Updated 2026-10-22. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
 
 ## Phase status
 
@@ -81,7 +81,17 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 - Turn off anonymous sign-ins in the Supabase dashboard (Authentication → Sign In / Providers), once old test builds are no longer in use.
 - The website's privacy, terms and delete-account pages and the store answers (Apple privacy labels, Google data safety) still describe guest mode and need rewording.
 
+## Round of 2026-10-22 (Q108–Q112)
+Founder's test list, done and tried on the iPhone 16 simulator (not on Android yet):
+- **Motion (Q108):** tab cross-fade, tab bar fade, car page fade, the tapped car flies into the car page and back (`lib/carFlight.ts`, `components/CarFlight.tsx`).
+- **Refresh (Q109):** normal system spinner again.
+- **Odometer (Q110):** cockpit layout; dial is drawn in code until the Gemini picture exists (`docs/gemini-odometer-prompt.md`).
+- **Expenses (Q111):** Month / Year line chart, swipe through all history.
+- **Small fixes (Q112):** VIN "—", My Cars cards without the status line, Logs filter keeps its layout.
+- **Design mock-ups** the founder chose from (transitions, odometer, refresh, expenses) were built as artifacts; the chosen ones are described in the decisions.
+
 ## Open items
+- **From the 2026-10-22 round:** the 3D dial picture for the odometer page (Gemini prompt in `docs/gemini-odometer-prompt.md`); Android not tried for the car-flight, fades and swipe chart; iOS swipe-back on the car page; the green top bar may still feel late (see Q108); an empty VIN was not seen on screen (both test cars have one).
 - **Not verified yet (QA):**
   - English/LTR layout of the Phase 3–5 screens;
   - light mode of the Phase 5 screens (they were reviewed in dark);
@@ -117,6 +127,8 @@ A full pass for Google Play and Huawei AppGallery. Store texts and form answers:
 - The email-link flow end to end (needs the live settings above).
 
 ## Environment & gotchas (learned the hard way)
+- **Simulator build (2026-10-22):** `pod install` fails with a Unicode error unless the shell has `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8`. The dev build installs as `com.bestim.app.dev` (an old `com.bestim.app` may also be on the simulator: launching that one gives "Cannot find native module" errors). After a code change that touches navigation, relaunch the app: a hot reload keeps the old navigation state.
+- **Car page is a root route** (`/vehicle/[id]`, Q108), not inside the Vehicles tab stack.
 - `.env` is **git-ignored** and holds EXPO_PUBLIC_SUPABASE_URL/ANON_KEY, EXPO_PUBLIC_GOOGLE_WEB/IOS_CLIENT_ID and SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET. A new machine or cloud session must recreate it.
 - Supabase project ref `wlepubflnjcguosicuak`. `supabase link` is needed on a new machine. Schema changes go through migrations only.
 - **Email links must be opened on the phone that asked for them** (sign-up, reset password): the link carries a one-time code and the phone holds the other half. A link opened on another phone lands on Sign in with a plain notice.

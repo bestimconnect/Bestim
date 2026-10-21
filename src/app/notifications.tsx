@@ -3,11 +3,12 @@ import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router, type Href } from 'expo-router';
 import { AlarmClock, BellRing, CalendarCheck, Gauge, Mic, type LucideIcon } from 'lucide-react-native';
+import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Header, Item, Text } from '@/components/ui';
+import { Button, Choice, Group, Header, Item, Text } from '@/components/ui';
 import { useColors } from '@/lib/theme';
 import { useInbox, type InboxItem, type InboxKind } from '@/stores/notifyInbox';
 
@@ -19,7 +20,9 @@ export default function NotificationsScreen() {
   const { t, i18n } = useTranslation();
   const refresh = useRefresh();
   const c = useColors();
-  const { items, markRead, markAllRead } = useInbox();
+  const { items: all, markRead, markAllRead } = useInbox();
+  const [only, setOnly] = useState<'all' | 'unread'>('all');
+  const items = only === 'unread' ? all.filter((i) => !i.read) : all;
   const locale = i18n.language === 'ar' ? ar : enUS;
 
   const day = (at: string) => {
@@ -40,7 +43,20 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper px-6" edges={['top', 'bottom']}>
-      <Header title={t('inbox.header')} />
+      <Header
+        title={t('inbox.header')}
+        below={
+          all.length ? (
+            <Choice
+              onDark
+              className="bg-[#FFFFFF1F]"
+              value={only}
+              onChange={setOnly}
+              options={[{ value: 'all', label: t('inbox.all') }, { value: 'unread', label: t('inbox.unreadOnly') }]}
+            />
+          ) : undefined
+        }
+      />
       {items.length === 0 ? (
         <View className="flex-1 items-center justify-center gap-2">
           <BellRing size={32} color={c.muted} />
@@ -52,6 +68,7 @@ export default function NotificationsScreen() {
           {groups.map((g) => (
             <View key={g.day} className="gap-3">
               <Text variant="label" className="text-muted">{g.day}</Text>
+              <Group>
               {g.items.map((item) => (
                 <Item
                   key={item.id}
@@ -65,11 +82,12 @@ export default function NotificationsScreen() {
                   onPress={() => open(item)}
                 />
               ))}
+              </Group>
             </View>
           ))}
         </ScrollView>
       )}
-      {items.some((i) => !i.read) ? (
+      {all.some((i) => !i.read) ? (
         <View className="pb-4 pt-2">
           <Button title={t('inbox.markAll')} variant="secondary" onPress={markAllRead} />
         </View>

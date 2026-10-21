@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { I18nManager, View, type PressableProps } from 'react-native';
 
 import { shadows, useColors } from '@/lib/theme';
+import { useInGroup } from './Group';
 import { PressableScale } from './PressableScale';
 import { Text } from './Text';
 
@@ -24,18 +25,20 @@ type Props = PressableProps & {
 export function Item({ icon: Icon, image, leading, tone = 'mint', title, subtitle, chevron = true, aside, ...rest }: Props) {
   const c = useColors();
   const Chevron = I18nManager.isRTL ? ChevronLeft : ChevronRight;
+  const grouped = useInGroup(); // inside a Group the row is part of one card: no card of its own
   return (
     <PressableScale
       accessibilityRole="button"
-      className="min-h-[72px] flex-row items-center gap-3 rounded-item bg-white p-3.5"
+      className={grouped ? 'min-h-[64px] flex-row items-center gap-3 px-3.5 py-3' : 'min-h-[72px] flex-row items-center gap-3 rounded-item bg-white p-3.5'}
       {...rest}
-      scale={0.98}
-      style={{ boxShadow: shadows.soft }}>
+      scale={grouped ? 0.99 : 0.98}
+      style={grouped ? undefined : { boxShadow: shadows.soft }}>
       {leading ?? (image ? (
         <Image source={image} contentFit="contain" style={{ width: 64, height: 32 }} />
       ) : Icon ? (
-        <View className={`h-11 w-11 items-center justify-center rounded-full ${badges[tone]}`}>
-          <Icon size={20} color={c.teal} />
+        // inside a Group the icon stands alone (no coloured badge behind it)
+        <View className={grouped ? 'h-8 w-8 items-center justify-center' : `h-11 w-11 items-center justify-center rounded-full ${badges[tone]}`}>
+          <Icon size={grouped ? 24 : 20} color={c.teal} />
         </View>
       ) : null)}
       <View className="flex-1 gap-0.5">

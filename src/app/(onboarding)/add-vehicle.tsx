@@ -8,6 +8,9 @@ import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { cleanVin, vinOk } from '@/lib/vin';
+import { ColorPicker } from '@/components/ColorPicker';
+import { PlateField, joinPlate } from '@/components/Plate';
 import { OdometerScanner } from '@/components/OdometerScanner';
 import { Button, Field, Header, Item, Note, PressableScale, Rise, Text } from '@/components/ui';
 import { errorText } from '@/lib/errors';
@@ -105,6 +108,9 @@ export default function AddVehicleInfoScreen() {
             odometer_updated_at: km == null ? null : new Date().toISOString(), // null = no reading yet (Q105)
             odometer_unit: 'km',
             nickname: d.nickname || null,
+            plate_number: joinPlate(d.plateLetters, d.plateDigits),
+            color: d.color,
+            vin: d.vin || null,
             vehicle_type: d.vehicleType,
             is_primary: !extra,
           })
@@ -221,6 +227,10 @@ export default function AddVehicleInfoScreen() {
             </PressableScale>
           </View>
           <Text variant="caption" className="-mt-1 text-muted">{t('onboarding.addVehicle.odometer.later')}</Text>
+          <Text variant="caption" className="text-muted">{t('plate.label')}</Text>
+          <PlateField letters={draft.plateLetters} digits={draft.plateDigits} onChange={(l, d) => draft.set({ plateLetters: l, plateDigits: d })} />
+          <ColorPicker value={draft.color} onChange={(c) => draft.set({ color: c })} />
+          <Field label={t('vehicles.vin.label')} value={draft.vin} onChangeText={(v) => draft.set({ vin: cleanVin(v) })} autoCapitalize="characters" autoCorrect={false} placeholder={t('vehicles.vin.hint')} error={vinOk(draft.vin) ? undefined : t('vehicles.vin.error')} />
           <Field
             label={t('onboarding.addVehicle.info.nickname')}
             value={draft.nickname}
@@ -230,7 +240,7 @@ export default function AddVehicleInfoScreen() {
         {save.error ? <Note tone="warning" text={errorText(save.error)} /> : null}
         <Button
           title={t('onboarding.addVehicle.info.cta')}
-          disabled={!draft.make || !draft.model || !draft.year}
+          disabled={!draft.make || !draft.model || !draft.year || !vinOk(draft.vin)}
           loading={save.isPending}
           onPress={() => !save.isPending && save.mutate(odometer ? Number(odometer) : null)}
         />

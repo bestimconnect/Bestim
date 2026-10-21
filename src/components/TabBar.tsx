@@ -1,7 +1,9 @@
 import type { BottomTabBarProps } from 'expo-router/tabs';
-import { Bell, CarFront, House, Plus, UserRound, type LucideIcon } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
+import { CarFront, House, Plus, UserRound, Wallet, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Keyboard, Platform, View } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -10,8 +12,8 @@ import { shadows, useColors } from '@/lib/theme';
 import { PressableScale } from './ui/PressableScale';
 import { Text } from './ui/Text';
 
-const icons: Record<string, LucideIcon> = { index: House, vehicles: CarFront, reminders: Bell, account: UserRound };
-const labels: Record<string, string> = { index: 'home', vehicles: 'vehicles', reminders: 'reminders', account: 'account' };
+const icons: Record<string, LucideIcon> = { index: House, vehicles: CarFront, expenses: Wallet, account: UserRound };
+const labels: Record<string, string> = { index: 'home', vehicles: 'vehicles', expenses: 'expenses', account: 'account' };
 
 /** Space to leave under scrolling content so the floating bar and its lifted + button never cover it. */
 export function useTabBarSpace() {
@@ -20,7 +22,7 @@ export function useTabBarSpace() {
 
 /**
  * Custom ink nav (spec §10): 68px, 28 radius, floating lime capture button in the centre.
- * The capture button isn't a tab: it opens the "new record" sheet (13).
+ * The capture button isn't a tab: it opens the say-it / type-it chooser (13).
  */
 export function TabBar({ state, navigation }: BottomTabBarProps) {
   const { t } = useTranslation();
@@ -33,15 +35,19 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
     const subs = [Keyboard.addListener('keyboardDidShow', () => setTyping(true)), Keyboard.addListener('keyboardDidHide', () => setTyping(false))];
     return () => subs.forEach((x) => x.remove());
   }, []);
-  if (typing) return null;
+  // Sub-pages (car details, export…) sit on a stack inside a tab: the bar belongs to the main pages only.
+  if (typing || (state.routes[state.index].state?.index ?? 0) > 0) return null;
   return (
-    <View
+    <Animated.View
+      entering={FadeIn.duration(180)}
+      exiting={FadeOut.duration(120)}
       className="absolute inset-x-4 h-[68px] flex-row items-center rounded-nav border border-line bg-panel px-2"
       style={{ bottom: Math.max(bottom, 16), boxShadow: shadows.nav }}>
       {state.routes.map((route, i) => {
         const focused = state.index === i;
         const Icon = icons[route.name];
         const onPress = () => {
+          if (!focused) Haptics.selectionAsync();
           const e = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
           if (!focused && !e.defaultPrevented) navigation.navigate(route.name);
         };
@@ -53,7 +59,10 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
             accessibilityRole="tab"
             accessibilityState={{ selected: focused }}
             className="flex-1 items-center gap-1">
-            <Icon size={22} color={focused ? c.lime : c.muted} />
+            {focused ? <View className="absolute -top-[12px] h-[3px] w-6 rounded-b-full bg-lime" /> : null}
+            <View className="h-6 w-6 items-center justify-center">
+              <Icon size={22} color={focused ? c.lime : c.muted} />
+            </View>
             <Text variant="caption" className={focused ? 'text-lime' : 'text-muted'}>{label}</Text>
           </PressableScale>
         );
@@ -68,6 +77,6 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
           </PressableScale>,
         ];
       })}
-    </View>
+    </Animated.View>
   );
 }

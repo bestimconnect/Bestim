@@ -16,12 +16,15 @@ import { AppState, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 
+import { AppBarOverlay } from '@/components/AppBarOverlay';
+import { CarFlight } from '@/components/CarFlight';
 import { KeyboardDone } from '@/components/KeyboardDone';
 import { SplashOverlay } from '@/components/SplashOverlay';
 import { Toast } from '@/components/Toast';
 import { Button, Text } from '@/components/ui';
 import { applyLanguage } from '@/lib/i18n';
 import { syncNotifications } from '@/lib/notifications';
+import { useOnline } from '@/lib/online';
 import { DAY, persister, queryClient } from '@/lib/queryClient';
 import { sessionFromUrl, useSession } from '@/lib/session';
 import { useProfile } from '@/lib/queries';
@@ -71,7 +74,9 @@ function App() {
   const [splashDone, setSplashDone] = useState(false); // lives here, not in the overlay: the tree unmounts while a new sign-in loads
   const oldGuest = useRef<string | null>(null); // the guest sent to /register already, so a refetch doesn't pull them back from /login
   const endSplash = useCallback(() => setSplashDone(true), []);
-  const ready = fontsLoaded && hydrated && session !== undefined && (!userId || !profile.isPending);
+  const online = useOnline();
+  // Offline the profile query is paused, not failed: don't make the splash wait for it (Home shows its offline state).
+  const ready = fontsLoaded && hydrated && session !== undefined && (!userId || !profile.isPending || !online);
 
   useEffect(() => useSettings.persist.onFinishHydration(() => setHydrated(true)), []);
 
@@ -136,7 +141,7 @@ function App() {
   }, [ready, language, userId, profile.data, session?.user.is_anonymous]);
 
   if (!ready) return null;
-  // Bottom sheets: the capture chooser (13) and the confirm sheet (Q55) and switch vehicle (Q56).
+  // Bottom sheets: the say-it / type-it chooser (13), the confirm sheet (Q55) and switch vehicle (Q56).
   const sheetOptions: ComponentProps<typeof Stack.Screen>['options'] = {
     presentation: 'formSheet',
     sheetAllowedDetents: 'fitToContents',
@@ -149,12 +154,18 @@ function App() {
     <View className="flex-1 bg-paper" style={themeVars[scheme]}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
+        {/* Over the tabs, like a transparent modal: the page below (Home, My Cars) stays attached, so its car is there to fly back to. */}
+        <Stack.Screen name="vehicle/[id]" options={{ presentation: 'transparentModal', animation: 'fade', animationDuration: 250 }} />
+        <Stack.Screen name="capture/choose" options={sheetOptions} />
+        <Stack.Screen name="part-logs" options={{ ...sheetOptions, sheetAllowedDetents: [0.6, 0.95] }} />
         <Stack.Screen name="capture/index" options={{ ...sheetOptions, sheetAllowedDetents: [0.92] }} />
         <Stack.Screen name="sheet" options={sheetOptions} />
         <Stack.Screen name="switch-vehicle" options={sheetOptions} />
         <Stack.Screen name="pick" options={{ presentation: 'modal' }} />
         <Stack.Screen name="notify-permission" options={{ presentation: 'modal' }} />
       </Stack>
+      <AppBarOverlay />
+      <CarFlight />
       <KeyboardDone />
       <Toast />
       {splashDone ? null : <SplashOverlay onDone={endSplash} />}

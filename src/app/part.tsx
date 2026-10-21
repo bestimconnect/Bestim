@@ -2,15 +2,18 @@ import { format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
-import { AlarmClock, Calendar, Check, History, Repeat, Wallet } from 'lucide-react-native';
+import { AlarmClock, Calendar, ChevronLeft, ChevronRight, Plus, Repeat, Wallet } from 'lucide-react-native';
 import { useState } from 'react';
-import { ActivityIndicator, ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, I18nManager, ScrollView, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { useLightStatusBar } from '@/components/Hero';
 import { PartStatus } from '@/components/PartStatus';
 import { useRefresh } from '@/components/Refresh';
 import { Button, Header, PressableScale, Text } from '@/components/ui';
+import { useAppBarHero } from '@/lib/appBar';
+import { lifeFraction } from '@/lib/parts';
 import { openCapture } from '@/lib/reading';
 import { snoozePart } from '@/lib/snooze';
 import { useServiceTypes, useVehicle, useVehicleParts } from '@/lib/queries';
@@ -28,6 +31,9 @@ export default function PartScreen() {
   const { data: logs, parts } = useVehicleParts(vehicle);
   const st = useServiceTypes().data?.find((s) => s.id === params.serviceTypeId);
   const [busy, setBusy] = useState(false);
+  useLightStatusBar();
+  const onHero = useAppBarHero();
+  const insets = useSafeAreaInsets();
   if (!vehicle || !st) return <SafeAreaView className="flex-1 bg-paper px-6"><Header title="" /></SafeAreaView>;
 
   const unit = t(`vehicles.unit.${vehicle.odometer_unit}`);
@@ -60,20 +66,28 @@ export default function PartScreen() {
   ] as const;
 
   return (
-    <SafeAreaView className="flex-1 bg-paper">
-      <View className="px-6">
-        <Header
-          title={name}
-          right={
-            <PressableScale
-              accessibilityRole="button"
-              accessibilityLabel={t('parts.viewHistory')}
-              onPress={() => router.push({ pathname: '/part-history', params })}
-              className="h-11 w-11 items-center justify-center rounded-field bg-white">
-              <History size={22} color={c.ink} />
-            </PressableScale>
-          }
-        />
+    <SafeAreaView className="flex-1 bg-paper" edges={['bottom']}>
+      <View onLayout={onHero} className="gap-3 rounded-b-[28px] bg-panel px-6 pb-4" style={{ paddingTop: insets.top + 8 }}>
+        <View className="h-11 flex-row items-center">
+          <PressableScale accessibilityRole="button" accessibilityLabel={t('back')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-[#FFFFFF26]">
+            {I18nManager.isRTL ? <ChevronRight size={22} color={c.onpanel} /> : <ChevronLeft size={22} color={c.onpanel} />}
+          </PressableScale>
+        </View>
+        <View className="flex-row items-center gap-3">
+          <View className="flex-1">
+            <Text variant="title" className="text-onpanel" numberOfLines={2}>{name}</Text>
+            {km != null || months != null ? (
+              <Text variant="caption" className="text-onpanel" style={{ opacity: 0.7 }}>
+                {t('parts.every')}: {km != null ? `${n(km)} ${unit}` : t('parts.months', { m: months })}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+        {status ? (
+          <View className="h-1.5 overflow-hidden rounded-full bg-[#FFFFFF2E]">
+            <View className="h-full rounded-full bg-lime" style={{ width: `${Math.round((status.state === 'overdue' ? 0 : 1 - lifeFraction(status, km).used) * 100)}%` }} />
+          </View>
+        ) : null}
       </View>
       <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="grow justify-center gap-8 px-6 py-4">
         <PartStatus status={status} unit={unit} intervalKm={km} snoozedUntil={snoozedUntil} nameEn={st.name_en} />
@@ -90,7 +104,13 @@ export default function PartScreen() {
         ) : null}
       </ScrollView>
       <View className="flex-row items-center gap-3 px-6 pb-4">
-        <Button className="flex-1" icon={last ? <Check size={20} color="#222E29" /> : undefined} title={t(last ? 'common.done' : 'partStatus.none')} onPress={done} />
+        <Button
+          className="flex-1 px-3"
+          variant="secondary"
+          title={t('parts.viewLogs')}
+          onPress={() => router.push({ pathname: '/part-logs', params: { vehicleId: vehicle.id, serviceTypeId: st.id } })}
+        />
+        <Button className="flex-1 px-3" icon={<Plus size={20} color="#222E29" />} title={t('vehicles.addRecord')} onPress={done} />
         {canSnooze ? (
           <PressableScale
             accessibilityRole="button"

@@ -84,7 +84,7 @@ export default function ExportScreen() {
   if (logs.isError && !logs.data) return <ErrorState onRetry={logs.refetch} retrying={logs.isRefetching} />;
   return (
     <SafeAreaView className="flex-1 bg-paper px-6" edges={['top']}>
-      <Header title={t('export.header')} />
+      <Header title={t('export.header')} sub={t('account.exportSub')} />
       <ScrollView refreshControl={refresh} contentContainerClassName="gap-4" contentContainerStyle={{ paddingBottom: space }} showsVerticalScrollIndicator={false}>
         <Text variant="title">{t('export.title')}</Text>
         {(vehicles.data?.length ?? 0) > 1 && vehicle ? <Text variant="caption" className="text-muted">{vehicleName(vehicle)}</Text> : null}

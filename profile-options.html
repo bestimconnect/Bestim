@@ -1,0 +1,59 @@
+<title>Bestim Profile Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Tajawal:wght@400;700&display=swap">
+<style>
+/* Layout: three phone mockups of the Account page, each with a profile picture and the same settings. */
+:root{--bg:#EEF1EE;--fg:#222E29;--muted:#5B6860;--line:#D5DCD6;--card:#FFFFFF;--lime:#D3F53D;--panel:#222E29;--onpanel:#F5F7F5;--teal:#08736F;--ap:#F5F7F5;--ac:#FFFFFF;--al:#DEE5DF;--ai:#222E29;--am:#5B6860;--mint:#E4F3D9;--pick:#08736F;--display:'Poppins','Tajawal',system-ui,sans-serif;--body:'Tajawal','Poppins',system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B100D;--fg:#E8EEEA;--muted:#93A39A;--line:#26332B;--card:#131A16;--panel:#212E27;--ap:#0E1411;--ac:#171F1B;--al:#2C3A32;--ai:#F2F5F3;--am:#93A39A;--mint:#1E3326;--pick:#3ECFC0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B100D;--fg:#E8EEEA;--muted:#93A39A;--line:#26332B;--card:#131A16;--panel:#212E27;--ap:#0E1411;--ac:#171F1B;--al:#2C3A32;--ai:#F2F5F3;--am:#93A39A;--mint:#1E3326;--pick:#3ECFC0;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1{font:700 28px/1.15 var(--display);margin:0}p{margin:0}.lead{color:var(--muted);max-width:68ch}
+.picks{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}.picks output{flex:1;min-width:200px;font-size:13px;color:var(--muted)}.picks button{font:600 13px var(--display);background:var(--pick);color:#fff;border:0;border-radius:10px;padding:8px 14px;cursor:pointer}
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:10px;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px;min-width:0}.opt:focus-visible,.picks button:focus-visible{outline:3px solid var(--pick);outline-offset:2px}.opt[aria-pressed="true"]{border-color:var(--pick)}
+.cap{display:flex;gap:10px;align-items:flex-start}.tag{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line);font:700 13px var(--display)}.opt[aria-pressed="true"] .tag{background:var(--pick);color:#fff}.cap b{font:600 14px var(--display);display:block}.cap small{color:var(--muted);font-size:13px;line-height:1.4;display:block}
+.ph{width:100%;max-width:250px;margin:0 auto;height:540px;background:var(--ap);border:1px solid var(--al);border-radius:26px;overflow:hidden;color:var(--ai);font-size:10px;display:flex;flex-direction:column}.ph *{min-width:0}
+.gb{background:var(--panel);color:var(--onpanel);border-radius:0 0 22px 22px;padding:0 12px 14px;display:flex;flex-direction:column;gap:9px;flex:none}
+.sb{height:26px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 6px 3px;font:600 9px var(--display)}
+.row{display:flex;align-items:center;gap:8px}.sp{flex:1}.t1{font:700 14px/1.2 var(--display)}.t2{font:700 18px/1.15 var(--display)}.s1{font-size:9px;opacity:.7}
+.av{border-radius:50%;background:linear-gradient(135deg,#bfe3a0,#6fbf8a);display:grid;place-items:center;font:700 22px var(--display);color:#fff;flex:none;position:relative}
+.cam{position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:50%;background:var(--lime);color:#222E29;display:grid;place-items:center;font-size:10px;border:2px solid var(--panel)}
+.body{padding:10px;display:flex;flex-direction:column;gap:7px;flex:1;overflow:hidden}
+.card{background:var(--ac);border-radius:13px;padding:9px;box-shadow:0 1px 4px rgba(0,0,0,.06)}.cr{display:flex;gap:8px;align-items:center}.h{font:700 10px var(--display)}.m{color:var(--am);font-size:9px}
+.ico{width:24px;height:24px;border-radius:8px;background:var(--mint);flex:none}.chev{color:var(--am)}
+.grp{font:700 9px var(--display);color:var(--am);margin-top:2px}
+.tg{width:26px;height:15px;border-radius:99px;background:var(--teal);position:relative;flex:none}.tg::after{content:"";position:absolute;right:2px;top:2px;width:11px;height:11px;border-radius:50%;background:#fff}
+.chip{border-radius:99px;padding:4px 9px;font:600 9px var(--display);background:var(--al)}
+.sheet{background:var(--ac);border-radius:16px 16px 0 0;padding:10px;display:grid;gap:6px;margin-top:auto;box-shadow:0 -4px 14px rgba(0,0,0,.12)}.sheet .b{padding:9px;border-radius:12px;background:var(--ap);text-align:center;font:600 10px var(--display)}
+</style>
+<div class="wrap">
+<header style="display:flex;flex-direction:column;gap:10px"><h1>Account page with a profile picture</h1>
+<p class="lead">Tapping the picture lets you take a photo or choose one from your gallery, and crops it round. If there is no photo yet, the first letter of your name shows on a soft green circle. Pick the layout.</p></header>
+<div class="picks" role="status"><output id="sum">No pick yet</output><button id="copy" type="button">Copy pick</button></div>
+<div class="set" id="set"></div>
+</div>
+<script>
+(function(){
+var SB='<div class="sb"><span>9:41</span><span>●●●</span></div>';
+var row=function(t,s){return '<div class="card cr"><span class="ico"></span><div class="sp"><div class="h">'+t+'</div>'+(s?'<div class="m">'+s+'</div>':'')+'</div><span class="chev">›</span></div>'};
+var rows=row('Notifications','Choose what suits you')+row('Export your history','PDF, CSV or JSON')+row('Share car history','Move it to the new owner')+'<div class="card cr"><span class="ico"></span><div class="sp"><div class="h">Dark mode</div></div><span class="tg"></span></div>';
+var O=[
+['Big avatar header','A large round picture in the green header with a camera badge, your name and email under it. Settings below, in one list.',
+ '<div class="ph"><div class="gb">'+SB+'<div style="display:grid;place-items:center;gap:6px;padding-top:6px"><div class="av" style="width:76px;height:76px;font-size:30px">S<span class="cam">●</span></div><div class="t2">Shady</div><div class="s1">sga@example.com</div></div><div class="row" style="justify-content:center"><span class="chip" style="background:rgba(255,255,255,.14);color:#F5F7F5">Arabic</span><span class="chip" style="background:rgba(255,255,255,.14);color:#F5F7F5">EGP</span></div></div><div class="body">'+rows+'</div></div>'],
+['Profile card','A white profile card sits under a slim green bar: small picture on the side, name, car count and an Edit button. Cleaner, more like a settings app.',
+ '<div class="ph"><div class="gb">'+SB+'<div class="t2" style="padding-top:4px">Account</div></div><div class="body"><div class="card" style="display:grid;gap:8px"><div class="cr"><div class="av" style="width:52px;height:52px;font-size:20px">S<span class="cam" style="border-color:var(--ac)">●</span></div><div class="sp"><div class="h" style="font-size:13px">Shady</div><div class="m">sga@example.com</div></div></div><div class="cr"><span class="chip">2 cars</span><span class="chip">12 records</span><span class="chip sp" style="text-align:center;background:var(--lime);color:#222E29">Edit profile</span></div></div><div class="grp">PREFERENCES</div>'+row('Language','English')+row('Currency','EGP')+'<div class="grp">YOUR DATA</div>'+row('Export your history')+row('Share car history')+'</div></div>'],
+['Cover and avatar','A taller green cover with the picture overlapping its bottom edge, like a social profile. Language and currency become two small tiles.',
+ '<div class="ph"><div class="gb" style="padding-bottom:34px">'+SB+'<div class="t2" style="padding-top:4px">Account</div></div><div class="body" style="margin-top:-30px"><div style="display:grid;place-items:center;gap:3px"><div class="av" style="width:64px;height:64px;font-size:24px;border:3px solid var(--ap)">S<span class="cam" style="border-color:var(--ap)">●</span></div><div class="t1">Shady</div><div class="m">sga@example.com</div></div><div class="cr"><div class="card sp"><div class="m">Language</div><div class="h">English</div></div><div class="card sp"><div class="m">Currency</div><div class="h">EGP</div></div></div>'+row('Notifications')+row('Export your history')+row('Share car history')+'</div></div>'],
+['Photo menu (all options)','What tapping the picture does: a small sheet to take a photo, choose from the gallery, or remove the photo. Same in every layout.',
+ '<div class="ph"><div class="gb" style="flex:1;border-radius:0">'+SB+'<div style="display:grid;place-items:center;gap:6px;padding-top:10px"><div class="av" style="width:76px;height:76px;font-size:30px">S</div><div class="t2">Shady</div></div><div class="sheet"><div class="h" style="text-align:center">Profile photo</div><div class="b">Take a photo</div><div class="b">Choose from gallery</div><div class="b" style="color:#E0455F">Remove photo</div></div></div></div>']];
+var set=document.getElementById('set');
+set.innerHTML=O.map(function(o,i){var v='ABCD'[i];return '<button class="opt" data-v="'+v+'" aria-pressed="false">'+o[2]+'<div class="cap"><span class="tag">'+(i<3?v:'•')+'</span><div><b>'+o[0]+'</b><small>'+o[1]+'</small></div></div></button>'}).join('');
+var v='';try{v=localStorage.getItem('bestim-profile')||''}catch(e){}
+var sum=document.getElementById('sum');
+function paint(){set.querySelectorAll('.opt').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.v===v))});sum.textContent=v?'Profile: '+v:'No pick yet'}
+set.addEventListener('click',function(e){var b=e.target.closest('.opt');if(!b||b.dataset.v==='D')return;v=b.dataset.v;try{localStorage.setItem('bestim-profile',v)}catch(x){};paint()});
+document.getElementById('copy').addEventListener('click',function(){var c=this;if(navigator.clipboard)navigator.clipboard.writeText(sum.textContent).then(function(){c.textContent='Copied';setTimeout(function(){c.textContent='Copy pick'},1500)},function(){})});
+paint()})();
+</script>

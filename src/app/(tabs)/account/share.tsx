@@ -68,7 +68,7 @@ export default function ShareScreen() {
   if (logs.isError && !logs.data) return <ErrorState onRetry={logs.refetch} retrying={logs.isRefetching} />;
   return (
     <SafeAreaView className="flex-1 bg-paper px-6" edges={['top']}>
-      <Header title={t('share.header')} />
+      <Header title={t('share.header')} sub={t('account.shareSub')} />
       <ScrollView refreshControl={refresh} contentContainerClassName="gap-5 pt-4" contentContainerStyle={{ paddingBottom: space }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets showsVerticalScrollIndicator={false}>
         <View className="h-[60px] w-[60px] items-center justify-center self-center rounded-full bg-mint">
           <Repeat size={26} color={c.teal} />

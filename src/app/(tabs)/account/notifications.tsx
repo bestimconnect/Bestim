@@ -67,7 +67,7 @@ export default function NotificationsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
       <ScrollView refreshControl={refresh} contentContainerClassName="gap-3 px-6" contentContainerStyle={{ paddingBottom: space }}>
-        <Header title={t('notifPrefs.title')} />
+        <Header title={t('notifPrefs.title')} sub={t('account.notificationsSub')} />
         <Text variant="title" className="mb-1">{t('notifPrefs.heading')}</Text>
         {!allowed ? (
           <>

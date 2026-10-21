@@ -1,6 +1,5 @@
 import { differenceInCalendarDays, format, parseISO, startOfMonth, subMonths } from 'date-fns';
 import * as Haptics from 'expo-haptics';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Bell, Car, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Fuel, Plus, RefreshCw, Sparkles } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
@@ -17,6 +16,9 @@ import { PartBadge } from '@/components/PartStatus';
 import { OfflineHome } from '@/components/OfflineHome';
 import { VoiceQueueCard } from '@/components/VoiceQueueCard';
 import { Button, PressableScale, Rise, Text } from '@/components/ui';
+import { CarPhoto } from '@/components/CarPhoto';
+import { useAppBarHero } from '@/lib/appBar';
+import { openDetails } from '@/lib/carFlight';
 import { hasReading, openCapture } from '@/lib/reading';
 import { needsAttention, useCurrentVehicle, useExpenses, useFuelFills, useVehicleParts, useVehicles, vehicleName, type Part, type Vehicle, useProfile } from '@/lib/queries';
 import { consumption } from '@/lib/fuel';
@@ -24,7 +26,6 @@ import { EASE_OUT, POP, SWAP } from '@/lib/motion';
 import { useOnline, useShowSaved } from '@/lib/online';
 import { pickVehicle } from '@/lib/sheet';
 import { shadows, useColors } from '@/lib/theme';
-import { vehicleArt } from '@/lib/vehicleArt';
 import { useInbox } from '@/stores/notifyInbox';
 import { useSettings } from '@/stores/settingsStore';
 
@@ -63,6 +64,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
   const { t, i18n } = useTranslation();
   const c = useColors();
   const insets = useSafeAreaInsets();
+  const onHero = useAppBarHero();
   const refresh = useRefresh(insets.top, '#D3F53D'); // Home draws under the status bar: keep the spinner clear of the notch
   const space = useTabBarSpace();
   const name = useFirstName();
@@ -116,7 +118,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
     <ScrollView refreshControl={refresh} className="flex-1 bg-panel" contentContainerClassName="grow bg-paper" contentContainerStyle={{ paddingBottom: space }}>
       <LightBar />
       {/* One column, top to bottom: who → which car (name) → the car → dots → its odometer. */}
-      <View className="gap-3 rounded-b-[28px] bg-panel px-6 pb-4" style={{ paddingTop: insets.top + 12 }}>
+      <View onLayout={onHero} className="gap-3 rounded-b-[28px] bg-panel px-6 pb-4" style={{ paddingTop: insets.top + 12 }}>
         <View className="flex-row items-center gap-3">
           <View className="flex-1 gap-0.5">
             <Text variant="caption" className="text-onpanel" style={{ opacity: 0.7 }}>
@@ -158,7 +160,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
           onMomentumScrollEnd={onSettle}
           renderItem={({ item }) => (
             <View style={{ width, height: 120 }} className="items-center justify-center">
-              <Image source={vehicleArt(item.vehicle_type)} contentFit="contain" style={{ width: 240, height: 120 }} />
+              <CarPhoto vehicle={item} width={240} height={120} slot="home" onPress={() => openDetails(item, 'home')} />
             </View>
           )}
         />
@@ -209,7 +211,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
         <VoiceQueueCard vehicleId={vehicle.id} />
         <View className="flex-row items-center justify-between">
           <Text variant="heading">{t('home.priority')}</Text>
-          <Pressable onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id, tab: 'reminders' } })} className="min-h-11 justify-center">
+          <Pressable onPress={() => openDetails(vehicle, 'home', { tab: 'reminders', fly: false })} className="min-h-11 justify-center">
             <Text variant="caption" className="text-teal">{t('home.viewAll')}</Text>
           </Pressable>
         </View>
@@ -242,7 +244,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
                 <PressableScale
                   accessibilityRole="button"
                   scale={0.98}
-                  onPress={() => (parts.length ? router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id, tab: 'reminders' } }) : openCapture())}
+                  onPress={() => (parts.length ? openDetails(vehicle, 'home', { tab: 'reminders', fly: false }) : openCapture())}
                   className="min-h-[56px] flex-row items-center gap-3 py-2">
                   <View className={`h-9 w-9 items-center justify-center rounded-full ${parts.length ? 'bg-mint' : 'bg-sky'}`}>
                     {parts.length ? <CircleCheck size={18} color={c.teal} /> : <Plus size={18} color={c.teal} />}
@@ -260,7 +262,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
 
         {/* Q95: this month's expenses (Q14: the 6 bars never animate) and fuel (Q91) in one card. */}
         <View className="gap-2 rounded-item bg-white px-4 py-3" style={{ boxShadow: shadows.card }}>
-          <PressableScale accessibilityRole="button" scale={0.98} onPress={() => router.push('/account/expenses')} className="flex-row items-center gap-3">
+          <PressableScale accessibilityRole="button" scale={0.98} onPress={() => router.push('/expenses')} className="flex-row items-center gap-3">
             <View className="flex-1 gap-0.5">
               <Text variant="caption" className="text-muted">{t('home.expenses')}</Text>
               <Text variant="heading">{`${num(totals[5])} ${t('home.currency')}`}</Text>
@@ -275,7 +277,7 @@ function Today({ vehicle }: { vehicle: Vehicle }) {
           <PressableScale
             accessibilityRole="button"
             scale={0.98}
-            onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id } })}
+            onPress={() => openDetails(vehicle, 'home', { fly: false })}
             className="flex-row items-center gap-2 border-t border-line pt-2.5">
             <Fuel size={16} color={c.teal} />
             <Text variant="caption" className="flex-1 text-muted">{t('fuel.title')}</Text>
@@ -339,6 +341,7 @@ export default function HomeScreen() {
     if (showSaved && online && dataUpdatedAt > showSaved) useShowSaved.getState().set(null); // Q46: cleared by the next successful fetch
   }, [showSaved, dataUpdatedAt, online]);
   if (isError && !data) return <ErrorState onRetry={refetch} retrying={isRefetching} onShowSaved={onShowSaved} />;
+  if (isPending && !online && !data) return <ErrorState onRetry={refetch} retrying={isRefetching} />; // offline + nothing saved: the query is paused, not failed
   if (isPending) return <View className="flex-1 bg-paper" />;
   if (vehicle && (!online || showSaved != null)) return <OfflineHome vehicle={vehicle} />; // Q45 / Q46
   return vehicle ? <Today vehicle={vehicle} /> : <Empty />;

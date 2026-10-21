@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
 import { VoiceQueueCard } from '@/components/VoiceQueueCard';
 import { PartArt } from '@/components/PartArt';
-import { Button, Choice, Header, Item, Text } from '@/components/ui';
+import { Button, Choice, Group, Header, Item, Text } from '@/components/ui';
 import { openCapture } from '@/lib/reading';
 import { carLog, scopeOf, type Kind } from '@/lib/carLog';
 import { consumption } from '@/lib/fuel';
@@ -93,7 +93,32 @@ export default function HistoryScreen() {
   if (logs.isError && !logs.data) return <ErrorState onRetry={logs.refetch} retrying={logs.isRefetching} onShowSaved={onShowSaved} />;
   return (
     <SafeAreaView className="flex-1 bg-paper px-6">
-      <Header title={t('history.header')} />
+      <Header
+        title={t('history.header')}
+        sub={empty ? undefined : t('history.count', { count: entries.length + queued.length })}
+        right={
+          empty ? undefined : (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('history.filter')}
+              onPress={() => pickOption({ title: t('history.filter'), options, allowCustom: false, onPick: ({ id }) => setFilterId(id) })}
+              className={`h-11 w-11 items-center justify-center rounded-full ${chip ? 'bg-lime' : 'bg-[#FFFFFF26]'}`}>
+              <ListFilter size={20} color={chip ? '#222E29' : '#F5F7F5'} />
+            </Pressable>
+          )
+        }
+        below={
+          empty ? undefined : (
+            <Choice
+              onDark
+              className="bg-[#FFFFFF1F]"
+              value={kind}
+              onChange={setKind}
+              options={KINDS.map((k) => ({ value: k, label: t(`history.kind.${k}`) }))}
+            />
+          )
+        }
+      />
       {empty ? (
         <View className="flex-1 justify-center gap-6 pb-10">
           <View className="items-center">
@@ -113,22 +138,8 @@ export default function HistoryScreen() {
       ) : (
         <>
           <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-3 pb-4" showsVerticalScrollIndicator={false}>
-            <Text variant="title">{t('history.title')}</Text>
             {vehicleId ? <VoiceQueueCard vehicleId={vehicleId} /> : null}
-            <Choice
-              className="bg-line"
-              value={kind}
-              onChange={setKind}
-              options={KINDS.map((k) => ({ value: k, label: t(`history.kind.${k}`) }))}
-            />
             <View className="flex-row flex-wrap gap-2">
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => pickOption({ title: t('history.filter'), options, allowCustom: false, onPick: ({ id }) => setFilterId(id) })}
-                className="h-11 flex-row items-center gap-2 rounded-nav bg-line px-4">
-                <ListFilter size={16} color={c.muted} />
-                <Text variant="caption" className="text-muted">{t('history.filter')}</Text>
-              </Pressable>
               {chip ? (
                 <Pressable
                   accessibilityRole="button"
@@ -155,6 +166,7 @@ export default function HistoryScreen() {
             {groups.map((g) => (
               <View key={g.month} className="gap-3">
                 <Text variant="heading">{g.month}</Text>
+                <Group>
                 {g.items.map((e) => {
                   if (e.type === 'reading')
                     return <Item key={`r${e.item.id}`} icon={Icons.Gauge} title={t('history.rowNoCost', { reading: n(e.item.reading) })} subtitle={t('history.odometerUpdated')} chevron={false} disabled />;
@@ -195,6 +207,7 @@ export default function HistoryScreen() {
                     </View>
                   );
                 })}
+                </Group>
               </View>
             ))}
           </ScrollView>

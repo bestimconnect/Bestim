@@ -13,7 +13,7 @@ import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-spe
 import { onlineManager } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Platform, Pressable, TextInput, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -75,7 +75,6 @@ export default function Voice() {
   const audioUri = useRef<string | null>(null);
   const said = useRef(''); // the latest transcript, for handlers that run after the state they closed over
   const waitingForEnd = useRef(false);
-  const scroller = useRef<ScrollView>(null);
   const doneAt = useRef(0); // when the owner tapped Done, to time the wait in development
   const [transcript, setTranscript] = useState('');
   const [seconds, setSeconds] = useState(0);
@@ -116,7 +115,7 @@ export default function Voice() {
     if (!perm.granted) return toManual('micDenied');
     ExpoSpeechRecognitionModule.start({
       lang: await speechLang(i18n.language),
-      interimResults: true,
+      interimResults: false, // no live text on screen: it is sometimes wrong, and the server writes the records from the audio
       continuous: true,
       volumeChangeEventOptions: { enabled: true },
       // 16 kHz 16-bit keeps 90 s under the upload limit.
@@ -278,10 +277,6 @@ export default function Voice() {
               style={{ textAlign: 'auto' }}
             />
           </View>
-        ) : transcript || (direct && !busy) ? (
-          <ScrollView ref={scroller} className="flex-1" onContentSizeChange={() => scroller.current?.scrollToEnd({ animated: true })}>
-            <Text variant="heading">{transcript ? `«${transcript}»` : t('capture.voice.noPreview')}</Text>
-          </ScrollView>
         ) : null}
         {direct && listening ? <DirectMeter recorder={recorder} level={level} /> : null}
         {noSpeech ? (
@@ -297,7 +292,7 @@ export default function Voice() {
           <Text className="text-muted">{t(seconds >= HINT_SECONDS ? 'capture.batch.longHint' : 'capture.voice.hint')}</Text>
         )}
         <Text variant="caption" className="text-muted">{t('capture.voice.aiNotice')}</Text>
-        {typed || !(transcript || (direct && !busy)) ? <View className="flex-1" /> : null}
+        <View className="flex-1" />
         <Button title={t('capture.voice.done')} onPress={finish} loading={busy} />
         <Button variant="secondary" title={t('capture.voice.cancel')} onPress={cancel} />
       </View>

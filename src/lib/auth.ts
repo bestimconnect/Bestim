@@ -24,6 +24,7 @@ export async function signInWithGoogle(): Promise<boolean> {
   const { GoogleSignin, isSuccessResponse } = await import('@react-native-google-signin/google-signin');
   GoogleSignin.configure({ webClientId, iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID });
   await GoogleSignin.hasPlayServices();
+  await GoogleSignin.signOut().catch(() => {}); // forget the last account so Google asks which one, every time
   const res = await GoogleSignin.signIn();
   if (!isSuccessResponse(res)) return false;
   if (!res.data.idToken) throw new Error('Google returned no identity token');
@@ -52,6 +53,7 @@ export async function signOut() {
   const { syncNotifications } = await import('./notifications');
   const { useSettings } = await import('@/stores/settingsStore');
   await supabase.auth.signOut();
+  import('@react-native-google-signin/google-signin').then(({ GoogleSignin }) => GoogleSignin.signOut()).catch(() => {});
   useSettings.getState().setCurrentVehicle(null);
   useSettings.getState().set({ pendingShareToken: null });
   syncNotifications(); // no user → cancels every scheduled reminder

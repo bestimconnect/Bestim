@@ -1,0 +1,82 @@
+<title>Bestim Copy Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap">
+<style>
+/* Layout: voice rules, a glossary where you pick one word per thing, then a before/after table you approve row by row. */
+:root{--bg:#EEF1EE;--fg:#222E29;--muted:#5B6860;--line:#D5DCD6;--card:#FFFFFF;--pick:#08736F;--warn:#B7791F;--okbg:#E4F3D9;--display:'Poppins','Tajawal',system-ui,sans-serif;--body:'Tajawal','Poppins',system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B100D;--fg:#E8EEEA;--muted:#93A39A;--line:#26332B;--card:#131A16;--pick:#3ECFC0;--warn:#E8A317;--okbg:#1E3326;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B100D;--fg:#E8EEEA;--muted:#93A39A;--line:#26332B;--card:#131A16;--pick:#3ECFC0;--warn:#E8A317;--okbg:#1E3326;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:34px}
+h1{font:700 28px/1.15 var(--display);margin:0}h2{font:700 20px var(--display);margin:0 0 4px}p{margin:0}.lead,.sub{color:var(--muted);max-width:68ch}.sub{font-size:14px}
+.picks{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}.picks output{flex:1;min-width:200px;font-size:13px;color:var(--muted)}.picks button{font:600 13px var(--display);background:var(--pick);color:#fff;border:0;border-radius:10px;padding:8px 14px;cursor:pointer}
+button:focus-visible{outline:3px solid var(--pick);outline-offset:2px}
+section{display:flex;flex-direction:column;gap:12px}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.rule{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}.rule b{font:600 14px var(--display);display:block;margin-bottom:4px}.rule .eg{display:grid;gap:3px;font-size:13px;margin-top:6px}.no{color:var(--warn);text-decoration:line-through}.yes{color:var(--pick);font-weight:700}
+.g{display:grid;gap:10px}
+.term{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:grid;gap:8px}.term .what{font:600 13px var(--display)}.term .why{font-size:13px;color:var(--muted)}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.o{all:unset;box-sizing:border-box;cursor:pointer;border:2px solid var(--line);border-radius:12px;padding:6px 12px;font-size:14px;display:flex;gap:10px;align-items:baseline}.o span{color:var(--muted);font-size:12px;font-family:var(--display)}.o[aria-pressed="true"]{border-color:var(--pick);background:var(--okbg)}
+.tbl{display:grid;gap:8px}.tr{display:grid;grid-template-columns:130px 1fr 1fr 82px;gap:10px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px}
+.tr.h{background:none;border:0;padding:0 12px;font:600 12px var(--display);color:var(--muted)}
+.tr .pg{font:600 12px var(--display);color:var(--muted)}.old{color:var(--muted)}.new{font-weight:500}.ar{font-family:'Tajawal',sans-serif;direction:rtl;display:block}.en{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.ok{all:unset;cursor:pointer;text-align:center;border:2px solid var(--line);border-radius:10px;padding:5px 0;font:600 12px var(--display)}.ok[aria-pressed="true"]{background:var(--pick);border-color:var(--pick);color:#fff}
+@media(max-width:700px){.tr{grid-template-columns:1fr}.tr.h{display:none}}
+</style>
+<div class="wrap">
+<header style="display:flex;flex-direction:column;gap:10px"><h1>Bestim copy guide</h1>
+<p class="lead">Arabic is the master voice, English follows it. Three parts: the voice rules, one word per thing, and a rewrite of the six main pages for you to approve. Everything here comes from the words in the app today.</p></header>
+<div class="picks" role="status"><output id="sum">Nothing chosen yet</output><button id="copy" type="button">Copy choices</button></div>
+
+<section><div><h2>1. Voice</h2><p class="sub">Bestim talks like a calm, helpful friend who knows cars. Plain Arabic everyone understands, no jargon.</p></div>
+<div class="rules">
+ <div class="rule"><b>Buttons say the action</b>A verb, 1 to 2 words, what happens next.<div class="eg"><span class="no">تم</span><span class="yes">احفظ السجل</span></div></div>
+ <div class="rule"><b>Titles name the page, lines explain it</b>Title: what it is. Line under it: what you can do here, in one sentence.<div class="eg"><span class="no">كل خطوة، محفوظة</span><span class="yes">سجل السيارة · كل ما حدث لسيارتك</span></div></div>
+ <div class="rule"><b>Short and warm, never scary</b>Late parts are "need attention", not "overdue/failed". Errors say how to fix it.<div class="eg"><span class="no">فشل التحميل</span><span class="yes">لم نستطع التحميل الآن، حاول مرة أخرى</span></div></div>
+ <div class="rule"><b>One word per thing, everywhere</b>If a thing has two names the app feels unsure. Pick below, then use it on every page and in both languages.<div class="eg"><span class="no">المواعيد / التذكيرات / التنبيهات</span><span class="yes">تذكيرات</span></div></div>
+ <div class="rule"><b>Talk to one person</b>You, not "the user". Same form of Arabic ("اضغط", "أضف") in every page, no mix of dialect and formal.<div class="eg"><span class="no">اتكلم وإحنا نكتبها</span><span class="yes">تحدّث وسنكتبها لك</span></div></div>
+ <div class="rule"><b>Numbers stay Latin</b>Latin digits, short units (كم, ج.م), thousands with commas, as in the brand rules.<div class="eg"><span class="yes">250,500 كم · 350 ج.م</span></div></div>
+</div></section>
+
+<section><div><h2>2. One word per thing</h2><p class="sub">These are the things the app names in more than one way today. Pick the Arabic word; the English follows. Your choice is used everywhere.</p></div><div class="g" id="gl"></div></section>
+
+<section><div><h2>3. Rewrites for the main pages</h2><p class="sub">Old is what the app says now. New uses the words picked above. Press OK on each row you accept, or tell me what to change.</p></div>
+<div class="tbl" id="tb"></div></section>
+</div>
+<script>
+(function(){
+var terms=[
+['The tab and button that adds something','Today: "سجّل" (tab), "سجل جديد", "أضف سجلاً", "تسجيل". One verb is clearer.',['أضف سجلاً','سجّل','Add a record'],''],
+['What you add (the thing itself)','Today: سجل / سجلات, تاريخ السيارة, سجل السيارة (the page).',['سجل','عملية','Record'],''],
+['Upcoming maintenance dates','Today: المواعيد (tab, old), التنبيهات (settings), الإشعارات (inbox), تذكيرات.',['تذكيرات','مواعيد الصيانة','Reminders'],''],
+['What reaches the phone','Today: التنبيهات in Account, الإشعارات on Home and inbox.',['الإشعارات','التنبيهات','Notifications'],''],
+['Money pages and totals','Today: المصروفات (tab) and المصاريف (page title).',['المصاريف','المصروفات','Expenses'],''],
+['A car part','Today: قطعة, طقم (part history), بند.',['قطعة','بند','Part'],''],
+['The distance meter','Today: العداد, عدّاد, قراءة العداد.',['العداد','عداد المسافة','Odometer'],'']];
+var rows=[
+['Tabs','Home / Cars / Expenses / Account · الرئيسية / سياراتي / المصروفات / حسابي','الرئيسية / سياراتي / المصاريف / حسابي','Home / My cars / Expenses / Account'],
+['Home','جاهز للخطوة القادمة؟','أهلاً {الاسم}، هذه حالة سيارتك اليوم','Hi {name}, here is your car today'],
+['Home','الأولوية اليوم · لا شيء يحتاج انتباهك اليوم.','يحتاج انتباهك · كل شيء في موعده','Needs you · Everything is on time'],
+['My cars','سياراتي · كل سياراتك، معاً','سياراتي · سياراتك وحالتها في مكان واحد','My cars · Your cars and how they are doing, in one place'],
+['Car details','Overview / Log / Reminders · نظرة عامة / السجل / المواعيد','حالة السيارة / السجل / التذكيرات','Overview / Log / Reminders'],
+['Expenses','أين تذهب المصاريف؟ · مصاريفك أوضح من البداية','أين ذهبت أموالك؟ · سجّل أول مصروف لتبدأ','Where did the money go? · Add your first expense to start'],
+['Account','حسابك جاهز للخطوة القادمة','أهلاً بك، يمكنك التحكم في حسابك من هنا','Welcome, manage your account here'],
+['The + sheet','سجل جديد · قلها بصوتك / اكتبها','سجل جديد · تحدّث وسنكتبها لك / اكتبها بنفسك','New record · Say it and we write it / Write it yourself'],
+['Voice','Take your time. Tap done when you finish.','خذ وقتك. يمكنك ذكر أكثر من شيء في تسجيل واحد، ثم اضغط انتهيت.','Take your time. You can mention several things in one recording, then tap Done.'],
+['Odometer','حدّث العداد · احفظ القراءة','تحديث العداد · احفظ القراءة الجديدة','Update odometer · Save the new reading'],
+['Offline','أنت غير متصل الآن','لا يوجد اتصال بالإنترنت · سنكمل عندما يعود','No internet connection · We will continue when it is back'],
+['Error','نحاول مرة أخرى؟ · لم نتمكن من تحميل البيانات','لم نستطع التحميل الآن · سجلاتك المحفوظة بأمان','We could not load right now · Your saved records are safe']];
+var gl=document.getElementById('gl'),tb=document.getElementById('tb'),sum=document.getElementById('sum');
+var pick={},ok={};try{pick=JSON.parse(localStorage.getItem('bestim-copy-pick')||'{}');ok=JSON.parse(localStorage.getItem('bestim-copy-ok')||'{}')}catch(e){}
+gl.innerHTML=terms.map(function(t,i){return '<div class="term"><div class="what">'+t[0]+'</div><div class="why">'+t[1]+'</div><div class="opts">'+t[2].slice(0,2).map(function(o){return '<button class="o" data-i="'+i+'" data-v="'+o+'" aria-pressed="false"><b>'+o+'</b><span>'+t[2][2]+'</span></button>'}).join('')+'</div></div>'}).join('');
+tb.innerHTML='<div class="tr h"><span>Page</span><span>Now</span><span>New</span><span></span></div>'+rows.map(function(r,i){return '<div class="tr"><span class="pg">'+r[0]+'</span><span class="old">'+r[1]+'</span><span class="new"><span class="ar">'+r[2]+'</span><span class="en">'+r[3]+'</span></span><button class="ok" data-i="'+i+'" aria-pressed="false">OK</button></div>'}).join('');
+function text(){var a=Object.keys(pick).map(function(i){return terms[i][0]+': '+pick[i]}),b=Object.keys(ok).filter(function(i){return ok[i]}).map(function(i){return rows[i][0]+' ✓'});return a.concat(b).join(' · ')}
+function paint(){gl.querySelectorAll('.o').forEach(function(b){b.setAttribute('aria-pressed',String(pick[b.dataset.i]===b.dataset.v))});tb.querySelectorAll('.ok').forEach(function(b){b.setAttribute('aria-pressed',String(!!ok[b.dataset.i]))});sum.textContent=text()||'Nothing chosen yet'}
+function save(){try{localStorage.setItem('bestim-copy-pick',JSON.stringify(pick));localStorage.setItem('bestim-copy-ok',JSON.stringify(ok))}catch(e){}}
+gl.addEventListener('click',function(e){var b=e.target.closest('.o');if(!b)return;pick[b.dataset.i]=b.dataset.v;save();paint()});
+tb.addEventListener('click',function(e){var b=e.target.closest('.ok');if(!b)return;ok[b.dataset.i]=!ok[b.dataset.i];save();paint()});
+document.getElementById('copy').addEventListener('click',function(){var c=this;if(navigator.clipboard)navigator.clipboard.writeText(text()||'Nothing chosen').then(function(){c.textContent='Copied';setTimeout(function(){c.textContent='Copy choices'},1500)},function(){})});
+paint()})();
+</script>

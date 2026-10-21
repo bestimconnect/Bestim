@@ -29,7 +29,7 @@ export function OfflineHome({ vehicle }: { vehicle: Vehicle }) {
         icon={Car}
         title={vehicleName(vehicle)}
         subtitle={t('feedback.offline.vehicleSub')}
-        onPress={() => router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id } })}
+        onPress={() => router.push({ pathname: '/vehicle/[id]', params: { id: vehicle.id } })}
       />
       <View className="gap-1 rounded-metric bg-panel p-5" style={{ boxShadow: shadows.soft }}>
         <Text variant="caption" className="text-onpanel">{t('feedback.offline.cardLabel')}</Text>

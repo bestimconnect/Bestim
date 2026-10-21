@@ -92,13 +92,14 @@ function Shell({ onClose, corner, footer, children }: { onClose: () => void; cor
   return (
     <View className="absolute inset-0 bg-panel px-6" style={{ paddingTop: top + 12, paddingBottom: bottom + 16 }}>
       <StatusBar style="light" />
-      <View className="flex-row items-center justify-between">
-        <Pressable accessibilityRole="button" accessibilityLabel={t('odometer.scan.close')} hitSlop={12} onPress={onClose} className="h-11 w-11 items-center justify-center rounded-full" style={{ backgroundColor: GLASS }}>
-          <X size={20} color="#F5F7F5" />
+      <View className="flex-1 justify-center gap-5">{children}</View>
+      {/* Under the frame, in thumb reach (not in the top corners). */}
+      <View className="flex-row items-center justify-center gap-4 pb-4 pt-2">
+        <Pressable accessibilityRole="button" accessibilityLabel={t('odometer.scan.close')} hitSlop={12} onPress={onClose} className="h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: GLASS }}>
+          <X size={22} color="#F5F7F5" />
         </Pressable>
         {corner}
       </View>
-      <View className="flex-1 justify-center gap-5">{children}</View>
       {footer}
     </View>
   );
@@ -268,7 +269,7 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
     <Shell
       onClose={onClose}
       corner={
-        <View className="flex-row gap-2">
+        <View className="flex-row gap-4">
           {/* Q97: closer for small LCD digits. */}
           <Pressable
             accessibilityRole="button"
@@ -276,7 +277,7 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
             accessibilityState={{ selected: zoom === 1 }}
             hitSlop={12}
             onPress={() => setZoom(zoom ? 0 : 1)}
-            className={`h-11 w-11 items-center justify-center rounded-full ${zoom ? 'bg-lime' : ''}`}
+            className={`h-12 w-12 items-center justify-center rounded-full ${zoom ? 'bg-lime' : ''}`}
             style={zoom ? undefined : { backgroundColor: GLASS }}>
             <ZoomIn size={20} color={zoom ? '#222E29' : '#F5F7F5'} />
           </Pressable>
@@ -287,7 +288,7 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
               accessibilityState={{ selected: torch }}
               hitSlop={12}
               onPress={() => setTorch(!torch)}
-              className={`h-11 w-11 items-center justify-center rounded-full ${torch ? 'bg-lime' : ''}`}
+              className={`h-12 w-12 items-center justify-center rounded-full ${torch ? 'bg-lime' : ''}`}
               style={torch ? undefined : { backgroundColor: GLASS }}>
               <Flashlight size={20} color={torch ? '#222E29' : '#F5F7F5'} />
             </Pressable>

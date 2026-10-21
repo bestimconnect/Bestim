@@ -15,22 +15,24 @@ const TICKS = Array.from({ length: 10 }, (_, k) => k);
 type Props = {
   /** The reading, shared with the rolling number. Dragging writes it; the screen animates it for typed/scanned values. */
   shown: SharedValue<number>;
-  /** Units per labelled segment: 1000 for km/mi, 100 for hours. Dragging snaps to 1/100 of it. */
+  /** Units per labelled segment: 1000 for km/mi, 100 for hours. Dragging lands on any whole number. */
   segment: number;
   max: number;
+  dark?: boolean;
 };
 
-function Segment({ label }: { label: string }) {
+// `dark` = on the dark cockpit card: lighter ticks and labels (the card stays dark in both themes).
+function Segment({ label, dark }: { label: string; dark?: boolean }) {
   return (
     <>
       {TICKS.map((k) => (
         <View
           key={k}
-          className={`absolute top-0 w-px ${k === 0 ? 'bg-muted' : 'bg-line'}`}
+          className={`absolute top-0 w-px ${dark ? (k === 0 ? 'bg-[#DCE6E0]' : 'bg-[#6F8379]') : k === 0 ? 'bg-muted' : 'bg-line'}`}
           style={{ left: k * (SEG_W / 10), height: k === 0 ? 34 : k === 5 ? 22 : 14 }}
         />
       ))}
-      <Text variant="caption" className="absolute text-center text-muted" style={{ top: 42, left: -SEG_W / 2, width: SEG_W, fontFamily: 'Poppins_400Regular' }}>
+      <Text variant="caption" className={`absolute text-center ${dark ? '' : 'text-muted'}`} style={{ top: 42, left: -SEG_W / 2, width: SEG_W, fontFamily: 'Poppins_400Regular', ...(dark ? { color: '#9FB0A7' } : null) }}>
         {label}
       </Text>
     </>
@@ -41,13 +43,12 @@ function Segment({ label }: { label: string }) {
  * Screen 25's ruler (decisions Q53, redrawn light in Q71): the reading sits under the fixed lime pointer and the
  * ruler slides under it. Drawn from the shared value, so it glides in step with the rolling number.
  */
-export function OdometerRuler({ shown, segment, max }: Props) {
+export function OdometerRuler({ shown, segment, max, dark }: Props) {
   const [width, setWidth] = useState(0);
   // Only the segments around the reading exist; `base` follows the reading one labelled step at a time.
   const [base, setBase] = useState(() => Math.floor(shown.get() / segment));
   const from = useSharedValue(0);
   const byUser = useSharedValue(false); // haptic ticks are for the finger, not for a typed or scanned value rolling in
-  const step = segment / 100;
   const first = base - SIDE;
 
   useAnimatedReaction(
@@ -80,7 +81,7 @@ export function OdometerRuler({ shown, segment, max }: Props) {
         'worklet';
         if (!finished) return;
         byUser.value = false;
-        shown.set(withTiming(Math.round(shown.value / step) * step, { duration: 120 }));
+        shown.set(withTiming(Math.round(shown.value), { duration: 120 }));
       };
       shown.set(withDecay({ velocity: (-e.velocityX / SEG_W) * segment, clamp: [0, max], deceleration: 0.996 }, settle));
     });
@@ -98,7 +99,7 @@ export function OdometerRuler({ shown, segment, max }: Props) {
             {Array.from({ length: SIDE * 2 + 1 }, (_, i) => first + i).map((i) =>
               i >= 0 && i * segment <= max ? (
                 <View key={i} className="absolute top-0" style={{ left: (i - first) * SEG_W }}>
-                  <Segment label={(i * segment).toLocaleString('en-US')} />
+                  <Segment label={(i * segment).toLocaleString('en-US')} dark={dark} />
                 </View>
               ) : null,
             )}

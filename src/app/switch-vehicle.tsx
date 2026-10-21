@@ -5,6 +5,7 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { PlateView } from '@/components/Plate';
 import { Item, PressableScale, Rise, Text } from '@/components/ui';
 import { needsAttention, useVehicleParts, useVehicles, vehicleName, type Vehicle } from '@/lib/queries';
 import { useVehiclePick } from '@/lib/sheet';
@@ -29,6 +30,7 @@ function VehicleRow({ vehicle, current, onPress }: { vehicle: Vehicle; current: 
       onPress={onPress}
       aside={
         <View className="flex-row items-center gap-2">
+          <PlateView plate={vehicle.plate_number} size="sm" />
           {overdue ? <View className="h-2.5 w-2.5 rounded-full bg-danger" /> : null}
           {current ? (
             <View className="h-6 w-6 items-center justify-center rounded-full bg-lime">

@@ -6,6 +6,10 @@ export type VehicleType = (typeof VEHICLE_TYPES)[number];
 
 type VehicleDraft = {
   nickname: string;
+  color: string | null;
+  vin: string;
+  plateLetters: string;
+  plateDigits: string;
   vehicleType: VehicleType;
   make: string;
   model: string;
@@ -21,6 +25,10 @@ type VehicleDraft = {
 
 const initial = {
   nickname: '',
+  color: null,
+  vin: '',
+  plateLetters: '',
+  plateDigits: '',
   vehicleType: 'sedan' as VehicleType,
   make: '',
   model: '',

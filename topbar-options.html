@@ -1,0 +1,177 @@
+<title>Bestim Top Bar Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Tajawal:wght@400;700&display=swap">
+<style>
+/* Layout: one section per app page, three phone mockups each. Every bar uses the same spacing scale: 12px between rows, 16px sides, 36px controls. */
+:root{
+  --bg:#EEF1EE; --fg:#222E29; --muted:#5B6860; --line:#D5DCD6; --card:#FFFFFF;
+  --lime:#D3F53D; --panel:#222E29; --onpanel:#F5F7F5; --teal:#08736F;
+  --app-paper:#F5F7F5; --app-card:#FFFFFF; --app-line:#DEE5DF; --app-ink:#222E29; --pick:#08736F;
+  --display:'Poppins','Tajawal',system-ui,sans-serif; --body:'Tajawal','Poppins',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B100D; --fg:#E8EEEA; --muted:#93A39A; --line:#26332B; --card:#131A16;
+  --panel:#212E27; --app-paper:#0E1411; --app-card:#171F1B; --app-line:#2C3A32; --app-ink:#F2F5F3; --pick:#3ECFC0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B100D; --fg:#E8EEEA; --muted:#93A39A; --line:#26332B; --card:#131A16;
+  --panel:#212E27; --app-paper:#0E1411; --app-card:#171F1B; --app-line:#2C3A32; --app-ink:#F2F5F3; --pick:#3ECFC0; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1{font:700 28px/1.15 var(--display);margin:0;text-wrap:balance}
+h2{font:700 19px/1.2 var(--display);margin:0 0 4px}
+p{margin:0}.lead,.sub{color:var(--muted);max-width:66ch}.sub{font-size:14px}
+.picks{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.picks output{flex:1;min-width:200px;font-size:13px;color:var(--muted)}
+.picks button{font:600 13px var(--display);background:var(--pick);color:#fff;border:0;border-radius:10px;padding:8px 14px;cursor:pointer}
+section{display:flex;flex-direction:column;gap:14px}
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:10px;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px;min-width:0}
+.opt:focus-visible,.picks button:focus-visible{outline:3px solid var(--pick);outline-offset:2px}
+.opt[aria-pressed="true"]{border-color:var(--pick)}
+.cap{display:flex;gap:10px;align-items:flex-start}
+.tag{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line);font:700 13px var(--display)}
+.opt[aria-pressed="true"] .tag{background:var(--pick);color:#fff}
+.cap b{font:600 14px var(--display);display:block}.cap small{color:var(--muted);font-size:13px;line-height:1.4;display:block}
+
+/* mock phone */
+.ph{width:100%;max-width:230px;margin:0 auto;height:330px;background:var(--app-paper);border:1px solid var(--app-line);border-radius:26px;overflow:hidden;color:var(--app-ink);font-size:11px;display:flex;flex-direction:column}
+.ph *{min-width:0}
+.ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* the green bar: status area 30, then rows 12 apart, 14 sides, 14 bottom */
+.gb{background:var(--panel);color:var(--onpanel);border-radius:0 0 24px 24px;padding:0 14px 14px;display:flex;flex-direction:column;gap:12px;flex:none}
+.sb{height:30px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 6px 4px;font:600 9px var(--display)}
+.row{display:flex;align-items:center;gap:10px;min-height:36px}
+.row .sp{flex:1}
+.bk{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);display:grid;place-items:center;flex:none}
+.t1{font:700 15px/1.2 var(--display)}
+.t2{font:700 21px/1.15 var(--display)}
+.s1{font-size:10px;opacity:.7;line-height:1.3}
+.seg{display:flex;background:rgba(255,255,255,.14);border-radius:99px;padding:3px;gap:2px}
+.seg span{flex:1;text-align:center;padding:6px 0;border-radius:99px;font:600 9px var(--display);white-space:nowrap}
+.seg .on{background:var(--lime);color:#222E29}
+.pill{border-radius:99px;padding:4px 10px;font:600 9px var(--display);display:inline-block;white-space:nowrap}
+.lime{background:var(--lime);color:#222E29}
+.glass{background:rgba(255,255,255,.14)}
+.met{background:rgba(255,255,255,.12);border-radius:14px;padding:8px 10px;flex:1}
+.met.w{background:#fff;color:#222E29}
+.met small{display:block;font-size:9px;opacity:.7}
+.met b{font:700 15px var(--display)}
+.art{width:56px;height:30px;border-radius:9px;background:rgba(255,255,255,.2);flex:none}
+.body{padding:12px;display:flex;flex-direction:column;gap:8px}
+.card{background:var(--app-card);border-radius:12px;padding:9px;display:flex;gap:8px;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.ln{height:6px;border-radius:3px;background:var(--app-line);flex:1}
+.dot{width:26px;height:26px;border-radius:8px;background:var(--app-line);flex:none}
+.bar-bg{height:6px;border-radius:3px;background:rgba(255,255,255,.18)}.bar-fg{height:100%;border-radius:3px;background:var(--lime)}
+.plate{background:#fff;color:#222E29;border:2px solid #222E29;border-radius:6px;padding:0 8px;font:700 11px 'Tajawal',sans-serif;display:inline-block}
+.num{font:700 26px var(--display);letter-spacing:.5px}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/></symbol>
+  <symbol id="pencil" viewBox="0 0 24 24"><path d="M4 20l1-5L16 4l4 4L9 19z"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></symbol>
+  <symbol id="filter" viewBox="0 0 24 24"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></symbol>
+</svg>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:10px">
+    <h1>Bestim top bar options</h1>
+    <p class="lead">Three top bars for every page. The spacing is now one scale for all of them: 16px on the sides, 12px between rows, 36px buttons, and the status area kept separate so nothing sits too high or too low. Pick one per page; your picks collect in the bar below.</p>
+  </header>
+  <div class="picks" role="status"><output id="sum">No picks yet</output><button id="copy" type="button">Copy picks</button></div>
+  <div id="root" class="wrap" style="gap:44px"></div>
+</div>
+
+<script>
+(function(){
+  var I=function(n){return '<svg class="ic"><use href="#'+n+'"/></svg>'};
+  var BK='<span class="bk">'+I('back')+'</span>';
+  var btn=function(n){return '<span class="bk">'+I(n)+'</span>'};
+  var SB='<div class="sb"><span>9:41</span><span>●●●</span></div>';
+  var bar=function(rows){return '<div class="gb">'+SB+rows+'</div>'};
+  var row=function(l,mid,r){return '<div class="row">'+(l||'')+mid+(r||'')+'</div>'};
+  var sp='<span class="sp"></span>';
+  var t1=function(s){return '<span class="t1">'+s+'</span>'};
+  var big=function(t,s){return '<div><div class="t2">'+t+'</div>'+(s?'<div class="s1" style="margin-top:4px">'+s+'</div>':'')+'</div>'};
+  var seg=function(a,on){return '<div class="seg">'+a.map(function(x,i){return '<span'+(i===on?' class="on"':'')+'>'+x+'</span>'}).join('')+'</div>'};
+  var met=function(l,v,w){return '<div class="met'+(w?' w':'')+'"><small>'+l+'</small><b>'+v+'</b></div>'};
+  var cards=function(n){var h='';for(var i=0;i<n;i++)h+='<div class="card"><span class="dot"></span><span class="ln"></span><span class="ln" style="flex:.4"></span></div>';return '<div class="body">'+h+'</div>'};
+  var row1=function(t,right){return row(BK,'<span class="t1" style="flex:1">'+t+'</span>',right||'')};
+
+  var pages=[
+   {id:'home',name:'Home',sub:'The big green hero. How much of it stays on screen is the choice.',o:[
+     ['Greeting only','Slim: greeting, bell and a car chip. The car art and odometer live in the page below.',bar(row('', '<div style="flex:1"><div class="s1">Good morning Shady</div><div class="t1">Ready for the next step?</div></div>',btn('bell'))+'<div><span class="pill glass">Car · 2020 ⌄</span></div>')+cards(3)],
+     ['Greeting and car','Greeting, chip and the car picture. Odometer moves into a card below the bar.',bar(row('', '<div style="flex:1"><div class="s1">Good morning Shady</div><div class="t1">Ready for the next step?</div></div>',btn('bell'))+'<div style="display:grid;place-items:center"><span class="pill glass">Car · 2020 ⌄</span></div><div class="art" style="width:100%;height:70px"></div>')+cards(2)],
+     ['Full hero (today)','Everything in the green: greeting, car, odometer and its Update button.',bar(row('', '<div style="flex:1"><div class="s1">Good morning Shady</div><div class="t1">Ready for the next step?</div></div>',btn('bell'))+'<div class="art" style="width:100%;height:56px"></div><div class="met" style="display:flex;align-items:center;gap:8px"><div style="flex:1"><small>Last reading · 13 days</small><b>250,500 km</b></div><span class="pill lime">Update</span></div>')+cards(1)]]},
+   {id:'cars',name:'Cars (tab)',sub:'Main tab: no back button.',o:[
+     ['Compact with add','One row: title and a lime add button.',bar(row('',t1('My cars')+sp,'<span class="pill lime">+ Add</span>'))+cards(3)],
+     ['Large title and count','Big title with a quiet line under it.',bar(big('My cars','2 cars · 251,000 km total'))+cards(3)],
+     ['Title and car chips','Big title, then a chip per car so you can jump straight to one.',bar(row('',big('My cars')+sp,btn('plus'))+'<div style="display:flex;gap:6px"><span class="pill lime">Car 2020</span><span class="pill glass">Hilux 2023</span></div>')+cards(2)]]},
+   {id:'detail',name:'Car details',sub:'Opened from Cars. Back button, car identity, the main switch.',o:[
+     ['Compact','Back, car name, edit. Plate and numbers are in the page.',bar(row1('Car · 2020',btn('pencil')))+cards(3)],
+     ['Name and plate','Back and edit on one row; name with the plate chip below.',bar(row(BK,sp,btn('pencil'))+'<div style="display:flex;align-items:center;gap:10px"><div style="flex:1">'+big('Car','2020 · Sedan')+'</div><span class="plate">أ ب ج ١٢٣٤</span></div>')+cards(2)],
+     ['Identity, numbers, switch','Back/edit, name with car art, two figures and the Overview / Log / Reminders switch.',bar(row(BK,sp,btn('pencil'))+'<div style="display:flex;align-items:center;gap:10px"><div style="flex:1">'+big('Car','2020 · Sedan')+'</div><div class="art"></div></div><div style="display:flex;gap:8px">'+met('Odometer','250,500')+met('Year','1,800',1)+'</div>'+seg(['Overview','Log','Reminders'],0))+cards(1)]]},
+   {id:'expenses',name:'Expenses (tab)',sub:'Main tab: no back button.',o:[
+     ['Compact with add','Title and an add button on one row.',bar(row('',t1('Expenses')+sp,btn('plus')))+cards(3)],
+     ['Title and total','Big title, with this year\'s total right under it.',bar(big('Expenses','<b style="font:700 15px var(--display);opacity:1">56,840 EGP</b> in 2026'))+cards(3)],
+     ['Title and period switch','Title, add button and the Month / Year switch in the bar.',bar(row('',big('Expenses')+sp,btn('plus'))+seg(['Month','Year','All'],1))+cards(2)]]},
+   {id:'account',name:'Account (tab)',sub:'Main tab: no back button.',o:[
+     ['Compact','One quiet row.',bar(row('',t1('Account')+sp))+cards(4)],
+     ['Large title','Big title, nothing else.',bar(big('Account','Your account is ready'))+cards(4)],
+     ['Profile in the bar','Avatar and name live in the green, settings list below.',bar(row('','<span class="bk" style="background:var(--lime);color:#222E29;width:44px;height:44px">'+I('check')+'</span>','<div style="flex:1">'+t1('Shady')+'<div class="s1">sga@…</div></div>')+'<div style="display:flex;gap:6px"><span class="pill glass">Arabic</span><span class="pill glass">EGP</span></div>')+cards(3)]]},
+   {id:'history',name:'Log (history)',sub:'Opened from a car or Home.',o:[
+     ['Compact with filter','Back, title, filter button.',bar(row1('Log',btn('filter')))+cards(4)],
+     ['Large title and switch','Back row, big title and the All / Service / Costs switch.',bar(row(BK,sp)+big('Log')+seg(['All','Service','Costs'],0))+cards(3)],
+     ['Title, count and switch','Back and filter, title with record count, switch below.',bar(row(BK,sp,btn('filter'))+big('Log','128 records')+seg(['All','Service','Costs'],0))+cards(3)]]},
+   {id:'odo',name:'Update odometer',sub:'A task page: one number, one save.',o:[
+     ['Compact','Back and title.',bar(row1('Update odometer'))+cards(2)],
+     ['Title and last reading','Big title, with the last reading as the line under it.',bar(row(BK,sp)+big('Update odometer','Last: 250,500 km · 13 days ago'))+cards(2)],
+     ['Number in the bar','Back and title, then the reading itself big in the green. The ruler sits below.',bar(row1('Update odometer')+'<div style="text-align:center"><div class="num" style="color:var(--lime)">250,500</div><div class="s1">km · +0 since last update</div></div>')+'<div class="body"><div class="card"><span class="ln"></span></div></div>']]},
+   {id:'part',name:'Part details',sub:'e.g. Oil change: status of one part.',o:[
+     ['Compact with history','Back, part name, history button.',bar(row1('Oil change',btn('clock')))+cards(3)],
+     ['Name and status chip','Back and history, big name, status chip.',bar(row(BK,sp,btn('clock'))+big('Oil change','Last done 169 days ago')+'<div><span class="pill lime">93% healthy</span></div>')+cards(2)],
+     ['Name, image and progress','Part picture, name and a progress bar to the next change.',bar(row(BK,sp,btn('clock'))+'<div style="display:flex;gap:10px;align-items:center"><div class="art" style="width:44px;height:44px"></div><div style="flex:1">'+big('Oil change','Every 10,000 km')+'</div></div><div class="bar-bg"><div class="bar-fg" style="width:70%"></div></div>')+cards(2)]]},
+   {id:'inbox',name:'Notifications inbox',sub:'The bell in Home.',o:[
+     ['Compact with mark all','Back, title, one text action.',bar(row1('Notifications','<span class="pill glass">Mark all read</span>'))+cards(4)],
+     ['Large title and count','Big title and the unread count.',bar(row(BK,sp)+big('Notifications','3 unread'))+cards(4)],
+     ['Title and All / Unread','Compact row with the All / Unread switch in the bar.',bar(row1('Notifications')+seg(['All','Unread'],1))+cards(3)]]},
+   {id:'settings',name:'Settings pages',sub:'Export, Share history, Notification settings.',o:[
+     ['Compact','Back and title.',bar(row1('Export your log'))+cards(3)],
+     ['Title and one-line help','Big title with a short sentence about what the page does.',bar(row(BK,sp)+big('Export your log','Get a PDF, CSV or JSON copy.'))+cards(3)],
+     ['Centered title','Back button at the start, title centered, balanced. The calmest option.',bar('<div class="row" style="justify-content:space-between">'+BK+'<span class="t1">Export your log</span><span style="width:36px"></span></div>')+cards(3)]]},
+   {id:'form',name:'Add / Edit car',sub:'Form pages with several steps or fields.',o:[
+     ['Compact','Back and title.',bar(row1('Add car'))+cards(3)],
+     ['Large question','Back row, then the page\'s own question as the title.',bar(row(BK,sp)+big('Tell us about your car','Takes under a minute'))+cards(3)],
+     ['Title and progress','Back, title and a step line (1 of 2) so people know how long it is.',bar(row1('Add car')+'<div style="display:flex;gap:6px"><div class="bar-bg" style="flex:1"><div class="bar-fg" style="width:100%"></div></div><div class="bar-bg" style="flex:1"></div></div><div class="s1">Step 1 of 2 · Car details</div>')+cards(2)]]}
+  ];
+  var root=document.getElementById('root'),picks={};
+  try{picks=JSON.parse(localStorage.getItem('bestim-bar-picks')||'{}')||{}}catch(e){}
+  root.innerHTML=pages.map(function(p,pi){
+    return '<section><div><h2>'+(pi+1)+'. '+p.name+'</h2><p class="sub">'+p.sub+'</p></div><div class="set">'+
+      p.o.map(function(o,i){var v='ABC'[i];return '<button class="opt" data-g="'+p.id+'" data-v="'+v+'" aria-pressed="false"><div class="ph">'+o[2]+'</div><div class="cap"><span class="tag">'+v+'</span><div><b>'+o[0]+'</b><small>'+o[1]+'</small></div></div></button>'}).join('')+
+      '</div></section>';
+  }).join('');
+  var sum=document.getElementById('sum');
+  function text(){return pages.filter(function(p){return picks[p.id]}).map(function(p){return p.name+': '+picks[p.id]}).join(' · ')}
+  function paint(){
+    root.querySelectorAll('.opt').forEach(function(b){b.setAttribute('aria-pressed',String(picks[b.dataset.g]===b.dataset.v))});
+    sum.textContent=text()||'No picks yet';
+  }
+  root.addEventListener('click',function(e){
+    var b=e.target.closest('.opt');if(!b)return;
+    picks[b.dataset.g]=b.dataset.v;
+    try{localStorage.setItem('bestim-bar-picks',JSON.stringify(picks))}catch(x){}
+    paint();
+  });
+  document.getElementById('copy').addEventListener('click',function(){
+    var c=this,t=text()||'No picks yet';
+    if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){c.textContent='Copied';setTimeout(function(){c.textContent='Copy picks'},1500)},function(){});
+  });
+  paint();
+})();
+</script>

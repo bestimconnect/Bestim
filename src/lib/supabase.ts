@@ -9,7 +9,18 @@ export const supabase = createClient<Database>(
   process.env.EXPO_PUBLIC_SUPABASE_URL!,
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
   // pkce: an email link carries a one-time code that only the phone that asked for it can turn into a session.
-  { auth: { storage: AsyncStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: false, flowType: 'pkce' } },
+  {
+    auth: { storage: AsyncStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: false, flowType: 'pkce' },
+    // A dead connection must fail in seconds, not hang the splash. Login/refresh calls only: uploads and the AI functions can be slow.
+    global: {
+      fetch: (input, init) => {
+        if (init?.signal || !String(input).includes('/auth/v1/')) return fetch(input, init);
+        const stop = new AbortController();
+        const timer = setTimeout(() => stop.abort(), 15000);
+        return fetch(input, { ...init, signal: stop.signal }).finally(() => clearTimeout(timer));
+      },
+    },
+  },
 );
 
 // Only refresh tokens while the app is in the foreground (Supabase RN guidance).

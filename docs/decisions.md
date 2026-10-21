@@ -1227,3 +1227,28 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 **Update (2026-10-12, mock-up):** Home and car-page part rows are "design 1" (tinted drawing square, name with the percentage or Late, life bar); Reminders is a two-column grid of "design 2" picture tiles; the fill never drops below a fifth of the drawing and the empty part is tinted in the state colour.
 
 **Update (2026-10-13, style 6):** the part pictures are now rendered pictures ("style 6") in three status colours (lime, amber, red), sized in proportion to their card (a small card gets a small picture). Home shows ring badges, Reminders a grouped list (needs attention / on time / snoozed), the service page a dashboard arc. The tank fill is gone. Masters in `../assets/parts-3d/style 6/`.
+
+### Q108: Screens move smoothly; the tapped car flies into the car page (founder, 2026-10-22)
+**Decision:** Tabs cross-fade, the tab bar fades in and out, and the car page fades in instead of sliding. Tapping the car on Home (or on a My Cars card) makes that car fly from where it was into the car page header, and fly back on the back button. The 360° view moves to the small "360°" badge on the picture. Home's "View all" and fuel row open the page without the flight.
+**Why:** The founder found switching between pages laggy, with pieces showing up before others. Of three animated ideas he chose "Car grows" (the other two were "Glide" and "Slide + stagger").
+**Spec for dev:** `lib/carFlight.ts` (measures each car picture, registered by `CarPhoto slot=home|list|detail`) and `components/CarFlight.tsx` (the one flying copy, in the root layout; it only moves and scales, on the UI thread). The flight starts at the tap and aims at a fixed spot in the car-page header (`detailRect`, measured on an iPhone 16), so it never waits for the page to build; check that spot if the header layout changes. The car page is a root screen (`app/vehicle/[id].tsx`, `transparentModal` + fade) so the page under it (Home or My Cars) stays alive and the car can fly back. Tabs use `animation: 'fade'`; Expenses is built at launch. Traps found: RN mirrors `left` in right-to-left, so the overlay converts physical x; Home's pager reports its car a page off sideways, so Home's x is centred in code.
+**Known gap:** the fade means iOS swipe-back probably does not work on the car page; the back button does. The green top bar (`AppBarOverlay`) still animates after the page mounts; if it still feels late on a phone, drive it from the route instead of from effects.
+**Replaces:** Q57's "tab switching never moves" and "system transitions".
+
+### Q109: Pull to refresh stays the normal spinner (founder, 2026-10-22)
+**Decision:** The car-on-a-road animation in the green bar is removed. Every screen shows the system spinner (lime on Home). The founder looked at three car ideas (spinning wheel, fuel gauge, check-engine light) and chose to keep the normal one. The three ideas are kept in `../docs/IDEAS.md`; none is built.
+**Spec for dev:** `components/Refresh.tsx` (`useRefresh(offset, tint)`); the `useRefreshing` store is gone.
+
+### Q110: Update-odometer page is a dark "cockpit" with a 3D dial (founder, 2026-10-22)
+**Decision:** One dark card holds the back button and title, a big dial with the rolling digits inside it, a "+N km since last" chip, and the ruler. Below it: when the last reading was, then "Read with camera" and Save. The needle sweeps 240° over the 1,500 km driven since the last saved reading (red chip beyond that). Saving, the lower-reading block, typing and the camera scan are unchanged.
+**Why:** The founder wanted the page in the same 3D look as the parts and cars. Of three layouts he chose "B · Cockpit".
+**Spec for dev:** `components/OdometerDial.tsx` (face in code for now; the needle is a separate overlay, so the face can become the 3D picture in one line). The picture is made by hand in Gemini with `docs/gemini-odometer-prompt.md` (no needle, no digits, light and dark), then cut out like the parts. **Open: the picture does not exist yet.**
+
+### Q111: Expenses are Month or Year, with a line chart you swipe (founder, 2026-10-22)
+**Decision:** Only two toggles, Month and Year (no "All"). Month draws one point per day, Year one per month, as a smooth line on the dark block with a dot you can tap or drag. Swipe the chart (or use the arrows) to move between months or years, through all the history. Under it: average, highest and change vs the previous period, then the breakdown and the list for that period. The chart keeps time running left to right even in Arabic: swipe right = earlier.
+**Why:** Of three designs the founder chose "C · Line + tiles".
+**Spec for dev:** `components/ExpenseChart.tsx`, `lib/expensePeriods.ts` (+ check). `useExpenses` now loads the whole history (one request, up to 1,000 rows; a heavy user's oldest rows would drop off, noted in the code). Side effect: the car page's "Total paid" and Logs list now cover all history instead of the last 6 months or the year.
+
+### Q112: Small fixes from the founder's test (founder, 2026-10-22)
+**Decision:** (1) An empty VIN on the car page shows "—" like the other empty fields. (2) My Cars cards lose the status line under the car; the health ring is the only indicator (Home's "all on schedule" row stays). (3) On the car's Logs tab, a filter with no results keeps the total and chips and says "No matches" (before, the whole tab was replaced by "No records" and you could not get back to "All").
+**Spec for dev:** `components/CarTabs.tsx` (`LogsTab`), `app/(tabs)/vehicles/index.tsx`.

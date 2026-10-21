@@ -1,24 +1,27 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, ArrowRight, Camera, TrendingUp } from 'lucide-react-native';
+import { Camera, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useState } from 'react';
 import { I18nManager, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { runOnJS, useAnimatedReaction, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { OdometerDial } from '@/components/OdometerDial';
 import { OdometerRuler } from '@/components/OdometerRuler';
 import { OdometerScanner } from '@/components/OdometerScanner';
 import { RollingNumber } from '@/components/RollingNumber';
-import { Button, Header, Item, Text } from '@/components/ui';
+import { useLightStatusBar } from '@/components/Hero';
+import { Button, Header, PressableScale, Text } from '@/components/ui';
+import { useAppBarHero } from '@/lib/appBar';
 import { errorText } from '@/lib/errors';
 import { easeOut } from '@/lib/motion';
 import { maxJump } from '@/lib/odometerScan';
 import { useCurrentVehicle, useVehicle, type Vehicle } from '@/lib/queries';
 import { hasReading } from '@/lib/reading';
 import { supabase } from '@/lib/supabase';
-import { useColors } from '@/lib/theme';
+import { shadows, useColors } from '@/lib/theme';
 import { KEYBOARD_DONE_ID } from '@/components/KeyboardDone';
 
 const MAX = 9_999_999;
@@ -29,6 +32,9 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
   const c = useColors();
   const qc = useQueryClient();
   const still = useReducedMotion();
+  const insets = useSafeAreaInsets();
+  const onHero = useAppBarHero();
+  useLightStatusBar();
   // One moving value drives the rolling number and the ruler; `reading` is what it currently says, for React.
   const shown = useSharedValue(vehicle.current_odometer);
   const [reading, setReading] = useState(vehicle.current_odometer);
@@ -70,69 +76,73 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
     router.back();
   };
 
+  const since = first ? 0 : delta;
   return (
-    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <ScrollView className="flex-1" contentContainerClassName="gap-4 p-6" keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
-        <Header title={t('odometer.header')} />
-        <Text variant="caption" className="text-muted">
+    <SafeAreaView className="flex-1 bg-paper" edges={['bottom']}>
+      {/* Layout B, the cockpit: one dark card holds the back button, the dial with the reading in it, and the ruler. */}
+      <ScrollView className="flex-1" contentContainerClassName="gap-4 pb-4" alwaysBounceVertical={false} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
+        <View onLayout={onHero} className="gap-2 rounded-b-[36px] bg-panel px-6 pb-2" style={{ paddingTop: insets.top + 8 }}>
+          <View className="h-11 flex-row items-center gap-3">
+            <PressableScale accessibilityRole="button" accessibilityLabel={t('back')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-[#FFFFFF26]">
+              {I18nManager.isRTL ? <ChevronRight size={22} color={c.onpanel} /> : <ChevronLeft size={22} color={c.onpanel} />}
+            </PressableScale>
+            <Text variant="title" className="text-onpanel">{t('odometer.header')}</Text>
+          </View>
+          <View className="items-center">
+            <OdometerDial shown={shown} from={first ? undefined : vehicle.current_odometer}>
+              <View className="items-center rounded-field border border-[#D3F53D59] bg-[#101713] px-2 py-1">
+                {typing == null ? (
+                  <Pressable accessibilityRole="button" accessibilityLabel={`${t('odometer.label')}: ${reading.toLocaleString('en-US')}`} onPress={() => setTyping('')}>
+                    <RollingNumber shown={shown} count={String(reading).length} size="sm" color="#FFFFFF" />
+                  </Pressable>
+                ) : (
+                  <TextInput
+                    accessibilityLabel={t('odometer.label')}
+                    autoFocus
+                    value={typing}
+                    // Each digit goes straight into the reading (no roll), so Save is right even while the keyboard is still up.
+                    onChangeText={(v) => {
+                      const digits = v.replace(/\D/g, '');
+                      setTyping(digits);
+                      if (digits) shown.set(Math.min(MAX, Number(digits)));
+                    }}
+                    onBlur={() => setTyping(null)}
+                    keyboardType="number-pad"
+                    returnKeyType="done"
+                    inputAccessoryViewID={KEYBOARD_DONE_ID}
+                    maxLength={7}
+                    className="h-[34px] p-0"
+                    style={{ fontFamily: 'Poppins_700Bold', fontSize: 28, textAlign: 'center', color: '#D3F53D', width: 130 }}
+                  />
+                )}
+              </View>
+            </OdometerDial>
+          </View>
+          {/* Fixed height so the dial and ruler do not jump when the chip appears. */}
+          <View className="h-8 items-center justify-center">
+            {lower ? (
+              <View className="rounded-full bg-[#FFE5EB] px-3 py-1"><Text variant="caption" className="text-[#AC2846]">{t('errors.lowerReading')}</Text></View>
+            ) : since > 0 ? (
+              <View className={`rounded-full px-3 py-1 ${since >= 1500 ? 'bg-[#FFE5EB]' : 'bg-lime'}`}>
+                <Text variant="caption" className={since >= 1500 ? 'text-[#AC2846]' : 'text-[#222E29]'} style={{ writingDirection: 'ltr' }}>+{since.toLocaleString('en-US')} {shortUnit}</Text>
+              </View>
+            ) : null}
+          </View>
+          <View className="-mx-6">
+            <OdometerRuler shown={shown} segment={unit === 'h' ? 100 : 1000} max={MAX} dark />
+          </View>
+        </View>
+
+        <Text variant="caption" className="px-6 text-center text-muted">
           {first ? t('odometer.first') : days > 0 ? t('odometer.last', { value: last, unit: shortUnit, count: days }) : t('odometer.lastToday', { value: last, unit: shortUnit })}
         </Text>
-
-        <View className="items-center gap-1 pt-4">
-          {typing == null ? (
-            // Tapping the number starts a fresh one: typing is the quiet fallback to the slider and the camera.
-            <Pressable accessibilityRole="button" accessibilityLabel={`${t('odometer.label')}: ${reading.toLocaleString('en-US')}`} onPress={() => setTyping('')}>
-              <RollingNumber shown={shown} count={String(reading).length} />
-            </Pressable>
-          ) : (
-            <TextInput
-              accessibilityLabel={t('odometer.label')}
-              autoFocus
-              value={typing}
-              // Each digit goes straight into the reading (no roll), so Save is right even while the keyboard is still up.
-              onChangeText={(v) => {
-                const digits = v.replace(/\D/g, '');
-                setTyping(digits);
-                if (digits) shown.set(Math.min(MAX, Number(digits)));
-              }}
-              onBlur={() => setTyping(null)}
-              keyboardType="number-pad"
-              returnKeyType="done"
-              inputAccessoryViewID={KEYBOARD_DONE_ID}
-              maxLength={7}
-              placeholder={reading.toLocaleString('en-US')}
-              placeholderTextColor={c.line}
-              className="h-[60px] self-stretch p-0 text-ink"
-              style={{ fontFamily: 'Poppins_700Bold', fontSize: 52, textAlign: 'center' }}
-            />
-          )}
-          <Text variant="caption" className="text-muted">{shortUnit}</Text>
-        </View>
-
-        <View className="-mx-6">
-          <OdometerRuler shown={shown} segment={unit === 'h' ? 100 : 1000} max={MAX} />
-        </View>
-        {/* The arrows show the gesture, not a reading direction, so they keep their sides in Arabic. */}
-        <View className="items-center justify-center gap-2" style={{ flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row' }}>
-          <ArrowLeft size={14} color={c.muted} />
-          <Text variant="caption" className="text-muted">{t('odometer.swipe')}</Text>
-          <ArrowRight size={14} color={c.muted} />
-        </View>
-
-        {lower ? (
-          <Text variant="caption" className="text-center text-danger">{t('errors.lowerReading')}</Text>
-        ) : !first && delta > 0 ? (
-          <View className="flex-row items-center justify-center gap-2">
-            <TrendingUp size={16} color={c.teal} />
-            <Text variant="caption" className="text-teal">{t('odometer.since', { value: delta.toLocaleString('en-US'), unit: shortUnit })}</Text>
-          </View>
-        ) : null}
-
-        <Item icon={Camera} tone="sky" title={t('odometer.scan.row')} subtitle={t('odometer.scan.rowSub')} onPress={() => setScanning(true)} />
-
-        {error ? <Text variant="caption" className="text-danger">{error}</Text> : null}
+        {error ? <Text variant="caption" className="px-6 text-center text-danger">{error}</Text> : null}
       </ScrollView>
-      <View className="px-6 pb-4 pt-2">
+      <View className="gap-2 px-6 pb-4 pt-2">
+        <PressableScale accessibilityRole="button" onPress={() => setScanning(true)} className="h-[52px] flex-row items-center justify-center gap-2 rounded-field bg-white" style={{ boxShadow: shadows.card }}>
+          <Camera size={20} color={c.ink} />
+          <Text variant="label" className="text-ink">{t('odometer.scan.row')}</Text>
+        </PressableScale>
         <Button title={t('odometer.cta')} onPress={() => save()} loading={saving} disabled={lower} />
       </View>
       {scanning ? (

@@ -10,7 +10,7 @@ import { useSession } from './session';
 import { supabase } from './supabase';
 
 // Shared query hooks (several screens read the same data). Keys: ['vehicles'], ['logs', vehicleId],
-// ['log', id], ['service_types'], ['record_categories'], ['snoozes', vehicleId], ['expenses', since]. After a write, invalidate
+// ['log', id], ['service_types'], ['record_categories'], ['snoozes', vehicleId], ['expenses', 'all']. After a write, invalidate
 // ['vehicles'], ['logs'] and ['expenses'] (a log's cost becomes an expense via a DB trigger).
 
 type Names = { name_en: string; name_ar: string };
@@ -246,24 +246,21 @@ export function useFuelFills(vehicleId: string | undefined) {
   });
 }
 
-/** Start of the expense window every money screen shares: Jan 1st, or 6 months back if earlier (bars on 06/23). */
-export function expensesSince(today = new Date()) {
-  const sixBack = new Date(today.getFullYear(), today.getMonth() - 5, 1);
-  const jan1 = new Date(today.getFullYear(), 0, 1);
-  return (sixBack < jan1 ? sixBack : jan1).toLocaleDateString('en-CA'); // YYYY-MM-DD, local
-}
-
-/** Expenses of all the user's vehicles since `expensesSince()`, newest first. Filter by vehicle_id / year client-side. */
+/**
+ * Expenses of all the user's vehicles, whole history, newest first. Filter by vehicle_id / date client-side
+ * (the Expenses tab swipes through every month and year).
+ * ponytail: the API returns at most 1000 rows (supabase/config.toml max_rows), newest first, so very old expenses of a heavy user
+ * drop off the oldest end; page with .range() or load by period if anyone gets there.
+ */
 export function useExpenses() {
-  const since = expensesSince();
   return useQuery({
-    queryKey: ['expenses', since],
+    queryKey: ['expenses', 'all'],
     queryFn: async (): Promise<Expense[]> => {
       const { data, error } = await supabase
         .from('expenses')
         .select(`*, vehicles(id, make, model, nickname, ${CATALOG_JOIN})`)
-        .gte('expense_date', since)
-        .order('expense_date', { ascending: false });
+        .order('expense_date', { ascending: false })
+        .limit(1000);
       if (error) throw error;
       return data;
     },
