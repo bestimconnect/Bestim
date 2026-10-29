@@ -78,7 +78,7 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 **Guest mode removed (Q103, later the same day):** the welcome screen has "Create account" and "Sign in"; the "save your car" card on Home, the feature-gate screen, the guest delete-data path and every guest check in the tabs and screens are gone. Not run by anyone yet: the whole door (sign in, Google from either screen, create account, an old guest session being taken to Create account), Part F and row G2 of the retest sheet.
 
 **To do outside the code:**
-- Turn off anonymous sign-ins in the Supabase dashboard (Authentication → Sign In / Providers), once old test builds are no longer in use.
+- Anonymous sign-ins: off on the live project and in `supabase/config.toml` (2026-10-29).
 - The website's privacy, terms and delete-account pages and the store answers (Apple privacy labels, Google data safety) still describe guest mode and need rewording.
 
 ## Round of 2026-10-22 (Q108–Q112)

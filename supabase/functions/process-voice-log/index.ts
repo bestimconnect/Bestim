@@ -59,11 +59,18 @@ Deno.serve(async (req) => {
   // OpenAI cannot read the raw AAC some Android phones record (understand.ts), so those recordings go to Gemini.
   const useOpenai = OPENAI && (!audio || Object.hasOwn(OPENAI_FILE, body.mime));
   const t1 = Date.now();
+  // The dashboard's AI usage log (admin_foundation migration). It must never break a recording, so errors are swallowed.
+  const logUse = async (ok: boolean) => {
+    try {
+      await supabase.rpc('log_ai_usage', { p_kind: 'voice', p_ok: ok, p_ms: Date.now() - t1 });
+    } catch { /* ignore */ }
+  };
   try {
     const system = instructions(own, services.data.map((s) => s.name_en), vehicleId, body.lang === 'en' ? 'en' : 'ar');
     const out = useOpenai
       ? await openai(said, system, Deno.env.get('OPENAI_API_KEY')!, Deno.env.get('OPENAI_MODEL') || undefined)
       : await gemini(said, system, Deno.env.get('GEMINI_API_KEY')!, Deno.env.get('GEMINI_MODEL') || undefined);
+    await logUse(true);
     return json({
       transcript: String(out.transcript ?? typed).slice(0, MAX_TRANSCRIPT),
       records: out.records ?? [],
@@ -71,6 +78,7 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error('voice', e instanceof Error ? e.message : e);
+    await logUse(false);
     return json({ error: 'ai' }, 502);
   }
 });

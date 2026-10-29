@@ -15,7 +15,9 @@ export default function NotifyPermission() {
   const { t } = useTranslation();
   const c = useColors();
   const params = useLocalSearchParams<Record<string, string>>();
-  useEffect(() => useSettings.getState().set({ notifyAsked: true }), []); // shown once, even if swiped away
+  useEffect(() => {
+    useSettings.getState().set({ notifyAsked: true });
+  }, []); // shown once, even if swiped away
 
   // From a modal: close it, then push (replace would only close it).
   const next = () => {

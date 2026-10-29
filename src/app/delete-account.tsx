@@ -13,13 +13,15 @@ export default function DeleteAccount() {
 
   const remove = async () => {
     if (!userId) throw new Error('no user');
-    // Receipt photos go first, a page at a time, until the folder is empty: nothing of the user may stay behind.
-    for (;;) {
-      const { data: files, error } = await supabase.storage.from('receipts').list(userId);
-      if (error) throw error;
-      if (!files?.length) break;
-      const { data: removed, error: removeError } = await supabase.storage.from('receipts').remove(files.map((f) => `${userId}/${f.name}`));
-      if (removeError || !removed?.length) throw removeError ?? new Error('receipts not removed');
+    // Receipt and profile photos go first, a page at a time, until each folder is empty: nothing of the user may stay behind.
+    for (const bucket of ['receipts', 'avatars']) {
+      for (;;) {
+        const { data: files, error } = await supabase.storage.from(bucket).list(userId);
+        if (error) throw error;
+        if (!files?.length) break;
+        const { data: removed, error: removeError } = await supabase.storage.from(bucket).remove(files.map((f) => `${userId}/${f.name}`));
+        if (removeError || !removed?.length) throw removeError ?? new Error(`${bucket} not removed`);
+      }
     }
     const { error } = await supabase.rpc('delete_my_account');
     if (error) throw error;

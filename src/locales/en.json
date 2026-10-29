@@ -251,7 +251,7 @@
     "allRecords": "Car log",
     "addRecord": "Add a record",
     "updateReading": "Update reading",
-    "summary": "{{count}} car(s) · {{km}} km in total",
+    "summary": "Cars: {{count}} · {{km}} km in total",
     "dash": {
       "health": "Car health",
       "counts": "{{late}} late · {{soon}} soon",
@@ -639,7 +639,7 @@
       "edit": "Change photo",
       "failed": "Couldn't save the photo. Try again."
     },
-    "cars": "{{count}} cars",
+    "cars": "Cars: {{count}}",
     "group": {
       "preferences": "Preferences",
       "data": "Your data"
@@ -720,12 +720,12 @@
     "body": "Share the logs, reminders and parts with the new owner.",
     "qr": "QR code",
     "linkTab": "Share link",
-    "sub": "{{n}} maintenance records · {{m}} dates",
+    "sub": "Maintenance records: {{n}} · Dates: {{m}}",
     "note": "Sharing the car's history only. This doesn't transfer legal ownership of the car.",
     "prepare": "Prepare the share",
     "send": "Share link",
     "valid": "Valid for 7 days.",
-    "removed": "{{n}} records were removed from this history.",
+    "removed": "Records removed from this history: {{n}}.",
     "empty": "Add at least one record to share.",
     "error": "We couldn't prepare the share. Try again.",
     "message": "I shared the maintenance history of {{vehicle}} on Bestim: {{link}}",
@@ -736,7 +736,7 @@
   "receive": {
     "header": "Receive car history",
     "title": "A car history is waiting",
-    "sub": "{{n}} maintenance records",
+    "sub": "Maintenance records: {{n}}",
     "by": "Shared by",
     "fallbackName": "A Bestim user",
     "body": "Review the details before adding this history to your account.",

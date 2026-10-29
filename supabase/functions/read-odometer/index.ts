@@ -40,12 +40,20 @@ Deno.serve(async (req) => {
   if (used.error) return json({ error: 'server' }, 500);
   if (used.data > DAILY_LIMIT) return json({ error: 'limit' }, 429);
 
+  const started = Date.now();
+  // The dashboard's AI usage log (admin_foundation migration). It must never break a scan, so errors are swallowed.
+  const logUse = async (ok: boolean) => {
+    try {
+      await supabase.rpc('log_ai_usage', { p_kind: 'scan', p_ok: ok, p_ms: Date.now() - started });
+    } catch { /* ignore */ }
+  };
   try {
-    const started = Date.now();
     const reading = await readOdometer(image, Deno.env.get('GEMINI_API_KEY')!, MODEL);
+    await logUse(true);
     return json({ reading, ms: { ai: Date.now() - started } }); // the app logs it in development (speed checks)
   } catch (e) {
     console.error('gemini', e instanceof Error ? e.message : e);
+    await logUse(false);
     return json({ error: 'ai' }, 502);
   }
 });

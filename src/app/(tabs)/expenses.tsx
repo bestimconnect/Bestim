@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -141,7 +141,7 @@ export default function Expenses() {
                         <Item
                           icon={Receipt}
                           title={sub ? (i18n.language === 'ar' ? sub.name_ar : sub.name_en) : t(`expenses.chip.${e.category}`)}
-                          subtitle={[`${fmt(Number(e.amount))} ${t('expenses.currency')}`, e.expense_date, e.description].filter(Boolean).join(' · ')}
+                          subtitle={[`${fmt(Number(e.amount))} ${t('expenses.currency')}`, format(parseISO(e.expense_date), 'd MMM yyyy', { locale }), e.description].filter(Boolean).join(' · ')}
                           // A cost that came from a maintenance log is changed (or deleted) through that log.
                           onPress={() => router.push(e.from_log && e.log_id ? { pathname: '/log/[id]', params: { id: e.log_id } } : { pathname: '/capture', params: { expenseId: e.id } })}
                         />
