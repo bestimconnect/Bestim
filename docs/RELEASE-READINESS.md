@@ -61,7 +61,7 @@ Notes: the app has four tabs (Home, Cars, Expenses, Account); there is no Remind
 Each item below changes something live, costs money, or needs an account login that I may not use.
 | # | Item | Who | Why it blocks launch |
 |---|---|---|---|
-| 1 | Push migration `20261029090000` (`supabase db push`, then `npm run types`, then check) | founder says yes | Admin PII roles and row caps are not live until then |
+| 1 | ~~Push migration `20261029090000`~~ DONE 2026-10-30: pushed by the founder, types regenerated, anon key gets 401 on the new/changed functions and tables. Not yet exercised with a real user: row caps, widget keys dying on password change, viewer-role admin refused (needs test accounts) | done | |
 | 2 | Supabase dashboard: Authentication > Providers > Apple > enable, Authorized Client ID `com.bestim.app` (no secret). Do NOT use `config push` | founder | Without it the Apple button fails and App Review rejects |
 | 3 | Apple Developer: App ID `com.bestim.app` with Sign in with Apple, Push, App Group `group.com.bestim.app`; widget extension ID; APNs key | founder / Ahmed | iPhone build, push and widgets |
 | 4 | Server push for iPhone (APNs key + scheduled function) | founder gives key, then I build the function | On-device reminders work, but server push is still missing |

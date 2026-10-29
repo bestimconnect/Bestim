@@ -883,6 +883,47 @@ export type Database = {
           },
         ]
       }
+      widget_keys: {
+        Row: {
+          created_at: string
+          id: string
+          key_hash: string
+          last_used_at: string | null
+          platform: string
+          user_id: string
+          window_start: string
+          window_uses: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key_hash: string
+          last_used_at?: string | null
+          platform: string
+          user_id: string
+          window_start?: string
+          window_uses?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_hash?: string
+          last_used_at?: string | null
+          platform?: string
+          user_id?: string
+          window_start?: string
+          window_uses?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "widget_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -920,6 +961,7 @@ export type Database = {
         Args: { changes: Json; log_id: string; reason: string }
         Returns: undefined
       }
+      create_widget_key: { Args: { p_platform: string }; Returns: string }
       delete_my_account: { Args: never; Returns: undefined }
       get_share: {
         Args: { token: string }
@@ -947,6 +989,19 @@ export type Database = {
       owns_log: { Args: { l: string }; Returns: boolean }
       owns_vehicle: { Args: { v: string }; Returns: boolean }
       require_admin: { Args: never; Returns: undefined }
+      require_pii_admin: { Args: never; Returns: undefined }
+      revoke_widget_keys: { Args: never; Returns: undefined }
+      widget_action: {
+        Args: {
+          p_action: string
+          p_key: string
+          p_km?: number
+          p_service?: string
+          p_title?: string
+          p_vehicle: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
