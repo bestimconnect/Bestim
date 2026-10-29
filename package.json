@@ -95,5 +95,8 @@
     "check": "for f in src/lib/*.check.ts; do node --experimental-strip-types --no-warnings $f || exit 1; done",
     "postinstall": "patch-package"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "@expo/require-utils": "57.0.6"
+  }
 }
