@@ -9,7 +9,12 @@
     "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/images/icon.png",
-      "bundleIdentifier": "com.bestim.app"
+      "bundleIdentifier": "com.bestim.app",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Bestim turns what you say into a record, using Google AI.",
+        "NSMicrophoneUsageDescription": "Bestim uses the microphone so you can log maintenance by voice.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {

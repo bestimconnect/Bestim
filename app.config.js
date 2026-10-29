@@ -42,7 +42,7 @@ module.exports = ({ config }) => {
   const personal = process.env.PERSONAL_TEAM === '1';
   // First in the list = runs last, after expo-notifications has added the entitlement.
   const plugins = [...(personal ? [withoutPush] : []), ...config.plugins, ['react-native-android-widget', { widgets: androidWidgets }]];
-  if (!personal) plugins.push(['expo-widgets', { widgets: iosWidgets }]);
+  if (!personal) plugins.push(['expo-widgets', { widgets: iosWidgets }], 'expo-apple-authentication'); // Apple sign-in cannot be signed with a free Apple ID either
   if (iosClientId) {
     const iosUrlScheme = `com.googleusercontent.apps.${iosClientId.replace('.apps.googleusercontent.com', '')}`;
     plugins.push(['@react-native-google-signin/google-signin', { iosUrlScheme }]);

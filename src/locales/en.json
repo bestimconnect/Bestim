@@ -81,6 +81,7 @@
     "common": {
       "or": "or use email",
       "googleContinue": "Continue with Google",
+      "appleContinue": "Continue with Apple",
       "errors": {
         "email": "Enter a valid email address",
         "passwordMin": "Password must be at least 8 characters",
@@ -823,6 +824,7 @@
     "weakPassword": "That password is too weak. Use at least 8 characters.",
     "samePassword": "Choose a password different from your old one.",
     "google": "Google sign-in didn't work. Try again or use your email.",
+    "apple": "Apple sign-in didn't work. Try again or use your email.",
     "lowerReading": "It can't be lower than the current reading",
     "needsReason": "This record is over a day old. Add a reason for the change."
   },

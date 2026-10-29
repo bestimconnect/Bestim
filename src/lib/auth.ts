@@ -48,6 +48,36 @@ export async function signInWithGoogle(): Promise<boolean> {
   return true;
 }
 
+/** Apple's button shows on iPhones only (Q6: App Store guideline 4.8 wants it next to Google). False in the free-Apple-ID test build. */
+export function useAppleAvailable() {
+  const [available, setAvailable] = useState(false);
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+    import('expo-apple-authentication')
+      .then((Apple) => Apple.isAvailableAsync())
+      .then(setAvailable, () => setAvailable(false));
+  }, []);
+  return available;
+}
+
+export async function signInWithApple(): Promise<boolean> {
+  const Apple = await import('expo-apple-authentication');
+  let credential;
+  try {
+    credential = await Apple.signInAsync({ requestedScopes: [Apple.AppleAuthenticationScope.FULL_NAME, Apple.AppleAuthenticationScope.EMAIL] });
+  } catch (e) {
+    if ((e as { code?: string }).code === 'ERR_REQUEST_CANCELED') return false;
+    throw e;
+  }
+  if (!credential.identityToken) throw new Error('Apple returned no identity token');
+  const { data, error } = await supabase.auth.signInWithIdToken({ provider: 'apple', token: credential.identityToken });
+  if (error) throw error;
+  // Apple shares the name only on the very first sign-in; keep it.
+  const name = [credential.fullName?.givenName, credential.fullName?.familyName].filter(Boolean).join(' ');
+  if (name) await supabase.from('profiles').update({ full_name: name }).eq('id', data.user.id);
+  return true;
+}
+
 /** Sign out; the cache empties itself when the user changes (queryClient.ts). Language, theme and the tour flag stay. */
 export async function signOut() {
   const { syncNotifications } = await import('./notifications');

@@ -7,11 +7,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Trans, useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { signInWithGoogle, useGoogleAvailable } from '@/lib/auth';
+import { signInWithApple, signInWithGoogle, useAppleAvailable, useGoogleAvailable } from '@/lib/auth';
 import { errorText } from '@/lib/errors';
 import { openPage } from '@/lib/links';
 import { supabase } from '@/lib/supabase';
-import { Button, Divider, Field, Header, Note, Text, GoogleIcon } from '@/components/ui';
+import { AppleIcon, Button, Divider, Field, Header, Note, Text, GoogleIcon } from '@/components/ui';
 
 // Screen 31 — Create account, Figma 167:57037 (ar-light) / 167:64683 (en-light).
 const schema = (t: (k: string) => string) =>
@@ -34,6 +34,7 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const google = useGoogleAvailable();
+  const apple = useAppleAvailable();
   const { control, handleSubmit, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema(t)),
     defaultValues: { fullName: '', email: '', password: '', confirmPassword: '' },
@@ -55,11 +56,11 @@ export default function RegisterScreen() {
     else router.push({ pathname: '/verify-email', params: { email } });
   };
 
-  const social = async (fn: () => Promise<boolean>) => {
+  const social = async (fn: () => Promise<boolean>, fallback: 'errors.google' | 'errors.apple' = 'errors.google') => {
     try {
       if (await fn()) router.replace('/');
     } catch (e) {
-      setError(errorText(e, 'errors.google'));
+      setError(errorText(e, fallback));
     }
   };
 
@@ -154,9 +155,10 @@ export default function RegisterScreen() {
           </Pressable>
         </View>
 
+        {google || apple ? <Divider label={t('auth.common.or')} /> : null}
+        {apple ? <Button title={t('auth.common.appleContinue')} icon={<AppleIcon />} variant="secondary" onPress={() => social(signInWithApple, 'errors.apple')} /> : null}
         {google ? (
           <>
-            <Divider label={t('auth.common.or')} />
             <Button title={t('auth.common.googleContinue')} icon={<GoogleIcon />} variant="secondary" onPress={() => social(signInWithGoogle)} />
           </>
         ) : null}

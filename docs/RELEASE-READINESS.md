@@ -49,5 +49,28 @@ Covered: Home, Notifications page, + sheet, Car page, edit/delete a record, Upda
 | 9 | Watch | After a crashed or deep-linked start, headers vanished until the app was relaunched; make sure a cold start never lands there | verify on a phone |
 Notes: the app has four tabs (Home, Cars, Expenses, Account); there is no Reminders tab, so `docs/store/phone-test-checklist.md` rows C7 and the "Reminders" wording are out of date. Swiping between periods on the Expenses chart did nothing in this run, the arrows work (Q111 says swipe should work; re-check on a phone).
 
-## Steps 4 to 8
-Not started: real phones, stores and compliance, release builds, live-service readiness, final sign-off.
+## Round 2 (2026-10-29, "go auto"): done on this Mac, nothing live changed
+- Decisions logged as Q116: Home card = selected car, Expenses tab = all cars; reminder interval = service default unless the owner's own record says otherwise (both by design).
+- Migration `20261029090000_release_hardening_2.sql` WRITTEN, NOT PUSHED, NOT RUN against any database (no local database here): PII admin roles, widget keys die on password change, row caps, four indexes. Verify after the push.
+- Sign in with Apple restored for iPhone (Apple guideline 4.8): `expo-apple-authentication`, button above Google on Sign in and Create account, shown on iOS only, entitlement added by the config plugin (not in the free-Apple-ID test build). `supabase/config.toml` lists the Apple provider (file only).
+- Expo packages aligned to SDK 57 patch versions; duplicate `@expo/ui` removed; `expo-doctor` 21/21.
+- Checklists: Android list fixed (no Reminders tab), new `docs/store/iphone-test-checklist.md`.
+- Website source has no guest-mode wording (store docs already say there is none).
+
+## What only the founder (or a live approval) can unblock
+Each item below changes something live, costs money, or needs an account login that I may not use.
+| # | Item | Who | Why it blocks launch |
+|---|---|---|---|
+| 1 | Push migration `20261029090000` (`supabase db push`, then `npm run types`, then check) | founder says yes | Admin PII roles and row caps are not live until then |
+| 2 | Supabase dashboard: Authentication > Providers > Apple > enable, Authorized Client ID `com.bestim.app` (no secret). Do NOT use `config push` | founder | Without it the Apple button fails and App Review rejects |
+| 3 | Apple Developer: App ID `com.bestim.app` with Sign in with Apple, Push, App Group `group.com.bestim.app`; widget extension ID; APNs key | founder / Ahmed | iPhone build, push and widgets |
+| 4 | Server push for iPhone (APNs key + scheduled function) | founder gives key, then I build the function | On-device reminders work, but server push is still missing |
+| 5 | App Store Connect and Google Play Console apps, privacy labels / data safety, reviewer account, screenshots from the final UI | founder | Store forms are in `docs/store/` |
+| 6 | Google Play closed test: 12 testers for 14 days | founder starts the clock | Personal Google account rule; decides the launch date |
+| 7 | Plans: Supabase Pro, Vercel Pro, Resend paid, Gemini cap + owner | founder (money) | Free limits (100 emails/day) and no backups |
+| 8 | Redeploy the two edited edge functions (`process-voice-log`, `read-odometer`) | founder says yes | Edited locally 2026-10-22/23 but the review found them fine; confirm they are what is live |
+| 9 | EAS production builds (iOS, Android AAB, Huawei APK) and smoke test on real phones | founder + me | Uses the Expo build queue |
+| 10 | Real-phone checklists: Android `phone-test-checklist.md`, iPhone `iphone-test-checklist.md`; Huawei has no phone | founder | Voice, camera, push, widgets on real hardware |
+| 11 | Google sign-in branding verification and Play signing SHA-1 in Google Cloud | founder | Google sign-in window shows the app name |
+
+Verdict today: NOT READY to publish. The code is in a good state, but items 1 to 11 must happen first. Closest honest status: "ready for store setup and real-phone testing".

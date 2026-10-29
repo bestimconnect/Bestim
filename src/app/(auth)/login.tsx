@@ -7,10 +7,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { signInWithGoogle, useGoogleAvailable } from '@/lib/auth';
+import { signInWithApple, signInWithGoogle, useAppleAvailable, useGoogleAvailable } from '@/lib/auth';
 import { errorText } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
-import { Button, Divider, Field, Header, Note, Text, GoogleIcon } from '@/components/ui';
+import { AppleIcon, Button, Divider, Field, Header, Note, Text, GoogleIcon } from '@/components/ui';
 
 // Screen 30 — Sign in, Figma 167:56978 (ar-light) / 167:64624 (en-light).
 const schema = (t: (k: string) => string) =>
@@ -27,6 +27,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const google = useGoogleAvailable();
+  const apple = useAppleAvailable();
   const { control, handleSubmit, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema(t)),
     defaultValues: { email: '', password: '' },
@@ -41,7 +42,7 @@ export default function LoginScreen() {
     else router.replace('/');
   };
 
-  const social = async (fn: () => Promise<boolean>, fallback?: 'errors.google') => {
+  const social = async (fn: () => Promise<boolean>, fallback?: 'errors.google' | 'errors.apple') => {
     try {
       if (await fn()) router.replace('/');
     } catch (e) {
@@ -108,9 +109,10 @@ export default function LoginScreen() {
             </Pressable>
           </View>
 
+          {google || apple ? <Divider label={t('auth.common.or')} /> : null}
+          {apple ? <Button title={t('auth.common.appleContinue')} icon={<AppleIcon />} variant="secondary" onPress={() => social(signInWithApple, 'errors.apple')} /> : null}
           {google ? (
             <>
-              <Divider label={t('auth.common.or')} />
               <Button title={t('auth.common.googleContinue')} icon={<GoogleIcon />} variant="secondary" onPress={() => social(signInWithGoogle, 'errors.google')} />
             </>
           ) : null}
