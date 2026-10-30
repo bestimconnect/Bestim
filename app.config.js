@@ -5,7 +5,16 @@
 //   block the App Store account from registering it), so: no push entitlement and a `.dev` identifier.
 //   Google sign-in does not work in that build (its client is tied to the real identifier); email sign-in does.
 //   Run `npx expo prebuild -p ios` without the flag afterwards to get the normal project back.
-const { withEntitlementsPlist } = require('expo/config-plugins');
+const { withEntitlementsPlist, withAppBuildGradle } = require('expo/config-plugins');
+
+// Android build failed with "Duplicate class androidx.work.OneTimeWorkRequestKt": the widget library brings
+// work-runtime 2.8.1, which already contains the classes of the older work-runtime-ktx 2.7.1 pulled in by another package.
+const withoutWorkKtx = (config) =>
+  withAppBuildGradle(config, (c) => {
+    if (!c.modResults.contents.includes("module: 'work-runtime-ktx'"))
+      c.modResults.contents += "\nconfigurations.all { exclude group: 'androidx.work', module: 'work-runtime-ktx' }\n";
+    return c;
+  });
 
 const withoutPush = (config) =>
   withEntitlementsPlist(config, (c) => {
@@ -41,7 +50,7 @@ module.exports = ({ config }) => {
   const iosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
   const personal = process.env.PERSONAL_TEAM === '1';
   // First in the list = runs last, after expo-notifications has added the entitlement.
-  const plugins = [...(personal ? [withoutPush] : []), ...config.plugins, ['react-native-android-widget', { widgets: androidWidgets }]];
+  const plugins = [...(personal ? [withoutPush] : []), withoutWorkKtx, ...config.plugins, ['react-native-android-widget', { widgets: androidWidgets }]];
   if (!personal) plugins.push(['expo-widgets', { widgets: iosWidgets }], 'expo-apple-authentication'); // Apple sign-in cannot be signed with a free Apple ID either
   if (iosClientId) {
     const iosUrlScheme = `com.googleusercontent.apps.${iosClientId.replace('.apps.googleusercontent.com', '')}`;
