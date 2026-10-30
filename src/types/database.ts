@@ -477,6 +477,45 @@ export type Database = {
           },
         ]
       }
+      plans: {
+        Row: {
+          created_at: string
+          desc_ar: string
+          desc_en: string
+          entitlements: Json
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name_ar: string
+          name_en: string
+          sort: number
+        }
+        Insert: {
+          created_at?: string
+          desc_ar?: string
+          desc_en?: string
+          entitlements?: Json
+          id: string
+          is_active?: boolean
+          is_default?: boolean
+          name_ar: string
+          name_en: string
+          sort?: number
+        }
+        Update: {
+          created_at?: string
+          desc_ar?: string
+          desc_en?: string
+          entitlements?: Json
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name_ar?: string
+          name_en?: string
+          sort?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -688,6 +727,45 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "record_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_plans: {
+        Row: {
+          expires_at: string | null
+          plan_id: string
+          source: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          expires_at?: string | null
+          plan_id: string
+          source?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          expires_at?: string | null
+          plan_id?: string
+          source?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_plans_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_plans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -932,6 +1010,10 @@ export type Database = {
       accept_share: { Args: { token: string }; Returns: string }
       admin_overview: { Args: never; Returns: Json }
       admin_role: { Args: never; Returns: string }
+      admin_set_user_plan: {
+        Args: { p_expires: string; p_plan: string; p_user: string }
+        Returns: undefined
+      }
       admin_type_usage: {
         Args: never
         Returns: {
@@ -986,8 +1068,12 @@ export type Database = {
         Args: { p_kind: string; p_ms: number; p_ok: boolean }
         Returns: undefined
       }
+      my_entitlements: { Args: never; Returns: Json }
+      my_feature: { Args: { p_key: string }; Returns: boolean }
+      my_limit: { Args: { p_key: string }; Returns: number }
       owns_log: { Args: { l: string }; Returns: boolean }
       owns_vehicle: { Args: { v: string }; Returns: boolean }
+      plan_entitlements: { Args: { p_user: string }; Returns: Json }
       require_admin: { Args: never; Returns: undefined }
       require_pii_admin: { Args: never; Returns: undefined }
       revoke_widget_keys: { Args: never; Returns: undefined }

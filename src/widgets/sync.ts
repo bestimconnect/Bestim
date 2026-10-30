@@ -3,6 +3,7 @@ import { Asset } from 'expo-asset';
 import { Directory, File, Paths } from 'expo-file-system';
 import { AppState, Platform } from 'react-native';
 
+import { can } from '@/lib/entitlements';
 import i18n from '@/lib/i18n';
 import { partArt, type ArtState } from '@/lib/partArt';
 import { queryClient } from '@/lib/queryClient';
@@ -88,6 +89,7 @@ async function widgetApi(): Promise<WidgetApi | null> {
   try {
     stored = JSON.parse((await AsyncStorage.getItem(KEY_STORE)) ?? 'null');
   } catch {}
+  if (!can(queryClient.getQueryData(['entitlements', user.id]), 'widgets')) return null; // plan without widgets: no key, the buttons just open the app
   if (stored?.userId !== user.id) {
     const { data: key, error } = await supabase.rpc('create_widget_key' as never, { p_platform: Platform.OS === 'ios' ? 'ios' : 'android' } as never);
     if (error || typeof key !== 'string') return null; // migration not applied yet, or offline: widgets still show data, their buttons open the app

@@ -52,7 +52,9 @@ Deno.serve(async (req) => {
   // Count before spending: a failed AI call still counts, so retries can't be used to hammer the API.
   const used = await supabase.rpc('bump_voice_usage');
   if (used.error) return json({ error: 'server' }, 500);
-  if (used.data > DAILY_LIMIT) return json({ error: 'limit' }, 429);
+  const plan = await supabase.rpc('my_limit', { p_key: 'voice_per_day' }); // the plan's own limit, never above the built-in one
+  const limit = plan.data == null ? DAILY_LIMIT : Math.min(DAILY_LIMIT, plan.data);
+  if (used.data > limit) return json({ error: 'limit' }, 429);
 
   // The phone's own text is the fallback when there is no recording (simulator, older Android).
   const said: Said = audio ? { audio, mime: body.mime } : { text: typed };

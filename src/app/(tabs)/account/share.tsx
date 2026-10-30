@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { ErrorState } from '@/components/ErrorState';
 import { openCapture } from '@/lib/reading';
 import { Button, Choice, Field, Header, Item, Note, Text } from '@/components/ui';
+import { blockFeature, upgradeOnLimitError, useEntitlements } from '@/lib/entitlements';
 import { SITE } from '@/lib/links';
 import { useCurrentVehicle, useVehicleLogs, useVehicleParts, useVehicles, vehicleName } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
@@ -40,6 +41,7 @@ export default function ShareScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const [pasted, setPasted] = useState('');
+  const ent = useEntitlements().data;
 
   const name = vehicle ? vehicleName(vehicle) : '';
   const count = logs.data?.length ?? 0;
@@ -49,7 +51,7 @@ export default function ShareScreen() {
     pickVehicle(vehicle?.id ?? null, (id) => { setPickedId(id); setLink(null); });
 
   const prepare = async () => {
-    if (!vehicle) return;
+    if (!vehicle || blockFeature(ent, 'share_history')) return;
     setBusy(true);
     setError(false);
     // Q43: reuse a pending unexpired share for this vehicle.
@@ -58,6 +60,7 @@ export default function ShareScreen() {
     if (!token) {
       const ins = await supabase.from('vehicle_shares').insert({ vehicle_id: vehicle.id }).select('share_token').single();
       token = ins.data?.share_token;
+      if (!token && ins.error?.code === '42501') blockFeature({ plan_id: '-', entitlements: {} }, 'share_history'); // RLS: plan has no sharing
     }
     setBusy(false);
     if (token) setLink(`${SITE}/receive?token=${token}`);

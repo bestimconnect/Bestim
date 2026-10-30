@@ -13,6 +13,7 @@ import { KeyboardDone } from '@/components/KeyboardDone';
 import { StepsBar } from '@/components/StepsBar';
 import { toast } from '@/components/Toast';
 import { Button, Field, Header, Item, Note, PressableScale, Text, Toggle } from '@/components/ui';
+import { blockFeature, useEntitlements } from '@/lib/entitlements';
 import { errorText } from '@/lib/errors';
 import { shouldAskNotifications } from '@/lib/notifications';
 import { useOnline } from '@/lib/online';
@@ -68,6 +69,7 @@ export default function CaptureSheet() {
   const current = useCurrentVehicle().vehicle;
   const picked = useVehicle(vehicleId ?? log?.vehicle_id ?? expense?.vehicle_id ?? card?.vehicleId).vehicle;
   const vehicle = picked ?? current;
+  const ent = useEntitlements().data;
   const connected = useOnline();
   const services = (useServiceTypes().data ?? []).filter((s) => s.category_id); // a retired one (Car Wash) is never offered
   const tree = useRecordCategories().data ?? [];
@@ -210,6 +212,7 @@ export default function CaptureSheet() {
   };
 
   const attach = async () => {
+    if (blockFeature(ent, 'receipt_photos')) return;
     const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
     if (!r.canceled) setPhotoUri(r.assets[0].uri);
   };

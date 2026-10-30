@@ -38,7 +38,9 @@ Deno.serve(async (req) => {
   // Count before spending: a failed AI call still counts, so retries can't be used to hammer the API.
   const used = await supabase.rpc('bump_scan_usage');
   if (used.error) return json({ error: 'server' }, 500);
-  if (used.data > DAILY_LIMIT) return json({ error: 'limit' }, 429);
+  const plan = await supabase.rpc('my_limit', { p_key: 'scans_per_day' }); // the plan's own limit, never above the built-in one
+  const limit = plan.data == null ? DAILY_LIMIT : Math.min(DAILY_LIMIT, plan.data);
+  if (used.data > limit) return json({ error: 'limit' }, 429);
 
   const started = Date.now();
   // The dashboard's AI usage log (admin_foundation migration). It must never break a scan, so errors are swallowed.

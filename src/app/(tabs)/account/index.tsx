@@ -2,7 +2,7 @@ import { useTabBarSpace } from '@/components/TabBar';
 import { useRefresh } from '@/components/Refresh';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { Bell, Camera, Coins, Download, Languages, Moon, Repeat, LogOut } from 'lucide-react-native';
+import { Bell, Camera, Coins, Crown, Download, Languages, Moon, Repeat, LogOut } from 'lucide-react-native';
 import { Fragment, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/components/Avatar';
 import { Group, Header, Item, Text, Toggle, PressableScale } from '@/components/ui';
 import { useAvatarActions } from '@/lib/avatar';
+import { planName, useEntitlements } from '@/lib/entitlements';
 import { signOut } from '@/lib/auth';
 import { applyLanguage } from '@/lib/i18n';
 import { openPage } from '@/lib/links';
@@ -34,6 +35,7 @@ export default function AccountScreen() {
   const { language, setLanguage, theme, setTheme } = useSettings();
   const { vehicle } = useCurrentVehicle();
   const { data: profile } = useProfile();
+  const plan = planName(useEntitlements().data);
 
   const switchLanguage = () =>
     sheet(t('account.switchTitle'), t('account.switchBody'), [
@@ -102,6 +104,7 @@ export default function AccountScreen() {
         </Group>
         <Text variant="caption" className="mt-2 px-1 text-muted">{t('account.group.data')}</Text>
         <Group>
+          <Item icon={Crown} tone="paper" title={t('plans.account')} aside={plan ? <Text variant="label">{plan}</Text> : undefined} onPress={() => router.push('/plans')} />
           <Item icon={Download} tone="paper" title={t('account.export')} subtitle={t('account.exportSub')} onPress={() => router.push('/account/export')} />
           <Item icon={Repeat} tone="paper" title={t('account.share')} subtitle={t('account.shareSub')} onPress={() => router.push('/account/share')} />
         </Group>

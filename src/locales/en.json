@@ -591,6 +591,32 @@
     "later": "Later",
     "emptyPeriod": "No expenses in this period."
   },
+  "plans": {
+    "title": "Plans",
+    "current": "Your plan",
+    "soon": "Upgrades will open soon",
+    "see": "See plans",
+    "close": "Close",
+    "unlimited": "Unlimited",
+    "proTitle": "This is a Pro feature",
+    "proBody": "It isn't included in your current plan.",
+    "limitTitle": "You reached your limit of {{n}} on {{plan}}",
+    "limitTitleShort": "You reached your plan's limit",
+    "limitBody": "See what each plan includes.",
+    "account": "My plan",
+    "limit": {
+      "max_cars": "Cars",
+      "max_logs": "Records",
+      "voice_per_day": "Voice records per day",
+      "scans_per_day": "Odometer scans per day"
+    },
+    "feature": {
+      "receipt_photos": "Receipt photos",
+      "share_history": "Share car history",
+      "export": "Export records",
+      "widgets": "Home screen widgets"
+    }
+  },
   "notify": {
     "soonTitle": "{{part}} is coming up",
     "soonDate": "Due {{date}}. Book in time.",

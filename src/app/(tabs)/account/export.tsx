@@ -14,6 +14,7 @@ import { ErrorState } from '@/components/ErrorState';
 import { openCapture } from '@/lib/reading';
 import { Button, Choice, Header, Note, Text, Toggle } from '@/components/ui';
 import { toCsv, toHtml, toJson, type ExportLabels, type ExportLog, type ExportOptions } from '@/lib/export';
+import { blockFeature, useEntitlements } from '@/lib/entitlements';
 import { useCurrentVehicle, useVehicleLogs, useVehicles, vehicleName } from '@/lib/queries';
 
 // Screen 27 — Export (decisions Q42); ar-light 27/تصدير السجل.png
@@ -31,10 +32,11 @@ export default function ExportScreen() {
   const [opts, setOpts] = useState<ExportOptions>({ costs: true, workshops: true, identifiers: false, notes: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const ent = useEntitlements().data;
 
   const empty = logs.isSuccess && logs.data.length === 0;
   const prepare = async () => {
-    if (!vehicle || !logs.data) return;
+    if (!vehicle || !logs.data || blockFeature(ent, 'export')) return;
     setBusy(true);
     setError(false);
     try {

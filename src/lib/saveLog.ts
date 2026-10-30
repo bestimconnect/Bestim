@@ -1,3 +1,4 @@
+import { upgradeOnLimitError } from './entitlements';
 import { supabase } from './supabase';
 
 // Saving a maintenance log lives here (not in the review screen) so it can be a TanStack mutation default:
@@ -78,6 +79,9 @@ export async function saveLog(d: SaveLogInput) {
     })
     .select('id, status')
     .single();
-  if (error) throw error;
+  if (error) {
+    upgradeOnLimitError(error); // the plan's log limit: explain it, the caller still sees the failure
+    throw error;
+  }
   return log;
 }

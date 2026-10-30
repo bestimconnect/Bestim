@@ -12,6 +12,7 @@ import { Ring } from '@/components/Ring';
 import { Button, Header, PressableScale, Rise, Text } from '@/components/ui';
 import { openDetails } from '@/lib/carFlight';
 import { carHealth, STATE_COLOR } from '@/lib/health';
+import { blockLimit, useEntitlements } from '@/lib/entitlements';
 import { useVehicleParts, useVehicles, vehicleName, type Vehicle } from '@/lib/queries';
 import { shadows, useColors } from '@/lib/theme';
 import { hasReading } from '@/lib/reading';
@@ -51,6 +52,7 @@ export default function VehiclesScreen() {
   const space = useTabBarSpace();
   const { t } = useTranslation();
   const { data: vehicles, isError, refetch, isRefetching } = useVehicles();
+  const ent = useEntitlements().data;
   const onShowSaved = useShowSavedAction();
   if (isError && !vehicles) return <ErrorState onRetry={refetch} retrying={isRefetching} onShowSaved={onShowSaved} />;
   return (
@@ -69,7 +71,7 @@ export default function VehiclesScreen() {
         ))}
         <Button
           title={t('vehicles.add')}
-          onPress={() => router.push({ pathname: '/add-vehicle', params: { mode: 'extra' } })}
+          onPress={() => !blockLimit(ent, 'max_cars', vehicles?.length ?? 0) && router.push({ pathname: '/add-vehicle', params: { mode: 'extra' } })}
         />
       </ScrollView>
     </SafeAreaView>

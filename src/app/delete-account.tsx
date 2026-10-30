@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { DeleteConfirm } from '@/components/DeleteConfirm';
 import { toast } from '@/components/Toast';
-import { signOut } from '@/lib/auth';
+import { revokeApple, signOut } from '@/lib/auth';
 import { useSession } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 
@@ -13,6 +13,7 @@ export default function DeleteAccount() {
 
   const remove = async () => {
     if (!userId) throw new Error('no user');
+    await revokeApple(); // before anything is deleted: if the user cancels Apple's prompt, nothing is lost
     // Receipt and profile photos go first, a page at a time, until each folder is empty: nothing of the user may stay behind.
     for (const bucket of ['receipts', 'avatars']) {
       for (;;) {

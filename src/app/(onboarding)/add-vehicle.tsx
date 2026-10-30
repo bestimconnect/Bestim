@@ -13,6 +13,7 @@ import { ColorPicker } from '@/components/ColorPicker';
 import { PlateField, joinPlate } from '@/components/Plate';
 import { OdometerScanner } from '@/components/OdometerScanner';
 import { Button, Field, Header, Item, Note, PressableScale, Rise, Text } from '@/components/ui';
+import { upgradeOnLimitError } from '@/lib/entitlements';
 import { errorText } from '@/lib/errors';
 import { POP, SWAP } from '@/lib/motion';
 import { useCarCatalog } from '@/lib/queries';
@@ -94,6 +95,7 @@ export default function AddVehicleInfoScreen() {
     });
 
   const save = useMutation({
+    onError: upgradeOnLimitError,
     mutationFn: async (km: number | null) => {
       if (!created.current) {
         const d = useVehicleDraft.getState();
@@ -237,7 +239,7 @@ export default function AddVehicleInfoScreen() {
             onChangeText={(v) => draft.set({ nickname: v })}
           />
         </View>
-        {save.error ? <Note tone="warning" text={errorText(save.error)} /> : null}
+        {save.error && (save.error as { code?: string }).code !== '54000' ? <Note tone="warning" text={errorText(save.error)} /> : null}
         <Button
           title={t('onboarding.addVehicle.info.cta')}
           disabled={!draft.make || !draft.model || !draft.year || !vinOk(draft.vin)}

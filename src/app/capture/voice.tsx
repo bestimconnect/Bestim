@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { KEYBOARD_DONE_ID } from '@/components/KeyboardDone';
 import { Button, Header, Text } from '@/components/ui';
 import { rise, SWAP } from '@/lib/motion';
+import { showUpgrade } from '@/lib/entitlements';
 import { useServiceTypes, useVehicles } from '@/lib/queries';
 import { speechLang } from '@/lib/speech';
 import { normalizeRecords } from '@/lib/voiceRecords';
@@ -151,7 +152,7 @@ export default function Voice() {
       };
       if (!onlineManager.isOnline()) return keep();
       const res = await sendVoice({ audio: fits ? await file!.base64() : null, mime, text, vehicleId: d.vehicleId, lang: i18n.language });
-      if (!res.ok) return res.reason === 'offline' ? keep() : toManual(res.reason === 'limit' ? 'dailyLimit' : 'aiFailed'); // Q64, Q65
+      if (!res.ok) return res.reason === 'offline' ? keep() : (res.reason === 'limit' && showUpgrade('limit'), toManual(res.reason === 'limit' ? 'dailyLimit' : 'aiFailed')); // Q64, Q65
       if (__DEV__) console.log(`voice: ${Date.now() - doneAt.current} ms from Done to result`, res.ms);
       const heard = res.transcript || text;
       if (!heard) {

@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { PlateView } from '@/components/Plate';
 import { Item, PressableScale, Rise, Text } from '@/components/ui';
+import { blockLimit, useEntitlements } from '@/lib/entitlements';
 import { needsAttention, useVehicleParts, useVehicles, vehicleName, type Vehicle } from '@/lib/queries';
 import { useVehiclePick } from '@/lib/sheet';
 import { useColors } from '@/lib/theme';
@@ -49,6 +50,7 @@ export default function SwitchVehicle() {
   const c = useColors();
   const { bottom } = useSafeAreaInsets();
   const vehicles = useVehicles().data ?? [];
+  const ent = useEntitlements().data;
   const { currentId, onPick } = useVehiclePick();
 
   const pick = (id: string) => {
@@ -60,6 +62,7 @@ export default function SwitchVehicle() {
   const add = () => {
     // replace() from a formSheet only closes the sheet on iOS, so close it, then push the full screen.
     router.back();
+    if (blockLimit(ent, 'max_cars', vehicles.length)) return;
     router.push({ pathname: '/add-vehicle', params: { mode: 'extra' } });
   };
 

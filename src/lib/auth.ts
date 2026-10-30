@@ -70,12 +70,36 @@ export async function signInWithApple(): Promise<boolean> {
     throw e;
   }
   if (!credential.identityToken) throw new Error('Apple returned no identity token');
-  const { data, error } = await supabase.auth.signInWithIdToken({ provider: 'apple', token: credential.identityToken });
-  if (error) throw error;
+  const credentials = { provider: 'apple', token: credential.identityToken } as const;
   // Apple shares the name only on the very first sign-in; keep it.
   const name = [credential.fullName?.givenName, credential.fullName?.familyName].filter(Boolean).join(' ');
-  if (name) await supabase.from('profiles').update({ full_name: name }).eq('id', data.user.id);
+  const saveName = (id: string) => name ? supabase.from('profiles').update({ full_name: name }).eq('id', id) : null;
+  // A guest links Apple to the same user, so their vehicles stay (same as Google above).
+  const { data: current } = await supabase.auth.getUser();
+  if (current.user?.is_anonymous) {
+    const { error } = await supabase.auth.linkIdentity(credentials);
+    if (!error) {
+      await saveName(current.user.id);
+      return true;
+    }
+    // This Apple account already has a Bestim account: sign into it (the guest's trial car is left behind).
+  }
+  const { data, error } = await supabase.auth.signInWithIdToken(credentials);
+  if (error) throw error;
+  await saveName(data.user.id);
   return true;
+}
+
+/** Account deletion on an Apple-signed-in iPhone: Apple wants the sign-in revoked (guideline 5.1.1(v)). Asks Apple again for a fresh one-time code and has the server revoke it. */
+export async function revokeApple(): Promise<void> {
+  if (Platform.OS !== 'ios') return;
+  const { data } = await supabase.auth.getUser();
+  if (!data.user?.identities?.some((i) => i.provider === 'apple')) return;
+  const Apple = await import('expo-apple-authentication');
+  const credential = await Apple.signInAsync({ requestedScopes: [] });
+  if (!credential.authorizationCode) throw new Error('Apple returned no authorization code');
+  const { error } = await supabase.functions.invoke('revoke-apple', { body: { code: credential.authorizationCode } });
+  if (error) throw error;
 }
 
 /** Sign out; the cache empties itself when the user changes (queryClient.ts). Language, theme and the tour flag stay. */
