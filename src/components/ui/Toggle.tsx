@@ -18,7 +18,7 @@ export function Toggle({ value, onChange, label }: { value: boolean; onChange: (
       style={{ direction: 'ltr', alignItems: 'flex-start' }}>
       <Animated.View
         className="h-5 w-5 rounded-full bg-[#FFFFFF]"
-        style={{ transform: [{ translateX: value ? 20 : 0 }], transitionProperty: 'transform', transitionDuration: still ? '0ms' : '160ms', transitionTimingFunction: EASE_OUT }}
+        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.25)', transform: [{ translateX: value ? 20 : 0 }], transitionProperty: 'transform', transitionDuration: still ? '0ms' : '160ms', transitionTimingFunction: EASE_OUT }}
       />
     </Pressable>
   );

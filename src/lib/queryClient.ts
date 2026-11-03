@@ -20,12 +20,30 @@ queryClient.setMutationDefaults(SAVE_LOG_KEY, {
 });
 // Bump the key's version whenever a query's data shape changes, so an old cached shape is never read back.
 export const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: 'queryCache.v4' });
+// Not worth keeping on the phone: the big brand list (Android rejects a storage row over ~2 MB), signed links that expire
+// within the hour, and a shared record someone else owns.
+const SKIP = new Set(['car_catalog', 'avatar', 'log-receipt', 'share']);
+export const dehydrateOptions = { shouldDehydrateQuery: (q: { queryKey: readonly unknown[]; state: { status: string } }) => q.state.status === 'success' && !SKIP.has(String(q.queryKey[0])) };
 // Cached data belongs to one user: drop it whenever the signed-in user changes (sign out, an expired session,
 // another account), so the next person on this phone never sees it. The first event only restores the session.
+/** Queued voice recordings, the notifications list, the "already notified" memory and per-user choices belong to one account. */
+async function wipeLocalUserData() {
+  try {
+    const [{ useVoiceQueue }, { dropVoice }, { useInbox }, { useSettings }] = await Promise.all([import('@/stores/voiceQueue'), import('./voiceSend'), import('@/stores/notifyInbox'), import('@/stores/settingsStore')]);
+    useVoiceQueue.getState().items.forEach((i) => dropVoice(i.id));
+    useInbox.getState().clear();
+    await AsyncStorage.removeItem('notifySent');
+    useSettings.getState().setCurrentVehicle(null);
+    useSettings.getState().set({ expensesAll: false });
+  } catch {} // best effort: a failure here must never break sign-in
+}
 let cacheOwner: string | null | undefined;
 supabase.auth.onAuthStateChange((_e, s) => {
   const id = s?.user.id ?? null;
-  if (cacheOwner !== undefined && cacheOwner !== id) queryClient.clear();
+  if (cacheOwner !== undefined && cacheOwner !== id) {
+    queryClient.clear();
+    wipeLocalUserData(); // the same goes for what the app keeps outside the cache
+  }
   cacheOwner = id;
 });
 onlineManager.setEventListener((setOnline) => NetInfo.addEventListener((s) => setOnline(s.isConnected !== false)));

@@ -109,7 +109,7 @@ export async function signOut() {
   await supabase.auth.signOut();
   import('@react-native-google-signin/google-signin').then(({ GoogleSignin }) => GoogleSignin.signOut()).catch(() => {});
   useSettings.getState().setCurrentVehicle(null);
-  useSettings.getState().set({ pendingShareToken: null });
+  useSettings.getState().set({ pendingShareToken: null, expensesAll: false });
   syncNotifications(); // no user → cancels every scheduled reminder
   const { useVoiceQueue } = await import('@/stores/voiceQueue');
   const { dropVoice } = await import('./voiceSend');

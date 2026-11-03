@@ -20,6 +20,7 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'method' }, 405);
   // Decisions Q97: reading stays on the phone. The AI backup only answers once ODOMETER_AI=on is set (CEO's call).
   if (Deno.env.get('ODOMETER_AI') !== 'on') return json({ error: 'disabled' }, 403);
+  // ponytail: a missing content-length passes (refusing it could reject real phones if the gateway streams the body); the gateway caps body size too.
   if (Number(req.headers.get('content-length') ?? 0) > MAX_IMAGE_B64 + 10_000) return json({ error: 'too_large' }, 413);
 
   const auth = req.headers.get('Authorization') ?? '';

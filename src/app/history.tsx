@@ -3,17 +3,17 @@ import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { useMutationState, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
-import { BadgeCheck, ListFilter, Trash2, X } from 'lucide-react-native';
-import * as Icons from 'lucide-react-native';
+import { BadgeCheck, Clock, Gauge, ListFilter, SearchX, Trash2, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { ErrorState, useShowSavedAction } from '@/components/ErrorState';
+import { EmptyState } from '@/components/EmptyState';
 import { VoiceQueueCard } from '@/components/VoiceQueueCard';
 import { PartArt } from '@/components/PartArt';
-import { Button, Choice, Group, Header, Item, Text } from '@/components/ui';
+import { Backdrop, Button, Card, Chip, Choice, FooterBar, Group, Header, Item, Section, Text } from '@/components/ui';
 import { openCapture } from '@/lib/reading';
 import { carLog, scopeOf, type Kind } from '@/lib/carLog';
 import { consumption } from '@/lib/fuel';
@@ -21,12 +21,13 @@ import { useCurrentVehicle, useExpenses, useFuelFills, useOdometerReadings, useR
 import { SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
 import { removeRecord } from '@/lib/removeRecord';
 import { pickOption, type PickOption } from '@/lib/sheet';
-import { shadows, useColors } from '@/lib/theme';
+import { useColors } from '@/lib/theme';
 
 // Screens 10 + 39 — Car log / empty state. Figma: docs/figma-screens.md (10, 39); the timeline and its filters are decisions Q90.
 // Maintenance logs, running costs and odometer readings in one list (merge + filter: src/lib/carLog.ts).
 const n = (x: number) => x.toLocaleString('en-US');
 const KINDS: Kind[] = ['all', 'maintenance', 'cost', 'reading'];
+const PAGE = 50; // rows shown at a time: a long history would otherwise render every row at once
 
 export default function HistoryScreen() {
   const { t, i18n } = useTranslation();
@@ -43,6 +44,7 @@ export default function HistoryScreen() {
   const tree = useRecordCategories().data ?? [];
   const onShowSaved = useShowSavedAction();
   const [kind, setKind] = useState<Kind>('all');
+  const [shown, setShown] = useState(PAGE);
   const [filterId, setFilterId] = useState<string | null>(p.filter ?? null);
   // Q45: logs written offline wait in the mutation queue until they sync.
   const queued = useMutationState({
@@ -81,7 +83,7 @@ export default function HistoryScreen() {
 
   const entries = carLog(logs.data ?? [], costs, readings, kind, scopeOf(filterId, tree, services));
   const groups: { month: string; items: typeof entries }[] = [];
-  for (const e of entries) {
+  for (const e of entries.slice(0, shown)) {
     const month = format(parseISO(e.date), 'MMMM yyyy', { locale: arabic ? ar : enUS });
     const last = groups[groups.length - 1];
     if (last?.month === month) last.items.push(e);
@@ -92,7 +94,9 @@ export default function HistoryScreen() {
 
   if (logs.isError && !logs.data) return <ErrorState onRetry={logs.refetch} retrying={logs.isRefetching} onShowSaved={onShowSaved} />;
   return (
-    <SafeAreaView className="flex-1 bg-paper px-6">
+    <SafeAreaView className="flex-1 bg-paper">
+      <Backdrop />
+      <View className="px-6">
       <Header
         title={t('history.header')}
         sub={empty ? undefined : t('history.count', { count: entries.length + queued.length })}
@@ -101,7 +105,7 @@ export default function HistoryScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('history.filter')}
-              onPress={() => pickOption({ title: t('history.filter'), options, allowCustom: false, onPick: ({ id }) => setFilterId(id) })}
+              onPress={() => pickOption({ title: t('history.filter'), options, allowCustom: false, onPick: ({ id }) => { setFilterId(id); setShown(PAGE); } })}
               className={`h-11 w-11 items-center justify-center rounded-full ${chip ? 'bg-lime' : 'bg-[#FFFFFF26]'}`}>
               <ListFilter size={20} color={chip ? '#222E29' : '#F5F7F5'} />
             </Pressable>
@@ -113,63 +117,56 @@ export default function HistoryScreen() {
               onDark
               className="bg-[#FFFFFF1F]"
               value={kind}
-              onChange={setKind}
+              onChange={(k) => { setKind(k); setShown(PAGE); }}
               options={KINDS.map((k) => ({ value: k, label: t(`history.kind.${k}`) }))}
             />
           )
         }
       />
+      </View>
       {empty ? (
-        <View className="flex-1 justify-center gap-6 pb-10">
+        <View className="flex-1 justify-center gap-6 px-6 pb-6">
           <View className="items-center">
-            <View className="w-[200px] gap-2 rounded-item bg-white p-4" style={{ boxShadow: shadows.elevated }}>
+            <Card className="w-[200px] gap-2 p-4">
               <View className="flex-row items-center gap-2">
                 <BadgeCheck size={24} color={c.teal} />
-                <Text variant="label" className="flex-1">{t('history.cardTitle')}</Text>
+                <Text variant="label" className="flex-1" numberOfLines={2}>{t('history.cardTitle')}</Text>
               </View>
               <Text variant="caption" className="text-muted">{t('history.cardBody')}</Text>
               <View className="h-1 w-[60%] rounded-full bg-lime" />
-            </View>
+            </Card>
           </View>
           <Text variant="title">{t('history.emptyTitle')}</Text>
           <Text variant="body" className="text-muted">{t('history.emptyBody')}</Text>
-          <Button title={t('history.emptyCta')} onPress={add} />
         </View>
       ) : (
-        <>
-          <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-3 pb-4" showsVerticalScrollIndicator={false}>
+        <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-6 px-6 pb-6 pt-1" showsVerticalScrollIndicator={false}>
             {vehicleId ? <VoiceQueueCard vehicleId={vehicleId} /> : null}
-            <View className="flex-row flex-wrap gap-2">
-              {chip ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('history.removeFilter')}
-                  onPress={() => setFilterId(null)}
-                  className="h-11 flex-row items-center gap-2 rounded-nav bg-ink px-4">
-                  <Text variant="caption" className="text-paper">{chip.label}</Text>
-                  <X size={14} color={c.paper} />
-                </Pressable>
-              ) : null}
-            </View>
-            {queued.map((q, i) => (
-              <View key={i} className="gap-1.5">
-                <Text variant="caption" className="text-muted">{t('feedback.pending')}</Text>
-                <Item icon={Icons.Clock} title={q.title} subtitle={`${(q.odometer ?? 0).toLocaleString('en-US')} · ${q.serviceDate}`} chevron={false} />
-              </View>
-            ))}
-            {groups.length === 0 && !queued.length && logs.isSuccess ? (
-              <View className="mt-6 gap-4">
-                <Text variant="body" className="text-center text-muted">{t('history.emptyCategory')}</Text>
-                <Button variant="secondary" title={t('history.clearFilter')} onPress={() => { setFilterId(null); setKind('all'); }} />
+            {chip ? (
+              <View className="flex-row">
+                <Chip label={chip.label} selected icon={X} onPress={() => { setFilterId(null); setShown(PAGE); }} />
               </View>
             ) : null}
+            {queued.length ? (
+              <View>
+                <Section title={t('feedback.pending')} />
+                <Group>
+                  {queued.map((q, i) => (
+                    <Item key={i} icon={Clock} title={q.title} subtitle={`${(q.odometer ?? 0).toLocaleString('en-US')} · ${q.serviceDate}`} chevron={false} />
+                  ))}
+                </Group>
+              </View>
+            ) : null}
+            {groups.length === 0 && !queued.length && logs.isSuccess ? (
+              <EmptyState icon={SearchX} title={t('history.emptyCategory')} action={t('history.clearFilter')} onAction={() => { setFilterId(null); setKind('all'); }} />
+            ) : null}
             {groups.map((g) => (
-              <View key={g.month} className="gap-3">
-                <Text variant="heading">{g.month}</Text>
+              <View key={g.month}>
+                <Section title={g.month} />
                 <Group>
                 {g.items.map((e) => {
                   if (e.type === 'reading')
-                    return <Item key={`r${e.item.id}`} icon={Icons.Gauge} title={t('history.rowNoCost', { reading: n(e.item.reading) })} subtitle={t('history.odometerUpdated')} chevron={false} disabled />;
+                    return <Item key={`r${e.item.id}`} icon={Gauge} title={t('history.rowNoCost', { reading: n(e.item.reading) })} subtitle={t('history.odometerUpdated')} chevron={false} disabled />;
                   if (e.type === 'cost') {
                     const x = e.item;
                     const sub = tree.find((y) => y.expense_code === x.category);
@@ -193,9 +190,9 @@ export default function HistoryScreen() {
                     : t('history.rowNoCost', { reading });
                   const caption = l.status === 'needs_review' ? t('history.needsReview') : l.status === 'corrected' ? t('history.corrected') : null;
                   return (
-                    <View key={l.id} className="gap-1.5">
+                    <View key={l.id}>
                       {caption ? (
-                        <Text variant="caption" className={l.status === 'needs_review' ? 'text-[#B7791F]' : 'text-teal'}>{caption}</Text>
+                        <Text variant="caption" className={`px-3.5 pt-3 ${l.status === 'needs_review' ? 'text-[#B7791F]' : 'text-teal'}`}>{caption}</Text>
                       ) : null}
                       <Item
                         leading={<PartArt nameEn={l.service_types?.name_en} size={28} />}
@@ -210,12 +207,12 @@ export default function HistoryScreen() {
                 </Group>
               </View>
             ))}
-          </ScrollView>
-          <View className="pb-4 pt-2">
-            <Button title={t('history.add')} onPress={add} />
-          </View>
-        </>
+            {entries.length > shown ? <Button title={t('history.more')} variant="secondary" onPress={() => setShown((n) => n + PAGE)} /> : null}
+        </ScrollView>
       )}
+      <FooterBar inset={false}>
+        <Button title={t(empty ? 'history.emptyCta' : 'history.add')} onPress={add} />
+      </FooterBar>
     </SafeAreaView>
   );
 }

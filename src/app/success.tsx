@@ -9,11 +9,11 @@ import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Item, Rise, Text } from '@/components/ui';
+import { Backdrop, Button, FooterBar, IconTile, Item, Rise, Sheen, Text } from '@/components/ui';
 import { openCapture } from '@/lib/reading';
 import { POP } from '@/lib/motion';
 import { useVehicle, useProfile } from '@/lib/queries';
-import { useColors } from '@/lib/theme';
+import { shadows, useColors } from '@/lib/theme';
 
 type Params = {
   kind?: 'log' | 'batch'; // batch = several records from one voice recording (Q67)
@@ -76,11 +76,18 @@ export default function Success() {
   const another = () => openCapture({ vehicleId: p.vehicleId });
 
   return (
-    <SafeAreaView className="flex-1 bg-paper px-6" edges={['top', 'bottom']}>
+    <View className="flex-1 bg-paper">
+      <Backdrop />
+      {/* a soft mint wash from the top so the screen is not an empty page */}
+      <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[60%] overflow-hidden">
+        <Sheen color={c.teal} opacity={0.07} />
+        <Sheen color="#D3F53D" opacity={0.22} glow="tr" radius={0.9} />
+      </View>
+    <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
       <Stack.Screen options={{ gestureEnabled: false }} />
-      <View className="flex-1 justify-center gap-6">
-        <Animated.View entering={POP} className="h-20 w-20 items-center justify-center self-center rounded-full bg-mint">
-          <Check size={36} color={c.teal} />
+      <View className="flex-1 justify-center gap-6 px-6">
+        <Animated.View entering={POP} className="self-center rounded-[33px]" style={{ boxShadow: shadows.lift }}>
+          <IconTile icon={Check} size={96} />
         </Animated.View>
         <Rise index={1}>
         <Text variant="title" className="text-center">
@@ -99,10 +106,11 @@ export default function Success() {
           </Rise>
         ) : null}
       </View>
-      <View className="gap-2 pb-4">
+      <FooterBar inset={false}>
         <Button title={t('feedback.success.another')} onPress={another} />
-        <Button title={t('feedback.success.home')} variant="secondary" onPress={home} />
-      </View>
+        <Button title={t('feedback.success.home')} variant="ghost" onPress={home} />
+      </FooterBar>
     </SafeAreaView>
+    </View>
   );
 }

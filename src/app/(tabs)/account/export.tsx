@@ -1,4 +1,3 @@
-import { useTabBarSpace } from '@/components/TabBar';
 import { useRefresh } from '@/components/Refresh';
 import { File, Paths } from 'expo-file-system';
 import * as Print from 'expo-print';
@@ -12,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorState } from '@/components/ErrorState';
 import { openCapture } from '@/lib/reading';
-import { Button, Choice, Header, Note, Text, Toggle } from '@/components/ui';
+import { Backdrop, Button, Choice, FooterBar, Group, Header, Item, Note, Text, Toggle } from '@/components/ui';
 import { toCsv, toHtml, toJson, type ExportLabels, type ExportLog, type ExportOptions } from '@/lib/export';
 import { blockFeature, useEntitlements } from '@/lib/entitlements';
 import { useCurrentVehicle, useVehicleLogs, useVehicles, vehicleName } from '@/lib/queries';
@@ -24,7 +23,6 @@ const ROWS = ['costs', 'workshops', 'identifiers', 'notes'] as const;
 export default function ExportScreen() {
   const { t, i18n } = useTranslation();
   const refresh = useRefresh();
-  const space = useTabBarSpace();
   const { vehicle } = useCurrentVehicle();
   const vehicles = useVehicles();
   const logs = useVehicleLogs(vehicle?.id);
@@ -85,37 +83,42 @@ export default function ExportScreen() {
 
   if (logs.isError && !logs.data) return <ErrorState onRetry={logs.refetch} retrying={logs.isRefetching} />;
   return (
-    <SafeAreaView className="flex-1 bg-paper px-6" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
+      <Backdrop />
       <Header title={t('export.header')} sub={t('account.exportSub')} />
-      <ScrollView refreshControl={refresh} contentContainerClassName="gap-4" contentContainerStyle={{ paddingBottom: space }} showsVerticalScrollIndicator={false}>
-        <Text variant="title">{t('export.title')}</Text>
-        {(vehicles.data?.length ?? 0) > 1 && vehicle ? <Text variant="caption" className="text-muted">{vehicleName(vehicle)}</Text> : null}
+      <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-6 px-6 pt-2 pb-6" showsVerticalScrollIndicator={false}>
+        <View className="gap-1">
+          <Text variant="title">{t('export.title')}</Text>
+          {(vehicles.data?.length ?? 0) > 1 && vehicle ? <Text variant="caption" className="text-muted">{vehicleName(vehicle)}</Text> : null}
+        </View>
         <Choice<Format> className="bg-line" value={fmt} onChange={setFmt} options={[{ value: 'pdf', label: 'PDF' }, { value: 'csv', label: 'CSV' }, { value: 'json', label: 'JSON' }]} />
-        <Row title={t('export.logs.title')} subtitle={t('export.logs.sub')} value disabled />
-        {ROWS.map((r) => (
-          <Row key={r} title={t(`export.${r}.title`)} subtitle={t(`export.${r}.sub`)} value={opts[r]} onChange={(v) => setOpts({ ...opts, [r]: v })} />
-        ))}
-        <Text variant="caption" className="text-muted">{t('export.footnote')}</Text>
+        <View className="gap-3">
+          <Group>
+            <Row title={t('export.logs.title')} subtitle={t('export.logs.sub')} value disabled />
+            {ROWS.map((r) => (
+              <Row key={r} title={t(`export.${r}.title`)} subtitle={t(`export.${r}.sub`)} value={opts[r]} onChange={(v) => setOpts({ ...opts, [r]: v })} />
+            ))}
+          </Group>
+          <Text variant="caption" className="px-1 text-muted">{t('export.footnote')}</Text>
+        </View>
         {empty ? <Text variant="caption" className="text-muted">{t('export.empty')}</Text> : null}
         {error ? <Note tone="warning" text={t('export.error')} /> : null}
-        {empty ? (
-          <Button title={t('history.emptyCta')} onPress={() => openCapture()} className="mt-4" />
-        ) : (
-          <Button title={t('export.prepare')} loading={busy} disabled={!vehicle || !logs.isSuccess} onPress={prepare} className="mt-4" />
-        )}
       </ScrollView>
+      <FooterBar>
+        {empty ? (
+          <Button title={t('history.emptyCta')} onPress={() => openCapture()} />
+        ) : (
+          <Button title={t('export.prepare')} loading={busy} disabled={!vehicle || !logs.isSuccess} onPress={prepare} />
+        )}
+      </FooterBar>
     </SafeAreaView>
   );
 }
 
 function Row({ title, subtitle, value, onChange, disabled }: { title: string; subtitle: string; value: boolean; onChange?: (v: boolean) => void; disabled?: boolean }) {
   return (
-    <View className="min-h-[72px] flex-row items-center gap-3 rounded-item bg-white p-4" style={{ opacity: disabled ? 0.7 : 1 }}>
-      <View className="flex-1 gap-0.5">
-        <Text variant="label">{title}</Text>
-        <Text variant="caption" className="text-muted">{subtitle}</Text>
-      </View>
-      <Toggle value={value} onChange={disabled ? () => {} : onChange!} label={title} />
+    <View style={{ opacity: disabled ? 0.7 : 1 }} pointerEvents={disabled ? 'none' : 'auto'}>
+      <Item title={title} subtitle={subtitle} chevron={false} aside={<Toggle value={value} onChange={onChange ?? (() => {})} label={title} />} />
     </View>
   );
 }

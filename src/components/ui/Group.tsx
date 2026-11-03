@@ -1,7 +1,7 @@
 import { Children, createContext, useContext, type ReactNode } from 'react';
 import { View } from 'react-native';
 
-import { shadows } from '@/lib/theme';
+import { Card } from './Card';
 
 const GroupContext = createContext(false);
 export const useInGroup = () => useContext(GroupContext);
@@ -14,14 +14,14 @@ export function Group({ children, inset = 14 }: { children: ReactNode; inset?: n
   const rows = Children.toArray(children);
   return (
     <GroupContext.Provider value>
-      <View className="overflow-hidden rounded-item bg-white" style={{ boxShadow: shadows.soft }}>
+      <Card>
         {rows.map((row, i) => (
           <View key={i}>
             {i ? <View className="h-px bg-line" style={{ marginHorizontal: inset }} /> : null}
             {row}
           </View>
         ))}
-      </View>
+      </Card>
     </GroupContext.Provider>
   );
 }

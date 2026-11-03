@@ -2,23 +2,26 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Gauge } from 'lucide-react-native';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Header, Text } from '@/components/ui';
+import { LoadingState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
+import { Backdrop, Button, Card, FooterBar, Group, Header, IconTile, Text } from '@/components/ui';
 import { useLog, useVehicle, useVehicleLogs } from '@/lib/queries';
+import { toastError } from '@/components/Toast';
+import { errorText } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
-import { useColors } from '@/lib/theme';
 
 // Screen 20 — Review a flagged reading (decisions Q9).
 export default function ReviewReadingScreen() {
   const { t } = useTranslation();
-  const c = useColors();
   const qc = useQueryClient();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: log } = useLog(id);
-  const { vehicle } = useVehicle(log?.vehicle_id);
+  const logQuery = useLog(id);
+  const log = logQuery.data;
+  const { vehicle, isPending: vehiclesPending, refetch: refetchVehicles } = useVehicle(log?.vehicle_id);
   const logs = useVehicleLogs(log?.vehicle_id).data;
 
   const confirm = useMutation({
@@ -33,8 +36,17 @@ export default function ReviewReadingScreen() {
       await qc.invalidateQueries({ queryKey: ['vehicles'] });
       router.back();
     },
+    onError: (e) => toastError(errorText(e)),
   });
-  if (!log || !vehicle) return <SafeAreaView className="flex-1 bg-paper px-6"><Header title="" /></SafeAreaView>;
+  if ((!log && !logQuery.isPending) || (log && !vehicle && !vehiclesPending))
+    return <ErrorState onRetry={() => { logQuery.refetch(); refetchVehicles(); }} retrying={logQuery.isRefetching} />;
+  if (!log || !vehicle)
+    return (
+      <SafeAreaView className="flex-1 bg-paper">
+        <View className="px-6"><Header title={t('log.review.header')} /></View>
+        <LoadingState />
+      </SafeAreaView>
+    );
 
   const current = log.odometer_reading ?? 0;
   // Previous = latest other log with a reading on or before this one, else the vehicle's odometer.
@@ -45,31 +57,32 @@ export default function ReviewReadingScreen() {
   const km = (n: number) => t('log.review.km', { n: n.toLocaleString('en-US') });
 
   return (
-    <SafeAreaView className="flex-1 bg-paper px-6">
-      <Header title={t('log.review.header')} />
-      <View className="flex-1 gap-4 pt-6">
-        <View className="h-16 w-16 items-center justify-center self-center rounded-full bg-amber">
-          <Gauge size={28} color={c.ink} />
-        </View>
+    <SafeAreaView className="flex-1 bg-paper">
+      <Backdrop />
+      <View className="px-6"><Header title={t('log.review.header')} /></View>
+      <ScrollView className="flex-1" contentContainerClassName="gap-6 px-6 pb-6 pt-4" showsVerticalScrollIndicator={false}>
+        <View className="items-center"><IconTile icon={Gauge} tone="amber" size={64} /></View>
         <Text variant="title">{t('log.review.title')}</Text>
         <Text variant="body" className="text-muted">
           {t(current < previous ? 'log.review.bodyLower' : 'log.review.body', { diff: Math.abs(current - previous).toLocaleString('en-US'), days })}
         </Text>
-        {[[t('log.review.previous'), previous], [t('log.review.current'), current]].map(([k, v]) => (
-          <View key={k as string} className="h-11 flex-row items-center justify-between">
-            <Text variant="caption" className="text-muted">{k}</Text>
-            <Text variant="label">{km(v as number)}</Text>
-          </View>
-        ))}
-        <View className="gap-2 rounded-field bg-amber p-4">
+        <Group>
+          {[[t('log.review.previous'), previous], [t('log.review.current'), current]].map(([k, v]) => (
+            <View key={k as string} className="min-h-[52px] flex-row items-center justify-between gap-3 px-4 py-3">
+              <Text variant="caption" className="shrink text-muted">{k}</Text>
+              <Text variant="label">{km(v as number)}</Text>
+            </View>
+          ))}
+        </Group>
+        <Card tone="amber" className="gap-2 p-4">
           <Text variant="label">{t('log.review.noteTitle')}</Text>
           <Text variant="caption" className="text-muted">{t('log.review.noteBody')}</Text>
-        </View>
-      </View>
-      <View className="gap-3 pb-4">
+        </Card>
+      </ScrollView>
+      <FooterBar inset={false}>
         <Button title={t('log.review.correct')} onPress={() => router.push({ pathname: '/capture', params: { logId: id } })} />
-        <Button variant="secondary" title={t('log.review.ok')} loading={confirm.isPending} onPress={() => confirm.mutate()} />
-      </View>
+        <Button variant="ghost" title={t('log.review.ok')} loading={confirm.isPending} onPress={() => confirm.mutate()} />
+      </FooterBar>
     </SafeAreaView>
   );
 }

@@ -9,6 +9,7 @@ import * as THREE from 'three';
 import { type Marker } from '@/lib/car360';
 import { ANCHORS, buildShadow, placeCar } from '@/lib/car3d';
 import { loadCarModel } from '@/lib/loadCar';
+import { reportError } from '@/lib/monitoring';
 
 type Dot = { x: number; y: number; on: number };
 const RAD_PER_PX = 0.011;
@@ -95,7 +96,7 @@ export function Car3D({ colors, onGroup }: { colors: Partial<Record<Marker['grou
           stage.add(placeCar(m));
         }
       })
-      .catch((e) => console.warn('car model failed', e));
+      .catch((e) => reportError(e, 'car model failed'));
 
     const p = new THREE.Vector3();
     const n = new THREE.Vector3();

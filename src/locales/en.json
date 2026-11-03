@@ -3,7 +3,8 @@
   "plate": {
     "edit": "Edit car",
     "save": "Save",
-    "label": "License plate (optional)"
+    "label": "License plate (optional)",
+    "details": "Car details"
   },
   "tabs": {
     "home": "Home",
@@ -17,7 +18,7 @@
     "en": "English"
   },
   "splash": {
-    "tagline": "Take care of your car. And go."
+    "promise": "Log maintenance by voice.\nKeep a history you can trust."
   },
   "auth": {
     "login": {
@@ -118,6 +119,16 @@
         "km": "{{n}} km",
         "verified": "Verified",
         "share": "Share record"
+      },
+      "what": {
+        "title": "Your car's logbook,\nthat writes itself.",
+        "body": "Tell Bestim what you did to your car. It keeps the history, reminders and costs for you.",
+        "pillar": {
+          "say": "Say it",
+          "reminders": "Reminders",
+          "expenses": "Expenses",
+          "share": "Share when you sell"
+        }
       }
     },
     "addVehicle": {
@@ -140,7 +151,11 @@
           "van": "Van"
         },
         "typeLabel": "Car type",
-        "choose": "Choose"
+        "choose": "Choose",
+        "preview": "Your car will show up here",
+        "sectionCar": "Your car",
+        "sectionPlate": "Plate and colour",
+        "sectionMore": "More details (optional)"
       },
       "odometer": {
         "label": "Current odometer reading",
@@ -156,7 +171,10 @@
     "greetingEvening": "Good evening {{name}}",
     "greeting": "Hi {{name}}",
     "title": "Ready for the next step?",
-    "lastReading": "Last odometer reading · {{count}} days ago",
+    "lastReading_one": "Last reading · {{count}} day ago",
+    "lastReading_two": "Last reading · {{count}} days ago",
+    "lastReading_few": "Last reading · {{count}} days ago",
+    "lastReading_other": "Last reading · {{count}} days ago",
     "lastReadingToday": "Last odometer reading · today",
     "updateOdometer": "Update odometer",
     "switchVehicle": "Switch car",
@@ -183,12 +201,39 @@
     },
     "fuelHint": "Add 2 full tanks",
     "loading": "Loading",
-    "update": "Update"
+    "update": "Update",
+    "example": {
+      "badge": "Example",
+      "title": "Oil change",
+      "sub": "In 800 km. We'll remind you before it's due.",
+      "note": "Your real reminders appear after your first service."
+    }
+  },
+  "tour": {
+    "step": "{{n}} of {{total}}",
+    "welcomeTitle": "Take a 30-second tour",
+    "welcomeBody": "Four quick stops, so you know where everything is.",
+    "start": "Start the tour",
+    "skip": "Skip",
+    "next": "Next",
+    "odometerTitle": "Your car, always current",
+    "odometerBody": "Keep the odometer up to date. Bestim uses it to know when each service is due.",
+    "priorityTitle": "What needs you, in order",
+    "priorityBody": "The most urgent services show first. Your real ones appear after your first record.",
+    "expensesTitle": "Costs add up here",
+    "expensesBody": "Every record with a price lands in Expenses, by month and by type.",
+    "captureTitle": "Say it, don't type it",
+    "captureBody": "This green button logs anything. Tap it and say what you did to your car.",
+    "try": "Say my first record",
+    "later": "Not now"
   },
   "odometer": {
     "header": "Update odometer",
     "label": "New reading",
-    "last": "Last reading: {{value}} {{unit}} · {{count}} days ago",
+    "last_one": "Last reading: {{value}} {{unit}} · {{count}} day ago",
+    "last_two": "Last reading: {{value}} {{unit}} · {{count}} days ago",
+    "last_few": "Last reading: {{value}} {{unit}} · {{count}} days ago",
+    "last_other": "Last reading: {{value}} {{unit}} · {{count}} days ago",
     "lastToday": "Last reading: {{value}} {{unit}} · today",
     "cta": "Save reading",
     "since": "+{{value}} {{unit}} since last update",
@@ -214,12 +259,23 @@
       "zoom": "Zoom in on small digits",
       "focus": "Tap to focus on the digits"
     },
-    "first": "Enter the car's first reading"
+    "first": "Enter the car's first reading",
+    "facts": {
+      "since": "Since update",
+      "avg": "Daily average",
+      "next": "Next service",
+      "due": "Due now",
+      "dueLabel": "Next service"
+    },
+    "trend": "Recent readings",
+    "nudge": "Adjust by {{n}}"
   },
   "vehicles": {
     "title": "My cars",
     "heading": "All your cars, together",
     "add": "Add car",
+    "emptyTitle": "Your garage is empty",
+    "emptyBody": "Add your car and keep its whole story in one place.",
     "type": {
       "pickup": "Pickup",
       "sedan": "Sedan",
@@ -269,7 +325,10 @@
       "lastService": "Last service",
       "colour": "Colour",
       "totalPaid": "Total paid",
-      "updated": "Updated {{count}} days ago",
+      "updated_one": "Updated {{count}} day ago",
+      "updated_two": "Updated {{count}} days ago",
+      "updated_few": "Updated {{count}} days ago",
+      "updated_other": "Updated {{count}} days ago",
       "updatedToday": "Updated today",
       "partsHint": "Parts with records are lit. Tap any part to see or add records."
     },
@@ -325,7 +384,7 @@
     "voice": {
       "header": "Log by voice",
       "listening": "Listening...",
-      "hint": "Take your time. You can say several things at once, like an oil change and a fuel fill-up. Tap done when you finish.",
+      "hint": "Take your time. Mention several things at once, like an oil change and a fill-up. Tap done when finished.",
       "done": "Done, review the details",
       "cancel": "Cancel recording",
       "noSpeech": "We didn't catch that. Try again.",
@@ -333,11 +392,15 @@
       "typeHint": "Speech recognition is unavailable, type what you would say",
       "aiNotice": "Your recording is sent to an AI service to write your records. We don't keep it.",
       "understanding": "Understanding what you said...",
-      "understandingBody": "We're writing your records. This takes a few seconds."
+      "understandingBody": "We're writing your records. This takes a few seconds.",
+      "tryTitle": "Try saying",
+      "try1": "“Changed the oil at 125,000 for 1,200”",
+      "try2": "“Filled up 30 litres for 450”",
+      "try3": "“New front brake pads, 2,500”"
     },
     "micDenied": "We couldn't use the microphone. Enter the record manually.",
     "batch": {
-      "header": "Review your records",
+      "header": "Review records",
       "title": "Here's what we understood",
       "transcript": "What you said",
       "tapHint": "Tap any record to edit it.",
@@ -419,7 +482,7 @@
       "typeBody": "Answer a few short questions"
     },
     "new": {
-      "step1": "What are you adding?",
+      "step1": "What to add?",
       "step2": "Which one?",
       "maintenance": "Maintenance",
       "maintenanceSub": "Parts that repeat, with reminders",
@@ -472,7 +535,9 @@
     "odometerUpdated": "Odometer updated",
     "liters": "{{n}} L",
     "clearFilter": "Clear the filter",
-    "count": "{{count}} records"
+    "more": "Show more",
+    "count_one": "{{count}} record",
+    "count_other": "{{count}} records"
   },
   "log": {
     "header": "Record details",
@@ -498,7 +563,7 @@
       }
     },
     "review": {
-      "header": "Review the reading",
+      "header": "Review reading",
       "title": "Shall we review this reading?",
       "body": "The distance went up by {{diff}} km in {{days}} days. We saved the record with a note for you to review.",
       "previous": "Previous reading",
@@ -541,6 +606,8 @@
     "onSchedule": "All on schedule"
   },
   "expenses": {
+    "allCars": "All cars",
+    "allCarsSub": "Every car together",
     "title": "Expenses",
     "where": "Where does the money go?",
     "currency": "EGP",
@@ -594,12 +661,9 @@
   "plans": {
     "title": "Plans",
     "current": "Your plan",
-    "soon": "Upgrades will open soon",
     "see": "See plans",
     "close": "Close",
     "unlimited": "Unlimited",
-    "proTitle": "This is a Pro feature",
-    "proBody": "It isn't included in your current plan.",
     "limitTitle": "You reached your limit of {{n}} on {{plan}}",
     "limitTitleShort": "You reached your plan's limit",
     "limitBody": "See what each plan includes.",
@@ -615,6 +679,55 @@
       "share_history": "Share car history",
       "export": "Export records",
       "widgets": "Home screen widgets"
+    },
+    "free": "Free",
+    "month": "month",
+    "year": "year",
+    "priceSoon": "Coming soon",
+    "everything": "Everything in {{plan}}, plus",
+    "sameAs": "Same features as {{plan}}",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "save": "Save {{n}}%",
+    "includes": "{{plan}} includes",
+    "popular": "Most popular",
+    "yourPlan": "Your plan",
+    "compare": "Compare plans",
+    "usageCars": "Cars used",
+    "isFeature": "This is a {{plan}} feature",
+    "alsoGet": "With {{plan}} you also get",
+    "seeAll": "See all plans",
+    "notNow": "Not now",
+    "limitLifts": "{{plan}} gives you",
+    "sheetLimitTitle": "You reached today's limit",
+    "trialStarted": "Your {{n}}-day {{plan}} trial has started",
+    "interestSaved": "Thanks! We'll tell you the moment subscriptions open.",
+    "cta": {
+      "trial": "Try {{plan}} free for {{n}} days",
+      "subscribe": "Subscribe now",
+      "unlock": "Subscribe now to unlock",
+      "notify": "Notify me when {{plan}} opens"
+    },
+    "welcome": {
+      "badge": "Welcome to Bestim",
+      "title": "Your car's history, safe and always with you.",
+      "start": "You start on {{plan}}.",
+      "go": "Get started",
+      "keep": "Continue with {{plan}}",
+      "see": "See what {{plan}} adds",
+      "swipe": "Swipe to see the plans",
+      "skip": "Skip"
+    },
+    "strip": {
+      "trial": "{{plan}} · {{n}}d left",
+      "upgrade": "Upgrade",
+      "cars": "{{n}} of {{max}} cars"
+    },
+    "featureDesc": {
+      "receipt_photos": "Attach a photo of every receipt.",
+      "share_history": "Hand the full history to the next owner.",
+      "export": "Download your history as PDF, CSV or JSON.",
+      "widgets": "See the next service without opening the app."
     }
   },
   "notify": {
@@ -638,6 +751,8 @@
     "currencyName": "EGP",
     "expensesSub": "Review your total expenses",
     "notifications": "Notifications",
+    "tour": "Replay the tour",
+    "tourSub": "See the 30-second tour of Home again",
     "notificationsSub": "Choose what suits you",
     "export": "Export your history",
     "exportSub": "PDF, CSV or JSON",
@@ -657,7 +772,26 @@
     "deleteVehicle": "Delete car data",
     "deleteAccount": "Delete my account",
     "terms": "Terms",
+    "about": "About",
     "support": "Support",
+    "card": {
+      "title": "Driver card",
+      "edit": "Edit",
+      "name": "Name",
+      "email": "Email",
+      "since": "Member since",
+      "plan": "Plan",
+      "plates": "Plates",
+      "noPlates": "No plates added yet",
+      "id": "ID"
+    },
+    "edit": {
+      "title": "Edit profile",
+      "name": "Your name",
+      "save": "Save",
+      "saved": "Saved",
+      "failed": "Couldn't save. Try again."
+    },
     "photo": {
       "title": "Profile photo",
       "take": "Take a photo",
@@ -761,7 +895,7 @@
     "continue": "Continue"
   },
   "receive": {
-    "header": "Receive car history",
+    "header": "Receive history",
     "title": "A car history is waiting",
     "sub": "Maintenance records: {{n}}",
     "by": "Shared by",

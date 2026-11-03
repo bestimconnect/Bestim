@@ -2,10 +2,9 @@ import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router } from 'expo-router';
 import { CircleAlert, CloudOff, LoaderCircle, Mic } from 'lucide-react-native';
-import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { Item } from './ui';
+import { Group, Item } from './ui';
 import { useServiceTypes, useVehicles } from '@/lib/queries';
 import { sheet } from '@/lib/sheet';
 import { normalizeRecords } from '@/lib/voiceRecords';
@@ -47,7 +46,7 @@ export function VoiceQueueCard({ vehicleId }: { vehicleId: string }) {
 
   const when = (at: string) => format(parseISO(at), 'd MMM · p', { locale: i18n.language === 'ar' ? ar : enUS });
   return (
-    <View className="gap-2">
+    <Group>
       {items.map((item) => {
         const row = {
           waiting: { icon: CloudOff, tone: 'paper' as const, title: t('voiceQueue.waitingTitle') },
@@ -68,6 +67,6 @@ export function VoiceQueueCard({ vehicleId }: { vehicleId: string }) {
           />
         );
       })}
-    </View>
+    </Group>
   );
 }

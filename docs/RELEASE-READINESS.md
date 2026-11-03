@@ -1,4 +1,4 @@
-# Bestim: release readiness report (draft, started 2026-10-29)
+# Bestim: release readiness report (started 2026-10-29, refreshed 2026-11-04)
 
 Plan: all three stores together (Google Play, Huawei AppGallery, App Store). Real phones available: Android + iPhone (no Huawei phone). Every live change is listed here and done only after the founder's yes.
 Legend: GREEN = ready, AMBER = fix or accept before launch, RED = blocks launch.
@@ -57,20 +57,60 @@ Notes: the app has four tabs (Home, Cars, Expenses, Account); there is no Remind
 - Checklists: Android list fixed (no Reminders tab), new `docs/store/iphone-test-checklist.md`.
 - Website source has no guest-mode wording (store docs already say there is none).
 
-## What only the founder (or a live approval) can unblock
-Each item below changes something live, costs money, or needs an account login that I may not use.
-| # | Item | Who | Why it blocks launch |
-|---|---|---|---|
-| 1 | ~~Push migration `20261029090000`~~ DONE 2026-10-30: pushed by the founder, types regenerated, anon key gets 401 on the new/changed functions and tables. Not yet exercised with a real user: row caps, widget keys dying on password change, viewer-role admin refused (needs test accounts) | done | |
-| 2 | Supabase dashboard: Authentication > Providers > Apple > enable, Authorized Client ID `com.bestim.app` (no secret). Do NOT use `config push` | founder | Without it the Apple button fails and App Review rejects |
-| 3 | Apple Developer: App ID `com.bestim.app` with Sign in with Apple, Push, App Group `group.com.bestim.app`; widget extension ID; APNs key | founder / Ahmed | iPhone build, push and widgets |
-| 4 | Server push for iPhone (APNs key + scheduled function) | founder gives key, then I build the function | On-device reminders work, but server push is still missing |
-| 5 | App Store Connect and Google Play Console apps, privacy labels / data safety, reviewer account, screenshots from the final UI | founder | Store forms are in `docs/store/` |
-| 6 | Google Play closed test: 12 testers for 14 days | founder starts the clock | Personal Google account rule; decides the launch date |
-| 7 | Plans: Supabase Pro, Vercel Pro, Resend paid, Gemini cap + owner | founder (money) | Free limits (100 emails/day) and no backups |
-| 8 | Redeploy the two edited edge functions (`process-voice-log`, `read-odometer`) | founder says yes | Edited locally 2026-10-22/23 but the review found them fine; confirm they are what is live |
-| 9 | EAS production builds (iOS, Android AAB, Huawei APK) and smoke test on real phones | founder + me | Uses the Expo build queue |
-| 10 | Real-phone checklists: Android `phone-test-checklist.md`, iPhone `iphone-test-checklist.md`; Huawei has no phone | founder | Voice, camera, push, widgets on real hardware |
-| 11 | Google sign-in branding verification and Play signing SHA-1 in Google Cloud | founder | Google sign-in window shows the app name |
+## Round 3: final production check (2026-11-04)
+Three read-only audits (backend and security, app code, release setup), then fixes. **Nothing committed, pushed, deployed or run against the live database.**
 
-Verdict today: NOT READY to publish. The code is in a good state, but items 1 to 11 must happen first. Closest honest status: "ready for store setup and real-phone testing".
+### Fixed in the app (code only, checked with tsc / lint / `npm run check` / expo-doctor 21/21)
+| Problem | Fix |
+|---|---|
+| Arabic counts from 11 to 99 showed a raw key (`home.lastReading_many` and friends); found on the simulator: Hermes has no plural rules, so every count in both languages read the "other" form ("3 سجل", "1 records") | Plural polyfill added (`@formatjs/intl-pluralrules`, Arabic + English, in `src/lib/i18n.ts`); all six Arabic forms added; `locales.check.ts` fails if a plural is incomplete |
+| Typing `12,5` or `١٢٫٥` for an amount or litres saved 125 | `src/lib/numberInput.ts` (+ check) |
+| A retried save could write the same record twice | The record id is made on the phone; the database's "already exists" answer counts as saved; an orphan receipt photo is removed |
+| Signing in as another account on the same phone could show the earlier account's queued voice notes, notifications and chosen car | Wiped when the signed-in user changes (`queryClient.ts`) |
+| Record, odometer-review and part screens could spin forever when the data failed to load | They show the retry screen |
+| A voice recording stayed on the phone if you left the screen | Deleted on leaving (Q70) |
+| Double tap on Google / Apple sign-in opened two sheets | Guarded |
+| Error messages used the green check icon | Warning icon (`toastError`) |
+| The offline cache could grow past Android's 2 MB row limit | Brand list, signed links and shared records are not stored |
+| History rendered every row at once | "Show more" (50 at a time) |
+| English "1 records" | Singular added |
+| Dead code | `Rotator360` removed; ten old design mock-ups moved to `docs/design-archive/`; two duplicate direct dependencies removed (expo-router installs them) |
+| Dependencies | `npm audit fix` (no force). Production audit 22 items; every remaining "high" is inside Expo's own tooling and its fix would downgrade Expo, so it is left |
+| Tests | `planRules.check.ts` (plan gates and upgrade targets), `numberInput.check.ts`, plural completeness; `npm run verify` = tsc + lint + all checks |
+| Arabic permission texts (iPhone microphone, speech, camera, photos), Apple privacy manifest, `.env*` ignored | `app.json`, `assets/native-locales/ar.json`. **Only provable in the first real iPhone build** |
+
+### Crash reports (Sentry, free plan)
+Code is in (`src/lib/monitoring.ts`, root wrapped, screen crashes and 3D / widget-sync errors reported). It does nothing until the key is set: put the project's DSN in `EXPO_PUBLIC_SENTRY_DSN` for the production profile in `eas.json` (slot added, empty). Emails and URL query strings are masked, no screenshots, no replays, no performance traces. Adding the native module means **the next iPhone / Android build must be a new one** (the current dev build does not contain it). For readable stack traces add the `@sentry/react-native/expo` plugin with the organisation and project names and an `SENTRY_AUTH_TOKEN` secret in EAS when the account exists. Store forms: `docs/store/google-data-safety.md` now says "crash logs, collected once Sentry is on"; Apple's privacy answers need the same line (Diagnostics > Crash Data, not linked to the user, not for tracking), and the website privacy page needs one sentence.
+
+### Database hardening: WRITTEN, NOT PUSHED, NOT RUN (no Docker on this Mac)
+`supabase/migrations/20261104090000_db_hardening.sql`, reviewed by reading only:
+1. A log's `created_at`, `status`, `source` and a car's `removed_records` can no longer be changed through the API (stops resetting the 24-hour edit window and faking "verified" or "N records removed"). Inserts reset them to the real values.
+2. `correct_log` runs as the database with its own owner check; nobody can write `log_corrections` directly (closes old finding 7).
+3. Text length limits (NOT VALID: old rows are untouched) and row caps on reminders (500), shares (200), corrections (5,000), odometer readings (10,000) (closes old finding 3).
+4. Receipt-photo uploads and widget keys now follow the plan switch in the database; guests cannot start a trial; the catalog audit function is no longer callable from the API.
+5. `config.toml`: anonymous sign-in off, `secure_password_change` on (matches the live project).
+6. Edge function `process-voice-log` now checks who is calling before reading the upload. A missing `content-length` is still accepted (refusing it could reject real phones; Supabase's gateway caps the size too).
+After pushing: `npm run types`, then test as a normal user: changing `created_at` or `status` on a log fails, `correct_log` works on your own log and fails on another's, a direct insert into `log_corrections` fails, ordinary edits / deletes / sharing / widget taps still work. Note: a record saved offline with a photo, then synced after the plan lost receipt photos, will fail at the upload.
+
+## What only the founder (or a live approval) can unblock
+Each item changes something live, costs money, or needs a login I may not use. Order is roughly the order to do them.
+| # | Item | Who | Why |
+|---|---|---|---|
+| 1 | **Commit and push the work** (about 140 changed paths on `cars-only-and-records`). EAS builds only what is committed | founder says yes | A build today would not contain any of this |
+| 2 | Push the database migrations (the plans ones from 2026-10-30 / 11-03 and `20261104090000_db_hardening`), then `npm run types` and the tests above | founder says yes | Plans are not live until then; the hardening is not either |
+| 3 | Redeploy the two AI functions (`process-voice-log`, `read-odometer`) and try one voice note and one scan | founder says yes | The live ones are older |
+| 4 | **Supabase Pro** (daily backups; free projects pause) and a separate **staging project**; all three EAS profiles point at production today | founder (money) | One bad migration or test account hits real users with no backup |
+| 5 | Resend paid plan, Gemini spend cap + budget alert | founder (money) | 100 emails/day on free; unbounded AI cost |
+| 6 | Sentry account (free), create a React Native project, put the DSN in `eas.json`; add the plugin + auth token for readable traces | founder | Without it nobody hears about crashes |
+| 7 | Apple Developer: App ID `com.bestim.app` with Sign in with Apple, Push, App Group `group.com.bestim.app`, widget ID, APNs key; Apple provider in the Supabase dashboard (never `config push`) | founder / Ahmed | iPhone build, Apple sign-in, push, widgets |
+| 8 | Create the three store apps; privacy labels / data safety; **fix store and privacy text** (no guest mode; Sign in with Apple exists; voice sends audio to Google AI for processing, not kept; crash reports) | founder | The old text still describes guest mode |
+| 9 | First real builds (iPhone, Android AAB, Huawei APK). Check in them: notification permission on Android 13+, `aps-environment` = production, app icon has no transparency, Arabic permission pop-ups | founder + me | Cannot be proven on a Mac simulator |
+| 10 | Real-phone tests: `docs/store/phone-test-checklist.md`, `iphone-test-checklist.md` (voice, camera, widgets, push, offline, Android, Huawei) | founder | Hardware only |
+| 11 | Google Play closed test: 12 testers for 14 days | founder starts the clock | Decides the launch date |
+| 12 | Rotate the reviewer account password after store review | founder | It is written in `docs/store/reviewer-account.md` |
+| 13 | Safer settings: Google sign-in nonce check (`skip_nonce_check`), spam protection on the demo-request form (`connect_leads`), admin accounts with two-step login, encrypted storage for the sign-in session | planned | Medium / low risk, not launch blockers |
+| 14 | Decide: turn on over-the-air updates (`expo-updates` is installed but off) or remove it | founder | Lets bug fixes reach phones without a store review |
+
+**Not verifiable here:** Android and Huawei behaviour, voice / camera / push / widgets on real hardware, the live Supabase state, Sentry delivery, the new database file (never executed).
+
+Verdict today: **not ready to publish; ready for store setup and real-phone testing** once items 1 to 4 are done. Nothing found in the code is a launch-blocking bug any more.

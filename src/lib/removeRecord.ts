@@ -1,6 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query';
 
-import { toast } from '@/components/Toast';
+import { toast, toastError } from '@/components/Toast';
 import { errorText } from './errors';
 import i18n from './i18n';
 import { supabase } from './supabase';
@@ -25,7 +25,7 @@ export function removeRecord(qc: QueryClient, table: 'maintenance_logs' | 'expen
     const { error } = await supabase.from(table).delete().eq('id', id);
     if (error) {
       restore();
-      toast(errorText(error));
+      toastError(errorText(error));
     }
     refreshRecords(qc);
   }, 5000);

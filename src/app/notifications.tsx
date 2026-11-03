@@ -8,8 +8,8 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Choice, Group, Header, Item, Text } from '@/components/ui';
-import { useColors } from '@/lib/theme';
+import { EmptyState } from '@/components/EmptyState';
+import { Backdrop, Button, Choice, FooterBar, Group, Header, Item, Section } from '@/components/ui';
 import { useInbox, type InboxItem, type InboxKind } from '@/stores/notifyInbox';
 
 // Notifications page (decisions Q92): every alert the phone has shown, newest first, grouped by day. No Figma frame;
@@ -19,7 +19,6 @@ const ICONS: Record<InboxKind, LucideIcon> = { soon: CalendarCheck, overdue: Ala
 export default function NotificationsScreen() {
   const { t, i18n } = useTranslation();
   const refresh = useRefresh();
-  const c = useColors();
   const { items: all, markRead, markAllRead } = useInbox();
   const [only, setOnly] = useState<'all' | 'unread'>('all');
   const items = only === 'unread' ? all.filter((i) => !i.read) : all;
@@ -42,7 +41,9 @@ export default function NotificationsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-paper px-6" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
+      <Backdrop />
+      <View className="px-6">
       <Header
         title={t('inbox.header')}
         below={
@@ -57,17 +58,16 @@ export default function NotificationsScreen() {
           ) : undefined
         }
       />
+      </View>
       {items.length === 0 ? (
-        <View className="flex-1 items-center justify-center gap-2">
-          <BellRing size={32} color={c.muted} />
-          <Text variant="heading" className="text-center">{t('inbox.emptyTitle')}</Text>
-          <Text variant="body" className="text-center text-muted">{t('inbox.emptyBody')}</Text>
+        <View className="flex-1 justify-center px-6 pb-10">
+          <EmptyState icon={BellRing} title={t('inbox.emptyTitle')} body={t('inbox.emptyBody')} />
         </View>
       ) : (
-        <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-4 pb-4 pt-2" showsVerticalScrollIndicator={false}>
+        <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-6 px-6 pb-6 pt-2" showsVerticalScrollIndicator={false}>
           {groups.map((g) => (
-            <View key={g.day} className="gap-3">
-              <Text variant="label" className="text-muted">{g.day}</Text>
+            <View key={g.day}>
+              <Section title={g.day} />
               <Group>
               {g.items.map((item) => (
                 <Item
@@ -88,9 +88,9 @@ export default function NotificationsScreen() {
         </ScrollView>
       )}
       {all.some((i) => !i.read) ? (
-        <View className="pb-4 pt-2">
+        <FooterBar inset={false}>
           <Button title={t('inbox.markAll')} variant="secondary" onPress={markAllRead} />
-        </View>
+        </FooterBar>
       ) : null}
     </SafeAreaView>
   );

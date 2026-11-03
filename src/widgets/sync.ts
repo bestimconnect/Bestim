@@ -4,6 +4,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 import { AppState, Platform } from 'react-native';
 
 import { can } from '@/lib/entitlements';
+import { reportError } from '@/lib/monitoring';
 import i18n from '@/lib/i18n';
 import { partArt, type ArtState } from '@/lib/partArt';
 import { queryClient } from '@/lib/queryClient';
@@ -160,7 +161,7 @@ export async function syncWidgets(force = false) {
     if (Platform.OS === 'ios') await pushIos(snap);
     else await pushAndroid(snap, dir);
   } catch (e) {
-    console.warn('widget sync failed', e);
+    reportError(e, 'widget sync failed');
   } finally {
     running = false;
     if (again) {

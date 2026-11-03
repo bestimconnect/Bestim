@@ -10,8 +10,7 @@ import { z } from 'zod';
 
 import { errorText } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
-import { useColors } from '@/lib/theme';
-import { Button, Field, Header, Note, Text } from '@/components/ui';
+import { Backdrop, Button, Field, FooterBar, Header, IconTile, Note, Text } from '@/components/ui';
 
 // Screen 49 layout — Figma 167:57136 (ar-light) / 167:64782 (en-light). New screen, not in the
 // design: lands the password-recovery deep link somewhere before /login (see docs/decisions.md Q1).
@@ -29,7 +28,6 @@ type Form = z.infer<ReturnType<typeof schema>>;
 
 export default function ResetPasswordScreen() {
   const { t } = useTranslation();
-  const c = useColors();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { control, handleSubmit, formState: { errors } } = useForm<Form>({
@@ -52,53 +50,57 @@ export default function ResetPasswordScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <ScrollView className="flex-1" contentContainerClassName="pb-10" keyboardShouldPersistTaps="handled">
+      <Backdrop />
+      <ScrollView className="flex-1" contentContainerClassName="pb-6" keyboardShouldPersistTaps="handled">
         <View className="px-6 pt-3">
-          <Header title={t('auth.resetPassword.title')} />
+          <Header title="" />
         </View>
-        <View className="gap-3.5 px-6 pt-2">
-          <View className="h-[60px] w-[60px] items-center justify-center rounded-full bg-mint">
-            <LockKeyhole size={30} color={c.teal} />
+        <View className="gap-6 px-6 pt-2">
+          <IconTile icon={LockKeyhole} size={72} />
+          <View className="gap-2">
+            <Text variant="title">{t('auth.resetPassword.heading')}</Text>
+            <Text className="text-muted">{t('auth.resetPassword.subtitle')}</Text>
           </View>
-          <Text variant="title">{t('auth.resetPassword.heading')}</Text>
-          <Text className="text-muted">{t('auth.resetPassword.subtitle')}</Text>
 
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Field
-                label={t('auth.resetPassword.password')}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.password?.message}
-                secureTextEntry
-                autoComplete="password-new"
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="confirmPassword"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Field
-                label={t('auth.resetPassword.confirmPassword')}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.confirmPassword?.message}
-                secureTextEntry
-                autoComplete="password-new"
-              />
-            )}
-          />
+          <View className="gap-3">
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Field
+                  label={t('auth.resetPassword.password')}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.password?.message}
+                  secureTextEntry
+                  autoComplete="password-new"
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="confirmPassword"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Field
+                  label={t('auth.resetPassword.confirmPassword')}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.confirmPassword?.message}
+                  secureTextEntry
+                  autoComplete="password-new"
+                />
+              )}
+            />
+          </View>
 
           {error ? <Note text={error} tone="warning" /> : null}
-
-          <Button title={t('auth.resetPassword.submit')} loading={loading} onPress={handleSubmit(onSubmit)} />
         </View>
       </ScrollView>
+      <FooterBar inset={false}>
+        <Button title={t('auth.resetPassword.submit')} loading={loading} onPress={handleSubmit(onSubmit)} />
+      </FooterBar>
     </SafeAreaView>
   );
 }

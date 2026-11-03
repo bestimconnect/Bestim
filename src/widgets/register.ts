@@ -14,7 +14,7 @@ try {
   if (Platform.OS === 'android') require('./android');
   startWidgetSync();
 } catch (e) {
-  console.warn('widgets unavailable', e);
+  console.warn('widgets unavailable', e); // runs before monitoring starts
 }
 let QuickActions: typeof import('expo-quick-actions') | null = null;
 try {

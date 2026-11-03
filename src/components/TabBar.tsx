@@ -8,8 +8,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { openCapture } from '@/lib/reading';
+import { useTourTarget } from '@/lib/tour';
 import { shadows, useColors } from '@/lib/theme';
 import { PressableScale } from './ui/PressableScale';
+import { Sheen } from './ui/Sheen';
 import { Text } from './ui/Text';
 
 const icons: Record<string, LucideIcon> = { index: House, vehicles: CarFront, expenses: Wallet, account: UserRound };
@@ -26,7 +28,8 @@ export function useTabBarSpace() {
  */
 export function TabBar({ state, navigation }: BottomTabBarProps) {
   const { t } = useTranslation();
-  const capture = () => openCapture();
+  const expensesTarget = useTourTarget('expenses');
+  const captureTarget = useTourTarget('capture');
   const c = useColors();
   const { bottom } = useSafeAreaInsets();
   const [typing, setTyping] = useState(false);
@@ -43,6 +46,10 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
       exiting={FadeOut.duration(120)}
       className="absolute inset-x-4 h-[68px] flex-row items-center rounded-nav border border-line bg-panel px-2"
       style={{ bottom: Math.max(bottom, 16), boxShadow: shadows.nav }}>
+      {/* its own clip: the lifted + button must not be cut off by the bar's corners */}
+      <View pointerEvents="none" className="absolute inset-0 overflow-hidden rounded-nav">
+        <Sheen opacity={0.06} />
+      </View>
       {state.routes.map((route, i) => {
         const focused = state.index === i;
         const Icon = icons[route.name];
@@ -58,20 +65,22 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
             onPress={onPress}
             accessibilityRole="tab"
             accessibilityState={{ selected: focused }}
-            className="flex-1 items-center gap-1">
+            className="flex-1 items-center">
             {focused ? <View className="absolute -top-[12px] h-[3px] w-6 rounded-b-full bg-lime" /> : null}
-            <View className="h-6 w-6 items-center justify-center">
-              <Icon size={22} color={focused ? c.lime : c.muted} />
+            <View ref={route.name === 'expenses' ? expensesTarget : undefined} collapsable={false} className="items-center gap-1">
+              <View className="h-6 w-6 items-center justify-center">
+                <Icon size={22} color={focused ? c.lime : c.muted} />
+              </View>
+              <Text variant="caption" className={focused ? 'text-lime' : 'text-muted'}>{label}</Text>
             </View>
-            <Text variant="caption" className={focused ? 'text-lime' : 'text-muted'}>{label}</Text>
           </PressableScale>
         );
         if (i !== 1) return tab;
         return [
           tab,
           // Floats: larger than the bar's icons and lifted above its top edge, ringed in the bar's colour (decisions Q57).
-          <PressableScale key="capture" scale={0.92} onPress={capture} accessibilityRole="button" accessibilityLabel={t('tabs.capture')} className="flex-1 items-center" style={{ marginTop: -30 }}>
-            <View className="h-[60px] w-[60px] items-center justify-center rounded-full border-4 border-panel bg-lime" style={{ boxShadow: shadows.glow }}>
+          <PressableScale key="capture" scale={0.92} onPress={() => openCapture()} accessibilityRole="button" accessibilityLabel={t('tabs.capture')} className="flex-1 items-center" style={{ marginTop: -30 }}>
+            <View ref={captureTarget} collapsable={false} className="h-[60px] w-[60px] items-center justify-center rounded-full border-4 border-panel bg-lime" style={{ boxShadow: shadows.glow }}>
               <Plus size={26} color="#222E29" strokeWidth={2.5} />
             </View>
           </PressableScale>,

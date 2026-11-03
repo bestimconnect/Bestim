@@ -6,14 +6,14 @@ import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from '
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { PressableScale, Text } from '@/components/ui';
-import { BAR_GAP, type BarEntry, useAppBar } from '@/lib/appBar';
+import { PressableScale, Sheen, Text } from '@/components/ui';
+import { BAR_GAP, type BarEntry, rowHeight, useAppBar } from '@/lib/appBar';
 import { easeOut } from '@/lib/motion';
 import { useColors } from '@/lib/theme';
 
 const GLIDE = 300;
 // Sheets and pop-ups sit over a page without a bar of their own: the page's bar stays put underneath.
-const OVER = ['/capture', '/sheet', '/switch-vehicle', '/pick', '/notify-permission'];
+const OVER = ['/capture', '/sheet', '/switch-vehicle', '/pick', '/notify-permission', '/upgrade', '/part-logs'];
 
 /**
  * The one green top bar (root layout, above every screen). A screen with a Header gets the compact bar; a screen with its
@@ -69,26 +69,27 @@ export function AppBarOverlay() {
       pointerEvents={top?.kind === 'bar' ? 'auto' : 'none'}
       className="absolute inset-x-0 top-0 overflow-hidden rounded-b-[28px] bg-panel"
       style={shellStyle}>
+      <Sheen opacity={0.07} />
+      <Sheen color="#D3F53D" opacity={0.09} glow="tr" radius={0.8} />
       <Animated.View className="absolute inset-x-0 bottom-0 px-6 pb-4" style={[wordsStyle, { gap: BAR_GAP }]}>
-        {shown?.back || shown?.right ? (
-          <View className="h-11 flex-row items-center justify-between">
-            {shown?.back ? (
-              <PressableScale
-                accessibilityRole="button"
-                accessibilityLabel={t('back')}
-                onPress={router.back}
-                className="h-11 w-11 items-center justify-center rounded-full bg-[#FFFFFF26]">
-                <Back size={22} color={c.onpanel} />
-              </PressableScale>
-            ) : <View />}
-            {shown?.right}
-          </View>
-        ) : null}
-        {/* keyed: a new page's title fades in instead of snapping */}
-        <Animated.View key={shown?.id} entering={FadeIn.duration(180)} style={{ minHeight: 32 + (shown?.sub ? 20 : 0) }} className="justify-center">
-          <Text variant="title" className="text-onpanel" numberOfLines={1}>{shown?.title}</Text>
-          {shown?.sub ? <Text variant="caption" className="text-onpanel" style={{ opacity: 0.7 }} numberOfLines={1}>{shown.sub}</Text> : null}
-        </Animated.View>
+        {/* back button, title and right action share one row: the bar stays slim */}
+        <View className="flex-row items-center gap-3" style={{ minHeight: shown ? rowHeight(shown) : 44 }}>
+          {shown?.back ? (
+            <PressableScale
+              accessibilityRole="button"
+              accessibilityLabel={t('back')}
+              onPress={router.back}
+              className="h-11 w-11 items-center justify-center rounded-full bg-[#FFFFFF26]">
+              <Back size={22} color={c.onpanel} />
+            </PressableScale>
+          ) : null}
+          {/* keyed: a new page's title fades in instead of snapping */}
+          <Animated.View key={shown?.id} entering={FadeIn.duration(180)} className="flex-1 justify-center">
+            <Text variant="title" className="!text-[24px] !leading-[32px] text-onpanel" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{shown?.title}</Text>
+            {shown?.sub ? <Text variant="caption" className="text-onpanel" style={{ opacity: 0.7 }} numberOfLines={1}>{shown.sub}</Text> : null}
+          </Animated.View>
+          {shown?.right}
+        </View>
         {shown?.below ? <View style={{ minHeight: shown.belowH ?? 44 }}>{shown.below}</View> : null}
       </Animated.View>
     </Animated.View>

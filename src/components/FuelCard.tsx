@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { consumption } from '@/lib/fuel';
 import { useFuelFills } from '@/lib/queries';
-import { shadows } from '@/lib/theme';
-import { Text } from './ui';
+import { Card, Text } from './ui';
 
 const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 2 });
 
@@ -14,18 +13,18 @@ export function FuelCard({ vehicleId, hint }: { vehicleId: string; hint?: boolea
   const c = consumption(useFuelFills(vehicleId).data ?? []);
   if (!c) return hint ? <Text variant="caption" className="text-muted">{t('fuel.hint')}</Text> : null;
   return (
-    <View className="gap-3 rounded-item bg-white p-4" style={{ boxShadow: shadows.soft }}>
+    <Card className="gap-3 p-4">
       <Text variant="label">{t('fuel.title')}</Text>
       <View className="flex-row gap-4">
         <View className="flex-1 gap-0.5">
-          <Text variant="heading">{fmt(c.average.kmPerLiter)}</Text>
+          <Text variant="small-number">{fmt(c.average.kmPerLiter)}</Text>
           <Text variant="caption" className="text-muted">{t('fuel.kmPerLiter')}</Text>
         </View>
         <View className="flex-1 gap-0.5">
-          <Text variant="heading">{fmt(c.average.costPerKm)}</Text>
+          <Text variant="small-number">{fmt(c.average.costPerKm)}</Text>
           <Text variant="caption" className="text-muted">{t('fuel.costPerKm')}</Text>
         </View>
       </View>
-    </View>
+    </Card>
   );
 }

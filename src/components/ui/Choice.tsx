@@ -28,14 +28,14 @@ export function Choice<T extends string>({
   const index = Math.max(0, options.findIndex((o) => o.value === value));
   const seg = width ? (width - 8 - (options.length - 1) * 4) / options.length : 0; // p-1 + gap-1
   return (
-    <View className={`h-11 flex-row items-center gap-1 rounded-nav p-1 ${className}`} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+    <View className={`h-11 flex-row items-center gap-1 rounded-nav p-1 ${className}`} style={onDark ? undefined : { boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.10)' }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
       {/* The pill slides between segments (decisions Q57). `left`, not translateX: RN mirrors it in RTL and under a
           forced-ltr parent alike, and the pill is out of flow and childless, so nothing else re-lays out. */}
       {seg ? (
         <Animated.View
           pointerEvents="none"
           className={`absolute bottom-1 top-1 rounded-nav ${onDark ? 'bg-lime' : 'bg-ink'}`}
-          style={{ width: seg, left: 4 + index * (seg + 4), transitionProperty: 'left', transitionDuration: still ? '0ms' : '220ms', transitionTimingFunction: EASE_OUT }}
+          style={{ width: seg, left: 4 + index * (seg + 4), boxShadow: '0 2px 6px rgba(0,0,0,0.18)', transitionProperty: 'left', transitionDuration: still ? '0ms' : '220ms', transitionTimingFunction: EASE_OUT }}
         />
       ) : null}
       {options.map((o) => (

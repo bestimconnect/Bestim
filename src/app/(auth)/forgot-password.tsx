@@ -10,8 +10,7 @@ import { z } from 'zod';
 
 import { errorText } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
-import { useColors } from '@/lib/theme';
-import { Button, Field, Header, Note, Text } from '@/components/ui';
+import { Backdrop, Button, Field, FooterBar, Header, IconTile, Note, Text } from '@/components/ui';
 
 // Screen 49 — Forgot password, Figma 167:57136 (ar-light) / 167:64782 (en-light).
 const schema = (t: (k: string) => string) => z.object({ email: z.string().email(t('auth.common.errors.email')) });
@@ -19,7 +18,6 @@ type Form = z.infer<ReturnType<typeof schema>>;
 
 export default function ForgotPasswordScreen() {
   const { t } = useTranslation();
-  const c = useColors();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { control, handleSubmit, formState: { errors } } = useForm<Form>({
@@ -38,16 +36,17 @@ export default function ForgotPasswordScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <ScrollView className="flex-1" contentContainerClassName="pb-10" keyboardShouldPersistTaps="handled">
+      <Backdrop />
+      <ScrollView className="flex-1" contentContainerClassName="pb-6" keyboardShouldPersistTaps="handled">
         <View className="px-6 pt-3">
-          <Header title={t('auth.forgotPassword.title')} />
+          <Header title="" />
         </View>
-        <View className="gap-3.5 px-6 pt-2">
-          <View className="h-[60px] w-[60px] items-center justify-center rounded-full bg-mint">
-            <LockKeyhole size={30} color={c.teal} />
+        <View className="gap-6 px-6 pt-2">
+          <IconTile icon={LockKeyhole} size={72} />
+          <View className="gap-2">
+            <Text variant="title">{t('auth.forgotPassword.heading')}</Text>
+            <Text className="text-muted">{t('auth.forgotPassword.subtitle')}</Text>
           </View>
-          <Text variant="title">{t('auth.forgotPassword.heading')}</Text>
-          <Text className="text-muted">{t('auth.forgotPassword.subtitle')}</Text>
 
           <Controller
             control={control}
@@ -67,11 +66,12 @@ export default function ForgotPasswordScreen() {
           />
 
           {error ? <Note text={error} tone="warning" /> : null}
-
-          <Button title={t('auth.forgotPassword.submit')} loading={loading} onPress={handleSubmit(onSubmit)} />
-          <Button title={t('auth.common.backToLogin')} variant="secondary" onPress={() => router.replace('/login')} />
         </View>
       </ScrollView>
+      <FooterBar inset={false}>
+        <Button title={t('auth.forgotPassword.submit')} loading={loading} onPress={handleSubmit(onSubmit)} />
+        <Button title={t('auth.common.backToLogin')} variant="ghost" onPress={() => router.replace('/login')} />
+      </FooterBar>
     </SafeAreaView>
   );
 }

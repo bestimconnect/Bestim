@@ -28,8 +28,8 @@ function Segment({ label, dark }: { label: string; dark?: boolean }) {
       {TICKS.map((k) => (
         <View
           key={k}
-          className={`absolute top-0 w-px ${dark ? (k === 0 ? 'bg-[#DCE6E0]' : 'bg-[#6F8379]') : k === 0 ? 'bg-muted' : 'bg-line'}`}
-          style={{ left: k * (SEG_W / 10), height: k === 0 ? 34 : k === 5 ? 22 : 14 }}
+          className={`absolute top-0 ${k === 0 ? 'w-[2px]' : 'w-px'} ${dark ? (k === 0 ? 'bg-[#DCE6E0]' : 'bg-[#6F8379]') : 'bg-muted'}`}
+          style={{ left: k * (SEG_W / 10), height: k === 0 ? 34 : k === 5 ? 22 : 14, opacity: dark ? 1 : k === 0 ? 0.85 : k === 5 ? 0.5 : 0.28 }}
         />
       ))}
       <Text variant="caption" className={`absolute text-center ${dark ? '' : 'text-muted'}`} style={{ top: 42, left: -SEG_W / 2, width: SEG_W, fontFamily: 'Poppins_400Regular', ...(dark ? { color: '#9FB0A7' } : null) }}>
@@ -107,7 +107,7 @@ export function OdometerRuler({ shown, segment, max, dark }: Props) {
         ) : null}
         <View pointerEvents="none" className="absolute top-0 items-center" style={{ left: width / 2 - 5, width: 10 }}>
           <View style={{ borderLeftWidth: 5, borderRightWidth: 5, borderTopWidth: 7, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: '#B4DB1F' }} />
-          <View className="h-[40px] w-[3px] rounded-full bg-lime" />
+          <View className="h-[40px] w-[3px] rounded-full bg-lime" style={{ boxShadow: '0 0 8px 1px rgba(211,245,61,0.9)' }} />
         </View>
       </View>
     </GestureDetector>

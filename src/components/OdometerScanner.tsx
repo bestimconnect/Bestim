@@ -230,7 +230,7 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
         const { data, error } = await supabase.functions.invoke('read-odometer', { body: { image_base64: await still(photo) } });
         if (__DEV__) console.log(`odometer AI: ${Date.now() - asked} ms`, error ? `error ${error.context?.status ?? error.message}` : data);
         const status = error?.context?.status;
-        if (status === 429) showUpgrade('limit');
+        if (status === 429) showUpgrade('limit', null, null, 'scans_per_day');
         if (status === 403 || status === 429) return void (stop = true); // switched off, or today's limit: no retry
         const n: unknown = data?.reading;
         const reading = typeof n === 'number' && Number.isInteger(n) ? (current == null ? n : pick([String(n)]) ?? n) : null;

@@ -2,13 +2,14 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router } from 'expo-router';
-import { Gauge, Receipt, Wrench, X } from 'lucide-react-native';
+import { Gauge, Mic, Receipt, Wrench, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Field, Header, Item, Note, Text } from '@/components/ui';
+import { EmptyState } from '@/components/EmptyState';
+import { Backdrop, Button, Card, Field, FooterBar, Header, Item, Note, Text } from '@/components/ui';
 import { shouldAskNotifications } from '@/lib/notifications';
 import { useServiceTypes, useVehicles } from '@/lib/queries';
 import { saveLog } from '@/lib/saveLog';
@@ -154,18 +155,21 @@ export default function ReviewAll() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <ScrollView contentContainerClassName="gap-4 p-6" keyboardShouldPersistTaps="handled" className="flex-1" automaticallyAdjustKeyboardInsets>
-        <Header title={t('capture.batch.header')} />
-        <Text variant="title">{t(records.length ? 'capture.batch.title' : 'capture.batch.emptyTitle')}</Text>
+      <Backdrop />
+      <View className="px-6"><Header title={t('capture.batch.header')} /></View>
+      <ScrollView contentContainerClassName="gap-4 px-6 pb-6 pt-2" keyboardShouldPersistTaps="handled" className="flex-1" automaticallyAdjustKeyboardInsets>
+        {records.length ? <Text variant="title">{t('capture.batch.title')}</Text> : null}
         {transcript ? (
-          <View className="gap-2 rounded-item bg-sky p-4">
+          <Card tone="sky" className="gap-2 p-4">
             <Text variant="label">{t('capture.batch.transcript')}</Text>
             <Text variant="caption" className="text-muted">«{transcript}»</Text>
-          </View>
+          </Card>
         ) : null}
         {partial ? <Note tone="warning" text={t('capture.batch.partialFail', partial)} /> : null}
         {records.length === 0 ? (
-          <Text className="text-muted">{t(understood ? 'capture.batch.emptyBody' : 'capture.batch.nothingUnderstood')}</Text>
+          <View className="-mx-6">
+            <EmptyState icon={Mic} tone={understood ? 'mint' : 'amber'} title={t('capture.batch.emptyTitle')} body={t(understood ? 'capture.batch.emptyBody' : 'capture.batch.nothingUnderstood')} />
+          </View>
         ) : null}
         {records.map((r) => {
           const vehicle = vehicleOf(r);
@@ -217,7 +221,7 @@ export default function ReviewAll() {
         })}
         {records.length ? <Text variant="caption" className="text-muted">{t('capture.batch.tapHint')}</Text> : null}
       </ScrollView>
-      <View className="gap-2 px-6 pb-4 pt-2">
+      <FooterBar inset={false}>
         {records.length ? (
           <>
             {blocked ? <Note tone="alert" text={blocked} /> : null}
@@ -231,10 +235,10 @@ export default function ReviewAll() {
         ) : (
           <>
             <Button title={t('capture.batch.emptyAgain')} onPress={() => restart('voice')} />
-            <Button variant="secondary" title={t('capture.batch.emptyManual')} onPress={() => restart('manual')} />
+            <Button variant="ghost" title={t('capture.batch.emptyManual')} onPress={() => restart('manual')} />
           </>
         )}
-      </View>
+      </FooterBar>
     </SafeAreaView>
   );
 }

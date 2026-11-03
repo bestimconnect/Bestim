@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { useTabBarSpace } from '@/components/TabBar';
-import { Button, Item, Text } from '@/components/ui';
+import { Backdrop, Button, Card, Item, Sheen, Text } from '@/components/ui';
 import { hasReading, openCapture } from '@/lib/reading';
 import { vehicleName, type Vehicle } from '@/lib/queries';
 import { shadows } from '@/lib/theme';
@@ -19,11 +19,12 @@ export function OfflineHome({ vehicle }: { vehicle: Vehicle }) {
     openCapture({ vehicleId: vehicle.id });
   };
   return (
-    <ScrollView className="flex-1 bg-paper" contentContainerClassName="gap-4 px-6" contentContainerStyle={{ paddingTop: insets.top + 16, paddingBottom: space }}>
-      <View className="gap-2 rounded-field bg-sky p-4">
+    <ScrollView className="flex-1 bg-paper" contentContainerClassName="gap-6 px-6" contentContainerStyle={{ paddingTop: insets.top + 16, paddingBottom: space }}>
+      <Backdrop />
+      <Card tone="sky" className="gap-1 p-4">
         <Text variant="label">{t('feedback.offline.bannerTitle')}</Text>
         <Text variant="caption" className="text-muted">{t('feedback.offline.bannerBody')}</Text>
-      </View>
+      </Card>
       <Text variant="title">{t('feedback.offline.title')}</Text>
       <Item
         icon={Car}
@@ -31,7 +32,8 @@ export function OfflineHome({ vehicle }: { vehicle: Vehicle }) {
         subtitle={t('feedback.offline.vehicleSub')}
         onPress={() => router.push({ pathname: '/vehicle/[id]', params: { id: vehicle.id } })}
       />
-      <View className="gap-1 rounded-metric bg-panel p-5" style={{ boxShadow: shadows.soft }}>
+      <View className="gap-1 overflow-hidden rounded-metric bg-panel p-5" style={{ boxShadow: shadows.lift }}>
+        <Sheen opacity={0.07} />
         <Text variant="caption" className="text-onpanel">{t('feedback.offline.cardLabel')}</Text>
         <Text variant="number" className="text-onpanel" numberOfLines={1}>{hasReading(vehicle) ? vehicle.current_odometer.toLocaleString('en-US') : '—'}</Text>
         <Text variant="caption" className="text-onpanel">
@@ -39,7 +41,7 @@ export function OfflineHome({ vehicle }: { vehicle: Vehicle }) {
         </Text>
       </View>
       <Button title={t('feedback.offline.write')} onPress={write} />
-      <Text variant="caption" className="text-muted">{t('feedback.offline.voice')}</Text>
+      <Text variant="caption" className="px-1 text-center text-muted">{t('feedback.offline.voice')}</Text>
     </ScrollView>
   );
 }

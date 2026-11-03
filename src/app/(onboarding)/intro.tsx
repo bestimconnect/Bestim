@@ -1,19 +1,19 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Bell, Check, Disc, Droplets, Mic, Share2, ShieldCheck, Wrench, type LucideIcon } from 'lucide-react-native';
+import { Bell, Check, Disc, Droplets, Mic, Share2, ShieldCheck, Wallet, Wrench, type LucideIcon } from 'lucide-react-native';
 import { type ReactNode, useRef, useState } from 'react';
 import { FlatList, useWindowDimensions, View, type ViewStyle } from 'react-native';
 import Animated, { type EntryOrExitLayoutType, useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Item, PressableScale, Text } from '@/components/ui';
+import { Backdrop, Button, FooterBar, Item, PressableScale, Sheen, Text } from '@/components/ui';
 import { EASE_OUT, POP, rise } from '@/lib/motion';
 import { shadows, useColors } from '@/lib/theme';
 import { useSettings } from '@/stores/settingsStore';
 import { vehicleArt } from '@/lib/vehicleArt';
 
-const SLIDES = ['voice', 'reminders', 'history'] as const;
+const SLIDES = ['what', 'voice', 'reminders', 'history'] as const;
 const VIEWABLE = { itemVisiblePercentThreshold: 50 }; // one slide at a time counts as the current one
 const STAGE = { w: 330, h: 300 }; // the collage is drawn on this fixed canvas, then scaled to fit
 
@@ -43,6 +43,16 @@ const Pill = ({ icon: Icon, text, dark }: { icon: LucideIcon; text: string; dark
 function Collage({ slide }: { slide: (typeof SLIDES)[number] }) {
   const { t } = useTranslation();
   const tt = (k: string, n?: string) => t(`onboarding.intro.${slide}.${k}`, { n });
+  if (slide === 'what')
+    return (
+      <>
+        {([[Mic, 'say', { top: 8, start: 0 }, -3], [Bell, 'reminders', { top: 78, end: 0 }, 3], [Wallet, 'expenses', { top: 148, start: 8 }, -2], [Share2, 'share', { top: 218, end: 0 }, 3]] as [LucideIcon, string, ViewStyle, number][]).map(([icon, k, at, tilt], i) => (
+          <Piece key={k} at={at} tilt={tilt} enter={rise(i * 2)}>
+            <Pill icon={icon} text={t(`onboarding.intro.what.pillar.${k}`)} dark={k === 'say'} />
+          </Piece>
+        ))}
+      </>
+    );
   if (slide === 'voice')
     return (
       <>
@@ -115,7 +125,7 @@ function Dot({ on }: { on: boolean }) {
   );
 }
 
-// First screen after the splash: three swipeable slides of real app pieces; Next / Get started, Skip → Sign in (decisions Q104).
+// First screen after the splash: four swipeable slides (what Bestim is, then the three promises, Q125) of real app pieces; Next / Get started, Skip → Sign in (decisions Q104).
 export default function IntroScreen() {
   const { t, i18n } = useTranslation();
   const { width } = useWindowDimensions();
@@ -135,11 +145,12 @@ export default function IntroScreen() {
     setSeen((s) => (s.includes(i) ? s : [...s, i]));
   });
 
-  const illo = Math.round(height * 0.56);
+  const illo = Math.min(Math.round(height * 0.56), height - 150); // always leave 150px for the words, even on a small phone
   const scale = Math.min(1, illo / STAGE.h, (width - 16) / STAGE.w);
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
+      <Backdrop />
       <View className="h-12 flex-row items-center justify-between px-6">
         {/* The language comes from the phone; this is the way to the other one (the gate applies it and flips the layout). */}
         <PressableScale accessibilityRole="button" onPress={() => useSettings.getState().setLanguage(other)} className="min-h-11 justify-center px-2">
@@ -172,21 +183,22 @@ export default function IntroScreen() {
             }}
             renderItem={({ item: slide, index: i }) => (
               <View style={{ width, height }}>
-                <View className="items-center justify-center" style={{ height: illo }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                <View className="items-center justify-center overflow-hidden" style={{ height: illo }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                  <Sheen color="#D3F53D" opacity={0.3} glow="br" radius={1.1} />
                   <View style={{ width: STAGE.w, height: STAGE.h, transform: [{ scale }] }}>
                     {seen.includes(i) ? <Collage slide={slide} /> : null}
                   </View>
                 </View>
-                <View className="gap-3 px-6 pt-4">
-                  <Text variant="title">{t(`onboarding.intro.${slide}.title`)}</Text>
-                  <Text className="text-muted">{t(`onboarding.intro.${slide}.body`)}</Text>
+                <View className="min-h-[130px] gap-2 px-6 pt-5">
+                  <Text variant="title" numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.85}>{t(`onboarding.intro.${slide}.title`)}</Text>
+                  <Text className="text-muted" numberOfLines={3}>{t(`onboarding.intro.${slide}.body`)}</Text>
                 </View>
               </View>
             )}
           />
         ) : null}
       </View>
-      <View className="gap-4 px-6 pb-2 pt-4">
+      <FooterBar inset={false}>
         <View className="h-2 flex-row items-center justify-center gap-2">
           {SLIDES.map((s, i) => <Dot key={s} on={i === index} />)}
         </View>
@@ -194,7 +206,7 @@ export default function IntroScreen() {
           title={t(last ? 'onboarding.start' : 'onboarding.next')}
           onPress={() => (last ? router.push('/login') : list.current?.scrollToIndex({ index: index + 1 }))}
         />
-      </View>
+      </FooterBar>
     </SafeAreaView>
   );
 }

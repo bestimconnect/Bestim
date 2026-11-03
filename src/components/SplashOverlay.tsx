@@ -22,7 +22,7 @@ const GB = { l: 1, r: 279, t: 1, b: 191 };
 const COVER_X = 281 * k; // where "estim" begins
 const COVER_W = W - COVER_X + 2;
 const GAP = 10;
-const TAG_H = 24;
+const TAG_H = 52; // two lines
 const WORD_TOP = -(H + GAP + TAG_H) / 2; // relative to screen centre: the word + tagline group is centred
 export const MARK_FROM = { x: ((MB.l + MB.r) / 2 - 256) * K, y: ((MB.t + MB.b) / 2 - 256) * K };
 export const MARK_TO = { x: ((GB.l + GB.r) / 2) * k - W / 2, y: WORD_TOP + ((GB.t + GB.b) / 2) * k };
@@ -113,7 +113,7 @@ export function SplashOverlay({ onDone }: { onDone: () => void }) {
           {still ? null : <Animated.View style={[{ position: 'absolute', left: 0, top: -1, width: COVER_W, height: H + 2, backgroundColor: '#222E29' }, coverStyle]} />}
         </Animated.View>
         <Animated.View style={[{ height: TAG_H, justifyContent: 'center' }, tagStyle]}>
-          <Text variant="body" className="text-[#D3F53D]">{t('splash.tagline')}</Text>
+          <Text variant="body" className="text-center text-[#D3F53D]">{t('splash.promise')}</Text>
         </Animated.View>
       </View>
       {/* The splash picture split in two (same 512 square, same place), so together they equal the native splash. */}

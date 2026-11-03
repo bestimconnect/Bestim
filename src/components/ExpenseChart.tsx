@@ -7,7 +7,7 @@ import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withTimin
 import Svg, { Circle, Defs, LinearGradient, Line, Path, Stop, Text as SvgText } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 
-import { Text } from '@/components/ui';
+import { Sheen, Text } from '@/components/ui';
 import { fmt, type Point } from '@/lib/expensePeriods';
 import { easeOut } from '@/lib/motion';
 
@@ -105,7 +105,9 @@ export function ExpenseChart({
   );
 
   return (
-    <View className="gap-3 rounded-metric bg-panel p-4">
+    <View className="gap-3 overflow-hidden rounded-metric bg-panel p-4">
+      <Sheen opacity={0.07} />
+      <Sheen color="#D3F53D" opacity={0.08} glow="tr" radius={0.8} />
       {/* direction ltr: older on the left, newer on the right, in Arabic too. */}
       <View className="flex-row items-center justify-between" style={{ direction: 'ltr' }}>
         <Pressable

@@ -1,4 +1,3 @@
-import { useTabBarSpace } from '@/components/TabBar';
 import { useRefresh } from '@/components/Refresh';
 import { router } from 'expo-router';
 import { Car, Repeat } from 'lucide-react-native';
@@ -12,12 +11,11 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorState } from '@/components/ErrorState';
 import { openCapture } from '@/lib/reading';
-import { Button, Choice, Field, Header, Item, Note, Text } from '@/components/ui';
-import { blockFeature, upgradeOnLimitError, useEntitlements } from '@/lib/entitlements';
+import { Backdrop, Button, Card, Choice, Field, FooterBar, Header, IconTile, Item, Note, Section, Text } from '@/components/ui';
+import { blockFeature, useEntitlements } from '@/lib/entitlements';
 import { SITE } from '@/lib/links';
 import { useCurrentVehicle, useVehicleLogs, useVehicleParts, useVehicles, vehicleName } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
-import { useColors } from '@/lib/theme';
 
 // Screen 41 — Share vehicle history (decisions Q43); ar-light 41/مشاركة تاريخ سيارة.png
 type Mode = 'qr' | 'link';
@@ -28,8 +26,6 @@ const tokenOf = (s: string) => s.trim().match(/token=([^&\s#]+)/)?.[1] ?? s.trim
 export default function ShareScreen() {
   const { t } = useTranslation();
   const refresh = useRefresh();
-  const space = useTabBarSpace();
-  const c = useColors();
   const vehicles = useVehicles();
   const { vehicle: current } = useCurrentVehicle();
   const [pickedId, setPickedId] = useState<string | null>(null);
@@ -70,47 +66,54 @@ export default function ShareScreen() {
 
   if (logs.isError && !logs.data) return <ErrorState onRetry={logs.refetch} retrying={logs.isRefetching} />;
   return (
-    <SafeAreaView className="flex-1 bg-paper px-6" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
+      <Backdrop />
       <Header title={t('share.header')} sub={t('account.shareSub')} />
-      <ScrollView refreshControl={refresh} contentContainerClassName="gap-5 pt-4" contentContainerStyle={{ paddingBottom: space }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets showsVerticalScrollIndicator={false}>
-        <View className="h-[60px] w-[60px] items-center justify-center self-center rounded-full bg-mint">
-          <Repeat size={26} color={c.teal} />
+      <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-6 px-6 pb-6 pt-2" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets showsVerticalScrollIndicator={false}>
+        <View className="items-center gap-3">
+          <IconTile icon={Repeat} size={64} />
+          <Text variant="title" className="text-center">{t('share.title')}</Text>
+          <Text variant="body" className="text-center text-muted">{t('share.body')}</Text>
         </View>
-        <Text variant="title">{t('share.title')}</Text>
-        <Text variant="body" className="text-muted">{t('share.body')}</Text>
         <Choice<Mode> className="bg-line" value={mode} onChange={setMode} options={[{ value: 'qr', label: t('share.qr') }, { value: 'link', label: t('share.linkTab') }]} />
-        {vehicle ? (
-          <Item icon={Car} title={name} subtitle={t('share.sub', { n: count, m: parts.length })} chevron={(vehicles.data?.length ?? 0) > 1} onPress={pick} />
-        ) : null}
-        {link && mode === 'qr' ? (
-          <View className="items-center gap-2">
-            <View className="rounded-item bg-[#FFFFFF] p-4">
-              <QRCode value={link} size={200} />
-            </View>
-            <Text variant="caption" className="text-muted">{t('share.valid')}</Text>
+        <View className="gap-3">
+          {vehicle ? (
+            <Item icon={Car} title={name} subtitle={t('share.sub', { n: count, m: parts.length })} chevron={(vehicles.data?.length ?? 0) > 1} onPress={pick} />
+          ) : null}
+          {link && mode === 'qr' ? (
+            <Card className="items-center gap-3 p-5">
+              <View className="rounded-field bg-[#FFFFFF] p-3">
+                <QRCode value={link} size={200} />
+              </View>
+              <Text variant="caption" className="text-muted">{t('share.valid')}</Text>
+            </Card>
+          ) : null}
+          {link && mode === 'link' ? (
+            <Card className="gap-2 p-4">
+              <Text variant="caption" selectable>{link}</Text>
+              <Text variant="caption" className="text-muted">{t('share.valid')}</Text>
+            </Card>
+          ) : null}
+          <Note tone="info" text={t('share.note')} />
+          {vehicle?.removed_records ? <Text variant="caption" className="px-1 text-muted">{t('share.removed', { n: vehicle.removed_records })}</Text> : null}
+          {empty ? <Text variant="caption" className="px-1 text-muted">{t('share.empty')}</Text> : null}
+          {error ? <Note tone="warning" text={t('share.error')} /> : null}
+        </View>
+        <View>
+          <Section title={t('share.received')} />
+          <View className="gap-3">
+            <Field label={t('share.paste')} value={pasted} onChangeText={setPasted} autoCapitalize="none" autoCorrect={false} style={{ textAlign: I18nManager.isRTL ? 'right' : 'left' }} />
+            <Button title={t('share.continue')} variant="secondary" disabled={!pasted.trim()} onPress={() => router.push({ pathname: '/receive', params: { token: tokenOf(pasted) } })} />
           </View>
-        ) : null}
-        {link && mode === 'link' ? (
-          <View className="gap-2 rounded-field bg-white p-4">
-            <Text variant="caption" selectable>{link}</Text>
-            <Text variant="caption" className="text-muted">{t('share.valid')}</Text>
-          </View>
-        ) : null}
-        <Note tone="info" text={t('share.note')} />
-        {vehicle?.removed_records ? <Text variant="caption" className="text-muted">{t('share.removed', { n: vehicle.removed_records })}</Text> : null}
-        {empty ? <Text variant="caption" className="text-muted">{t('share.empty')}</Text> : null}
-        {error ? <Note tone="warning" text={t('share.error')} /> : null}
+        </View>
+      </ScrollView>
+      <FooterBar>
         {empty ? (
           <Button title={t('history.emptyCta')} onPress={() => openCapture({ vehicleId: vehicle?.id })} />
         ) : (
           <Button title={link ? t('share.send') : t('share.prepare')} loading={busy} disabled={!vehicle || !logs.isSuccess} onPress={link ? send : prepare} />
         )}
-        <View className="gap-3 pt-4">
-          <Text variant="label">{t('share.received')}</Text>
-          <Field label={t('share.paste')} value={pasted} onChangeText={setPasted} autoCapitalize="none" autoCorrect={false} style={{ textAlign: I18nManager.isRTL ? 'right' : 'left' }} />
-          <Button title={t('share.continue')} variant="secondary" disabled={!pasted.trim()} onPress={() => router.push({ pathname: '/receive', params: { token: tokenOf(pasted) } })} />
-        </View>
-      </ScrollView>
+      </FooterBar>
     </SafeAreaView>
   );
 }

@@ -5,14 +5,14 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Camera, ChevronDown, Mic, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, ScrollView, UIManager, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, UIManager, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { KeyboardDone } from '@/components/KeyboardDone';
 import { StepsBar } from '@/components/StepsBar';
 import { toast } from '@/components/Toast';
-import { Button, Field, Header, Item, Note, PressableScale, Text, Toggle } from '@/components/ui';
+import { Backdrop, Button, Card, Chip, Field, FooterBar, Header, IconTile, Note, PressableScale, Sheen, Text, Toggle } from '@/components/ui';
 import { blockFeature, useEntitlements } from '@/lib/entitlements';
 import { errorText } from '@/lib/errors';
 import { shouldAskNotifications } from '@/lib/notifications';
@@ -20,10 +20,11 @@ import { useOnline } from '@/lib/online';
 import { useCurrentVehicle, useExpenses, useLog, useRecordCategories, useServiceTypes, useVehicle, useVehicleLogs } from '@/lib/queries';
 import { expenseChip, isFresh, topChips } from '@/lib/quickAdd';
 import { refreshRecords, removeRecord } from '@/lib/removeRecord';
-import { cleanDetails, LOG_FIELDS, SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
+import { clean } from '@/lib/numberInput';
+import { cleanDetails, LOG_FIELDS, newLogId, SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
 import { pickOption } from '@/lib/sheet';
 import { supabase } from '@/lib/supabase';
-import { useColors } from '@/lib/theme';
+import { shadows, useColors } from '@/lib/theme';
 import { useLogDraft } from '@/stores/logDraft';
 import { useVoiceBatch } from '@/stores/voiceBatch';
 import type { ExpenseCategory } from '@/lib/voiceRecords';
@@ -42,11 +43,6 @@ function IosDatePicker({ date, onChange, locale }: { date: string; onChange: (d:
 const DEFAULTS = ['Oil Change', expenseChip('fuel'), expenseChip('wash'), 'Tire Replacement', 'Brake Pad Replacement', 'Battery Replacement'];
 const NOTICES = { micDenied: 'capture.micDenied', aiFailed: 'capture.batch.aiFailed', dailyLimit: 'capture.batch.dailyLimit' } as const;
 const num = (s: string) => (s.trim() && !isNaN(Number(s)) ? Number(s) : null);
-// Typed numbers: Arabic-Indic digits become Latin, everything but digits (and one point, if `dec`) is dropped.
-const clean = (s: string, dec = false) => {
-  const v = s.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660)).replace(dec ? /[^\d.]/g : /\D/g, '');
-  return dec ? v.replace(/\./g, (m, i) => (v.indexOf('.') === i ? m : '')) : v;
-};
 const daysAgo = (n: number) => {
   const d = new Date();
   d.setDate(d.getDate() - n);
@@ -335,6 +331,7 @@ export default function CaptureSheet() {
     }
     const reminds = !!service?.has_reminder;
     const input: SaveLogInput = {
+      id: newLogId(),
       vehicleId: vehicle.id,
       serviceTypeId: service!.id,
       title: custom?.trim() || name(service!),
@@ -391,12 +388,16 @@ export default function CaptureSheet() {
     (!reasonMode || reason.trim().length >= 3);
   const day = date === daysAgo(0) ? 'today' : date === daysAgo(1) ? 'yesterday' : 'other';
 
-  return (
+  const saveButton = (
+    <Button title={t('capture.quick.save')} onPress={submit} disabled={!valid} loading={busy || save.isPending} />
+  );
+  const form = (
     // A formSheet lays out one scroll view as its root; a header or footer beside it gets hidden under it.
+    // The full-screen steps page can pin the Save button in a FooterBar instead (below).
     <ScrollView
-      className={steps ? 'flex-1 bg-paper' : 'flex-1 rounded-t-screen border-t border-line bg-sheet'}
+      className={steps ? 'flex-1' : 'flex-1 rounded-t-screen border-t border-line bg-sheet'}
       contentContainerClassName={steps ? 'gap-4 px-6' : 'gap-4 px-6 pt-8'}
-      contentContainerStyle={{ paddingBottom: bottom + 16, ...(steps ? { paddingTop: top } : null) }}
+      contentContainerStyle={{ paddingBottom: steps ? 16 : bottom + 16, ...(steps ? { paddingTop: top } : null) }}
       keyboardShouldPersistTaps="handled"
       automaticallyAdjustKeyboardInsets>
       {steps ? (
@@ -404,7 +405,7 @@ export default function CaptureSheet() {
       ) : (
         <View className="flex-row items-center justify-between">
           <Text variant="heading">{t(editing ? 'capture.quick.editTitle' : 'capture.newRecord')}</Text>
-          <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white">
+          <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white" style={{ boxShadow: shadows.lift }}>
             <X size={20} color={c.ink} />
           </PressableScale>
         </View>
@@ -414,7 +415,8 @@ export default function CaptureSheet() {
         <PressableScale
           accessibilityRole="button"
           onPress={voice}
-          className="h-14 flex-row items-center justify-center gap-3 rounded-item bg-panel">
+          className="h-14 flex-row items-center justify-center gap-3 overflow-hidden rounded-item bg-panel">
+          <Sheen opacity={0.08} />
           <Mic size={22} color="#D3F53D" />
           <Text variant="label" className="text-onpanel">{t('capture.quick.say')}</Text>
         </PressableScale>
@@ -422,113 +424,106 @@ export default function CaptureSheet() {
         {editing || steps ? null : <Text variant="caption" className="text-muted">{t('capture.quick.mostUsed')}</Text>}
         {steps ? null : <View className="flex-row flex-wrap gap-2">
           {chips.map((id) => (
-            <Pressable
-              key={id}
-              accessibilityRole="button"
-              accessibilityState={{ selected: chip === id }}
-              onPress={() => choose(id)}
-              className={`h-11 justify-center rounded-nav px-4 ${chip === id ? 'bg-ink' : 'bg-line'}`}>
-              <Text variant="caption" className={chip === id ? 'text-paper' : 'text-muted'}>{label(id)}</Text>
-            </Pressable>
+            <Chip key={id} label={label(id)} selected={chip === id} onPress={() => choose(id)} />
           ))}
-          <Pressable accessibilityRole="button" onPress={openMore} className="h-11 justify-center rounded-nav bg-line px-4">
-            <Text variant="caption" className="text-muted">{t('capture.quick.more')}</Text>
-          </Pressable>
+          <Chip label={t('capture.quick.more')} onPress={openMore} />
         </View>}
         {chip ? (
           <>
-            <View className="flex-row gap-4">
-              <Field className="flex-1" label={t('expenses.amount')} value={amount} onChangeText={(v) => setAmount(clean(v, true))} keyboardType="decimal-pad" returnKeyType="done" placeholder="0" autoFocus />
-              {fuel ? <Field className="flex-1" label={t('expenses.liters')} value={liters} onChangeText={(v) => setLiters(clean(v, true))} keyboardType="decimal-pad" returnKeyType="done" placeholder={t('expenses.optional')} /> : null}
-            </View>
-            {fuel ? (
-              <>
-                <View className="flex-row items-center gap-3 rounded-field bg-white p-4">
-                  <View className="flex-1 gap-0.5">
-                    <Text variant="label">{t('expenses.fullTank')}</Text>
-                    <Text variant="caption" className="text-muted">{t('expenses.fullTankHint')}</Text>
-                  </View>
-                  <Toggle value={fullTank} onChange={setFullTank} label={t('expenses.fullTank')} />
-                </View>
-                <Field label={t('expenses.reading')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" returnKeyType="done" placeholder={t('expenses.optional')} error={tooLow ? t('errors.lowerReading') : undefined} />
-              </>
-            ) : null}
-            <View className="gap-2">
-              <Text variant="caption" className="text-muted">{t('expenses.date')}</Text>
-              <View className="flex-row gap-2">
-                {(['today', 'yesterday', 'other'] as const).map((k) => (
-                  <Pressable
-                    key={k}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: day === k }}
-                    onPress={() => (k === 'other' ? otherDay() : setDate(daysAgo(k === 'today' ? 0 : 1)))}
-                    className={`h-11 justify-center rounded-nav px-4 ${day === k ? 'bg-ink' : 'bg-line'}`}>
-                    <Text variant="caption" className={day === k ? 'text-paper' : 'text-muted'}>
-                      {k === 'other' && day === 'other' ? format(new Date(`${date}T00:00:00`), 'd MMM', { locale: ar ? arLocale : enUS }) : t(`capture.quick.${k}`)}
-                    </Text>
-                  </Pressable>
-                ))}
+            <Card className="gap-4 p-4">
+              <View className="flex-row gap-4">
+                <Field className="flex-1" label={t('expenses.amount')} value={amount} onChangeText={(v) => setAmount(clean(v, true))} keyboardType="decimal-pad" returnKeyType="done" placeholder="0" autoFocus />
+                {fuel ? <Field className="flex-1" label={t('expenses.liters')} value={liters} onChangeText={(v) => setLiters(clean(v, true))} keyboardType="decimal-pad" returnKeyType="done" placeholder={t('expenses.optional')} /> : null}
               </View>
-              {showPicker && Platform.OS === 'ios' ? <IosDatePicker date={date} onChange={(d) => setDate(d.toLocaleDateString('en-CA'))} locale={ar ? 'ar' : 'en'} /> : null}
-            </View>
-            {steps && service?.has_reminder ? (
-              <Field
-                label={t('capture.new.remind')}
-                value={every}
-                onChangeText={(v) => setEvery(clean(v))}
-                keyboardType="number-pad"
-                returnKeyType="done"
-                placeholder={service.default_interval_km != null ? service.default_interval_km.toLocaleString('en-US') : t('capture.manual.optional')}
-              />
-            ) : null}
-            <Pressable accessibilityRole="button" onPress={() => setMore(!more)} className="h-11 flex-row items-center justify-between">
-              <Text variant="label">{t('capture.quick.moreDetails')}</Text>
-              <ChevronDown size={20} color={c.muted} style={{ transform: [{ rotate: more ? '180deg' : '0deg' }] }} />
-            </Pressable>
-            {more ? (
-              <View className="gap-4">
-                {fuel ? null : service ? (
-                  <Field label={t('capture.manual.odometer')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" returnKeyType="done" placeholder={t('capture.manual.optional')} error={tooLow ? t('errors.lowerReading') : undefined} />
-                ) : null}
+              {fuel ? (
+                <>
+                  <View className="flex-row items-center gap-3">
+                    <View className="flex-1 gap-0.5">
+                      <Text variant="label">{t('expenses.fullTank')}</Text>
+                      <Text variant="caption" className="text-muted">{t('expenses.fullTankHint')}</Text>
+                    </View>
+                    <Toggle value={fullTank} onChange={setFullTank} label={t('expenses.fullTank')} />
+                  </View>
+                  <Field label={t('expenses.reading')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" returnKeyType="done" placeholder={t('expenses.optional')} error={tooLow ? t('errors.lowerReading') : undefined} />
+                </>
+              ) : null}
+              <View className="gap-2">
+                <Text variant="caption" className="text-muted">{t('expenses.date')}</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {(['today', 'yesterday', 'other'] as const).map((k) => (
+                    <Chip
+                      key={k}
+                      selected={day === k}
+                      onPress={() => (k === 'other' ? otherDay() : setDate(daysAgo(k === 'today' ? 0 : 1)))}
+                      label={k === 'other' && day === 'other' ? format(new Date(`${date}T00:00:00`), 'd MMM', { locale: ar ? arLocale : enUS }) : t(`capture.quick.${k}`)}
+                    />
+                  ))}
+                </View>
+                {showPicker && Platform.OS === 'ios' ? <IosDatePicker date={date} onChange={(d) => setDate(d.toLocaleDateString('en-CA'))} locale={ar ? 'ar' : 'en'} /> : null}
+              </View>
+              {steps && service?.has_reminder ? (
                 <Field
-                  label={t(service ? 'capture.manual.workshop' : 'expenses.place')}
-                  value={workshop}
-                  onChangeText={setWorkshop}
-                  placeholder={t('capture.manual.optional')}
+                  label={t('capture.new.remind')}
+                  value={every}
+                  onChangeText={(v) => setEvery(clean(v))}
+                  keyboardType="number-pad"
+                  returnKeyType="done"
+                  placeholder={service.default_interval_km != null ? service.default_interval_km.toLocaleString('en-US') : t('capture.manual.optional')}
                 />
-                {fields.map((f) => (
+              ) : null}
+            </Card>
+            <Card>
+              <PressableScale accessibilityRole="button" accessibilityState={{ expanded: more }} onPress={() => setMore(!more)} scale={0.99} className="min-h-[56px] flex-row items-center justify-between gap-3 px-4">
+                <Text variant="label" className="shrink">{t('capture.quick.moreDetails')}</Text>
+                <ChevronDown size={20} color={c.muted} style={{ transform: [{ rotate: more ? '180deg' : '0deg' }] }} />
+              </PressableScale>
+              {more ? (
+                <View className="gap-4 px-4 pb-4 pt-1">
+                  {fuel ? null : service ? (
+                    <Field label={t('capture.manual.odometer')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" returnKeyType="done" placeholder={t('capture.manual.optional')} error={tooLow ? t('errors.lowerReading') : undefined} />
+                  ) : null}
                   <Field
-                    key={f}
-                    label={t(`capture.fields.${f}`)}
-                    value={details[f] ?? ''}
-                    onChangeText={(v) => setDetails({ ...details, [f]: v })}
-                    keyboardType={LOG_FIELDS[f]}
+                    label={t(service ? 'capture.manual.workshop' : 'expenses.place')}
+                    value={workshop}
+                    onChangeText={setWorkshop}
                     placeholder={t('capture.manual.optional')}
                   />
-                ))}
-                {service?.has_reminder && !steps ? (
-                  <Field
-                    label={t('capture.manual.interval')}
-                    value={every}
-                    onChangeText={(v) => setEvery(clean(v))}
-                    keyboardType="number-pad" returnKeyType="done"
-                    placeholder={service.default_interval_km != null ? service.default_interval_km.toLocaleString('en-US') : t('capture.manual.optional')}
-                  />
-                ) : null}
-                {service ? <Field label={t('capture.manual.notes')} value={notes} onChangeText={setNotes} placeholder={t('capture.manual.optional')} multiline /> : null}
-                {service ? (
-                  <Item
-                    icon={Camera}
-                    tone="sky"
-                    title={t('capture.manual.attach')}
-                    subtitle={t(!connected ? 'toast.photoOffline' : photoUri ? 'capture.manual.attached' : 'capture.manual.attachSub')}
-                    onPress={attach}
-                    disabled={!connected}
-                    style={{ opacity: connected ? 1 : 0.5 }}
-                  />
-                ) : null}
-              </View>
-            ) : null}
+                  {fields.map((f) => (
+                    <Field
+                      key={f}
+                      label={t(`capture.fields.${f}`)}
+                      value={details[f] ?? ''}
+                      onChangeText={(v) => setDetails({ ...details, [f]: v })}
+                      keyboardType={LOG_FIELDS[f]}
+                      placeholder={t('capture.manual.optional')}
+                    />
+                  ))}
+                  {service?.has_reminder && !steps ? (
+                    <Field
+                      label={t('capture.manual.interval')}
+                      value={every}
+                      onChangeText={(v) => setEvery(clean(v))}
+                      keyboardType="number-pad" returnKeyType="done"
+                      placeholder={service.default_interval_km != null ? service.default_interval_km.toLocaleString('en-US') : t('capture.manual.optional')}
+                    />
+                  ) : null}
+                  {service ? <Field label={t('capture.manual.notes')} value={notes} onChangeText={setNotes} placeholder={t('capture.manual.optional')} multiline /> : null}
+                  {service ? (
+                    <PressableScale
+                      accessibilityRole="button"
+                      onPress={attach}
+                      disabled={!connected}
+                      className={`min-h-[60px] flex-row items-center gap-3 rounded-field bg-paper px-3 py-2 ${connected ? '' : 'opacity-50'}`}>
+                      <IconTile icon={Camera} tone="sky" size={36} />
+                      <View className="flex-1 gap-0.5">
+                        <Text variant="label" numberOfLines={2}>{t('capture.manual.attach')}</Text>
+                        <Text variant="caption" className="text-muted" numberOfLines={2}>{t(!connected ? 'toast.photoOffline' : photoUri ? 'capture.manual.attached' : 'capture.manual.attachSub')}</Text>
+                      </View>
+                    </PressableScale>
+                  ) : null}
+                </View>
+              ) : null}
+            </Card>
           </>
         ) : null}
         {reasonMode ? (
@@ -538,7 +533,7 @@ export default function CaptureSheet() {
           </>
         ) : null}
         {error ? <Note tone="warning" text={error} /> : null}
-        <Button title={t('capture.quick.save')} onPress={submit} disabled={!valid} loading={busy || save.isPending} />
+        {steps ? null : saveButton}
         {(logId || expenseId) && filled ? (
           <Pressable accessibilityRole="button" onPress={remove} className="h-11 items-center justify-center">
             <Text variant="label" className="text-danger">{t('capture.quick.delete')}</Text>
@@ -547,4 +542,12 @@ export default function CaptureSheet() {
         {steps ? null : <KeyboardDone />}
     </ScrollView>
   );
+
+  return steps ? (
+    <KeyboardAvoidingView behavior="padding" className="flex-1 bg-paper">
+      <Backdrop />
+      {form}
+      <FooterBar>{saveButton}</FooterBar>
+    </KeyboardAvoidingView>
+  ) : form;
 }

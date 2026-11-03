@@ -12,7 +12,7 @@ import { cleanVin, vinOk } from '@/lib/vin';
 import { ColorPicker } from '@/components/ColorPicker';
 import { PlateField, joinPlate } from '@/components/Plate';
 import { OdometerScanner } from '@/components/OdometerScanner';
-import { Button, Field, Header, Item, Note, PressableScale, Rise, Text } from '@/components/ui';
+import { Backdrop, Button, Card, Field, FooterBar, Group, Header, IconTile, Item, Note, PressableScale, Rise, Section, Sheen, Text } from '@/components/ui';
 import { upgradeOnLimitError } from '@/lib/entitlements';
 import { errorText } from '@/lib/errors';
 import { POP, SWAP } from '@/lib/motion';
@@ -145,11 +145,14 @@ export default function AddVehicleInfoScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <ScrollView className="flex-1" contentContainerClassName="gap-5 p-6" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
+      <Backdrop />
+      <ScrollView className="flex-1" contentContainerClassName="gap-6 p-6" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
+        <View className="gap-4">
         <Header title={t(mode === 'extra' ? 'vehicles.add' : 'onboarding.addVehicle.info.header')} />
         <Text variant="title">{t('onboarding.addVehicle.info.title')}</Text>
         <Rise>
-          <View className="h-[150px] items-center justify-center rounded-item bg-white" style={{ boxShadow: shadows.soft }}>
+          <Card className="h-[150px] items-center justify-center">
+            <Sheen color="#D3F53D" opacity={0.25} glow="tl" radius={1.1} />
             {known ? (
               // The picture pops in once a model is chosen; the inner one is keyed by type so a corrected type fades in.
               <Animated.View entering={POP} className="w-full items-center">
@@ -159,15 +162,24 @@ export default function AddVehicleInfoScreen() {
                 <Text variant="label">{`${makeLabel} ${modelLabel}`}</Text>
               </Animated.View>
             ) : (
-              <CarFront size={56} color={c.muted} />
+              <View className="items-center gap-2 px-6">
+                <IconTile icon={CarFront} size={64} />
+                <Text variant="caption" className="text-center text-muted" numberOfLines={1}>{t('onboarding.addVehicle.info.preview')}</Text>
+              </View>
             )}
-          </View>
+          </Card>
         </Rise>
-        <View className="gap-3">
+        </View>
+        <View>
+          <Section title={t('onboarding.addVehicle.info.sectionCar')} />
+          <View className="gap-3">
+          <Group>
           <Item icon={Car} title={makeLabel || choose} subtitle={t('onboarding.addVehicle.info.make')} onPress={pickBrand} />
           <View style={{ opacity: draft.make ? 1 : 0.5 }}>
             <Item icon={Tag} title={modelLabel || choose} subtitle={t('onboarding.addVehicle.info.model')} disabled={!draft.make} onPress={() => pickModel()} />
           </View>
+          <Item icon={CalendarDays} title={draft.year ? String(draft.year) : choose} subtitle={t('onboarding.addVehicle.info.year')} onPress={pickYear} />
+          </Group>
           {/* Picture cards per type (decisions Q52), only for a car typed by hand: a catalog model brings its own type. -mx-6 lets the row scroll edge to edge. */}
           {known && !draft.carModelId ? (
           <View className="gap-2">
@@ -209,11 +221,15 @@ export default function AddVehicleInfoScreen() {
             />
           </View>
           ) : null}
-          <Item icon={CalendarDays} title={draft.year ? String(draft.year) : choose} subtitle={t('onboarding.addVehicle.info.year')} onPress={pickYear} />
+          </View>
+        </View>
+        <View>
+          <Section title={t('onboarding.addVehicle.odometer.label')} />
+          <View className="gap-2">
           <View className="flex-row items-center gap-3">
             <Field
               className="flex-1"
-              label={`${t('onboarding.addVehicle.odometer.label')} · ${t('onboarding.addVehicle.odometer.unit.km')}`}
+              label={t('vehicles.odometer', { unit: t('onboarding.addVehicle.odometer.unit.km') })}
               value={odometer}
               // Arabic-Indic digits become Latin, everything else but digits is dropped (same as the record sheet).
               onChangeText={(v) => setOdometer(v.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660)).replace(/\D/g, ''))}
@@ -228,25 +244,40 @@ export default function AddVehicleInfoScreen() {
               <Camera size={22} color={c.teal} />
             </PressableScale>
           </View>
-          <Text variant="caption" className="-mt-1 text-muted">{t('onboarding.addVehicle.odometer.later')}</Text>
-          <Text variant="caption" className="text-muted">{t('plate.label')}</Text>
-          <PlateField letters={draft.plateLetters} digits={draft.plateDigits} onChange={(l, d) => draft.set({ plateLetters: l, plateDigits: d })} />
-          <ColorPicker value={draft.color} onChange={(c) => draft.set({ color: c })} />
+          <Text variant="caption" className="text-muted">{t('onboarding.addVehicle.odometer.later')}</Text>
+          </View>
+        </View>
+        <View>
+          <Section title={t('onboarding.addVehicle.info.sectionPlate')} />
+          <Card className="gap-4 p-4">
+            <View className="gap-2">
+              <Text variant="caption" className="text-muted">{t('plate.label')}</Text>
+              <PlateField letters={draft.plateLetters} digits={draft.plateDigits} onChange={(l, d) => draft.set({ plateLetters: l, plateDigits: d })} />
+            </View>
+            <ColorPicker value={draft.color} onChange={(c) => draft.set({ color: c })} />
+          </Card>
+        </View>
+        <View>
+          <Section title={t('onboarding.addVehicle.info.sectionMore')} />
+          <View className="gap-3">
           <Field label={t('vehicles.vin.label')} value={draft.vin} onChangeText={(v) => draft.set({ vin: cleanVin(v) })} autoCapitalize="characters" autoCorrect={false} placeholder={t('vehicles.vin.hint')} error={vinOk(draft.vin) ? undefined : t('vehicles.vin.error')} />
           <Field
             label={t('onboarding.addVehicle.info.nickname')}
             value={draft.nickname}
             onChangeText={(v) => draft.set({ nickname: v })}
           />
+          </View>
         </View>
         {save.error && (save.error as { code?: string }).code !== '54000' ? <Note tone="warning" text={errorText(save.error)} /> : null}
+      </ScrollView>
+      <FooterBar inset={false}>
         <Button
           title={t('onboarding.addVehicle.info.cta')}
           disabled={!draft.make || !draft.model || !draft.year || !vinOk(draft.vin)}
           loading={save.isPending}
           onPress={() => !save.isPending && save.mutate(odometer ? Number(odometer) : null)}
         />
-      </ScrollView>
+      </FooterBar>
       {scanning ? (
         // No reading on file yet, so the scanner offers what it sees and the owner checks it here before saving.
         <OdometerScanner

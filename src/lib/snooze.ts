@@ -1,7 +1,7 @@
 import { addDays, format } from 'date-fns';
 import { router } from 'expo-router';
 
-import { toast } from '@/components/Toast';
+import { toast, toastError } from '@/components/Toast';
 import i18n from './i18n';
 import { queryClient } from './queryClient';
 import { supabase } from './supabase';
@@ -14,7 +14,7 @@ export async function snoozePart(vehicleId: string, serviceTypeId: string, title
     ? { error: e1 }
     : await supabase.from('reminders').insert({ vehicle_id: vehicleId, service_type_id: serviceTypeId, title, status: 'dismissed', due_date: until });
   if (error) {
-    toast(i18n.t('reminders.snoozeFailed'));
+    toastError(i18n.t('reminders.snoozeFailed'));
     return false;
   }
   queryClient.invalidateQueries({ queryKey: ['snoozes'] });

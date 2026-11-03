@@ -1,3 +1,7 @@
+// Hermes has no Intl.PluralRules: without this every count read the "other" form ("3 سجل", "1 records").
+import '@formatjs/intl-pluralrules/polyfill.js';
+import '@formatjs/intl-pluralrules/locale-data/ar.js';
+import '@formatjs/intl-pluralrules/locale-data/en.js';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { DevSettings, I18nManager, Platform } from 'react-native';

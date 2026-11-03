@@ -13,13 +13,13 @@ import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-spe
 import { onlineManager } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { KEYBOARD_DONE_ID } from '@/components/KeyboardDone';
-import { Button, Header, Text } from '@/components/ui';
+import { Backdrop, Button, Card, FooterBar, Header, Sheen, Text } from '@/components/ui';
 import { rise, SWAP } from '@/lib/motion';
 import { showUpgrade } from '@/lib/entitlements';
 import { useServiceTypes, useVehicles } from '@/lib/queries';
@@ -74,6 +74,7 @@ export default function Voice() {
   const vehicles = useVehicles();
   const level = useSharedValue(0);
   const audioUri = useRef<string | null>(null);
+  const sending = useRef(false); // once sending starts, send() owns the recording file
   const said = useRef(''); // the latest transcript, for handlers that run after the state they closed over
   const waitingForEnd = useRef(false);
   const doneAt = useRef(0); // when the owner tapped Done, to time the wait in development
@@ -99,6 +100,7 @@ export default function Voice() {
       await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
       await recorder.prepareToRecordAsync();
       recorder.record();
+      audioUri.current = recorder.uri; // so leaving the screen can still delete the file
       setDirect(true);
       setListening(true);
     } catch {
@@ -130,6 +132,7 @@ export default function Voice() {
   };
 
   const send = async () => {
+    sending.current = true;
     waitingForEnd.current = false;
     const d = useLogDraft.getState();
     const text = said.current.trim();
@@ -152,7 +155,7 @@ export default function Voice() {
       };
       if (!onlineManager.isOnline()) return keep();
       const res = await sendVoice({ audio: fits ? await file!.base64() : null, mime, text, vehicleId: d.vehicleId, lang: i18n.language });
-      if (!res.ok) return res.reason === 'offline' ? keep() : (res.reason === 'limit' && showUpgrade('limit'), toManual(res.reason === 'limit' ? 'dailyLimit' : 'aiFailed')); // Q64, Q65
+      if (!res.ok) return res.reason === 'offline' ? keep() : (res.reason === 'limit' && showUpgrade('limit', null, null, 'voice_per_day'), toManual(res.reason === 'limit' ? 'dailyLimit' : 'aiFailed')); // Q64, Q65
       if (__DEV__) console.log(`voice: ${Date.now() - doneAt.current} ms from Done to result`, res.ms);
       const heard = res.transcript || text;
       if (!heard) {
@@ -181,7 +184,12 @@ export default function Voice() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     start();
-    return () => ExpoSpeechRecognitionModule.abort();
+    return () => {
+      ExpoSpeechRecognitionModule.abort();
+      try {
+        if (!sending.current && audioUri.current) new File(audioUri.current).delete(); // left without sending: the recording is never kept
+      } catch {}
+    };
   }, []);
 
 
@@ -254,17 +262,21 @@ export default function Voice() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <View className="flex-1 gap-5 p-6">
-        <Header title={t('capture.voice.header')} />
+      <Backdrop />
+      <View className="px-6"><Header title={t('capture.voice.header')} /></View>
+      {/* scrolls only when the text is long or the keyboard is up; otherwise the content sits centred, no dead gap */}
+      <ScrollView className="flex-1" contentContainerClassName="flex-grow justify-center gap-5 px-6 py-2" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets showsVerticalScrollIndicator={false}>
         <View className="flex-row items-center justify-between">
           <Animated.View key={String(busy)} entering={SWAP}>
             <Text variant="label">{t(busy ? 'capture.voice.understanding' : 'capture.voice.listening')}</Text>
           </Animated.View>
           <Text variant="small-number">{mmss(seconds)}</Text>
         </View>
-        <View className={`h-[150px] flex-row items-center justify-center gap-3.5 ${busy ? 'opacity-40' : ''}`}>
+        <Card className={`h-[150px] flex-row items-center justify-center gap-3.5 ${busy ? 'opacity-40' : ''}`}>
+          <Sheen color={c.teal} opacity={0.1} />
+          <Sheen color={c.teal} opacity={0.14} glow="br" radius={0.9} />
           {BARS.map((b, i) => <Bar key={i} base={b} level={level} />)}
-        </View>
+        </Card>
         {typed ? (
           <View className="gap-2">
             <Text variant="caption" className="text-muted">{t('capture.voice.typeHint')}</Text>
@@ -290,13 +302,23 @@ export default function Voice() {
             <Text variant="label">{t('capture.voice.understandingBody')}</Text>
           </Animated.View>
         ) : (
-          <Text className="text-muted">{t(seconds >= HINT_SECONDS ? 'capture.batch.longHint' : 'capture.voice.hint')}</Text>
+          <View className="gap-4">
+            <Text className="text-muted">{t(seconds >= HINT_SECONDS ? 'capture.batch.longHint' : 'capture.voice.hint')}</Text>
+            {/* Q125: what to say, shown until the owner is well into talking */}
+            {seconds < HINT_SECONDS ? (
+              <Card tone="mint" className="gap-2 p-4">
+                <Text variant="caption" className="text-muted">{t('capture.voice.tryTitle')}</Text>
+                {[1, 2, 3].map((n) => <Text key={n} variant="label">{t(`capture.voice.try${n}`)}</Text>)}
+              </Card>
+            ) : null}
+          </View>
         )}
         <Text variant="caption" className="text-muted">{t('capture.voice.aiNotice')}</Text>
-        <View className="flex-1" />
+      </ScrollView>
+      <FooterBar inset={false}>
         <Button title={t('capture.voice.done')} onPress={finish} loading={busy} />
-        <Button variant="secondary" title={t('capture.voice.cancel')} onPress={cancel} />
-      </View>
+        <Button variant="ghost" title={t('capture.voice.cancel')} onPress={cancel} />
+      </FooterBar>
     </SafeAreaView>
   );
 }

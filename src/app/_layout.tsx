@@ -23,9 +23,10 @@ import { SplashOverlay } from '@/components/SplashOverlay';
 import { Toast } from '@/components/Toast';
 import { Button, Text } from '@/components/ui';
 import { applyLanguage } from '@/lib/i18n';
+import { initMonitoring, reportError, wrapRoot } from '@/lib/monitoring';
 import { syncNotifications } from '@/lib/notifications';
 import { useOnline } from '@/lib/online';
-import { DAY, persister, queryClient } from '@/lib/queryClient';
+import { DAY, dehydrateOptions, persister, queryClient } from '@/lib/queryClient';
 import { sessionFromUrl, useSession } from '@/lib/session';
 import { useProfile } from '@/lib/queries';
 import { palette } from '@/lib/palette';
@@ -34,14 +35,16 @@ import { processVoiceQueue } from '@/lib/voiceSend';
 import { useSettings } from '@/stores/settingsStore';
 
 SplashScreen.preventAutoHideAsync();
+initMonitoring();
 
 /** Shown instead of a blank screen when a screen crashes (Q81). expo-router picks this export up by name. */
-export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   const { t } = useTranslation();
   const scheme = useScheme();
   useEffect(() => {
     SplashScreen.hideAsync();
-  }, []);
+    reportError(error, 'screen crash');
+  }, [error]);
   return (
     <View className="flex-1 justify-center gap-4 bg-paper p-6" style={themeVars[scheme]}>
       <Text variant="title">{t('errorScreen.title')}</Text>
@@ -51,16 +54,16 @@ export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
   );
 }
 
-export default function RootLayout() {
+export default wrapRoot(function RootLayout() {
   return (
     <PersistQueryClientProvider
       client={queryClient}
-      persistOptions={{ persister, maxAge: 7 * DAY }}
+      persistOptions={{ persister, maxAge: 7 * DAY, dehydrateOptions }}
       onSuccess={() => queryClient.resumePausedMutations()}>
       <App />
     </PersistQueryClientProvider>
   );
-}
+});
 
 function App() {
   const scheme = useScheme();
@@ -141,7 +144,7 @@ function App() {
   }, [ready, language, userId, profile.data, session?.user.is_anonymous]);
 
   if (!ready) return null;
-  // Bottom sheets: the say-it / type-it chooser (13), the confirm sheet (Q55) and switch vehicle (Q56).
+  // Bottom sheets: the say-it / type-it chooser (13), the confirm sheet (Q55), switch vehicle (Q56) and the upgrade sheet (Q121).
   const sheetOptions: ComponentProps<typeof Stack.Screen>['options'] = {
     presentation: 'formSheet',
     sheetAllowedDetents: 'fitToContents',
@@ -156,11 +159,14 @@ function App() {
       <Stack screenOptions={{ headerShown: false }}>
         {/* Over the tabs, like a transparent modal: the page below (Home, My Cars) stays attached, so its car is there to fly back to. */}
         <Stack.Screen name="vehicle/[id]" options={{ presentation: 'transparentModal', animation: 'fade', animationDuration: 250 }} />
+        {/* Opened from the car page (a transparent modal) a plain push shows as an inset card. These pages go full screen; a full-screen modal hides the root green bar, so they draw their own (LOCAL_BAR in ui/Header). */}
+        {['part', 'update-odometer', 'edit-vehicle', 'car-360'].map((n) => <Stack.Screen key={n} name={n} options={{ presentation: 'fullScreenModal' }} />)}
         <Stack.Screen name="capture/choose" options={sheetOptions} />
         <Stack.Screen name="part-logs" options={{ ...sheetOptions, sheetAllowedDetents: [0.6, 0.95] }} />
         <Stack.Screen name="capture/index" options={{ ...sheetOptions, sheetAllowedDetents: [0.92] }} />
         <Stack.Screen name="sheet" options={sheetOptions} />
         <Stack.Screen name="switch-vehicle" options={sheetOptions} />
+        <Stack.Screen name="upgrade" options={sheetOptions} />
         <Stack.Screen name="pick" options={{ presentation: 'modal' }} />
         <Stack.Screen name="notify-permission" options={{ presentation: 'modal' }} />
       </Stack>

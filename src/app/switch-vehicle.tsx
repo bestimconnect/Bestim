@@ -1,16 +1,15 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { Check, Plus, X } from 'lucide-react-native';
-import { View } from 'react-native';
+import { Car, Check, Plus, X } from 'lucide-react-native';
+import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { PlateView } from '@/components/Plate';
-import { Item, PressableScale, Rise, Text } from '@/components/ui';
+import { Group, Item, PressableScale, Rise, Text } from '@/components/ui';
 import { blockLimit, useEntitlements } from '@/lib/entitlements';
 import { needsAttention, useVehicleParts, useVehicles, vehicleName, type Vehicle } from '@/lib/queries';
 import { useVehiclePick } from '@/lib/sheet';
-import { useColors } from '@/lib/theme';
+import { shadows, useColors } from '@/lib/theme';
 import { hasReading } from '@/lib/reading';
 import { vehicleArt } from '@/lib/vehicleArt';
 
@@ -19,7 +18,8 @@ function VehicleRow({ vehicle, current, onPress }: { vehicle: Vehicle; current: 
   const { parts } = useVehicleParts(vehicle);
   const overdue = needsAttention(parts).some((p) => p.status.state === 'overdue');
   const title = vehicleName(vehicle);
-  const subtitle = hasReading(vehicle) ? `${vehicle.year} · ${vehicle.current_odometer.toLocaleString('en-US')} ${t(`vehicles.unit.${vehicle.odometer_unit}`)}` : String(vehicle.year);
+  // the plate rides in the subtitle: a plate pill next to the check left the name under 100pt on a 375pt phone
+  const subtitle = [vehicle.year, hasReading(vehicle) ? `${vehicle.current_odometer.toLocaleString('en-US')} ${t(`vehicles.unit.${vehicle.odometer_unit}`)}` : null, vehicle.plate_number?.trim() || null].filter(Boolean).join(' · ');
   return (
     <Item
       image={vehicleArt(vehicle.vehicle_type)}
@@ -31,7 +31,6 @@ function VehicleRow({ vehicle, current, onPress }: { vehicle: Vehicle; current: 
       onPress={onPress}
       aside={
         <View className="flex-row items-center gap-2">
-          <PlateView plate={vehicle.plate_number} size="sm" />
           {overdue ? <View className="h-2.5 w-2.5 rounded-full bg-danger" /> : null}
           {current ? (
             <View className="h-6 w-6 items-center justify-center rounded-full bg-lime">
@@ -51,11 +50,11 @@ export default function SwitchVehicle() {
   const { bottom } = useSafeAreaInsets();
   const vehicles = useVehicles().data ?? [];
   const ent = useEntitlements().data;
-  const { currentId, onPick } = useVehiclePick();
+  const { currentId, onPick, all } = useVehiclePick();
 
   const pick = (id: string) => {
     router.back();
-    if (id === currentId) return;
+    if (id === currentId && !all?.active) return;
     Haptics.selectionAsync();
     onPick(id);
   };
@@ -70,21 +69,43 @@ export default function SwitchVehicle() {
     <View className="gap-4 rounded-t-screen border-t border-line bg-sheet px-6 pt-6" style={{ paddingBottom: bottom + 16 }}>
       <View className="min-h-11 flex-row items-center gap-3">
         <Text variant="heading" className="flex-1">{t('home.switchVehicle')}</Text>
-        <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white">
+        <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white" style={{ boxShadow: shadows.lift }}>
           <X size={20} color={c.ink} />
         </PressableScale>
       </View>
-      {/* ponytail: no scrolling (a ScrollView breaks the fit-to-content sheet layout); fine for a personal garage of up to ~6 vehicles, fleets live in Bestim Connect. */}
-      <View className="gap-2">
-        {vehicles.map((v, i) => (
-          <Rise key={v.id} index={i}>
-            <VehicleRow vehicle={v} current={v.id === currentId} onPress={() => pick(v.id)} />
-          </Rise>
-        ))}
-        <Rise index={vehicles.length}>
-          <Item icon={Plus} title={t('vehicles.add')} chevron={false} onPress={add} />
-        </Rise>
-      </View>
+      {/* a fit-to-contents sheet cannot size a ScrollView: only scroll (fixed height) when the list is long */}
+      {(() => {
+        const rows = (
+          <Group>
+            {all ? (
+              <Rise index={0}>
+                <Item
+                  icon={Car}
+                  title={t('expenses.allCars')}
+                  subtitle={t('expenses.allCarsSub')}
+                  chevron={false}
+                  accessibilityState={{ selected: all.active }}
+                  onPress={() => { router.back(); if (!all.active) { Haptics.selectionAsync(); all.onPick(); } }}
+                  aside={all.active ? (
+                    <View className="h-6 w-6 items-center justify-center rounded-full bg-lime">
+                      <Check size={14} color="#222E29" strokeWidth={3} />
+                    </View>
+                  ) : null}
+                />
+              </Rise>
+            ) : null}
+            {vehicles.map((v, i) => (
+              <Rise key={v.id} index={i + 1}>
+                <VehicleRow vehicle={v} current={!all?.active && v.id === currentId} onPress={() => pick(v.id)} />
+              </Rise>
+            ))}
+            <Rise index={vehicles.length + 1}>
+              <Item icon={Plus} title={t('vehicles.add')} chevron={false} onPress={add} />
+            </Rise>
+          </Group>
+        );
+        return vehicles.length > 4 ? <ScrollView style={{ height: 420 }} contentContainerClassName="p-0.5" showsVerticalScrollIndicator={false}>{rows}</ScrollView> : rows;
+      })()}
     </View>
   );
 }

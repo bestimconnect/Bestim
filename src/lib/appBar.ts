@@ -13,8 +13,11 @@ export type BarEntry = { id: string; kind: 'bar' | 'hero'; title: string; sub?: 
  * Blocks, top to bottom: action row (back / right), title with an optional line under it, an optional switch or chips.
  */
 export const BAR_GAP = 12;
-export const barHeight = (e: { back: boolean; right?: unknown; sub?: string; below?: unknown; belowH?: number }) => {
-  const blocks = [(e.back || e.right ? 44 : 0), 32 + (e.sub ? 20 : 0), e.below ? (e.belowH ?? 44) : 0].filter(Boolean);
+type BarShape = { back: boolean; right?: unknown; sub?: string; below?: unknown; belowH?: number };
+/** The top row: back button, title (with its optional line under it) and the right action sit side by side. */
+export const rowHeight = (e: BarShape) => Math.max(e.back || e.right ? 44 : 32, 32 + (e.sub ? 20 : 0));
+export const barHeight = (e: BarShape) => {
+  const blocks = [rowHeight(e), e.below ? (e.belowH ?? 44) : 0].filter(Boolean);
   return 8 + blocks.reduce((a, b) => a + b, 0) + BAR_GAP * (blocks.length - 1) + 16;
 };
 

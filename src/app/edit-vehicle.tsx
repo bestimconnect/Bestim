@@ -6,9 +6,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { cleanVin, vinOk } from '@/lib/vin';
+import { LoadingState } from '@/components/EmptyState';
 import { ColorPicker } from '@/components/ColorPicker';
 import { cleanDigits, joinPlate, PlateField, splitPlate } from '@/components/Plate';
-import { Button, Field, Header, Note, Text } from '@/components/ui';
+import { Backdrop, Button, Card, Field, FooterBar, Header, Note, Section } from '@/components/ui';
 import { errorText } from '@/lib/errors';
 import { useVehicle, vehicleName, type Vehicle } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
@@ -37,19 +38,25 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <ScrollView className="flex-1" contentContainerClassName="gap-4 p-6" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
-        <Header title={t('plate.edit')} sub={vehicleName(vehicle)} />
-        <Text variant="caption" className="text-muted">{t('plate.label')}</Text>
-        <PlateField letters={letters} digits={digits} onChange={(l, d) => (setLetters(l), setDigits(d))} />
-        <ColorPicker value={color} onChange={setColor} />
-        <Field label={t('vehicles.vin.label')} value={vin} onChangeText={(v) => setVin(cleanVin(v))} autoCapitalize="characters" autoCorrect={false} placeholder={t('vehicles.vin.hint')} error={vinOk(vin) ? undefined : t('vehicles.vin.error')} />
-        <Field label={t('onboarding.addVehicle.info.nickname')} value={nickname} onChangeText={setNickname} />
-        {error ? <Note tone="warning" text={error} /> : null}
+    <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
+      <Backdrop />
+      <Header title={t('plate.edit')} sub={vehicleName(vehicle)} />
+      <ScrollView className="flex-1" contentContainerClassName="px-6 pb-6 pt-2" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
+        <Section title={t('plate.label')} />
+        <Card className="gap-4 p-4">
+          <PlateField letters={letters} digits={digits} onChange={(l, d) => (setLetters(l), setDigits(d))} />
+          <ColorPicker value={color} onChange={setColor} />
+        </Card>
+        <View className="pt-6"><Section title={t('plate.details')} /></View>
+        <View className="gap-3">
+          <Field label={t('vehicles.vin.label')} value={vin} onChangeText={(v) => setVin(cleanVin(v))} autoCapitalize="characters" autoCorrect={false} placeholder={t('vehicles.vin.hint')} error={vinOk(vin) ? undefined : t('vehicles.vin.error')} />
+          <Field label={t('onboarding.addVehicle.info.nickname')} value={nickname} onChangeText={setNickname} />
+          {error ? <Note tone="warning" text={error} /> : null}
+        </View>
       </ScrollView>
-      <View className="px-6 pb-4 pt-2">
+      <FooterBar>
         <Button title={t('plate.save')} onPress={save} loading={saving} disabled={!vinOk(vin)} />
-      </View>
+      </FooterBar>
     </SafeAreaView>
   );
 }
@@ -57,5 +64,5 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
 export default function EditVehicleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const vehicle = useVehicle(id).vehicle;
-  return vehicle ? <Form vehicle={vehicle} /> : <SafeAreaView className="flex-1 bg-paper px-6"><Header title="" /></SafeAreaView>;
+  return vehicle ? <Form vehicle={vehicle} /> : <SafeAreaView className="flex-1 bg-paper"><Header title="" /><LoadingState /></SafeAreaView>;
 }

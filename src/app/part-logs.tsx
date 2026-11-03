@@ -1,15 +1,16 @@
 import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router, useLocalSearchParams } from 'expo-router';
-import { X } from 'lucide-react-native';
+import { History, X } from 'lucide-react-native';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { EmptyState } from '@/components/EmptyState';
 import { PartArt } from '@/components/PartArt';
 import { Group, Item, PressableScale, Text } from '@/components/ui';
 import { useServiceTypes, useVehicle, useVehicleLogs } from '@/lib/queries';
-import { useColors } from '@/lib/theme';
+import { shadows, useColors } from '@/lib/theme';
 
 const n = (x: number) => x.toLocaleString('en-US');
 
@@ -35,7 +36,7 @@ export default function PartLogs() {
           <Text variant="heading" numberOfLines={1}>{st ? (arabic ? st.name_ar : st.name_en) : ''}</Text>
           <Text variant="caption" className="text-muted">{t('history.count', { count: logs.length })} · {n(total)} {t('vehicles.currency')}</Text>
         </View>
-        <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white">
+        <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white" style={{ boxShadow: shadows.lift }}>
           <X size={20} color={c.ink} />
         </PressableScale>
       </View>
@@ -53,7 +54,7 @@ export default function PartLogs() {
           ))}
         </Group>
       ) : (
-        <Text variant="body" className="py-6 text-center text-muted">{t('parts.history.empty')}</Text>
+        <EmptyState icon={History} title={t('parts.history.empty')} />
       )}
     </ScrollView>
   );

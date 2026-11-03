@@ -2,18 +2,18 @@ import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { PartArt } from '@/components/PartArt';
 import { PlateView } from '@/components/Plate';
-import { Group, Item, PressableScale, Text } from '@/components/ui';
+import { Card, Chip, Group, Item, PressableScale, Section, Text } from '@/components/ui';
 import { consumption } from '@/lib/fuel';
 import { carLog, type Kind } from '@/lib/carLog';
 import { STATE_COLOR } from '@/lib/health';
 import { useExpenses, useFuelFills, useRecordCategories, useServiceTypes, type Log, type Part, type Vehicle } from '@/lib/queries';
 import { hasReading } from '@/lib/reading';
-import { shadows, useColors } from '@/lib/theme';
+import { useColors } from '@/lib/theme';
 
 const n = (x: number) => x.toLocaleString('en-US');
 
@@ -22,14 +22,7 @@ function Chips<T extends string>({ value, options, onChange }: { value: T; optio
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-6" contentContainerClassName="gap-2 px-6">
       {options.map((o) => (
-        <Pressable
-          key={o.value}
-          accessibilityRole="button"
-          accessibilityState={{ selected: value === o.value }}
-          onPress={() => onChange(o.value)}
-          className={`h-9 justify-center rounded-full px-4 ${value === o.value ? 'bg-ink' : 'bg-line'}`}>
-          <Text variant="caption" className={value === o.value ? 'text-paper' : 'text-muted'}>{o.label}</Text>
-        </Pressable>
+        <Chip key={o.value} label={o.label} selected={value === o.value} onPress={() => onChange(o.value)} />
       ))}
     </ScrollView>
   );
@@ -57,11 +50,8 @@ export function OverviewTab({ vehicle, logs, unit }: { vehicle: Vehicle; logs: L
   ];
   return (
     <>
-      <View className="gap-4 rounded-item bg-white p-4" style={{ boxShadow: shadows.soft }}>
-        <View className="flex-row flex-wrap items-center gap-3">
-          <PlateView plate={vehicle.plate_number} />
-          <Text variant="caption" className="text-muted">{t(`vehicles.type.${vehicle.vehicle_type}`)} · {vehicle.year}</Text>
-        </View>
+      <Card className="gap-4 p-4">
+        {vehicle.plate_number?.trim() ? <View className="flex-row"><PlateView plate={vehicle.plate_number} /></View> : null}
         <View className="flex-row items-end justify-between gap-3">
           <View className="flex-1 gap-0.5">
             <Text variant="caption" className="text-muted">{t('vehicles.odometer', { unit })}</Text>
@@ -75,23 +65,21 @@ export function OverviewTab({ vehicle, logs, unit }: { vehicle: Vehicle; logs: L
             <Text variant="label" className="text-[#222E29]">{t('home.update')}</Text>
           </PressableScale>
         </View>
-      </View>
-      <View className="flex-row flex-wrap gap-3">
-        {facts.map(([label, value]) => (
-          <View key={label} className="gap-1 rounded-item bg-white p-4" style={{ boxShadow: shadows.soft, width: '47.8%' }}>
-            <Text variant="caption" className="text-muted">{label}</Text>
-            <Text variant="label" numberOfLines={1}>{value}</Text>
-          </View>
-        ))}
-      </View>
-      <PressableScale
-        accessibilityRole="button"
-        onPress={() => router.push({ pathname: '/edit-vehicle', params: { id: vehicle.id } })}
-        className="gap-1 rounded-item bg-white p-4"
-        style={{ boxShadow: shadows.soft }}>
+      </Card>
+      {[facts.slice(0, 2), facts.slice(2)].map((row, i) => (
+        <View key={i} className="flex-row gap-3">
+          {row.map(([label, value]) => (
+            <Card key={label} className="flex-1 gap-1 p-4">
+              <Text variant="caption" className="text-muted">{label}</Text>
+              <Text variant="label" numberOfLines={1}>{value}</Text>
+            </Card>
+          ))}
+        </View>
+      ))}
+      <Card className="gap-1 p-4" onPress={() => router.push({ pathname: '/edit-vehicle', params: { id: vehicle.id } })}>
         <Text variant="caption" className="text-muted">{t('vehicles.vin.label')}</Text>
         <Text variant="label" selectable={!!vehicle.vin}>{vehicle.vin || '—'}</Text>
-      </PressableScale>
+      </Card>
     </>
   );
 }
@@ -172,13 +160,13 @@ export function LogsTab({ vehicle, logs, unit, empty }: { vehicle: Vehicle; logs
   if (empty && !carLog(logs, expenses, [], 'all', null).length) return <>{empty}</>;
   return (
     <>
-      <View className="flex-row items-center gap-3 rounded-item bg-white p-4" style={{ boxShadow: shadows.soft }}>
+      <Card className="flex-row items-center gap-3 p-4">
         <View className="flex-1 gap-0.5">
           <Text variant="caption" className="text-muted">{t('vehicles.facts.totalPaid')}</Text>
-          <Text variant="number" style={{ fontSize: 26, lineHeight: 34 }}>{n(total)} <Text variant="caption" className="text-muted">{t('vehicles.currency')}</Text></Text>
+          <Text variant="number" numberOfLines={1} style={{ fontSize: 26, lineHeight: 34 }}>{n(total)} <Text variant="caption" className="text-muted">{t('vehicles.currency')}</Text></Text>
         </View>
-        <Text variant="caption" className="text-muted">{t('history.count', { count: entries.length })}</Text>
-      </View>
+        <Text variant="caption" className="shrink-0 text-muted">{t('history.count', { count: entries.length })}</Text>
+      </Card>
       <Chips
         value={kind}
         onChange={setKind}
@@ -190,8 +178,8 @@ export function LogsTab({ vehicle, logs, unit, empty }: { vehicle: Vehicle; logs
       />
       {!entries.length ? <Text variant="caption" className="py-6 text-center text-muted">{t('pick.empty')}</Text> : null}
       {groups.map((g) => (
-        <View key={g.month} className="gap-3">
-          <Text variant="label" className="text-muted">{g.month}</Text>
+        <View key={g.month}>
+          <Section title={g.month} />
           <Group>
           {g.items.map((e) => {
             if (e.type === 'log') {

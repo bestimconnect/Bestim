@@ -12,10 +12,13 @@ type Settings = {
   currentVehicleId: string | null; // Home's vehicle + the one new logs go to; null = the primary vehicle
   notifyAsked: boolean; // screen 45 is shown once (Q39)
   pendingShareToken: string | null; // a share link opened while signed out; used after sign-in (Q44)
+  planTourSeen: string | null; // user id the plans tour (/welcome) was shown to
+  expensesAll: boolean; // Expenses shows every car (pill choice "All cars"); Home and new logs keep currentVehicleId
+  tourSeen: boolean; // the first-run spotlight tour on Home (Idea 4, 2026-11-03)
   setLanguage: (l: Language) => void;
   setTheme: (t: Theme) => void;
   setCurrentVehicle: (id: string | null) => void;
-  set: (patch: Partial<Pick<Settings, 'notifyAsked' | 'pendingShareToken' | 'skipSplash'>>) => void;
+  set: (patch: Partial<Pick<Settings, 'notifyAsked' | 'pendingShareToken' | 'skipSplash' | 'planTourSeen' | 'tourSeen' | 'expensesAll'>>) => void;
 };
 
 export const useSettings = create<Settings>()(
@@ -27,6 +30,9 @@ export const useSettings = create<Settings>()(
       currentVehicleId: null,
       notifyAsked: false,
       pendingShareToken: null,
+      planTourSeen: null,
+      tourSeen: false,
+      expensesAll: false,
       setLanguage: (language) => set({ language }),
       setTheme: (theme) => set({ theme }),
       setCurrentVehicle: (currentVehicleId) => set({ currentVehicleId }),

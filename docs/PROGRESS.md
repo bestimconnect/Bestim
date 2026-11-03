@@ -1,6 +1,6 @@
 # Bestim: Build Progress
 
-Updated 2026-10-22. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
+Updated 2026-11-04. Read this first in any new session. **Current state (2026-11-04):** phases 1 to 5 are built, plus plans, widgets, All-cars, the licence-card Account and the new tab header; the final production check is in `RELEASE-READINESS.md` (Round 3). Phase 6 (store release) waits on the founder's list there. The notes below are the original build log and some parts (tab list, guest-mode wording) are older than the code. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
 
 ## Phase status
 
@@ -11,7 +11,7 @@ Updated 2026-10-22. Read this first in any new session. The spec is `docs/BESTIM
 | 3 · Core features | Home (06/07/36), vehicles (08/09), parts (11/12), capture (13–17), history (10/18/19/20/39) | ✅ Done |
 | 4 · Reminders & expenses | Reminders (21/22/38), update odometer (25), expenses (23/24/40) | ✅ Done |
 | 5 · Account & polish | Account (26), notification prefs (28), export (27), share/receive (41/42), feedback (43–48), on-device reminders, offline, delete vehicle/account | ✅ Built (QA gaps below) |
-| 6 · Release | Needs the Apple Developer account: Sign in with Apple, server push, TestFlight, Android Google key, universal links, store submission | ⏭ Next |
+| 6 · Release | Store setup, Apple Developer account, real-phone tests, first builds: see the founder checklist in `RELEASE-READINESS.md` | ⏭ In progress (founder steps) |
 
 ## App flow (decisions Q8)
 Splash (native, then `SplashOverlay`: the logo builds itself in about 2 s, Q104) → Onboarding (`(onboarding)/intro`, 3 swipeable slides, "Next" / "Get started" button, "Skip" top corner; shown every time the app opens signed out; no guest mode, nothing is usable without an account, Q103) → Sign in (link to Create account; "Continue with Google" is the last element on both account screens)  → Your profile (32) if the name is empty → Add car (saves the car, sets `onboarding_completed`) → Home (tabs). An old guest session from a test build is sent once to Create account and keeps its car. Q87, Q98–Q104.
@@ -21,7 +21,7 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 - **UI kit** (`src/components/ui/`): Text, Button, Field, Card, Item, Header, Note, Divider, Progress, Choice (`className` for the track), Metric, GoogleIcon. Also `Hero`, `TourSlide`, `TabBar`, `PartMetric` in `src/components/`.
 - **Data hooks** (`src/lib/queries.ts`): vehicles, current vehicle, logs, log, service types, parts (`useVehicleParts` + `needsAttention`), snoozes, expenses. Part status math: `src/lib/parts.ts` (pure, checked by `npm run check`). Voice: see "Voice logging" below.
 - **Flow stores:** `settingsStore` (language, theme, skipSplash, currentVehicleId), `vehicleDraft` (onboarding / `?mode=extra` add vehicle), `logDraft` (capture → review → save, and corrections).
-- **Tabs:** Home, Vehicles (stack: 08 → 09), Reminders (21), Account (Phase 5 placeholder with an Expenses row; stack → 23). The center + opens the capture sheet (13).
+- **Tabs (current):** Home, Cars, Expenses, Account (no Reminders tab; the bell opens notifications). The center + opens the capture sheet (13). Every tab has a car pill; Expenses can show "All cars". Account starts with the licence card.
 - **No guest mode (Q103):** signed out, only the welcome, sign-in and create-account screens are reachable. The only guest-aware code left: the gate in `src/app/_layout.tsx` sends an old anonymous session to Create account, `register.tsx` upgrades it in place (`updateUser`), and `signInWithGoogle` in `src/lib/auth.ts` links Google to it.
 - **DB** (migrations in `supabase/migrations/`):
   - odometer trigger (flags suspicious readings as needs_review and moves the vehicle odometer, decisions Q9/Q20);

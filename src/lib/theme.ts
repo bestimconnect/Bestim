@@ -34,4 +34,13 @@ export const shadows = {
   glow: '0 4px 12px rgba(211,245,61,0.18)', // primary button; softer than Figma's (founder, 2026-10-01)
   nav: '0 -4px 20px -2px rgba(0,0,0,0.16)',
   field: 'inset 0 1px 3px rgba(0,0,0,0.05)',
+  // Card depth (Q124): a tight contact shadow plus a soft lift, so cards sit on the page instead of floating in a haze.
+  lift: '0 1px 2px rgba(16,24,20,0.05), 0 8px 20px -6px rgba(16,24,20,0.10)',
+  focus: '0 0 0 3px rgba(8,115,111,0.16)', // input focus ring (teal)
 } as const;
+
+/**
+ * The spacing / shape rules every screen follows (Q124).
+ * Radii: 12 chips and small controls · 16 inputs · 18 buttons and rows (`rounded-item`) · 28 big cards and sheets.
+ * Page gutter 24; 12 between things in a group; 24 between sections (`Section`); pinned actions in `FooterBar`.
+ */

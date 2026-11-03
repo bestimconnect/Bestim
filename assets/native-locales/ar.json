@@ -1,0 +1,8 @@
+{
+  "ios": {
+    "NSMicrophoneUsageDescription": "يستخدم بستيم الميكروفون لتسجّل الصيانة بصوتك.",
+    "NSSpeechRecognitionUsageDescription": "يحوّل بستيم كلامك إلى سجل باستخدام ذكاء Google الاصطناعي.",
+    "NSCameraUsageDescription": "يستخدم بستيم الكاميرا لقراءة عدّاد المسافة.",
+    "NSPhotoLibraryUsageDescription": "يُرفق بستيم صور الفواتير بسجلاتك."
+  }
+}

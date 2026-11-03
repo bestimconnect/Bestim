@@ -21,22 +21,25 @@ const json = (body: unknown, status = 200) =>
 Deno.serve(async (req) => {
   const t0 = Date.now();
   if (req.method !== 'POST') return json({ error: 'method' }, 405);
+  // ponytail: a missing content-length passes (refusing it could reject real phones if the gateway streams the body); the gateway caps body size too.
   if (Number(req.headers.get('content-length') ?? 0) > MAX_AUDIO_B64 + 10_000) return json({ error: 'too_large' }, 413);
 
   const auth = req.headers.get('Authorization') ?? '';
   const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
     global: { headers: { Authorization: auth } },
   });
-  // Everything that does not depend on anything else, at once: who is asking, what they sent, their cars, our service names.
+  // Who is asking comes first: the body (up to ~4 MB) is only read for a signed-in, non-guest user.
+  const { data: { user } } = await supabase.auth.getUser(auth.replace(/^Bearer /i, ''));
+  if (!user) return json({ error: 'unauthorized' }, 401);
+  if (user.is_anonymous) return json({ error: 'guest' }, 403); // guests could mint accounts to dodge the daily limit
+
+  // Then everything that does not depend on anything else, at once: what they sent, their cars, our service names.
   // The reads use the user's own token, so RLS decides what they may see.
-  const [{ data: { user } }, body, vehicles, services] = await Promise.all([
-    supabase.auth.getUser(auth.replace(/^Bearer /i, '')),
+  const [body, vehicles, services] = await Promise.all([
     req.json().catch(() => null),
     supabase.from('vehicles').select('id, user_id, make, model, year, nickname, vehicle_type, odometer_unit, current_odometer'),
     supabase.from('service_types').select('name_en').not('category_id', 'is', null), // retired services are not offered
   ]);
-  if (!user) return json({ error: 'unauthorized' }, 401);
-  if (user.is_anonymous) return json({ error: 'guest' }, 403); // guests could mint accounts to dodge the daily limit
 
   const audio = typeof body?.audio_base64 === 'string' ? body.audio_base64 : '';
   const typed = typeof body?.transcript === 'string' ? body.transcript.trim().slice(0, MAX_TRANSCRIPT) : '';

@@ -74,6 +74,13 @@ export function useCurrentVehicle() {
   return { ...vehicles, vehicle };
 }
 
+/** Expenses is set to "All cars" (only meaningful with two or more cars). */
+export function useAllCars() {
+  const all = useSettings((s) => s.expensesAll);
+  const count = useVehicles().data?.length ?? 0;
+  return all && count > 1;
+}
+
 export function useVehicle(id: string | undefined) {
   const vehicles = useVehicles();
   return { ...vehicles, vehicle: vehicles.data?.find((v) => v.id === id) ?? null };

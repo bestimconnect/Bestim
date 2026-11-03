@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,7 +11,8 @@ import { signInWithApple, signInWithGoogle, useAppleAvailable, useGoogleAvailabl
 import { errorText } from '@/lib/errors';
 import { openPage } from '@/lib/links';
 import { supabase } from '@/lib/supabase';
-import { AppleIcon, Button, Divider, Field, Header, Note, Text, GoogleIcon } from '@/components/ui';
+import { BrandBlock } from '@/components/BrandBlock';
+import { AppleIcon, Backdrop, Button, Divider, Field, FooterBar, GoogleIcon, Header, Note, Text } from '@/components/ui';
 
 // Screen 31 — Create account, Figma 167:57037 (ar-light) / 167:64683 (en-light).
 const schema = (t: (k: string) => string) =>
@@ -56,87 +57,108 @@ export default function RegisterScreen() {
     else router.push({ pathname: '/verify-email', params: { email } });
   };
 
+  const socialBusy = useRef(false);
   const social = async (fn: () => Promise<boolean>, fallback: 'errors.google' | 'errors.apple' = 'errors.google') => {
+    if (socialBusy.current) return; // a second tap would open a second sign-in sheet
+    socialBusy.current = true;
     try {
       if (await fn()) router.replace('/');
     } catch (e) {
       setError(errorText(e, fallback));
+    } finally {
+      socialBusy.current = false;
     }
   };
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <ScrollView className="flex-1" contentContainerClassName="pb-10" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
+      <Backdrop />
+      <ScrollView className="flex-1" contentContainerClassName="pb-6" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <View className="px-6 pt-3">
-          <Header title={t('auth.register.title')} />
+          <Header title="" />
         </View>
-        <View className="gap-3.5 px-6 pt-2">
-        <Text variant="title">{t('auth.register.heading')}</Text>
-        <Text className="text-muted">{t('auth.register.subtitle')}</Text>
+        <View className="gap-6 px-6 pt-1">
+          <BrandBlock />
+          <View className="gap-2">
+            <Text variant="title">{t('auth.register.heading')}</Text>
+            <Text className="text-muted">{t('auth.register.subtitle')}</Text>
+          </View>
 
-        <Controller
-          control={control}
-          name="fullName"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Field
-              label={t('auth.register.fullName')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={errors.fullName?.message}
-              autoComplete="name"
+          <View className="gap-3">
+            <Controller
+              control={control}
+              name="fullName"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Field
+                  label={t('auth.register.fullName')}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.fullName?.message}
+                  autoComplete="name"
+                />
+              )}
             />
-          )}
-        />
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Field
-              label={t('auth.register.email')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={errors.email?.message}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Field
+                  label={t('auth.register.email')}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.email?.message}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                />
+              )}
             />
-          )}
-        />
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Field
-              label={t('auth.register.password')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={errors.password?.message}
-              secureTextEntry
-              autoComplete="password-new"
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Field
+                  label={t('auth.register.password')}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.password?.message}
+                  secureTextEntry
+                  autoComplete="password-new"
+                />
+              )}
             />
-          )}
-        />
-        <Controller
-          control={control}
-          name="confirmPassword"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Field
-              label={t('auth.register.confirmPassword')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={errors.confirmPassword?.message}
-              secureTextEntry
-              autoComplete="password-new"
+            <Controller
+              control={control}
+              name="confirmPassword"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Field
+                  label={t('auth.register.confirmPassword')}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.confirmPassword?.message}
+                  secureTextEntry
+                  autoComplete="password-new"
+                />
+              )}
             />
-          )}
-        />
+          </View>
 
-        {error ? <Note text={error} tone="warning" /> : null}
+          {error ? <Note text={error} tone="warning" /> : null}
 
+          {google || apple ? (
+            <View className="gap-3">
+              <Divider label={t('auth.common.or')} />
+              {apple ? <Button title={t('auth.common.appleContinue')} icon={<AppleIcon />} variant="secondary" onPress={() => social(signInWithApple, 'errors.apple')} /> : null}
+              {google ? <Button title={t('auth.common.googleContinue')} icon={<GoogleIcon />} variant="secondary" onPress={() => social(signInWithGoogle)} /> : null}
+            </View>
+          ) : null}
+        </View>
+      </ScrollView>
+      <FooterBar inset={false}>
         <Button title={t('auth.register.submit')} loading={loading} onPress={handleSubmit(onSubmit)} />
         <Text variant="caption" className="text-center text-muted">
           <Trans
@@ -147,23 +169,13 @@ export default function RegisterScreen() {
             }}
           />
         </Text>
-
-        <View className="flex-row items-center justify-center gap-1.5 pt-2">
+        <View className="flex-row items-center justify-center gap-1.5">
           <Text className="text-muted">{t('auth.register.haveAccount')}</Text>
           <Pressable onPress={() => router.replace('/login')} className="min-h-11 justify-center">
             <Text variant="label" className="text-teal">{t('auth.register.signIn')}</Text>
           </Pressable>
         </View>
-
-        {google || apple ? <Divider label={t('auth.common.or')} /> : null}
-        {apple ? <Button title={t('auth.common.appleContinue')} icon={<AppleIcon />} variant="secondary" onPress={() => social(signInWithApple, 'errors.apple')} /> : null}
-        {google ? (
-          <>
-            <Button title={t('auth.common.googleContinue')} icon={<GoogleIcon />} variant="secondary" onPress={() => social(signInWithGoogle)} />
-          </>
-        ) : null}
-        </View>
-      </ScrollView>
+      </FooterBar>
     </SafeAreaView>
   );
 }
