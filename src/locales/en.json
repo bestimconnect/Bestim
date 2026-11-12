@@ -45,7 +45,7 @@
       "signIn": "Sign in",
       "heading": "Start your journey",
       "confirmPassword": "Confirm password",
-      "consent": "By creating an account you agree to the <terms>Terms</terms> and the <privacy>Privacy Policy</privacy>"
+      "consent": "I agree to the <terms>Terms</terms> and the <privacy>Privacy Policy</privacy>"
     },
     "forgotPassword": {
       "title": "Forgot password",

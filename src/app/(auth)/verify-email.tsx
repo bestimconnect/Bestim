@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from '@/components/Toast';
 import { Backdrop, Button, Card, FooterBar, Header, IconTile, Text } from '@/components/ui';
 import { errorText } from '@/lib/errors';
+import { EMAIL_LINK } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 
 // Screen 50 — Check your email, Figma 167:57182 (ar-light) / 167:64828 (en-light).
@@ -30,7 +31,7 @@ export default function VerifyEmailScreen() {
   const resend = async () => {
     if (!email) return;
     setSending(true);
-    const { error } = await supabase.auth.resend({ type: 'signup', email });
+    const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: EMAIL_LINK } });
     setSending(false);
     if (error) return toast(errorText(error));
     setWait(60);

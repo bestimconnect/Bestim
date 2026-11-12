@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { errorText } from '@/lib/errors';
+import { EMAIL_LINK } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 import { Backdrop, Button, Field, FooterBar, Header, IconTile, Note, Text } from '@/components/ui';
 
@@ -28,7 +29,7 @@ export default function ForgotPasswordScreen() {
   const onSubmit = async ({ email }: Form) => {
     setLoading(true);
     setError(null);
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: EMAIL_LINK });
     setLoading(false);
     if (error) setError(errorText(error));
     else router.push({ pathname: '/verify-email', params: { email } });

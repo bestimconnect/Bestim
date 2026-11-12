@@ -25,6 +25,11 @@ async function load(): Promise<Session | null> {
 }
 
 /** undefined = still loading, null = signed out. */
+// Where email links (confirm, reset, change email) reopen the app. Sent with every request instead of relying on the
+// project's Site URL (which is the website now: the Claude connector's sign-in page lives there).
+// Must also be listed under Authentication > URL Configuration > Redirect URLs as exactly `bestim://`.
+export const EMAIL_LINK = 'bestim://';
+
 export function useSession() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   useEffect(() => {

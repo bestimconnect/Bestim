@@ -45,7 +45,7 @@
       "signIn": "تسجيل الدخول",
       "heading": "ابدأ رحلتك",
       "confirmPassword": "تأكيد كلمة المرور",
-      "consent": "بإنشاء حساب فإنك توافق على <terms>الشروط والأحكام</terms> و<privacy>سياسة الخصوصية</privacy>"
+      "consent": "أوافق على <terms>الشروط والأحكام</terms> و<privacy>سياسة الخصوصية</privacy>"
     },
     "forgotPassword": {
       "title": "نسيت كلمة المرور",
