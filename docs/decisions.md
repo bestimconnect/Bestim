@@ -1381,3 +1381,9 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 - Plural rules: i18next needs `Intl.PluralRules`, which Hermes lacks, so the app polyfills it (`@formatjs/intl-pluralrules`, Arabic and English). Arabic needs all six forms; `locales.check.ts` enforces it.
 - Left as is on purpose: `review-all` saves (it removes saved cards, so a retry cannot duplicate), `expo-web-browser` / `react-native-web` / `react-dom` (not used directly but cheap, owned by Expo tooling), the 64 unused locale keys.
 
+
+### Q132 — Team tracker, Claude connector and store fixes (founder, 2026-11-12)
+- **Connector:** until the new builds are live in all three stores (Site URL must stay `bestim://`), admins connect Claude with a **personal key** (Plan A): made on Team > Connect, shown once, only the hash stored, revocable, 300 calls an hour, stops working when its owner stops being an admin. It runs the same `team_*` functions as that admin through `team_mcp()` (migration `20261112130000_team_keys.sql`) and the Edge Function `team-mcp`. The sign-in-button version (Plan B, Supabase OAuth server) replaces it once the Site URL can move to the website.
+- **Huawei rejection (3 privacy errors):** consent is now an unticked checkbox the user ticks (blocks Create account and Google/Apple buttons); privacy label filled in the console; China mainland removed from the regions so no Chinese privacy text is needed.
+- **Apple 2.1 Information Needed:** answered with notes, demo account and a screen recording on a real iPhone (`docs/store/app-store-review-notes.md`); new build 5 replaces build 4 under version 1.0.0.
+- **Dashboard and website** pushed to production (PR 3, bestimconnect/Bestim-landing-page) with the plan cards and database-driven legal pages.
