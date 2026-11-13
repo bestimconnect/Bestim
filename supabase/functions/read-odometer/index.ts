@@ -7,7 +7,7 @@
 // SCAN_DAILY_LIMIT to change the limit; ODOMETER_AI=on to switch the backup on at all (off by default, Q97).
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-import { DEFAULT_MODEL, readOdometer } from './read.ts';
+import { DEFAULT_MODEL, readOdometer, type Usage } from './read.ts';
 
 const MODEL = Deno.env.get('GEMINI_MODEL') ?? DEFAULT_MODEL;
 const DAILY_LIMIT = Number(Deno.env.get('SCAN_DAILY_LIMIT')) || 20; // AI reads per user per day (Cairo time); a bad value must never mean "no limit"
@@ -45,13 +45,17 @@ Deno.serve(async (req) => {
 
   const started = Date.now();
   // The dashboard's AI usage log (admin_foundation migration). It must never break a scan, so errors are swallowed.
+  let used: Usage | undefined;
   const logUse = async (ok: boolean) => {
     try {
-      await supabase.rpc('log_ai_usage', { p_kind: 'scan', p_ok: ok, p_ms: Date.now() - started });
+      const base = { p_kind: 'scan', p_ok: ok, p_ms: Date.now() - started };
+      // With token counts when we have them; if the database is not updated yet, fall back to the plain row.
+      const r = used ? await supabase.rpc('log_ai_usage', { ...base, p_model: used.model, p_in: used.input, p_audio: used.audio, p_out: used.output }) : { error: true };
+      if (r.error) await supabase.rpc('log_ai_usage', base);
     } catch { /* ignore */ }
   };
   try {
-    const reading = await readOdometer(image, Deno.env.get('GEMINI_API_KEY')!, MODEL);
+    const reading = await readOdometer(image, Deno.env.get('GEMINI_API_KEY')!, MODEL, undefined, (u) => { used = u; });
     await logUse(true);
     return json({ reading, ms: { ai: Date.now() - started } }); // the app logs it in development (speed checks)
   } catch (e) {

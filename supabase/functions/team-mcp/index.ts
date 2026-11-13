@@ -4,6 +4,7 @@
 // dashboard uses, as that admin. The service key below is used only to store and sign screenshots, never to read the tracker.
 // Deploy with JWT check OFF (verify_jwt = false): the key is the credential.
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { assemble, checkChunk, checkImage, EXT, fromBase64, isHash, MAX_IMAGE, Plain } from './upload.ts';
 
 const SITE = 'https://bestim-eg.com/dashboard/team';
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, { auth: { persistSession: false } });
@@ -115,23 +116,62 @@ const TOOLS = [
   },
   {
     name: 'attach_screenshot',
-    description: 'Attach a small image (screenshot) to a bug or task. Send the image as base64 text, no "data:" prefix. Keep it under about 3 MB (PNG, JPEG or WebP); for larger files, attach on the item page in the dashboard.',
+    description: 'Attach a small image (screenshot, PNG, JPEG or WebP, up to about 3 MB) to a bug or task. Send the image as base64 text (no "data:" prefix) together with its size in bytes and its sha256: the file is only saved if both match, so a cut-off copy is rejected instead of saved broken. To attach a file you can read, pass a file reference instead of the text: sha256:<64 lowercase hex>:<absolute path>. Use start_upload, upload_chunk and finish_upload when attach_screenshot can\'t take the file directly.',
     inputSchema: {
       type: 'object',
       properties: {
         number: { type: 'integer' },
-        image_base64: s('Base64 of the image bytes'),
+        image_base64: {
+          type: 'string',
+          format: 'byte',
+          description: 'Base64 of the image bytes. To attach a file you can read, pass a file reference instead: sha256:<64 lowercase hex>:<absolute path>. The app fills in the file content.',
+        },
         mime: e(['image/png', 'image/jpeg', 'image/webp'], 'Image type'),
+        sha256: s('64 lowercase hex characters: the sha256 of the decoded image bytes'),
+        size: { type: 'integer', description: 'Number of bytes of the decoded image' },
       },
-      required: ['number', 'image_base64', 'mime'],
+      required: ['number', 'image_base64', 'mime', 'sha256', 'size'],
     },
   },
+  {
+    name: 'delete_file',
+    description: 'Remove a screenshot or file from a bug or task. Get the file_id from get_item (files[].id). The removal is written to the item history.',
+    inputSchema: { type: 'object', properties: { number: { type: 'integer' }, file_id: s('The file id from get_item') }, required: ['number', 'file_id'] },
+  },
+  {
+    name: 'start_upload',
+    description: 'Start a chunked image upload (fallback). Use start_upload, upload_chunk and finish_upload when attach_screenshot can\'t take the file directly. Returns an upload_id valid for 1 hour.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        number: { type: 'integer' },
+        mime: e(['image/png', 'image/jpeg', 'image/webp'], 'Image type'),
+        size: { type: 'integer', description: 'Number of bytes of the whole image' },
+        sha256: s('sha256 (64 lowercase hex) of the whole image'),
+      },
+      required: ['number', 'mime', 'size', 'sha256'],
+    },
+  },
+  {
+    name: 'upload_chunk',
+    description: 'Send one piece of a chunked upload. Chunks must be 1500 base64 characters or less. They may arrive in any order; sending the same index again replaces it. If the hash is wrong the answer is "Chunk mismatch, resend".',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        upload_id: s('From start_upload'),
+        index: { type: 'integer', description: 'Piece number, starting at 0' },
+        data: { type: 'string', format: 'byte', description: 'Base64 of this piece, at most 1500 characters' },
+        chunk_sha256: s('sha256 (64 lowercase hex) of this piece, decoded'),
+      },
+      required: ['upload_id', 'index', 'data', 'chunk_sha256'],
+    },
+  },
+  {
+    name: 'finish_upload',
+    description: 'Join all the chunks, check the total size and sha256 given at start_upload, then attach the image to the item. Returns the saved file id and size.',
+    inputSchema: { type: 'object', properties: { upload_id: s('From start_upload') }, required: ['upload_id'] },
+  },
 ];
-
-class Plain extends Error {} // a message safe to show the person
-
-const EXT: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
-const MAX_IMAGE = 3_000_000; // bytes
 
 async function rpc(key: string, action: string, args: Record<string, unknown> = {}) {
   const { data, error } = await db.rpc('team_mcp', { p_key: key, p_action: action, p_args: args });
@@ -142,6 +182,9 @@ async function rpc(key: string, action: string, args: Record<string, unknown> = 
     throw new Plain('The tracker could not answer. Try again.');
   }
   if (data?.error === 'not_found') throw new Plain('No item with that number.');
+  if (data?.error === 'no_file') throw new Plain('No file with that id on this item. Use get_item to see the ids.');
+  if (data?.error === 'no_upload') throw new Plain('That upload is unknown, finished or expired (1 hour). Start again with start_upload.');
+  if (data?.error === 'too_many') throw new Plain('Too many open uploads (5). Finish them or wait for them to expire.');
   if (data?.error === 'invalid') throw new Plain(`Not accepted: ${data.detail}`);
   if (data?.error) throw new Plain(`Not accepted: ${data.error}`);
   return data;
@@ -151,6 +194,21 @@ const pick = (o: Record<string, unknown>, keys: string[]) =>
   Object.fromEntries(keys.filter((k) => k in o).map((k) => [k, o[k]]));
 
 const ITEM_KEYS = ['status', 'title', 'severity', 'priority', 'platform', 'area', 'owner', 'due_date', 'build', 'screen', 'steps', 'expected', 'actual', 'details', 'link_num', 'task_type'];
+
+// Store an already checked image and register it on the item. If registering fails the stored object is removed again.
+async function save(key: string, num: number, mime: string, bytes: Uint8Array) {
+  const d = await rpc(key, 'get', { num }); // also proves the item exists and the key is good
+  const path = `${d.item.id}/${crypto.randomUUID()}.${EXT[mime]}`;
+  const up = await files.storage.from('team-files').upload(path, bytes, { contentType: mime });
+  if (up.error) { console.error('upload', up.error.message); throw new Plain('The image could not be stored.'); }
+  try {
+    const r = await rpc(key, 'file_add', { num, path, mime, size: bytes.length });
+    return { ok: true, file_id: r.id, size: bytes.length, link: `${SITE}/${num}` };
+  } catch (err) {
+    await files.storage.from('team-files').remove([path]);
+    throw err;
+  }
+}
 
 async function call(name: string, a: Record<string, unknown>, key: string): Promise<unknown> {
   switch (name) {
@@ -189,21 +247,35 @@ async function call(name: string, a: Record<string, unknown>, key: string): Prom
       return { ok: true, link: `${SITE}/${a.number}` };
     }
     case 'attach_screenshot': {
-      const mime = String(a.mime);
-      if (!(mime in EXT)) throw new Plain('Only PNG, JPEG or WebP images.');
-      let bytes: Uint8Array;
-      try {
-        bytes = Uint8Array.from(atob(String(a.image_base64).replace(/\s/g, '')), (c) => c.charCodeAt(0));
-      } catch {
-        throw new Plain('The image is not valid base64.');
+      if (typeof a.image_base64 === 'string' && a.image_base64.startsWith('sha256:')) {
+        throw new Plain('The file reference was not filled in with the file content. Send the base64 text with its size and sha256, or use start_upload, upload_chunk and finish_upload.');
       }
-      if (bytes.length > MAX_IMAGE) throw new Plain('The image is too big (limit about 3 MB). Attach it on the item page in the dashboard.');
-      const d = await rpc(key, 'get', { num: a.number }); // also proves the item exists and the key is good
-      const path = `${d.item.id}/${crypto.randomUUID()}.${EXT[mime]}`;
-      const up = await files.storage.from('team-files').upload(path, bytes, { contentType: mime });
-      if (up.error) { console.error('upload', up.error.message); throw new Plain('The image could not be stored.'); }
-      await rpc(key, 'file_add', { num: a.number, path, mime, size: bytes.length });
+      const bytes = await checkImage(fromBase64(String(a.image_base64)), { mime: String(a.mime), size: Number(a.size), sha256: String(a.sha256) });
+      return await save(key, Number(a.number), String(a.mime), bytes);
+    }
+    case 'delete_file': {
+      const r = await rpc(key, 'file_delete', { num: a.number, file_id: a.file_id });
+      const rm = await files.storage.from('team-files').remove([r.path]);
+      if (rm.error) console.error('remove', rm.error.message); // the row is gone; a leftover private object is harmless
       return { ok: true, link: `${SITE}/${a.number}` };
+    }
+    case 'start_upload': {
+      if (!isHash(a.sha256)) throw new Plain('sha256 must be 64 lowercase hex characters.');
+      if (!(String(a.mime) in EXT)) throw new Plain('Only PNG, JPEG or WebP images.');
+      if (!(Number(a.size) >= 1 && Number(a.size) <= MAX_IMAGE)) throw new Plain('size must be between 1 and 3000000 bytes.');
+      return await rpc(key, 'upload_start', { num: a.number, mime: a.mime, size: a.size, sha256: a.sha256 });
+    }
+    case 'upload_chunk': {
+      await checkChunk(String(a.data), String(a.chunk_sha256)); // wrong hash: "Chunk mismatch, resend"
+      await rpc(key, 'upload_chunk', { upload_id: a.upload_id, index: a.index, data: String(a.data).replace(/\s/g, '') });
+      return { ok: true, index: a.index };
+    }
+    case 'finish_upload': {
+      const up = await rpc(key, 'upload_read', { upload_id: a.upload_id });
+      const bytes = await assemble(up.chunks, up);
+      const out = await save(key, up.num, up.mime, bytes);
+      await rpc(key, 'upload_done', { upload_id: a.upload_id });
+      return out;
     }
   }
   throw new Plain('Unknown tool.');
@@ -224,7 +296,7 @@ Deno.serve(async (req) => {
       return rpcOut(msg.id, {
         protocolVersion: msg.params?.protocolVersion ?? '2025-03-26',
         capabilities: { tools: {} },
-        serverInfo: { name: 'bestim-team', version: '1.0.0' },
+        serverInfo: { name: 'bestim-team', version: '1.1.0' },
         instructions: 'Bestim bugs and tasks. Check for a duplicate with list_items before creating. Ask for missing steps, expected and actual before filing a bug.',
       });
     case 'ping':

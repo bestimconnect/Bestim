@@ -8,7 +8,7 @@
 // VOICE_DAILY_LIMIT to change the daily limit.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-import { AUDIO_MIME, gemini, instructions, openai, OPENAI_FILE, type Said } from './understand.ts';
+import { AUDIO_MIME, gemini, instructions, openai, OPENAI_FILE, type Said, type Usage } from './understand.ts';
 
 const OPENAI = Deno.env.get('VOICE_PROVIDER') === 'openai';
 const DAILY_LIMIT = Number(Deno.env.get('VOICE_DAILY_LIMIT')) || 30; // recordings per user per day (Cairo time); a bad value must never mean "no limit"
@@ -65,9 +65,12 @@ Deno.serve(async (req) => {
   const useOpenai = OPENAI && (!audio || Object.hasOwn(OPENAI_FILE, body.mime));
   const t1 = Date.now();
   // The dashboard's AI usage log (admin_foundation migration). It must never break a recording, so errors are swallowed.
-  const logUse = async (ok: boolean) => {
+  const logUse = async (ok: boolean, u?: Usage) => {
     try {
-      await supabase.rpc('log_ai_usage', { p_kind: 'voice', p_ok: ok, p_ms: Date.now() - t1 });
+      const base = { p_kind: 'voice', p_ok: ok, p_ms: Date.now() - t1 };
+      // With token counts when we have them; if the database is not updated yet, fall back to the plain row.
+      const r = u ? await supabase.rpc('log_ai_usage', { ...base, p_model: u.model, p_in: u.input, p_audio: u.audio, p_out: u.output }) : { error: true };
+      if (r.error) await supabase.rpc('log_ai_usage', base);
     } catch { /* ignore */ }
   };
   try {
@@ -75,7 +78,7 @@ Deno.serve(async (req) => {
     const out = useOpenai
       ? await openai(said, system, Deno.env.get('OPENAI_API_KEY')!, Deno.env.get('OPENAI_MODEL') || undefined)
       : await gemini(said, system, Deno.env.get('GEMINI_API_KEY')!, Deno.env.get('GEMINI_MODEL') || undefined);
-    await logUse(true);
+    await logUse(true, out.usage);
     return json({
       transcript: String(out.transcript ?? typed).slice(0, MAX_TRANSCRIPT),
       records: out.records ?? [],
