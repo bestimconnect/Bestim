@@ -8,6 +8,7 @@ import i18n from './i18n';
 import { latestPerType, partStatus, type Unit } from './parts';
 import { CATALOG_JOIN, vehicleName } from './queries';
 import { DEFAULT_PREFS, planNotifications, type PlanPart, type PlanVehicle, type Prefs } from './reminderPlan.ts';
+import { registerPushToken } from './pushToken';
 import { supabase } from './supabase';
 import { useInbox, type InboxItem } from '@/stores/notifyInbox';
 
@@ -22,7 +23,28 @@ Notifications.setNotificationHandler({
 });
 
 /** A notification the OS showed while the app was open: move it into the list now instead of at the next sync. */
-Notifications.addNotificationReceivedListener(() => useInbox.getState().deliver());
+Notifications.addNotificationReceivedListener(() => {
+  useInbox.getState().deliver();
+  fetchAnnouncements();
+});
+
+/** Admin messages (Q147) are saved in the database, so they reach the bell even when the phone alert was off or missed. Newest 20, language picked here. */
+async function fetchAnnouncements() {
+  try {
+    const { data } = await supabase.from('announcements').select('id, title_ar, title_en, body_ar, body_en, created_at').order('created_at', { ascending: false }).limit(20);
+    const en = i18n.language === 'en';
+    useInbox.getState().add(
+      (data ?? []).map((a) => ({
+        id: `ann-${a.id}`,
+        kind: 'announcement' as const,
+        title: en && a.title_en ? a.title_en : a.title_ar,
+        body: en && a.body_en ? a.body_en : a.body_ar,
+        url: '/notifications',
+        at: a.created_at,
+      })),
+    );
+  } catch {}
+}
 
 /** The user tapped a notification: make sure it is in the list, mark it read, return its screen (Q92). Null when it carries none. */
 export async function openedFromNotification(response: Notifications.NotificationResponse) {
@@ -70,10 +92,12 @@ export async function syncNotifications() {
     // Notifications page (Q92): what was scheduled and is now past has been shown, so it joins the list.
     if (!user) return useInbox.getState().clear(); // signed out: the list belongs to that account
     useInbox.getState().deliver();
+    await fetchAnnouncements();
     // Not wiped here: if anything below fails or returns early (offline, no permission) the pending alerts stay and are still
     // delivered when their time passes. Only the final setScheduled() replaces them. (Wiping early was why alerts vanished.)
     await ensureChannel();
     if (!(await notificationsAllowed())) return;
+    registerPushToken();
 
     const today = new Date().toLocaleDateString('en-CA');
     const [profile, vehicles, logs, snoozes] = await Promise.all([

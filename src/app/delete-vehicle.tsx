@@ -18,15 +18,12 @@ export default function DeleteVehicle() {
   const vehicle = vehicles.find((v) => v.id === vehicleId);
 
   const remove = async () => {
-    // Receipt files first (best effort), then the row; logs, expenses, reminders and shares cascade.
-    const { data: logs } = await supabase.from('maintenance_logs').select('photos').eq('vehicle_id', vehicleId);
-    const paths = (logs ?? []).flatMap((l) => l.photos ?? []);
-    if (paths.length) await supabase.storage.from('receipts').remove(paths);
-    const { error } = await supabase.from('vehicles').delete().eq('id', vehicleId);
+    // Soft delete: the car is kept 30 days and can be restored from Recently deleted (receipt files stay until the purge).
+    const { error } = await supabase.rpc('soft_delete_vehicle', { p_vehicle_id: vehicleId });
     if (error) throw error;
     const next = vehicles.filter((v) => v.id !== vehicleId).sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
     useSettings.getState().setCurrentVehicle(next?.id ?? null);
-    for (const key of ['vehicles', 'logs', 'expenses', 'snoozes']) queryClient.invalidateQueries({ queryKey: [key] });
+    for (const key of ['vehicles', 'logs', 'expenses', 'snoozes', 'deleted-items']) queryClient.invalidateQueries({ queryKey: [key] });
     syncNotifications();
     toast(t('toast.vehicleDeleted'));
     router.replace('/');

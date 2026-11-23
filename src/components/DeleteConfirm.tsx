@@ -10,9 +10,7 @@ import { Button, Field, FooterBar, IconTile, Note, Text } from '@/components/ui'
 import { useColors } from '@/lib/theme';
 
 // v2 flow 13 "confirm delete": the delete button stays off until the user types the word (the car's name). Shared by delete-vehicle (Q36).
-// TODO(phase 1/5): the strip also shows a green "kept 30 days, restore from Recently deleted" note. The soft-delete functions exist in
-// supabase/migrations/20261121110000_v2_soft_delete.sql but are not in the generated types yet; until the app calls soft_delete_vehicle
-// the delete is permanent, so the body text says so and the note is not shown.
+// Both deletes are soft: kept 30 days, restored from Recently deleted (cars) or at sign-in (account).
 type Props = { header: string; title: string; name?: string; body: string; keep: string; error: string; confirmLabel: string; word: string; onDelete: () => Promise<void> };
 
 export function DeleteConfirm({ header, title, name, body, keep, error, confirmLabel, word, onDelete }: Props) {

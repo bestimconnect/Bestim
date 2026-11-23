@@ -1,8 +1,8 @@
 import { useRefresh } from '@/components/Refresh';
-import { format, isToday, isYesterday, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router, type Href } from 'expo-router';
-import { AlarmClock, BellRing, CalendarCheck, FileCheck, Gauge, Mic, ShieldCheck, type LucideIcon } from 'lucide-react-native';
+import { BellRing, FileCheck, Gauge, Megaphone, Mic, ShieldCheck, type LucideIcon } from 'lucide-react-native';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -15,8 +15,7 @@ import { useColors } from '@/lib/theme';
 import { useInbox, type InboxItem, type InboxKind } from '@/stores/notifyInbox';
 
 // Alerts (flow 11): New (unread, with the lime dot) and Earlier, rows with the part art, tap opens the target.
-const ICONS: Partial<Record<InboxKind, LucideIcon>> = { odometer: Gauge, weekly: BellRing, voice: Mic, licence: FileCheck, insurance: ShieldCheck, record: FileCheck };
-void [AlarmClock, CalendarCheck];
+const ICONS: Partial<Record<InboxKind, LucideIcon>> = { odometer: Gauge, weekly: BellRing, voice: Mic, licence: FileCheck, insurance: ShieldCheck, record: FileCheck, announcement: Megaphone };
 
 /** Where a row goes: a part alert opens the Part page, a licence or insurance alert its Timeline item, a saved record the record. */
 function target(item: InboxItem): Href {
@@ -31,11 +30,10 @@ export default function NotificationsScreen() {
   const refresh = useRefresh();
   const { items: all, markRead, markAllRead } = useInbox();
   const locale = i18n.language === 'ar' ? ar : enUS;
-  // Design flow 11 #8: grouped by day (Today, Yesterday, then older), a new one carries a green edge and the word "New".
+  // Design flow 11 #8: New (unread, green edge, "Mark all as read") then Earlier. Read state is kept on the phone (persisted), so alerts no longer vanish (#14).
   const groups = [
-    { key: 'today', items: all.filter((i) => isToday(parseISO(i.at))) },
-    { key: 'yesterday', items: all.filter((i) => isYesterday(parseISO(i.at))) },
-    { key: 'earlier', items: all.filter((i) => !isToday(parseISO(i.at)) && !isYesterday(parseISO(i.at))) },
+    { key: 'new', items: all.filter((i) => !i.read) },
+    { key: 'earlier', items: all.filter((i) => i.read) },
   ].filter((g) => g.items.length);
   const open = (item: InboxItem) => {
     markRead(item.id);
@@ -62,8 +60,8 @@ export default function NotificationsScreen() {
           {groups.map((g) => (
             <View key={g.key} className="gap-2">
               <View className="min-h-[28px] flex-row items-center justify-between px-1">
-                <Text variant="caption" className="text-muted">{t(g.key === 'today' ? 'inbox.today' : g.key === 'yesterday' ? 'inbox.yesterday' : 'inbox.earlier')}</Text>
-                {g.key === 'today' && g.items.some((i) => !i.read) ? (
+                <Text variant="caption" className="text-muted">{t(g.key === 'new' ? 'inbox.new' : 'inbox.earlier')}</Text>
+                {g.key === 'new' ? (
                   <PressableScale accessibilityRole="button" onPress={markAllRead} className="min-h-[44px] justify-center">
                     <Text variant="caption" className="text-ink">{t('inbox.markAll')}</Text>
                   </PressableScale>
