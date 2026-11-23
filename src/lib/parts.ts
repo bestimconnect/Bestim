@@ -47,12 +47,16 @@ export function partStatus(p: PartInput): PartStatus | null {
     remainingKm != null ? remainingKm / p.intervalKm! : Infinity,
     due ? remainingDays! / Math.max(differenceInCalendarDays(due, last), 1) : Infinity,
   ];
+  const urgency = Math.min(...fractions);
+  // v2: "Due soon" also at 30% health or less (same rule as the server's item_health), besides 1,000 km / 30 days.
   const state: PartState =
     (remainingKm != null && remainingKm <= 0) || (remainingDays != null && remainingDays <= 0)
       ? 'overdue'
       : (remainingKm != null && remainingKm <= SOON_DISTANCE[p.unit]) || (remainingDays != null && remainingDays <= SOON_DAYS)
         ? 'soon'
-        : 'ok';
+        : urgency <= 0.3
+          ? 'soon'
+          : 'ok';
 
   return {
     state,
@@ -60,7 +64,7 @@ export function partStatus(p: PartInput): PartStatus | null {
     remainingDays,
     dueOdometer,
     dueDate: due ? format(due, 'yyyy-MM-dd') : null, // local date; toISOString() would shift a day east of UTC
-    urgency: Math.min(...fractions),
+    urgency,
   };
 }
 

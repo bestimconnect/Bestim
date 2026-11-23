@@ -106,6 +106,7 @@ export async function revokeApple(): Promise<void> {
 export async function signOut() {
   const { syncNotifications } = await import('./notifications');
   const { useSettings } = await import('@/stores/settingsStore');
+  await (await import('./pushToken')).forgetPushToken();
   await supabase.auth.signOut();
   import('@react-native-google-signin/google-signin').then(({ GoogleSignin }) => GoogleSignin.signOut()).catch(() => {});
   useSettings.getState().setCurrentVehicle(null);

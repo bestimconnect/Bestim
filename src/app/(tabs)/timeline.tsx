@@ -3,7 +3,7 @@ import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { useMutationState, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams, usePathname } from 'expo-router';
-import { Check, Clock, Gauge, ListFilter, SearchX, Trash2, TriangleAlert, WifiOff, X } from 'lucide-react-native';
+import { Check, Clock, Gauge, Wrench, ListFilter, SearchX, Trash2, TriangleAlert, WifiOff, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -148,6 +148,7 @@ export default function TimelineScreen() {
       <View className="gap-3 px-6">
         <TabHeader title={t('tabs.timeline')} back={!tab} />
         <Segments value={seg} onChange={setSeg} options={[{ value: 'up', label: t('tl.up') }, { value: 'done', label: t('tl.done') }]} />
+        <View className="flex-row"><Chip label={t('services.title')} icon={Wrench} onPress={() => router.push('/services')} /></View>
       </View>
       <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-2 px-6 pb-6 pt-3" contentContainerStyle={tab ? { paddingBottom: space } : undefined} showsVerticalScrollIndicator={false}>
         {!online ? (

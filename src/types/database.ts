@@ -516,11 +516,316 @@ export type Database = {
         }
         Relationships: []
       }
+      systems: {
+        Row: {
+          id: number
+          name_en: string
+          name_ar: string
+          health_weight: number
+          sort: number
+        }
+        Insert: {
+          id?: number
+          name_en?: string
+          name_ar?: string
+          health_weight?: number
+          sort?: number
+        }
+        Update: {
+          id?: number
+          name_en?: string
+          name_ar?: string
+          health_weight?: number
+          sort?: number
+        }
+        Relationships: []
+      }
+      push_tokens: {
+        Row: { id: string; user_id: string; token: string; platform: string; updated_at: string }
+        Insert: { id?: string; user_id: string; token: string; platform?: string; updated_at?: string }
+        Update: { id?: string; user_id?: string; token?: string; platform?: string; updated_at?: string }
+        Relationships: []
+      }
+      announcements: {
+        Row: { id: string; title_ar: string; title_en: string | null; body_ar: string; body_en: string | null; audience: string; sent_by: string | null; push_sent: number; push_failed: number; created_at: string }
+        Insert: { id?: string; title_ar: string; title_en?: string | null; body_ar: string; body_en?: string | null; audience?: string; sent_by?: string | null; push_sent?: number; push_failed?: number; created_at?: string }
+        Update: { id?: string; title_ar?: string; title_en?: string | null; body_ar?: string; body_en?: string | null; audience?: string; sent_by?: string | null; push_sent?: number; push_failed?: number; created_at?: string }
+        Relationships: []
+      }
+      announcement_users: {
+        Row: { announcement_id: string; user_id: string }
+        Insert: { announcement_id: string; user_id: string }
+        Update: { announcement_id?: string; user_id?: string }
+        Relationships: []
+      }
+      specialists: {
+        Row: {
+          key: string
+          name_en: string
+          name_ar: string
+          shows_all_jobs: boolean
+          sort: number
+        }
+        Insert: {
+          key?: string
+          name_en?: string
+          name_ar?: string
+          shows_all_jobs?: boolean
+          sort?: number
+        }
+        Update: {
+          key?: string
+          name_en?: string
+          name_ar?: string
+          shows_all_jobs?: boolean
+          sort?: number
+        }
+        Relationships: []
+      }
+      catalog_items: {
+        Row: {
+          id: string
+          system_id: number | null
+          subsystem: string | null
+          subsystem_ar: string | null
+          group_name: string | null
+          group_ar: string | null
+          name_en: string
+          name_ar: string
+          aliases: string[]
+          fuel_types: string[] | null
+          flags: string[]
+          item_type: string
+        }
+        Insert: {
+          id?: string
+          system_id?: number | null
+          subsystem?: string | null
+          subsystem_ar?: string | null
+          group_name?: string | null
+          group_ar?: string | null
+          name_en?: string
+          name_ar?: string
+          aliases?: string[]
+          fuel_types?: string[] | null
+          flags?: string[]
+          item_type?: string
+        }
+        Update: {
+          id?: string
+          system_id?: number | null
+          subsystem?: string | null
+          subsystem_ar?: string | null
+          group_name?: string | null
+          group_ar?: string | null
+          name_en?: string
+          name_ar?: string
+          aliases?: string[]
+          fuel_types?: string[] | null
+          flags?: string[]
+          item_type?: string
+        }
+        Relationships: []
+      }
+      job_types: {
+        Row: {
+          id: string
+          specialist_key: string
+          category_en: string
+          category_ar: string
+          system_id: number | null
+          name_en: string
+          name_ar: string
+          aliases: string[]
+          tracked: boolean
+          default_interval_km: number | null
+          default_interval_months: number | null
+          fuel_types: string[] | null
+          suggested_items: string[]
+          sort: number
+        }
+        Insert: {
+          id?: string
+          specialist_key?: string
+          category_en?: string
+          category_ar?: string
+          system_id?: number | null
+          name_en?: string
+          name_ar?: string
+          aliases?: string[]
+          tracked?: boolean
+          default_interval_km?: number | null
+          default_interval_months?: number | null
+          fuel_types?: string[] | null
+          suggested_items?: string[]
+          sort?: number
+        }
+        Update: {
+          id?: string
+          specialist_key?: string
+          category_en?: string
+          category_ar?: string
+          system_id?: number | null
+          name_en?: string
+          name_ar?: string
+          aliases?: string[]
+          tracked?: boolean
+          default_interval_km?: number | null
+          default_interval_months?: number | null
+          fuel_types?: string[] | null
+          suggested_items?: string[]
+          sort?: number
+        }
+        Relationships: []
+      }
+      visits: {
+        Row: {
+          id: string
+          vehicle_id: string
+          user_id: string
+          visit_date: string
+          odometer: number | null
+          workshop_name: string | null
+          workshop_phone: string | null
+          notes: string | null
+          photos: string[]
+          deleted_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          vehicle_id?: string
+          user_id?: string
+          visit_date?: string
+          odometer?: number | null
+          workshop_name?: string | null
+          workshop_phone?: string | null
+          notes?: string | null
+          photos?: string[]
+          deleted_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          vehicle_id?: string
+          user_id?: string
+          visit_date?: string
+          odometer?: number | null
+          workshop_name?: string | null
+          workshop_phone?: string | null
+          notes?: string | null
+          photos?: string[]
+          deleted_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          id: string
+          visit_id: string
+          specialist_key: string
+          specialist_name: string | null
+          job_type_id: string | null
+          custom_name: string | null
+          position: string | null
+          notes: string | null
+          sort: number
+        }
+        Insert: {
+          id?: string
+          visit_id?: string
+          specialist_key?: string
+          specialist_name?: string | null
+          job_type_id?: string | null
+          custom_name?: string | null
+          position?: string | null
+          notes?: string | null
+          sort?: number
+        }
+        Update: {
+          id?: string
+          visit_id?: string
+          specialist_key?: string
+          specialist_name?: string | null
+          job_type_id?: string | null
+          custom_name?: string | null
+          position?: string | null
+          notes?: string | null
+          sort?: number
+        }
+        Relationships: [
+          { foreignKeyName: "jobs_visit_id_fkey"; columns: ["visit_id"]; isOneToOne: false; referencedRelation: "visits"; referencedColumns: ["id"] },
+        ]
+      }
+      line_items: {
+        Row: {
+          id: string
+          job_id: string
+          type: string
+          catalog_item_id: string | null
+          name: string
+          qty: number
+          unit: string | null
+          unit_price: number | null
+          total: number
+          brand: string | null
+          origin: string | null
+          condition: string | null
+          part_number: string | null
+          warranty_months: number | null
+        }
+        Insert: {
+          id?: string
+          job_id?: string
+          type?: string
+          catalog_item_id?: string | null
+          name?: string
+          qty?: number
+          unit?: string | null
+          unit_price?: number | null
+          total?: number
+          brand?: string | null
+          origin?: string | null
+          condition?: string | null
+          part_number?: string | null
+          warranty_months?: number | null
+        }
+        Update: {
+          id?: string
+          job_id?: string
+          type?: string
+          catalog_item_id?: string | null
+          name?: string
+          qty?: number
+          unit?: string | null
+          unit_price?: number | null
+          total?: number
+          brand?: string | null
+          origin?: string | null
+          condition?: string | null
+          part_number?: string | null
+          warranty_months?: number | null
+        }
+        Relationships: [
+          { foreignKeyName: "line_items_job_id_fkey"; columns: ["job_id"]; isOneToOne: false; referencedRelation: "jobs"; referencedColumns: ["id"] },
+        ]
+      }
+      catalog_meta: {
+        Row: { id: boolean; version: number }
+        Insert: { id?: boolean; version?: number }
+        Update: { id?: boolean; version?: number }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           currency: string
+          deleted_at: string | null
           full_name: string
           id: string
           language: string
@@ -854,6 +1159,7 @@ export type Database = {
           color: string | null
           created_at: string
           current_odometer: number
+          deleted_at: string | null
           daily_km_hint: number | null
           id: string
           is_primary: boolean
@@ -1007,6 +1313,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      register_push_token: { Args: { p_token: string; p_platform: string }; Returns: undefined }
+      remove_push_token: { Args: { p_token: string }; Returns: undefined }
       accept_share: { Args: { token: string }; Returns: string }
       admin_overview: { Args: never; Returns: Json }
       admin_role: { Args: never; Returns: string }
@@ -1045,6 +1353,32 @@ export type Database = {
       }
       create_widget_key: { Args: { p_platform: string }; Returns: string }
       delete_my_account: { Args: never; Returns: undefined }
+      // v2 Services RPCs, hand-added like the soft-delete ones (see 20261121100000_v2_save_visit_health.sql).
+      save_visit: { Args: { p: Json }; Returns: string }
+      car_health: { Args: { p_vehicle_id: string }; Returns: Json }
+      tracked_health: {
+        Args: { p_vehicle_id: string }
+        Returns: {
+          tracked_item_id: string; job_type_id: string | null; catalog_item_id: string | null; system_id: number | null; weight: number
+          interval_km: number | null; interval_months: number | null; last_done_km: number | null; last_done_date: string | null
+          health: number | null; state: string | null; remaining_km: number | null; remaining_days: number | null; due_date: string | null
+        }[]
+      }
+      search_catalog: {
+        Args: { q: string; p_vehicle_id?: string; max_rows?: number }
+        Returns: { kind: string; id: string; name_en: string; name_ar: string; system_id: number | null; item_type: string | null; specialist_key: string | null }[]
+      }
+      // v2 soft delete (20261121110000_v2_soft_delete.sql); hand-added until the migration is pushed and `npm run types` is re-run.
+      soft_delete_vehicle: { Args: { p_vehicle_id: string }; Returns: undefined }
+      restore_vehicle: { Args: { p_vehicle_id: string }; Returns: undefined }
+      soft_delete_visit: { Args: { p_visit_id: string }; Returns: undefined }
+      restore_visit: { Args: { p_visit_id: string }; Returns: undefined }
+      soft_delete_my_account: { Args: never; Returns: undefined }
+      restore_my_account: { Args: never; Returns: undefined }
+      my_deleted_items: {
+        Args: never
+        Returns: { kind: string; id: string; vehicle_id: string; title: string; deleted_at: string; purge_at: string }[]
+      }
       get_share: {
         Args: { token: string }
         Returns: {

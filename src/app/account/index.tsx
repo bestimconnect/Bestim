@@ -1,6 +1,6 @@
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { router } from 'expo-router';
-import { Bell, ChevronLeft, ChevronRight, CircleHelp, Compass, Download, Languages, Moon, Sun, type LucideIcon } from 'lucide-react-native';
+import { Bell, ChevronLeft, ChevronRight, CircleHelp, Compass, Download, Languages, Moon, Sun, Trash2, type LucideIcon } from 'lucide-react-native';
 import { I18nManager, ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -76,6 +76,7 @@ export default function AccountScreen() {
           {exp.hidden ? null : (
             <Row icon={Download} label={t('account.export')} value={exp.locked ? undefined : t('account.exportValue')} onPress={() => (exp.locked ? showUpgrade('feature', exp.ent, null, 'export') : router.push('/account/export'))} />
           )}
+          <Row icon={Trash2} label={t('account.recent')} onPress={() => router.push('/account/deleted')} />
           <Row icon={CircleHelp} label={t('account.help')} onPress={() => router.push({ pathname: '/page/[slug]', params: { slug: 'terms' } })} />
           <Row icon={Compass} label={t('account.tour')} onPress={() => { useTourReplay.setState({ on: true }); router.navigate('/'); }} last />
         </View>

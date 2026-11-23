@@ -28,13 +28,13 @@ function withReading(params: CaptureParams | undefined, go: (carId?: string) => 
 /** Every way into a new record: the voice sheet, idle until tapped, with a type-instead link (straight to quick-add when a part is already chosen). */
 export function openCapture(params?: CaptureParams) {
   withReading(params, (carId) => {
-    if (params?.serviceTypeId) return router.push({ pathname: '/capture', params });
+    if (params?.serviceTypeId) return router.push({ pathname: '/add-record', params });
     useLogDraft.getState().reset({ vehicleId: params?.vehicleId ?? carId ?? null });
     router.push('/capture/voice');
   });
 }
 
-/** The by-hand sheet (the fan's pencil). */
+/** The by-hand ladder (the fan's pencil): find a job, quick form, details, more jobs (flow 14). Fuel and other running costs stay on /capture. */
 export function openManual(params?: CaptureParams) {
-  withReading(params, () => router.push({ pathname: '/capture', params }));
+  withReading(params, () => router.push({ pathname: '/add-record', params }));
 }

@@ -6,6 +6,7 @@ import { AppState } from 'react-native';
 
 import { syncNotifications } from './notifications';
 import { SAVE_LOG_KEY, saveLog } from './saveLog';
+import { SAVE_VISIT_KEY, saveVisit } from './saveVisit';
 import { supabase } from './supabase';
 
 // Offline (screens 47/48, decisions Q45): cached data is persisted to the device, the connection state comes
@@ -16,6 +17,12 @@ queryClient.setMutationDefaults(SAVE_LOG_KEY, {
   mutationFn: saveLog,
   onSuccess: () => {
     for (const key of ['vehicles', 'logs', 'expenses']) queryClient.invalidateQueries({ queryKey: [key] });
+  },
+});
+queryClient.setMutationDefaults(SAVE_VISIT_KEY, {
+  mutationFn: saveVisit,
+  onSuccess: () => {
+    for (const key of ['vehicles', 'logs', 'expenses', 'visits', 'tracked']) queryClient.invalidateQueries({ queryKey: [key] });
   },
 });
 // Bump the key's version whenever a query's data shape changes, so an old cached shape is never read back.
