@@ -1,11 +1,12 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { Car, Check, Plus, X } from 'lucide-react-native';
+import { Image } from 'expo-image';
+import { Car, Check, Plus } from 'lucide-react-native';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Group, Item, PressableScale, Rise, Text } from '@/components/ui';
+import { Item, PressableScale, Rise, Text } from '@/components/ui';
 import { blockLimit, useEntitlements } from '@/lib/entitlements';
 import { needsAttention, useVehicleParts, useVehicles, vehicleName, type Vehicle } from '@/lib/queries';
 import { useVehiclePick } from '@/lib/sheet';
@@ -15,31 +16,49 @@ import { vehicleArt } from '@/lib/vehicleArt';
 
 function VehicleRow({ vehicle, current, onPress }: { vehicle: Vehicle; current: boolean; onPress: () => void }) {
   const { t } = useTranslation();
+  const c = useColors();
   const { parts } = useVehicleParts(vehicle);
   const overdue = needsAttention(parts).some((p) => p.status.state === 'overdue');
   const title = vehicleName(vehicle);
-  // the plate rides in the subtitle: a plate pill next to the check left the name under 100pt on a 375pt phone
   const subtitle = [vehicle.year, hasReading(vehicle) ? `${vehicle.current_odometer.toLocaleString('en-US')} ${t(`vehicles.unit.${vehicle.odometer_unit}`)}` : null, vehicle.plate_number?.trim() || null].filter(Boolean).join(' · ');
+  // From a sheet: close it first, then open the full screen.
+  const go = (pathname: '/edit-vehicle' | '/delete-vehicle', params: Record<string, string>) => {
+    router.back();
+    router.push({ pathname, params });
+  };
   return (
-    <Item
-      image={vehicleArt(vehicle.vehicle_type)}
-      tone="paper"
-      title={title}
-      subtitle={subtitle}
-      accessibilityLabel={[title, subtitle, overdue ? t('vehicles.attention') : ''].filter(Boolean).join(', ')}
-      accessibilityState={{ selected: current }}
-      onPress={onPress}
-      aside={
-        <View className="flex-row items-center gap-2">
-          {overdue ? <View className="h-2.5 w-2.5 rounded-full bg-danger" /> : null}
-          {current ? (
-            <View className="h-6 w-6 items-center justify-center rounded-full bg-lime">
-              <Check size={14} color="#222E29" strokeWidth={3} />
-            </View>
-          ) : null}
+    <View className="rounded-row bg-white" style={{ boxShadow: current ? `0 0 0 2px ${c.ink}` : shadows.ring }}>
+      <PressableScale
+        accessibilityRole="button"
+        accessibilityLabel={[title, subtitle, overdue ? t('vehicles.attention') : ''].filter(Boolean).join(', ')}
+        accessibilityState={{ selected: current }}
+        onPress={onPress}
+        className="min-h-[76px] flex-row items-center gap-3 px-3.5 py-3"
+        scale={0.99}>
+        <Image source={vehicleArt(vehicle.vehicle_type)} contentFit="contain" style={{ width: 72, height: 40 }} />
+        <View className="flex-1 gap-0.5">
+          <Text variant="label" numberOfLines={2}>{title}</Text>
+          <Text variant="caption" className="text-muted" numberOfLines={1}>{subtitle}</Text>
         </View>
-      }
-    />
+        {overdue ? <View className="h-2.5 w-2.5 rounded-full bg-danger" /> : null}
+        {current ? (
+          <View className="h-6 w-6 items-center justify-center rounded-full bg-ink">
+            <Check size={14} color={c.paper} strokeWidth={3} />
+          </View>
+        ) : null}
+      </PressableScale>
+      {current ? (
+        <View className="flex-row gap-1 px-3.5 pb-2.5">
+          <PressableScale accessibilityRole="button" onPress={() => go('/delete-vehicle', { vehicleId: vehicle.id })} className="min-h-9 justify-center">
+            <Text variant="caption" className="text-danger">{t('vehicles.deleteShort')}</Text>
+          </PressableScale>
+          <Text variant="caption" className="self-center text-muted">·</Text>
+          <PressableScale accessibilityRole="button" onPress={() => go('/edit-vehicle', { id: vehicle.id })} className="min-h-9 justify-center">
+            <Text variant="caption" className="text-muted">{t('vehicles.editShort')}</Text>
+          </PressableScale>
+        </View>
+      ) : null}
+    </View>
   );
 }
 
@@ -67,16 +86,11 @@ export default function SwitchVehicle() {
 
   return (
     <View className="gap-4 rounded-t-screen border-t border-line bg-sheet px-6 pt-6" style={{ paddingBottom: bottom + 16 }}>
-      <View className="min-h-11 flex-row items-center gap-3">
-        <Text variant="heading" className="flex-1">{t('home.switchVehicle')}</Text>
-        <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white" style={{ boxShadow: shadows.lift }}>
-          <X size={20} color={c.ink} />
-        </PressableScale>
-      </View>
+      <Text variant="heading">{t('vehicles.title')}</Text>
       {/* a fit-to-contents sheet cannot size a ScrollView: only scroll (fixed height) when the list is long */}
       {(() => {
         const rows = (
-          <Group>
+          <View className="gap-2.5">
             {all ? (
               <Rise index={0}>
                 <Item
@@ -87,8 +101,8 @@ export default function SwitchVehicle() {
                   accessibilityState={{ selected: all.active }}
                   onPress={() => { router.back(); if (!all.active) { Haptics.selectionAsync(); all.onPick(); } }}
                   aside={all.active ? (
-                    <View className="h-6 w-6 items-center justify-center rounded-full bg-lime">
-                      <Check size={14} color="#222E29" strokeWidth={3} />
+                    <View className="h-6 w-6 items-center justify-center rounded-full bg-ink">
+                      <Check size={14} color={c.paper} strokeWidth={3} />
                     </View>
                   ) : null}
                 />
@@ -100,9 +114,12 @@ export default function SwitchVehicle() {
               </Rise>
             ))}
             <Rise index={vehicles.length + 1}>
-              <Item icon={Plus} title={t('vehicles.add')} chevron={false} onPress={add} />
+              <PressableScale accessibilityRole="button" onPress={add} className="h-[54px] flex-row items-center justify-center gap-2 rounded-row border border-dashed border-line">
+                <Text variant="label">{t('vehicles.add')}</Text>
+                <Plus size={18} color={c.ink} />
+              </PressableScale>
             </Rise>
-          </Group>
+          </View>
         );
         return vehicles.length > 4 ? <ScrollView style={{ height: 420 }} contentContainerClassName="p-0.5" showsVerticalScrollIndicator={false}>{rows}</ScrollView> : rows;
       })()}

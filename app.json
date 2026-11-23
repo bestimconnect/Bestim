@@ -76,9 +76,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#222E29",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 140
+          "backgroundColor": "#EBEBE8"
         }
       ],
       "expo-localization",
@@ -95,8 +93,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Bestim attaches receipt photos to your records.",
-          "cameraPermission": "Bestim uses the camera to read your odometer."
+          "photosPermission": "Bestim uses your photos for your profile picture and for receipts on your records.",
+          "cameraPermission": "Bestim uses the camera to read your odometer and to take your profile picture or a receipt photo."
         }
       ],
       [

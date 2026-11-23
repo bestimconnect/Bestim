@@ -9,7 +9,8 @@ import { cleanVin, vinOk } from '@/lib/vin';
 import { LoadingState } from '@/components/EmptyState';
 import { ColorPicker } from '@/components/ColorPicker';
 import { cleanDigits, joinPlate, PlateField, splitPlate } from '@/components/Plate';
-import { Backdrop, Button, Card, Field, FooterBar, Header, Note, Section } from '@/components/ui';
+import { PageHeader as Header } from '@/components/PageHeader';
+import { Button, Card, Field, FooterBar, Note, Section } from '@/components/ui';
 import { errorText } from '@/lib/errors';
 import { useVehicle, vehicleName, type Vehicle } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
@@ -39,7 +40,6 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
-      <Backdrop />
       <Header title={t('plate.edit')} sub={vehicleName(vehicle)} />
       <ScrollView className="flex-1" contentContainerClassName="px-6 pb-6 pt-2" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Section title={t('plate.label')} />
@@ -56,6 +56,7 @@ function Form({ vehicle }: { vehicle: Vehicle }) {
       </ScrollView>
       <FooterBar>
         <Button title={t('plate.save')} onPress={save} loading={saving} disabled={!vinOk(vin)} />
+        <Button title={t('vehicles.deleteCar')} variant="ghost" onPress={() => router.push({ pathname: '/delete-vehicle', params: { vehicleId: vehicle.id } })} />
       </FooterBar>
     </SafeAreaView>
   );

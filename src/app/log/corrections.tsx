@@ -8,7 +8,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { LoadingState } from '@/components/EmptyState';
-import { Backdrop, Button, Card, FooterBar, Header, Text } from '@/components/ui';
+import { TabHeader } from '@/components/TabHeader';
+import { Button, Card, FooterBar, Text } from '@/components/ui';
 import { useLog, useServiceTypes } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 
@@ -50,11 +51,10 @@ export default function CorrectionsScreen() {
   for (const r of rows) groups.set(r.corrected_at, [...(groups.get(r.corrected_at) ?? []), r]);
 
   return (
-    <SafeAreaView className="flex-1 bg-paper">
-      <Backdrop />
-      <View className="px-6"><Header title={t('log.corrections.header')} /></View>
+    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
+      <View className="px-6"><TabHeader title={t('log.corrections.header')} back /></View>
       {!log || q.isPending ? <LoadingState /> : (
-      <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-4 px-6 pb-6" showsVerticalScrollIndicator={false}>
+      <ScrollView refreshControl={refresh} className="flex-1" contentContainerClassName="gap-3 px-6 pb-40 pt-3" showsVerticalScrollIndicator={false}>
         <Text variant="title">{t('log.corrections.title')}</Text>
         {log ? (
           <Card className="gap-1 p-4">
@@ -65,7 +65,7 @@ export default function CorrectionsScreen() {
           </Card>
         ) : null}
         {[...groups.entries()].map(([at, rs]) => (
-          <Card key={at} tone="mint" className="gap-1 p-4">
+          <Card key={at} className="gap-1 p-4">
             <Text variant="label">{t('log.corrections.correction', { date: day(at) })}</Text>
             {rs.map((r) => (
               <Text key={r.id} variant="caption" className="text-muted">{line(r, r.new_value)}</Text>

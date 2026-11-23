@@ -8,7 +8,9 @@ import { useTranslation } from 'react-i18next';
 
 import { EmptyState } from '@/components/EmptyState';
 import { PartArt } from '@/components/PartArt';
-import { Group, Item, PressableScale, Text } from '@/components/ui';
+import { Row } from '@/components/timeline/Row';
+import { Trust, trustOf } from '@/components/timeline/Trust';
+import { PressableScale, Text } from '@/components/ui';
 import { useServiceTypes, useVehicle, useVehicleLogs } from '@/lib/queries';
 import { shadows, useColors } from '@/lib/theme';
 
@@ -41,18 +43,18 @@ export default function PartLogs() {
         </PressableScale>
       </View>
       {logs.length ? (
-        <Group>
+        <View className="gap-2">
           {logs.map((l) => (
-            <Item
+            <Row
               key={l.id}
-              leading={<PartArt nameEn={l.service_types?.name_en} size={28} />}
+              leading={<PartArt nameEn={l.service_types?.name_en} size={44} />}
               title={format(parseISO(l.service_date), 'd MMMM yyyy', { locale: arabic ? ar : enUS })}
-              subtitle={l.odometer_reading != null ? `${n(l.odometer_reading)} ${unit}` : undefined}
-              aside={l.cost != null ? <Text variant="label">{n(l.cost)}</Text> : undefined}
+              sub={[l.odometer_reading != null ? `${n(l.odometer_reading)} ${unit}` : null, l.cost != null ? `${n(l.cost)} ${t('vehicles.currency')}` : null].filter(Boolean).join(' · ')}
+              aside={<Trust kind={trustOf(l)} />}
               onPress={() => router.push({ pathname: '/log/[id]', params: { id: l.id } })}
             />
           ))}
-        </Group>
+        </View>
       ) : (
         <EmptyState icon={History} title={t('parts.history.empty')} />
       )}

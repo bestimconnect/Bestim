@@ -63,7 +63,7 @@ export function Tour() {
   if (step < 0) return null;
   const last = step === STEPS.length - 1;
   const lit = rect && { x: rect.x - PAD, y: rect.y - PAD, w: rect.w + PAD * 2, h: rect.h + PAD * 2 };
-  const radius = lit ? (key === 'capture' ? Math.min(lit.w, lit.h) / 2 : key === 'expenses' ? 18 : 22) : 0;
+  const radius = lit ? (key === 'capture' || key === 'expenses' ? Math.min(lit.w, lit.h) / 2 : 22) /* v2 nav: round voice button, pill-shaped Money tab */ : 0;
   const below = !!lit && lit.y + lit.h / 2 < height / 2;
   const place = !lit ? { top: 0, bottom: 0, justifyContent: 'center' as const } : below ? { top: lit.y + lit.h + GAP } : { bottom: height - lit.y + GAP };
   const name = key ?? 'welcome';

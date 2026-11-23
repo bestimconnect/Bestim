@@ -1,7 +1,7 @@
 // Fuel consumption from a car's fuel expenses. Pure, so `node --experimental-strip-types src/lib/fuel.check.ts` can run it.
 
 type Fill = { id?: string; amount: number; liters: number | null; odometer_reading: number | null; full_tank?: boolean | null };
-export type Figure = { kmPerLiter: number; costPerKm: number };
+export type Figure = { kmPerLiter: number; lPer100: number; costPerKm: number };
 
 /**
  * Measured between full tanks only: the distance from one full tank to the next ÷ every litre put in after the first
@@ -26,7 +26,7 @@ export function consumption(fills: Fill[]): { latest: Figure; average: Figure; p
     if (!full) continue;
     const km = start != null ? f.odometer_reading - start : 0;
     if (km > 0) {
-      const figure = { kmPerLiter: km / liters, costPerKm: amount / km };
+      const figure = { kmPerLiter: km / liters, lPer100: (liters / km) * 100, costPerKm: amount / km };
       figures.push(figure);
       if (f.id) byFill.set(f.id, figure);
     }
@@ -36,5 +36,13 @@ export function consumption(fills: Fill[]): { latest: Figure; average: Figure; p
   }
   if (!figures.length) return null;
   const mean = (k: keyof Figure) => figures.reduce((s, f) => s + f[k], 0) / figures.length;
-  return { latest: figures[figures.length - 1], average: { kmPerLiter: mean('kmPerLiter'), costPerKm: mean('costPerKm') }, pairs: figures.length, byFill };
+  return { latest: figures[figures.length - 1], average: { kmPerLiter: mean('kmPerLiter'), lPer100: mean('lPer100'), costPerKm: mean('costPerKm') }, pairs: figures.length, byFill };
+}
+
+/** Why `consumption` has no figure yet, so the card can say what to add: no fill-ups, litres missing, odometer reading missing, or fewer than two usable full tanks. */
+export function fuelGap(fills: Fill[]): 'noFills' | 'noLiters' | 'noReading' | 'needMore' {
+  if (!fills.length) return 'noFills';
+  if (!fills.some((f) => !!f.liters && f.liters > 0)) return 'noLiters';
+  if (!fills.some((f) => !!f.liters && f.liters > 0 && f.odometer_reading != null)) return 'noReading';
+  return 'needMore';
 }

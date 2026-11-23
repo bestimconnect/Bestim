@@ -13,24 +13,24 @@ import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-spe
 import { onlineManager } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Linking, Platform, TextInput, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { KEYBOARD_DONE_ID } from '@/components/KeyboardDone';
-import { Backdrop, Button, Card, FooterBar, Header, Sheen, Text } from '@/components/ui';
-import { rise, SWAP } from '@/lib/motion';
+import { SheetBody, StopButton, TextLink, VoiceBlocked, VoiceIdle, VoiceNotHeard, VoiceUnderstanding } from '@/components/VoiceSheet';
+import { Text } from '@/components/ui';
 import { showUpgrade } from '@/lib/entitlements';
 import { useServiceTypes, useVehicles } from '@/lib/queries';
 import { speechLang } from '@/lib/speech';
 import { normalizeRecords } from '@/lib/voiceRecords';
 import { MAX_AUDIO_BYTES, queueVoice, sendVoice } from '@/lib/voiceSend';
 import { useColors } from '@/lib/theme';
+import { useSettings } from '@/stores/settingsStore';
 import { useLogDraft } from '@/stores/logDraft';
 import { useVoiceBatch } from '@/stores/voiceBatch';
 
-// Screen 14 — Log by voice, PNG 14/التسجيل بالصوت.
+// Log by voice, v2: a bottom sheet (design-v2 flow 4/8/13). Idle until the owner taps the big button (bug #19); no live captions (bug #21).
 // The phone's own recognizer only draws the live text; the recording itself goes to the `process-voice-log`
 // Edge Function, which answers with a list of records for capture/review-all (decisions Q58–Q69).
 const MAX_SECONDS = 90; // Q66
@@ -49,11 +49,11 @@ const DIRECT: RecordingOptions = {
   web: {},
 };
 
-const BARS = [22, 46, 72, 98, 64, 132, 110, 132, 64, 98, 72, 46, 22]; // heights from the PNG, symmetric
+const BARS = [14, 26, 40, 22, 54, 34, 18, 46, 60, 30, 16, 42, 28, 12, 36, 20, 10]; // heights from the v2 design
 
-function Bar({ base, level }: { base: number; level: SharedValue<number> }) {
+function Bar({ base, level, green }: { base: number; level: SharedValue<number>; green: boolean }) {
   const style = useAnimatedStyle(() => ({ height: withTiming(base * (0.3 + 0.7 * level.value), { duration: 120 }) }));
-  return <Animated.View className="w-1.5 rounded-full bg-ink" style={style} />;
+  return <Animated.View className={`w-1 rounded-full ${green ? 'bg-ok' : 'bg-ink'}`} style={style} />;
 }
 
 /** Direct recording has no recognizer to report loudness, so the bars follow the recorder's own meter (dB). */
@@ -86,6 +86,10 @@ export default function Voice() {
   const recorder = useAudioRecorder(DIRECT);
   const [direct, setDirect] = useState(false); // Q79: recording directly, so no live text
   const [busy, setBusy] = useState(false);
+  const [started, setStarted] = useState(false); // nothing records until the owner taps the button
+  const [blocked, setBlocked] = useState(false); // microphone permission refused
+  const [step, setStep] = useState(0); // processing progress, for the three-step view
+  const gone = useRef(false); // the sheet was closed: a late answer is ignored
 
   // The quick-add sheet is the fallback. A sheet is closed with back(), so go back first, then push it.
   const toManual = (notice?: string) => {
@@ -96,7 +100,7 @@ export default function Voice() {
   const startDirect = async () => {
     if (__DEV__ && Platform.OS === 'ios') return setTyped(true);
     try {
-      if (!(await requestRecordingPermissionsAsync()).granted) return toManual('micDenied');
+      if (!(await requestRecordingPermissionsAsync()).granted) return setBlocked(true);
       await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
       await recorder.prepareToRecordAsync();
       recorder.record();
@@ -115,7 +119,7 @@ export default function Voice() {
     if (!onlineManager.isOnline() || !ExpoSpeechRecognitionModule.isRecognitionAvailable() || (Platform.OS === 'android' && Platform.Version < 33))
       return startDirect();
     const perm = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
-    if (!perm.granted) return toManual('micDenied');
+    if (!perm.granted) return setBlocked(true);
     ExpoSpeechRecognitionModule.start({
       lang: await speechLang(i18n.language),
       interimResults: false, // no live text on screen: it is sometimes wrong, and the server writes the records from the audio
@@ -155,6 +159,7 @@ export default function Voice() {
       };
       if (!onlineManager.isOnline()) return keep();
       const res = await sendVoice({ audio: fits ? await file!.base64() : null, mime, text, vehicleId: d.vehicleId, lang: i18n.language });
+      if (gone.current) return; // closed while it was being written up
       if (!res.ok) return res.reason === 'offline' ? keep() : (res.reason === 'limit' && showUpgrade('limit', null, null, 'voice_per_day'), toManual(res.reason === 'limit' ? 'dailyLimit' : 'aiFailed')); // Q64, Q65
       if (__DEV__) console.log(`voice: ${Date.now() - doneAt.current} ms from Done to result`, res.ms);
       const heard = res.transcript || text;
@@ -171,7 +176,7 @@ export default function Voice() {
           today: new Date().toLocaleDateString('en-CA'),
         }),
       );
-      router.replace('/capture/review-all');
+      router.replace('/capture/review-all'); // swap this sheet for the review sheet: opening one while the other dismisses left it with no height
     } catch {
       toManual('aiFailed');
     } finally {
@@ -182,9 +187,10 @@ export default function Voice() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    start();
+    // The widget opens this screen with no car chosen: use the current one.
+    if (!useLogDraft.getState().vehicleId) useLogDraft.getState().reset({ vehicleId: useSettings.getState().currentVehicleId });
     return () => {
+      gone.current = true;
       ExpoSpeechRecognitionModule.abort();
       try {
         if (!sending.current && audioUri.current) new File(audioUri.current).delete(); // left without sending: the recording is never kept
@@ -209,14 +215,20 @@ export default function Voice() {
   });
   useSpeechRecognitionEvent('error', (e) => {
     if (e.error === 'no-speech') setNoSpeech(true);
-    else if (e.error === 'not-allowed') toManual('micDenied');
+    else if (e.error === 'not-allowed') setBlocked(true);
     else if (e.error === 'service-not-allowed' || e.error === 'language-not-supported' || e.error === 'network') startDirect();
   });
 
   const retry = () => {
+    setStarted(true);
     setNoSpeech(false);
     say('');
     setSeconds(0);
+    start();
+  };
+
+  const begin = () => {
+    setStarted(true);
     start();
   };
 
@@ -227,7 +239,7 @@ export default function Voice() {
     level.set(0);
   };
 
-  const cancel = async () => {
+  const cancel = async (close = true) => {
     ExpoSpeechRecognitionModule.abort();
     if (direct) {
       await stopDirect();
@@ -235,7 +247,12 @@ export default function Voice() {
         if (audioUri.current) new File(audioUri.current).delete(); // the recording is never kept
       } catch {}
     }
-    router.back();
+    if (close) router.back();
+  };
+
+  const cancelToManual = async () => {
+    await cancel(false);
+    toManual();
   };
 
   const finish = async () => {
@@ -260,65 +277,46 @@ export default function Voice() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listening]);
 
+  // Processing progress for the three-step view (upload, transcribe, extract): paced, the server answers in one call.
+  useEffect(() => {
+    if (!busy) return;
+    const a = setTimeout(() => setStep(1), 1500);
+    const b = setTimeout(() => setStep(2), 3500);
+    return () => (clearTimeout(a), clearTimeout(b));
+  }, [busy]);
+
+  if (blocked) return <VoiceBlocked onSettings={() => Linking.openSettings()} onType={() => toManual()} />;
+  if (noSpeech) return <VoiceNotHeard onRetry={retry} onType={() => toManual()} />;
+  if (busy) return <VoiceUnderstanding step={step} onCancel={() => cancel()} />;
+  if (!started) return <VoiceIdle onStart={begin} onType={() => toManual()} />;
+
   return (
-    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <Backdrop />
-      <View className="px-6"><Header title={t('capture.voice.header')} /></View>
-      {/* scrolls only when the text is long or the keyboard is up; otherwise the content sits centred, no dead gap */}
-      <ScrollView className="flex-1" contentContainerClassName="flex-grow justify-center gap-5 px-6 py-2" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets showsVerticalScrollIndicator={false}>
-        <View className="flex-row items-center justify-between">
-          <Animated.View key={String(busy)} entering={SWAP}>
-            <Text variant="label">{t(busy ? 'capture.voice.understanding' : 'capture.voice.listening')}</Text>
-          </Animated.View>
-          <Text variant="small-number">{mmss(seconds)}</Text>
-        </View>
-        <Card className={`h-[150px] flex-row items-center justify-center gap-3.5 ${busy ? 'opacity-40' : ''}`}>
-          <Sheen color={c.teal} opacity={0.1} />
-          <Sheen color={c.teal} opacity={0.14} glow="br" radius={0.9} />
-          {BARS.map((b, i) => <Bar key={i} base={b} level={level} />)}
-        </Card>
-        {typed ? (
-          <View className="gap-2">
-            <Text variant="caption" className="text-muted">{t('capture.voice.typeHint')}</Text>
-            <TextInput
-              value={transcript}
-              onChangeText={say}
-              multiline
-              inputAccessoryViewID={KEYBOARD_DONE_ID}
-              placeholderTextColor={c.muted}
-              className="min-h-[80px] rounded-field border border-line bg-white p-4 text-body text-ink"
-              style={{ textAlign: 'auto' }}
-            />
-          </View>
-        ) : null}
-        {direct && listening ? <DirectMeter recorder={recorder} level={level} /> : null}
-        {noSpeech ? (
-          <View className="gap-2">
-            <Pressable onPress={retry} className="min-h-11 justify-center"><Text className="text-muted">{t('capture.voice.noSpeech')}</Text></Pressable>
-            <Pressable onPress={() => toManual()} className="min-h-11 justify-center"><Text variant="label" className="text-teal">{t('capture.voice.manualLink')}</Text></Pressable>
-          </View>
-        ) : busy ? (
-          <Animated.View entering={rise()}>
-            <Text variant="label">{t('capture.voice.understandingBody')}</Text>
-          </Animated.View>
-        ) : (
-          <View className="gap-4">
-            <Text className="text-muted">{t(seconds >= HINT_SECONDS ? 'capture.batch.longHint' : 'capture.voice.hint')}</Text>
-            {/* Q125: what to say, shown until the owner is well into talking */}
-            {seconds < HINT_SECONDS ? (
-              <Card tone="mint" className="gap-2 p-4">
-                <Text variant="caption" className="text-muted">{t('capture.voice.tryTitle')}</Text>
-                {[1, 2, 3].map((n) => <Text key={n} variant="label">{t(`capture.voice.try${n}`)}</Text>)}
-              </Card>
-            ) : null}
-          </View>
-        )}
-        <Text variant="caption" className="text-muted">{t('capture.voice.aiNotice')}</Text>
-      </ScrollView>
-      <FooterBar inset={false}>
-        <Button title={t('capture.voice.done')} onPress={finish} loading={busy} />
-        <Button variant="ghost" title={t('capture.voice.cancel')} onPress={cancel} />
-      </FooterBar>
-    </SafeAreaView>
+    <SheetBody>
+      <View className="flex-row items-center gap-1.5">
+        <View className="h-[7px] w-[7px] rounded-full bg-late" />
+        <Text variant="caption" className="text-muted">{t('logv2.listen')}</Text>
+      </View>
+      <View className="h-[104px] flex-row items-center justify-center gap-1 rounded-[22px] bg-paper" style={{ direction: 'ltr' }}>
+        {BARS.map((b, i) => <Bar key={i} base={b} level={level} green={i % 5 === 0} />)}
+      </View>
+      <Text className="text-center text-[40px] leading-[48px]" style={{ fontFamily: 'Poppins_400Regular' }}>{mmss(seconds)}</Text>
+      {typed ? (
+        <TextInput
+          value={transcript}
+          onChangeText={say}
+          multiline
+          placeholder={t('capture.voice.typeHint')}
+          inputAccessoryViewID={KEYBOARD_DONE_ID}
+          placeholderTextColor={c.muted}
+          className="min-h-[80px] rounded-field bg-paper p-4 text-body text-ink"
+          style={{ textAlign: 'auto' }}
+        />
+      ) : (
+        <Text variant="caption" className="text-center text-muted">{t(seconds >= HINT_SECONDS ? 'capture.batch.longHint' : 'logv2.hint')}</Text>
+      )}
+      {direct && listening ? <DirectMeter recorder={recorder} level={level} /> : null}
+      <StopButton onPress={finish} label={t('capture.voice.done')} />
+      <TextLink title={t('logv2.typeIn')} onPress={() => cancelToManual()} />
+    </SheetBody>
   );
 }

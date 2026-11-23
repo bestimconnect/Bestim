@@ -4,24 +4,21 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
-import Svg, { Circle, Defs, LinearGradient, Line, Path, Stop, Text as SvgText } from 'react-native-svg';
+import Svg, { ClipPath, Defs, Line, Rect } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 
-import { Sheen, Text } from '@/components/ui';
+import { Num } from '@/components/money/Num';
+import { Text } from '@/components/ui';
 import { fmt, type Point } from '@/lib/expensePeriods';
 import { easeOut } from '@/lib/motion';
+import { shadows, useColors } from '@/lib/theme';
 
-const H = 132; // chart height
-const PB = 18; // room for the x labels
-const PT = 10;
-const PX = 8; // keeps the end dots inside the box
-const LIME = '#D3F53D';
-const SOFT = '#9FB0A7';
+const H = 128; // v2 `.chartbox`
 
 /**
- * The dark block of the Expenses tab: period navigator, selected amount + period total, and a smooth area chart.
- * Time runs left to right in Arabic too (founder): swipe right = earlier period, left = later. Tap or hold-and-drag moves the dot.
- * ponytail: the dot redraws the whole (<= 31 points) SVG per touch move; fine at this size, move it to a shared value if it ever stutters.
+ * Money tab, v2: period navigator + big total, then a flat bar chart in a white tile. The selected bar is hatched (ok green) with an
+ * ink cap and a tip pill with its amount; the rest are paper columns with a hairline top. Time runs left to right in Arabic too:
+ * swipe right = earlier period, left = later. Tap or hold-and-drag picks a bar.
  */
 export function ExpenseChart({
   periodKey,
@@ -32,6 +29,7 @@ export function ExpenseChart({
   onStep,
   canOlder,
   canNewer,
+  change,
 }: {
   periodKey: string;
   title: string;
@@ -42,8 +40,11 @@ export function ExpenseChart({
   onStep: (by: -1 | 1) => void;
   canOlder: boolean;
   canNewer: boolean;
+  /** Change against the previous period, already formatted ('+12%'), or null. */
+  change?: { text: string; up: boolean } | null;
 }) {
   const { t } = useTranslation();
+  const c = useColors();
   const [w, setW] = useState(0);
   const [picked, setPicked] = useState<{ key: string; i: number } | null>(null);
   const still = useReducedMotion();
@@ -66,22 +67,14 @@ export function ExpenseChart({
 
   const n = points.length;
   const last = Math.max(0, points.map((p) => !p.future).lastIndexOf(true));
-  const live = points.slice(0, last + 1);
-  const max = Math.max(1, ...live.map((p) => p.total));
-  const unit = 10 ** Math.floor(Math.log10(max));
-  const top = Math.ceil(max / unit) * unit;
-  const base = H - PB;
-  const xs = (i: number) => PX + (n > 1 ? i / (n - 1) : 0) * Math.max(0, w - 2 * PX);
-  const ys = (v: number) => base - (v / top) * (base - PT);
-  let line = live.length ? `M${xs(0)} ${ys(live[0].total)}` : '';
-  for (let i = 1; i < live.length; i++) {
-    const mid = (xs(i - 1) + xs(i)) / 2; // flat tangents at each point: never dips below the baseline
-    line += ` C${mid} ${ys(live[i - 1].total)} ${mid} ${ys(live[i].total)} ${xs(i)} ${ys(live[i].total)}`;
-  }
-  const si = picked?.key === periodKey ? Math.min(picked.i, last) : last;
+  const max = Math.max(1, ...points.map((p) => (p.future ? 0 : p.total)));
+  const spent = points.map((p) => !p.future && p.total > 0).lastIndexOf(true); // default: the latest bar with spending
+  const si = picked?.key === periodKey ? Math.min(picked.i, last) : spent >= 0 ? spent : last;
   const sel = points[si];
+  const bw = w / Math.max(1, n);
+  const bh = (p: Point) => (p.future ? 0 : Math.max(p.total > 0 ? 4 : 0, (p.total / max) * (H - 44)));
 
-  const at = (x: number) => Math.max(0, Math.min(last, Math.round(((x - PX) / Math.max(1, w - 2 * PX)) * (n - 1))));
+  const at = (x: number) => Math.max(0, Math.min(last, Math.floor(x / Math.max(1, bw))));
   const step = (by: -1 | 1) => {
     if (by < 0 ? !canOlder : !canNewer) return;
     Haptics.selectionAsync();
@@ -104,10 +97,13 @@ export function ExpenseChart({
     Gesture.Tap().runOnJS(true).onEnd((e) => pick(e.x)),
   );
 
+  // The tip sits above the picked bar, kept inside the tile.
+  const tipW = 112;
+  const tipLeft = Math.max(8, Math.min(w - tipW - 8, si * bw + bw / 2 - tipW / 2));
+  const tipTop = Math.max(8, H - bh(sel ?? points[0]) - 44);
+
   return (
-    <View className="gap-3 overflow-hidden rounded-metric bg-panel p-4">
-      <Sheen opacity={0.07} />
-      <Sheen color="#D3F53D" opacity={0.08} glow="tr" radius={0.8} />
+    <View className="gap-3">
       {/* direction ltr: older on the left, newer on the right, in Arabic too. */}
       <View className="flex-row items-center justify-between" style={{ direction: 'ltr' }}>
         <Pressable
@@ -116,58 +112,66 @@ export function ExpenseChart({
           accessibilityState={{ disabled: !canOlder }}
           disabled={!canOlder}
           onPress={() => step(-1)}
-          className={`h-11 w-11 items-center justify-center rounded-full bg-[#FFFFFF24] ${canOlder ? '' : 'opacity-30'}`}>
-          <ChevronLeft size={20} color="#F5F7F5" />
+          className={`h-11 w-11 items-center justify-center rounded-full bg-white ${canOlder ? '' : 'opacity-30'}`}
+          style={{ boxShadow: shadows.ring }}>
+          <ChevronLeft size={20} color={c.ink} />
         </Pressable>
-        <Text variant="label" className="text-onpanel">{title}</Text>
+        <Text variant="label" numberOfLines={1}>{title}</Text>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('expenses.later')}
           accessibilityState={{ disabled: !canNewer }}
           disabled={!canNewer}
           onPress={() => step(1)}
-          className={`h-11 w-11 items-center justify-center rounded-full bg-[#FFFFFF24] ${canNewer ? '' : 'opacity-30'}`}>
-          <ChevronRight size={20} color="#F5F7F5" />
+          className={`h-11 w-11 items-center justify-center rounded-full bg-white ${canNewer ? '' : 'opacity-30'}`}
+          style={{ boxShadow: shadows.ring }}>
+          <ChevronRight size={20} color={c.ink} />
         </Pressable>
       </View>
       <GestureDetector gesture={gesture}>
-        <Animated.View className="gap-2" style={slide}>
+        <Animated.View className="gap-3" style={slide}>
           <View className="flex-row items-end justify-between gap-3">
-            <View className="flex-1">
-              <Text variant="caption" className="text-[#9FB0A7]">{sel ? pointName(sel.n) : ''}</Text>
-              <Text variant="number" className="text-onpanel" numberOfLines={1} style={{ fontSize: 26, lineHeight: 34 }}>
-                {fmt(sel?.total ?? 0)} <Text variant="caption" className="text-[#9FB0A7]">{t('expenses.currency')}</Text>
-              </Text>
+            <View className="min-w-0 flex-1 gap-1">
+              <Text variant="caption" className="text-muted" numberOfLines={1}>{t('expenses.periodTotal')}</Text>
+              <Num value={fmt(total)} unit={t('expenses.currency')} size={44} />
             </View>
-            <View className="items-end">
-              <Text variant="caption" className="text-[#9FB0A7]">{t('expenses.periodTotal')}</Text>
-              <Text variant="label" className="text-onpanel" numberOfLines={1}>{fmt(total)} {t('expenses.currency')}</Text>
-            </View>
-          </View>
-          <View style={{ direction: 'ltr', height: H }} onLayout={(e) => setW(e.nativeEvent.layout.width)}>
-            {w > 0 && live.length > 0 ? (
-              <Svg width={w} height={H}>
-                <Defs>
-                  <LinearGradient id="area" x1="0" y1="0" x2="0" y2="1">
-                    <Stop offset="0" stopColor={LIME} stopOpacity={0.35} />
-                    <Stop offset="1" stopColor={LIME} stopOpacity={0} />
-                  </LinearGradient>
-                </Defs>
-                {[0, 0.5, 1].map((k) => (
-                  <Line key={k} x1={0} x2={w} y1={PT + (base - PT) * k} y2={PT + (base - PT) * k} stroke="#FFFFFF" strokeOpacity={0.12} />
-                ))}
-                <Path d={`${line} L${xs(last)} ${base} L${xs(0)} ${base}Z`} fill="url(#area)" />
-                <Path d={line} fill="none" stroke={LIME} strokeWidth={2.2} strokeLinecap="round" />
-                <Line x1={xs(si)} x2={xs(si)} y1={PT} y2={base} stroke="#FFFFFF" strokeOpacity={0.5} strokeDasharray="3 3" />
-                <Circle cx={xs(si)} cy={ys(sel.total)} r={5} fill={LIME} stroke="#222E29" strokeWidth={2} />
-                {points.map((p, i) =>
-                  p.n === 1 || p.n % 5 === 0 || n === 12 ? (
-                    <SvgText key={p.n} x={xs(i)} y={H - 4} textAnchor="middle" fontSize={9} fill={SOFT} fontFamily="Poppins_400Regular">{p.n}</SvgText>
-                  ) : null,
-                )}
-              </Svg>
+            {change ? (
+              <View className={`rounded-full px-3 py-1 ${change.up ? 'bg-lateTint' : 'bg-okTint'}`}>
+                <Text variant="caption" className={change.up ? 'text-late' : 'text-ok'} style={{ fontVariant: ['tabular-nums'], writingDirection: 'ltr' }}>{change.text}</Text>
+              </View>
             ) : null}
           </View>
+          <View className="overflow-hidden rounded-[24px] bg-white" style={{ direction: 'ltr', height: H, boxShadow: shadows.ring }} onLayout={(e) => setW(e.nativeEvent.layout.width)}>
+            {w > 0 ? (
+              <Svg width={w} height={H}>
+                <Defs>
+                  {sel ? (
+                    <ClipPath id="sel">
+                      <Rect x={si * bw} y={H - bh(sel)} width={bw} height={bh(sel)} />
+                    </ClipPath>
+                  ) : null}
+                </Defs>
+                {points.map((p, i) => (i === si ? null : <Rect key={p.n} x={i * bw} y={H - bh(p)} width={bw} height={bh(p)} fill={c.paper} />))}
+                {/* the picked bar: green with light diagonal stripes (drawn, since SVG patterns render as triangles on iOS) */}
+                {sel && bh(sel) > 0 ? (
+                  <>
+                    <Rect x={si * bw} y={H - bh(sel)} width={bw} height={bh(sel)} fill={c.ok} />
+                    {Array.from({ length: Math.ceil((bw + H) / 14) + 1 }, (_, k) => (
+                      <Line key={k} clipPath="url(#sel)" x1={si * bw + k * 14} y1={H - bh(sel)} x2={si * bw + k * 14 - H} y2={H} stroke={c.paper} strokeOpacity={0.4} strokeWidth={7} />
+                    ))}
+                  </>
+                ) : null}
+                {points.map((p, i) => (i === si || p.future || bh(p) === 0 ? null : <Line key={`t${p.n}`} x1={i * bw} x2={(i + 1) * bw} y1={H - bh(p) + 0.5} y2={H - bh(p) + 0.5} stroke={c.tick} />))}
+                {sel && bh(sel) > 0 ? <Rect x={si * bw} y={H - bh(sel)} width={bw} height={2} fill={c.ink} /> : null}
+              </Svg>
+            ) : null}
+            {sel ? (
+              <View className="absolute items-center rounded-full bg-ink px-3 py-1.5" style={{ left: tipLeft, top: tipTop, width: tipW }} pointerEvents="none">
+                <Text variant="caption" className="text-paper" numberOfLines={1} style={{ fontVariant: ['tabular-nums'] }}>{`${fmt(sel.total)} ${t('expenses.currency')}`}</Text>
+              </View>
+            ) : null}
+          </View>
+          <Text variant="caption" className="text-center text-muted" numberOfLines={1}>{sel ? pointName(sel.n) : ''}</Text>
         </Animated.View>
       </GestureDetector>
     </View>

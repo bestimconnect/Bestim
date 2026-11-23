@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { EmptyState } from '@/components/EmptyState';
-import { Backdrop, Button, FooterBar } from '@/components/ui';
+import { Button, FooterBar } from '@/components/ui';
 import { useShowSaved } from '@/lib/online';
 import { useVehicles } from '@/lib/queries';
 
@@ -14,7 +14,6 @@ export function ErrorState({ onRetry, onShowSaved, retrying }: { onRetry: () => 
   const { t } = useTranslation();
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <Backdrop />
       <View className="flex-1 items-center justify-center gap-6 px-6">
         <EmptyState icon={CloudOff} tone="sky" title={t('feedback.error.title')} body={t('feedback.error.body')} />
       </View>

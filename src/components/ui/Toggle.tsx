@@ -1,11 +1,12 @@
-import { Pressable } from 'react-native';
+import { I18nManager, Pressable } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { EASE_OUT } from '@/lib/motion';
 
-/** Figma `fresh/toggle` (screens 27, 28): 44×24 track, teal when on. */
+/** v2 `.tgl` (50×30): on = dark green track with a lime knob at the end side (left in Arabic), off = tick track, card knob at the start. */
 export function Toggle({ value, onChange, label }: { value: boolean; onChange: (v: boolean) => void; label?: string }) {
   const still = useReducedMotion();
+  const shift = I18nManager.isRTL ? -20 : 20; // translateX is physical; the knob travels toward the end side
   return (
     <Pressable
       accessibilityRole="switch"
@@ -13,12 +14,10 @@ export function Toggle({ value, onChange, label }: { value: boolean; onChange: (
       accessibilityState={{ checked: value }}
       onPress={() => onChange(!value)}
       hitSlop={8}
-      className={`h-6 w-11 justify-center rounded-full px-0.5 ${value ? 'bg-teal' : 'bg-line'}`}
-      // The design keeps "on" at the physical right in both languages.
-      style={{ direction: 'ltr', alignItems: 'flex-start' }}>
+      className={`h-[30px] w-[50px] items-start justify-center rounded-full px-[3px] ${value ? 'bg-btn' : 'bg-tick'}`}>
       <Animated.View
-        className="h-5 w-5 rounded-full bg-[#FFFFFF]"
-        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.25)', transform: [{ translateX: value ? 20 : 0 }], transitionProperty: 'transform', transitionDuration: still ? '0ms' : '160ms', transitionTimingFunction: EASE_OUT }}
+        className={`h-6 w-6 rounded-full ${value ? 'bg-onbtn' : 'bg-white'}`}
+        style={{ transform: [{ translateX: value ? shift : 0 }], transitionProperty: 'transform', transitionDuration: still ? '0ms' : '160ms', transitionTimingFunction: EASE_OUT }}
       />
     </Pressable>
   );

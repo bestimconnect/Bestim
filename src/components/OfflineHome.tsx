@@ -1,14 +1,14 @@
 import { router } from 'expo-router';
 import { Car } from 'lucide-react-native';
-import { ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { useTabBarSpace } from '@/components/TabBar';
-import { Backdrop, Button, Card, Item, Sheen, Text } from '@/components/ui';
+import { Num } from '@/components/home/Num';
+import { Backdrop, Button, Card, Item, Text } from '@/components/ui';
 import { hasReading, openCapture } from '@/lib/reading';
 import { vehicleName, type Vehicle } from '@/lib/queries';
-import { shadows } from '@/lib/theme';
 
 // Screen 47 — Home offline, PNG 47/الرئيسية/دون اتصال (Q45). Rendered from the persisted cache.
 export function OfflineHome({ vehicle }: { vehicle: Vehicle }) {
@@ -32,14 +32,11 @@ export function OfflineHome({ vehicle }: { vehicle: Vehicle }) {
         subtitle={t('feedback.offline.vehicleSub')}
         onPress={() => router.push({ pathname: '/vehicle/[id]', params: { id: vehicle.id } })}
       />
-      <View className="gap-1 overflow-hidden rounded-metric bg-panel p-5" style={{ boxShadow: shadows.lift }}>
-        <Sheen opacity={0.07} />
-        <Text variant="caption" className="text-onpanel">{t('feedback.offline.cardLabel')}</Text>
-        <Text variant="number" className="text-onpanel" numberOfLines={1}>{hasReading(vehicle) ? vehicle.current_odometer.toLocaleString('en-US') : '—'}</Text>
-        <Text variant="caption" className="text-onpanel">
-          {t('feedback.offline.cardNote', { unit: t(`home.${vehicle.odometer_unit}`) })}
-        </Text>
-      </View>
+      <Card className="gap-1 p-5">
+        <Text variant="caption" className="text-muted">{t('feedback.offline.cardLabel')}</Text>
+        <Num value={hasReading(vehicle) ? vehicle.current_odometer.toLocaleString('en-US') : '—'} unit={t(`home.${vehicle.odometer_unit}`)} size={40} />
+        <Text variant="caption" className="text-muted">{t('feedback.offline.cardNote', { unit: t(`home.${vehicle.odometer_unit}`) })}</Text>
+      </Card>
       <Button title={t('feedback.offline.write')} onPress={write} />
       <Text variant="caption" className="px-1 text-center text-muted">{t('feedback.offline.voice')}</Text>
     </ScrollView>

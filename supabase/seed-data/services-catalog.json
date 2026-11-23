@@ -1,0 +1,7210 @@
+{
+ "source": "Bestim_Bug_Report.pdf section 2 (2026-11-17)",
+ "specialists": [
+  {
+   "key": "mechanic",
+   "en": "Mechanic",
+   "ar": "ميكانيكي",
+   "desc": "Engine work, periodic service, belts, engine repairs and overhauls.",
+   "categories": [
+    {
+     "en": "PERIODIC SERVICE",
+     "ar": "صيانة دورية",
+     "jobs": [
+      {
+       "en": "Engine oil change",
+       "ar": "تغيير زيت الموتور",
+       "intervalKm": 5000,
+       "intervalKmMax": 10000,
+       "intervalMonths": 6,
+       "tracked": true,
+       "intervalText": "5,000 km mineral / 7,500 semi-synthetic / 10,000 synthetic, or 6 months",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Engine oil",
+         "ar": "زيت موتور",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Oil filter",
+         "ar": "فلتر زيت",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Drain plug washer",
+         "ar": "وردة طبة الكارتير",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Oil drain plug",
+         "ar": "طبة الكارتير",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Air filter replacement",
+       "ar": "تغيير فلتر الهوا",
+       "intervalKm": 20000,
+       "intervalKmMax": 30000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "20,000 - 30,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Engine air filter",
+         "ar": "فلتر هوا",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Cabin (A/C) filter replacement",
+       "ar": "تغيير فلتر التكييف",
+       "intervalKm": 15000,
+       "intervalKmMax": 20000,
+       "intervalMonths": 12,
+       "tracked": true,
+       "intervalText": "15,000 - 20,000 km or 1 year",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Cabin filter",
+         "ar": "فلتر تكييف",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Fuel filter replacement",
+       "ar": "تغيير فلتر البنزين",
+       "intervalKm": 30000,
+       "intervalKmMax": 40000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "30,000 - 40,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Fuel filter",
+         "ar": "فلتر بنزين",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Filter clamps / hose",
+         "ar": "أفيز / خرطوم",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Spark plugs replacement",
+       "ar": "تغيير البوجيهات",
+       "intervalKm": 30000,
+       "intervalKmMax": 60000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "30,000 - 60,000 km (depends on plug type)",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Spark plugs",
+         "ar": "بوجيهات",
+         "aliases": [
+          "بواجي",
+          "شمعات"
+         ]
+        },
+        {
+         "type": "consumable",
+         "en": "Anti-seize grease",
+         "ar": "شحم مانع للزرجنة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Full service package",
+       "ar": "سيرفيس كامل",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Per manufacturer schedule",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Engine oil",
+         "ar": "زيت موتور",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Oil filter",
+         "ar": "فلتر زيت",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Air filter",
+         "ar": "فلتر هوا",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Cabin filter",
+         "ar": "فلتر تكييف",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "General check-up",
+         "ar": "كشف عام",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Fluids top-up",
+       "ar": "تزويد سوائل",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Coolant",
+         "ar": "مياه رادياتير",
+         "aliases": [
+          "سائل تبريد",
+          "أنتيفريز"
+         ]
+        },
+        {
+         "type": "consumable",
+         "en": "Brake fluid",
+         "ar": "زيت فرامل",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Power steering fluid",
+         "ar": "زيت باور",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Washer fluid",
+         "ar": "مياه مساحات",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Distilled water",
+         "ar": "مياه مقطرة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Greasing",
+       "ar": "تشحيم",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Grease",
+         "ar": "شحم",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "BELTS & TIMING",
+     "ar": "السيور والكاتينة",
+     "jobs": [
+      {
+       "en": "Timing belt kit replacement",
+       "ar": "تغيير طقم الكاتينة (سير)",
+       "intervalKm": 60000,
+       "intervalKmMax": 100000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "60,000 - 100,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Timing belt",
+         "ar": "سير كاتينة",
+         "aliases": [
+          "سير تيمن"
+         ]
+        },
+        {
+         "type": "part",
+         "en": "Tensioner bearing",
+         "ar": "بلية شداد",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Idler pulley",
+         "ar": "بلية تايهة / بكرة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Water pump (often with kit)",
+         "ar": "طلمبة مياه",
+         "aliases": [
+          "طرمبة مياه"
+         ]
+        },
+        {
+         "type": "part",
+         "en": "Timing cover gasket",
+         "ar": "جوان غطا الكاتينة",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Coolant",
+         "ar": "مياه رادياتير",
+         "aliases": [
+          "سائل تبريد",
+          "أنتيفريز"
+         ]
+        }
+       ]
+      },
+      {
+       "en": "Timing chain kit replacement",
+       "ar": "تغيير طقم جنزير الكاتينة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "When noisy / per manufacturer",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Timing chain",
+         "ar": "جنزير كاتينة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Chain guides",
+         "ar": "مزلقانات الجنزير",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Chain tensioner",
+         "ar": "شداد جنزير",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Timing gears",
+         "ar": "تروس الكاتينة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Front cover gasket",
+         "ar": "جوان الوش الأمامي",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Gasket sealant",
+         "ar": "سليكون جوان",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Drive / accessory belt replacement",
+       "ar": "تغيير سير المجموعة (الدينامو والتكييف)",
+       "intervalKm": 40000,
+       "intervalKmMax": 60000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "40,000 - 60,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Accessory belt",
+         "ar": "سير مجموعة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Belt tensioner",
+         "ar": "شداد سير",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Idler pulley",
+         "ar": "بكرة سير",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "ENGINE REPAIR",
+     "ar": "إصلاح الموتور",
+     "jobs": [
+      {
+       "en": "Head gasket replacement",
+       "ar": "تغيير جوان وش السلندر",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Head gasket",
+         "ar": "جوان وش السلندر",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Head bolts",
+         "ar": "مسامير الوش",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Valve cover gasket",
+         "ar": "جوان غطا التاكيهات",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Intake manifold gasket",
+         "ar": "جوان مانيفولد الهوا",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Exhaust manifold gasket",
+         "ar": "جوان مانيفولد الشكمان",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Gasket sealant / silicone",
+         "ar": "سليكون / لزق جوان",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Coolant",
+         "ar": "مياه رادياتير",
+         "aliases": [
+          "سائل تبريد",
+          "أنتيفريز"
+         ]
+        },
+        {
+         "type": "consumable",
+         "en": "Engine oil",
+         "ar": "زيت موتور",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Oil filter",
+         "ar": "فلتر زيت",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Head skimming (machine shop)",
+         "ar": "تسطيح الوش (خراطة)",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Valve cover gasket replacement",
+       "ar": "تغيير جوان غطا التاكيهات",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Valve cover gasket",
+         "ar": "جوان غطا التاكيهات",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Spark plug tube seals",
+         "ar": "جلب البوجيهات",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Gasket sealant",
+         "ar": "سليكون جوان",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Oil pan gasket replacement",
+       "ar": "تغيير جوان الكارتير",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Oil pan gasket",
+         "ar": "جوان الكارتير",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Gasket sealant",
+         "ar": "سليكون جوان",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Engine oil",
+         "ar": "زيت موتور",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Oil seals replacement",
+       "ar": "تغيير أويل سيل",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Front crankshaft seal",
+         "ar": "أويل سيل كرنك أمامي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Rear crankshaft seal",
+         "ar": "أويل سيل كرنك خلفي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Camshaft seal",
+         "ar": "أويل سيل كامة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Oil leak repair",
+       "ar": "إصلاح تعريق / تسريب زيت",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Gasket sealant",
+         "ar": "سليكون جوان",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Engine degreaser",
+         "ar": "سبراي تنظيف موتور",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Valve stem seals replacement",
+       "ar": "تغيير كاوتش الصباب",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Valve stem seals",
+         "ar": "طقم كاوتش صباب",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Tappet / valve clearance adjustment",
+       "ar": "ضبط التاكيهات",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Per manufacturer (older engines)",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Valve cover gasket",
+         "ar": "جوان غطا التاكيهات",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Shims",
+         "ar": "شرائح ضبط",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Compression test",
+       "ar": "قياس الكبس",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Compression test",
+         "ar": "قياس كبس",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Half overhaul (top end)",
+       "ar": "نص عمرة (عمرة وش)",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Head gasket set",
+         "ar": "طقم جوان الوش",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Valves",
+         "ar": "صبابات",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Valve stem seals",
+         "ar": "كاوتش صباب",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Piston rings set",
+         "ar": "طقم شنبر",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Valve seats & guides",
+         "ar": "قواعد ودلايل",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Valve lapping",
+         "ar": "روديه صبابات",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Head skimming",
+         "ar": "تسطيح وش",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Full engine overhaul",
+       "ar": "عمرة كاملة (توضيب موتور)",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Pistons",
+         "ar": "بساتم",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Piston rings",
+         "ar": "شنبر",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Cylinder liners",
+         "ar": "شمايز",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Main bearings",
+         "ar": "سبايك ثابتة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Con-rod bearings",
+         "ar": "سبايك متحركة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Camshaft bearings",
+         "ar": "سبايك كامة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Oil pump",
+         "ar": "طلمبة زيت",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Full gasket set",
+         "ar": "طقم جوانات كامل",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Timing kit",
+         "ar": "طقم كاتينة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Oil seals",
+         "ar": "أويل سيلات",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Crankshaft grinding",
+         "ar": "خراطة كرنك",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Cylinder boring / honing",
+         "ar": "تجليخ سلندرات",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Engine oil (run-in)",
+         "ar": "زيت تليين",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Oil filter",
+         "ar": "فلتر زيت",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Coolant",
+         "ar": "مياه رادياتير",
+         "aliases": [
+          "سائل تبريد",
+          "أنتيفريز"
+         ]
+        }
+       ]
+      },
+      {
+       "en": "Engine mounts replacement",
+       "ar": "تغيير كراسي الموتور",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Engine mount",
+         "ar": "كرسي موتور",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Gearbox mount",
+         "ar": "كرسي فتيس",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Torque rod / dog bone",
+         "ar": "كرسي عزم (عضمة)",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Engine replacement",
+       "ar": "تغيير موتور",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Engine (imported used)",
+         "ar": "موتور استيراد",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Gasket set",
+         "ar": "طقم جوانات",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Engine oil",
+         "ar": "زيت موتور",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Coolant",
+         "ar": "مياه رادياتير",
+         "aliases": [
+          "سائل تبريد",
+          "أنتيفريز"
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "IGNITION",
+     "ar": "الإشعال",
+     "jobs": [
+      {
+       "en": "Ignition coil replacement",
+       "ar": "تغيير البوبينة (الكويل)",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Ignition coil",
+         "ar": "بوبينة / كويل",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Coil connector",
+         "ar": "فيشة الكويل",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Spark plug wires replacement",
+       "ar": "تغيير فيش البوجيهات",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Spark plug wires set",
+         "ar": "طقم فيش بوجيهات",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Distributor repair",
+       "ar": "إصلاح الدلكو",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Older cars",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Distributor cap",
+         "ar": "غطا الدلكو",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Rotor",
+         "ar": "شاكوش الدلكو",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Contact set / platinum",
+         "ar": "بلاتين",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "fuel_injection_carburettor",
+   "en": "Fuel injection & carburettor",
+   "ar": "فني انجكشن وكربراتير",
+   "desc": "Injectors, throttle body, fuel pump, idle problems, carburettors.",
+   "categories": [
+    {
+     "en": "INJECTION",
+     "ar": "الانجكشن",
+     "jobs": [
+      {
+       "en": "Injector cleaning (machine)",
+       "ar": "تنظيف بخاخات على الجهاز",
+       "intervalKm": 30000,
+       "intervalKmMax": 40000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "30,000 - 40,000 km or when needed",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Injector O-rings / seals",
+         "ar": "جلب وكاوتش بخاخات",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Injector filters",
+         "ar": "فلاتر بخاخات",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Ultrasonic cleaning",
+         "ar": "تنظيف بالموجات",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Injector replacement",
+       "ar": "تغيير بخاخ",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Fuel injector",
+         "ar": "بخاخ",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Injector seals",
+         "ar": "جلب بخاخ",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Throttle body cleaning",
+       "ar": "تنظيف البوابة (الثروتل)",
+       "intervalKm": 20000,
+       "intervalKmMax": 30000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "20,000 - 30,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Throttle body cleaner spray",
+         "ar": "سبراي تنظيف بوابة الانجكشن",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Throttle body gasket",
+         "ar": "جوان البوابة",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Idle relearn",
+         "ar": "ضبط / تعليم الفاضي",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Idle control valve service",
+       "ar": "إصلاح حساس الفاضي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Idle air control valve",
+         "ar": "موتور / حساس الفاضي",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Carb & choke cleaner",
+         "ar": "سبراي تنظيف",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Fuel pressure regulator replacement",
+       "ar": "تغيير منظم ضغط البنزين",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Fuel pressure regulator",
+         "ar": "منظم ضغط بنزين (ريجيلاتير)",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Fuel additive treatment",
+       "ar": "إضافة منظف للبنزين",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Injector cleaner additive",
+         "ar": "منظف بخاخات (إضافة للتانك)",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "FUEL SYSTEM",
+     "ar": "دورة البنزين",
+     "jobs": [
+      {
+       "en": "Fuel pump replacement",
+       "ar": "تغيير طرمبة البنزين",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Fuel pump",
+         "ar": "طرمبة بنزين",
+         "aliases": [
+          "طلمبة بنزين"
+         ]
+        },
+        {
+         "type": "part",
+         "en": "Pump strainer",
+         "ar": "شبكة / فلتر طرمبة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Pump seal",
+         "ar": "جوان طرمبة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Fuel level sender",
+         "ar": "عوامة بنزين",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Fuel tank cleaning / repair",
+       "ar": "تنظيف / إصلاح تانك البنزين",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Tank cleaning",
+         "ar": "تنظيف تانك",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Fuel tank",
+         "ar": "تانك بنزين",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Fuel cap",
+         "ar": "غطا تانك",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Fuel lines / hoses replacement",
+       "ar": "تغيير خراطيم البنزين",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Fuel hose",
+         "ar": "خرطوم بنزين",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Hose clamps",
+         "ar": "أفيز",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "CARBURETTOR",
+     "ar": "الكربراتير",
+     "jobs": [
+      {
+       "en": "Carburettor overhaul",
+       "ar": "توضيب الكربراتير",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Older cars",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Carburettor repair kit",
+         "ar": "طقم إصلاح كربراتير",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Carb cleaner spray",
+         "ar": "سبراي تنظيف كربراتير",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Carburettor gasket",
+         "ar": "جوان كربراتير",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "electrician",
+   "en": "Electrician",
+   "ar": "كهربائي",
+   "desc": "Battery, charging, starting, lighting, wiring, sensors, comfort electrics.",
+   "categories": [
+    {
+     "en": "BATTERY & CHARGING",
+     "ar": "البطارية والشحن",
+     "jobs": [
+      {
+       "en": "Battery replacement",
+       "ar": "تغيير البطارية",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": 24,
+       "tracked": true,
+       "intervalText": "2 - 4 years",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Battery",
+         "ar": "بطارية",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Battery terminals",
+         "ar": "أطراف / أقطاب بطارية",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Terminal grease",
+         "ar": "شحم أقطاب",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Battery / charging test",
+       "ar": "فحص بطارية وشحن",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Battery and charging test",
+         "ar": "فحص بطارية وشحن",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Alternator repair",
+       "ar": "توضيب الدينامو",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Alternator brushes",
+         "ar": "فحم دينامو",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Alternator bearings",
+         "ar": "بلي دينامو",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Voltage regulator",
+         "ar": "كتاوت (منظم)",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Diode plate",
+         "ar": "قنطرة دايودات",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Alternator replacement",
+       "ar": "تغيير الدينامو",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Alternator",
+         "ar": "دينامو",
+         "aliases": [
+          "دينمو"
+         ]
+        },
+        {
+         "type": "part",
+         "en": "Alternator belt",
+         "ar": "سير الدينامو",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "STARTING",
+     "ar": "التشغيل",
+     "jobs": [
+      {
+       "en": "Starter motor repair",
+       "ar": "توضيب المارش",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Starter brushes",
+         "ar": "فحم مارش",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Starter bushings",
+         "ar": "جلب مارش",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Solenoid",
+         "ar": "أوتوماتيك المارش",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Starter motor replacement",
+       "ar": "تغيير المارش",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Starter motor",
+         "ar": "مارش",
+         "aliases": [
+          "سلف"
+         ]
+        }
+       ]
+      },
+      {
+       "en": "Ignition switch replacement",
+       "ar": "تغيير السويتش",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Ignition switch",
+         "ar": "سويتش",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "LIGHTING",
+     "ar": "الإضاءة",
+     "jobs": [
+      {
+       "en": "Bulb replacement",
+       "ar": "تغيير لمبة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Headlight bulb (H4 / H7...)",
+         "ar": "لمبة فانوس أمامي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Tail / brake light bulb",
+         "ar": "لمبة خلفية / فرامل",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Indicator bulb",
+         "ar": "لمبة إشارة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Number plate bulb",
+         "ar": "لمبة نمرة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Interior / dome bulb",
+         "ar": "لمبة صالون",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Fog light bulb",
+         "ar": "لمبة كشاف ضباب",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Brake light switch replacement",
+       "ar": "تغيير مفتاح لمبة الفرامل",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Brake light switch",
+         "ar": "مفتاح لمبة الفرامل",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Flasher relay replacement",
+       "ar": "تغيير الفلاشر",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Flasher relay",
+         "ar": "فلاشر",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "LED / xenon conversion",
+       "ar": "تحويل ليد / زينون",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "LED / xenon kit",
+         "ar": "طقم ليد / زينون",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Fog lights installation",
+       "ar": "تركيب كشافات",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Fog lights",
+         "ar": "كشافات ضباب",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Switch & wiring",
+         "ar": "مفتاح وضفيرة",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "WIRING & FUSES",
+     "ar": "الأسلاك والفيوزات",
+     "jobs": [
+      {
+       "en": "Fuse / relay replacement",
+       "ar": "تغيير فيوز / ريلاي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Fuse",
+         "ar": "فيوز",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Relay",
+         "ar": "ريلاي",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Wiring repair",
+       "ar": "تصليح ضفيرة / سلك",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Wire",
+         "ar": "سلك",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Electrical tape",
+         "ar": "شريط لحام / عازل",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Connectors",
+         "ar": "فيش وكوس",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Solder",
+         "ar": "قصدير لحام",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Cable ties",
+         "ar": "سلوك ربط (تيرابس)",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Ground wire fix",
+       "ar": "تصليح الأرضي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Ground strap",
+         "ar": "سلك أرضي",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Short circuit / battery drain diagnosis",
+       "ar": "كشف قفلة / سحب بطارية",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Electrical diagnosis",
+         "ar": "كشف كهرباء",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "SENSORS",
+     "ar": "الحساسات",
+     "jobs": [
+      {
+       "en": "Oxygen sensor replacement",
+       "ar": "تغيير حساس الأكسجين (حساس الشكمان)",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Oxygen sensor (upstream / downstream)",
+         "ar": "حساس أكسجين قبل / بعد الكاتلايزر",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Crankshaft sensor replacement",
+       "ar": "تغيير حساس الكرنك",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Crankshaft position sensor",
+         "ar": "حساس كرنك",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Camshaft sensor replacement",
+       "ar": "تغيير حساس الكامة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Camshaft position sensor",
+         "ar": "حساس كامة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "MAP / MAF sensor replacement or cleaning",
+       "ar": "تغيير / تنظيف حساس الماب أو حساس الهوا",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "MAP sensor",
+         "ar": "حساس ماب",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "MAF sensor",
+         "ar": "حساس هوا MAF",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Sensor cleaner spray",
+         "ar": "سبراي تنظيف حساسات",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Coolant temperature sensor replacement",
+       "ar": "تغيير حساس الحرارة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Coolant temperature sensor",
+         "ar": "حساس حرارة",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Coolant",
+         "ar": "مياه رادياتير",
+         "aliases": [
+          "سائل تبريد",
+          "أنتيفريز"
+         ]
+        }
+       ]
+      },
+      {
+       "en": "Throttle position sensor replacement",
+       "ar": "تغيير حساس البوابة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Throttle position sensor",
+         "ar": "حساس بوابة TPS",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Knock sensor replacement",
+       "ar": "تغيير حساس الصفعة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Knock sensor",
+         "ar": "حساس نوك (صفعة)",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Speed sensor replacement",
+       "ar": "تغيير حساس السرعة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Vehicle speed sensor",
+         "ar": "حساس سرعة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Oil pressure switch replacement",
+       "ar": "تغيير بلف الزيت",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Oil pressure switch",
+         "ar": "بلف زيت",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Parking sensors installation / repair",
+       "ar": "تركيب / تصليح حساسات الركن",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Parking sensor",
+         "ar": "حساس ركن",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Parking sensor module",
+         "ar": "كمبيوتر الحساسات",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "COMFORT & BODY ELECTRICS",
+     "ar": "كهرباء الصالون والأبواب",
+     "jobs": [
+      {
+       "en": "Power window repair",
+       "ar": "تصليح زجاج كهربا",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Window motor",
+         "ar": "موتور زجاج",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Window regulator",
+         "ar": "ماكينة زجاج",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Window switch",
+         "ar": "مفتاح زجاج",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Central lock repair",
+       "ar": "تصليح السنتر لوك",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Door lock actuator",
+         "ar": "موتور سنتر لوك",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Central lock module",
+         "ar": "كمبيوتر سنتر لوك",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Horn replacement",
+       "ar": "تغيير الكلاكس",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Horn",
+         "ar": "كلاكس",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Horn relay",
+         "ar": "ريلاي كلاكس",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Wiper motor replacement",
+       "ar": "تغيير موتور المساحات",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Wiper motor",
+         "ar": "موتور مساحات",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Wiper linkage",
+         "ar": "ذراع / مقص المساحات",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Wiper blades replacement",
+       "ar": "تغيير المساحات",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": 6,
+       "tracked": true,
+       "intervalText": "6 - 12 months",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Wiper blades",
+         "ar": "مساحات (أساتيك)",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Washer pump replacement",
+       "ar": "تغيير طرمبة مياه المساحات",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Washer pump",
+         "ar": "طرمبة مياه المساحات",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Washer reservoir",
+         "ar": "قربة مياه المساحات",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Power mirror repair",
+       "ar": "تصليح المرايات الكهربا",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Mirror motor",
+         "ar": "موتور مراية",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "computer_diagnostics_programming",
+   "en": "Computer diagnostics & programming",
+   "ar": "فحص كمبيوتر وبرمجة",
+   "desc": "OBD scan, fault codes, ECU repair, key and module programming.",
+   "categories": [
+    {
+     "en": "DIAGNOSTICS",
+     "ar": "الفحص",
+     "jobs": [
+      {
+       "en": "Computer scan (OBD)",
+       "ar": "فحص كمبيوتر",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "When a warning light appears",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "OBD scan",
+         "ar": "فحص كمبيوتر",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Clear fault codes",
+         "ar": "مسح أعطال",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "ECU repair / programming",
+       "ar": "تصليح / برمجة كمبيوتر الموتور",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "ECU",
+         "ar": "كمبيوتر الموتور ECU",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Programming",
+         "ar": "برمجة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Key / immobilizer programming",
+       "ar": "برمجة مفتاح / إيموبلايزر",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Key / remote",
+         "ar": "مفتاح / ريموت",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Programming",
+         "ar": "برمجة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Module coding after replacement",
+       "ar": "برمجة قطعة بعد التركيب",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Coding",
+         "ar": "برمجة",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "suspension_steering_specialist",
+   "en": "Suspension & steering specialist",
+   "ar": "عفشجي",
+   "desc": "Shocks, arms, bushings, ball joints, wheel bearings, steering parts.",
+   "categories": [
+    {
+     "en": "FRONT SUSPENSION",
+     "ar": "العفشة الأمامية",
+     "jobs": [
+      {
+       "en": "Front shock absorbers replacement",
+       "ar": "تغيير المساعدين الأمامي",
+       "intervalKm": 60000,
+       "intervalKmMax": 100000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "60,000 - 100,000 km or when weak",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Front shock absorber",
+         "ar": "مساعد أمامي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Strut mount",
+         "ar": "بطاحة مساعد",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Strut bearing",
+         "ar": "بلية بطاحة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Dust boot & bump stop",
+         "ar": "جراب وكاوتش مساعد",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Coil spring",
+         "ar": "سوستة (ياي)",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Lower control arm replacement",
+       "ar": "تغيير المقص السفلي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Lower control arm",
+         "ar": "مقص سفلي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Control arm bushings",
+         "ar": "جلب مقص",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Ball joint",
+         "ar": "بيضة مقص",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Control arm bushings replacement",
+       "ar": "تغيير جلب المقصات",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Control arm bushings",
+         "ar": "جلب مقص",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Ball joint replacement",
+       "ar": "تغيير بيضة المقص",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Ball joint",
+         "ar": "بيضة مقص",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Stabilizer links replacement",
+       "ar": "تغيير مسامير الميزان",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Stabilizer link",
+         "ar": "مسمار ميزان (بيضة شمعدان)",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Sway bar bushings replacement",
+       "ar": "تغيير كاوتش الميزان",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Sway bar bushings",
+         "ar": "كاوتش / جلب ميزان",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Front wheel bearing replacement",
+       "ar": "تغيير بلية العجل الأمامي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Wheel bearing",
+         "ar": "بلية عجل",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Hub",
+         "ar": "صرة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Circlip",
+         "ar": "تيلة / حلقة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Steering knuckle replacement",
+       "ar": "تغيير الشمعدان",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Steering knuckle",
+         "ar": "شمعدان",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Subframe / crossmember repair",
+       "ar": "إصلاح القنطرة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Subframe",
+         "ar": "قنطرة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Subframe bushings",
+         "ar": "جلب قنطرة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Suspension check & tightening",
+       "ar": "كشف وتربيط عفشة",
+       "intervalKm": 10000,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "Every 10,000 km or yearly",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Suspension check",
+         "ar": "كشف عفشة",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Tightening",
+         "ar": "تربيط",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "REAR SUSPENSION",
+     "ar": "العفشة الخلفية",
+     "jobs": [
+      {
+       "en": "Rear shock absorbers replacement",
+       "ar": "تغيير المساعدين الخلفي",
+       "intervalKm": 60000,
+       "intervalKmMax": 100000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "60,000 - 100,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Rear shock absorber",
+         "ar": "مساعد خلفي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Shock mount",
+         "ar": "كرسي مساعد",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Rear spring",
+         "ar": "سوستة خلفي",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Rear axle bushings replacement",
+       "ar": "تغيير جلب الكوبري الخلفي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Rear axle / trailing arm bushings",
+         "ar": "جلب الكوبري الخلفي",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Rear wheel bearing replacement",
+       "ar": "تغيير بلية العجل الخلفي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Rear wheel bearing",
+         "ar": "بلية عجل خلفي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Hub cap / dust cap",
+         "ar": "طاسة البلية",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Leaf springs repair",
+       "ar": "إصلاح ريش اليايات",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Pickups / vans",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Leaf spring",
+         "ar": "ريشة ياي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Leaf spring bushings",
+         "ar": "جلب يايات",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "U-bolts",
+         "ar": "مسامير يو",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "STEERING",
+     "ar": "الدركسيون",
+     "jobs": [
+      {
+       "en": "Tie rod end replacement",
+       "ar": "تغيير بيضة الدركسيون",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Tie rod end",
+         "ar": "بيضة دركسيون (طرف)",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Inner tie rod replacement",
+       "ar": "تغيير دراع الدركسيون",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Inner tie rod",
+         "ar": "دراع دركسيون",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Steering rack repair / replacement",
+       "ar": "إصلاح / تغيير علبة الدركسيون",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Steering rack",
+         "ar": "علبة دركسيون",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Rack repair kit",
+         "ar": "طقم إصلاح علبة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Rack boots",
+         "ar": "جراب علبة الدركسيون",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Power steering pump replacement",
+       "ar": "تغيير طلمبة الباور",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Power steering pump",
+         "ar": "طلمبة باور",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Power steering fluid",
+         "ar": "زيت باور",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Power steering hoses",
+         "ar": "خراطيم باور",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Power steering fluid change",
+       "ar": "تغيير زيت الباور",
+       "intervalKm": 40000,
+       "intervalKmMax": 80000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "40,000 - 80,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Power steering fluid",
+         "ar": "زيت باور",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Electric power steering repair",
+       "ar": "إصلاح الباور الكهربا",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "EPS motor / column",
+         "ar": "موتور باور كهربا",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Center link / idler arm (older cars)",
+       "ar": "تغيير الإسكترا",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Older cars",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Center link",
+         "ar": "إسكترا",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Idler arm",
+         "ar": "تيش",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Ends",
+         "ar": "بيض تيش",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "drive_shafts_cv_joints_specialist",
+   "en": "Drive shafts (CV joints) specialist",
+   "ar": "فني كبالن",
+   "desc": "CV joints, boots and axles; cardan shaft and differential for rear-wheel drive.",
+   "categories": [
+    {
+     "en": "CV JOINTS",
+     "ar": "الكبالن",
+     "jobs": [
+      {
+       "en": "Outer CV joint replacement",
+       "ar": "تغيير الكبلن الخارجي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Outer CV joint",
+         "ar": "راس كبلن خارجي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "CV boot",
+         "ar": "جراب كبلن (عكس)",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "CV grease",
+         "ar": "شحم كبالن",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Boot clamps",
+         "ar": "أفيز جراب",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Inner CV joint replacement",
+       "ar": "تغيير الكبلن الداخلي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Inner CV joint",
+         "ar": "كبلن داخلي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "CV boot",
+         "ar": "جراب كبلن",
+         "aliases": [
+          "عكس"
+         ]
+        },
+        {
+         "type": "consumable",
+         "en": "CV grease",
+         "ar": "شحم كبالن",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "CV boot replacement",
+       "ar": "تغيير جراب الكبلن",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "CV boot",
+         "ar": "جراب كبلن (عكس)",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "CV grease",
+         "ar": "شحم كبالن",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Boot clamps",
+         "ar": "أفيز",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Drive axle replacement",
+       "ar": "تغيير عمود الكبلن",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Drive axle (complete)",
+         "ar": "كبلن كامل بالعمود",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Axle seal",
+         "ar": "أويل سيل كبلن",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "CARDAN & DIFFERENTIAL (RWD / 4X4)",
+     "ar": "الكردان والدفرنس",
+     "jobs": [
+      {
+       "en": "Cardan shaft repair",
+       "ar": "إصلاح عمود الكردان",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Cardan shaft",
+         "ar": "عمود كردان",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "U-joint",
+         "ar": "صليبة كردان",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Center bearing",
+         "ar": "كرسي / بلية كردان",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Differential oil change",
+       "ar": "تغيير زيت الدفرنس",
+       "intervalKm": 40000,
+       "intervalKmMax": 60000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "40,000 - 60,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Differential oil",
+         "ar": "زيت دفرنس",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Differential repair",
+       "ar": "إصلاح الدفرنس",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Crown & pinion",
+         "ar": "كرونة وبنيون",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Differential bearings",
+         "ar": "بلي دفرنس",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Seals",
+         "ar": "أويل سيلات",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "wheel_alignment_balancing",
+   "en": "Wheel alignment & balancing",
+   "ar": "زوايا واتزان (ميزان وترصيص)",
+   "desc": "Alignment angles and wheel balancing.",
+   "categories": [
+    {
+     "en": "ALIGNMENT & BALANCING",
+     "ar": "الزوايا والترصيص",
+     "jobs": [
+      {
+       "en": "Wheel alignment",
+       "ar": "ضبط زوايا (ميزان)",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Yearly, after suspension work or hitting a pothole",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Alignment",
+         "ar": "ضبط زوايا",
+         "aliases": [
+          "ميزان",
+          "وزن أذرعة"
+         ]
+        }
+       ]
+      },
+      {
+       "en": "Wheel balancing",
+       "ar": "ترصيص",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "With new tyres or when vibrating",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Balancing",
+         "ar": "ترصيص",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Balancing weights",
+         "ar": "رصاص ترصيص",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Tyre rotation",
+       "ar": "تبديل أماكن الكاوتش",
+       "intervalKm": 10000,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "Every 10,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Rotation",
+         "ar": "تبديل الكاوتش",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "tyre_shop_puncture_repair",
+   "en": "Tyre shop / puncture repair",
+   "ar": "كاوتشي / بنشري",
+   "desc": "Tyres, punctures, rims.",
+   "categories": [
+    {
+     "en": "TYRES & WHEELS",
+     "ar": "الكاوتش والجنوط",
+     "jobs": [
+      {
+       "en": "New tyres",
+       "ar": "تغيير كاوتش",
+       "intervalKm": 40000,
+       "intervalKmMax": 60000,
+       "intervalMonths": 48,
+       "tracked": true,
+       "intervalText": "40,000 - 60,000 km or 4 - 5 years",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Tyre",
+         "ar": "كاوتش",
+         "aliases": [
+          "إطار",
+          "كفر"
+         ]
+        },
+        {
+         "type": "part",
+         "en": "Valve stem",
+         "ar": "بلف كاوتش",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Fitting",
+         "ar": "تركيب",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Balancing",
+         "ar": "ترصيص",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Puncture repair",
+       "ar": "تصليح بنشر",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Plug / patch",
+         "ar": "فتيلة / رقعة",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Puncture repair",
+         "ar": "تصليح",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Rim straightening / repair",
+       "ar": "تعديل جنط",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Rim straightening",
+         "ar": "تعديل جنط",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Rim",
+         "ar": "جنط",
+         "aliases": [
+          "جنوط"
+         ]
+        }
+       ]
+      },
+      {
+       "en": "Wheel nuts / studs replacement",
+       "ar": "تغيير صواميل / مسامير العجل",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Wheel nuts",
+         "ar": "صواميل عجل",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Wheel studs",
+         "ar": "مسامير عجل",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Tyre pressure sensor (TPMS)",
+       "ar": "حساس ضغط الكاوتش",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "TPMS sensor",
+         "ar": "حساس ضغط كاوتش",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Nitrogen fill",
+       "ar": "نفخ نيتروجين",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Nitrogen",
+         "ar": "نيتروجين",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Spare wheel / jack",
+       "ar": "الاستبن والكوريك",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Spare tyre",
+         "ar": "استبن",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Jack",
+         "ar": "كوريك",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "brakes_booster_specialist",
+   "en": "Brakes & booster specialist",
+   "ar": "فرامل وسيرفو",
+   "desc": "Pads, discs, drums, calipers, master cylinder, booster, ABS, brake fluid.",
+   "categories": [
+    {
+     "en": "FRONT BRAKES",
+     "ar": "الفرامل الأمامي",
+     "jobs": [
+      {
+       "en": "Front brake pads replacement",
+       "ar": "تغيير تيل الفرامل الأمامي",
+       "intervalKm": 20000,
+       "intervalKmMax": 40000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "20,000 - 40,000 km (check thickness)",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Front brake pads",
+         "ar": "تيل فرامل أمامي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Pad wear sensor",
+         "ar": "حساس تيل",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Brake cleaner spray",
+         "ar": "سبراي تنظيف فرامل",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Copper / caliper grease",
+         "ar": "شحم نحاسي",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Front discs replacement",
+       "ar": "تغيير الطنابير الأمامي (الديسكات)",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Every 2 sets of pads or below min thickness",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Brake discs (pair)",
+         "ar": "طنابير أمامي (جوز)",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Front brake pads",
+         "ar": "تيل أمامي",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Disc skimming",
+       "ar": "خرط الطنابير",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Disc skimming (machine shop)",
+         "ar": "خرط طنابير",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Caliper repair / replacement",
+       "ar": "إصلاح / تغيير الكليبر (الدشمة)",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Caliper",
+         "ar": "كليبر",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Caliper repair kit",
+         "ar": "طقم إصلاح كليبر",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Caliper pins",
+         "ar": "مسامير كليبر",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Brake fluid",
+         "ar": "زيت فرامل",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "REAR BRAKES",
+     "ar": "الفرامل الخلفي",
+     "jobs": [
+      {
+       "en": "Rear brake shoes replacement (drums)",
+       "ar": "تغيير تيل الطنابير الخلفي",
+       "intervalKm": 40000,
+       "intervalKmMax": 60000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "40,000 - 60,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Brake shoes",
+         "ar": "تيل خلفي (فحمات)",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Shoe springs kit",
+         "ar": "طقم سوست تيل",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Brake cleaner",
+         "ar": "سبراي تنظيف فرامل",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Rear brake pads replacement (discs)",
+       "ar": "تغيير التيل الخلفي (ديسك)",
+       "intervalKm": 30000,
+       "intervalKmMax": 60000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "30,000 - 60,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Rear brake pads",
+         "ar": "تيل فرامل خلفي",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Brake drum replacement / skimming",
+       "ar": "تغيير / خرط الطنبورة الخلفي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Brake drum",
+         "ar": "طنبورة خلفي",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Drum skimming",
+         "ar": "خرط طنبورة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Wheel cylinder replacement",
+       "ar": "تغيير سلندر العجلة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Wheel cylinder",
+         "ar": "سلندر فرامل خلفي",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Brake fluid",
+         "ar": "زيت فرامل",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Handbrake adjustment / cable",
+       "ar": "ضبط / تغيير سلك فرامل اليد",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Handbrake cable",
+         "ar": "سلك فرامل يد (هاند)",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Adjustment",
+         "ar": "ضبط",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "HYDRAULICS & ABS",
+     "ar": "الهيدروليك والـABS",
+     "jobs": [
+      {
+       "en": "Brake fluid change & bleeding",
+       "ar": "تغيير زيت الفرامل وتنسيم",
+       "intervalKm": 40000,
+       "intervalKmMax": null,
+       "intervalMonths": 24,
+       "tracked": true,
+       "intervalText": "Every 2 years / ~40,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Brake fluid DOT 3 / DOT 4",
+         "ar": "زيت فرامل",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Bleeding",
+         "ar": "تنسيم",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Master cylinder replacement",
+       "ar": "تغيير الماستر العمومي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Brake master cylinder",
+         "ar": "ماستر فرامل",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Brake fluid",
+         "ar": "زيت فرامل",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Brake booster replacement",
+       "ar": "تغيير السيرفو",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Brake booster",
+         "ar": "سيرفو فرامل",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Vacuum hose",
+         "ar": "خرطوم فاكيوم",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Brake hoses replacement",
+       "ar": "تغيير خراطيم الفرامل",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Brake hose",
+         "ar": "خرطوم فرامل (لي)",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Brake fluid",
+         "ar": "زيت فرامل",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "ABS repair ABS",
+       "ar": "إصلاح الـ",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "ABS sensor",
+         "ar": "حساس ABS",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "ABS pump / module",
+         "ar": "وحدة ABS",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "ABS diagnosis",
+         "ar": "فحص ABS",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "gearbox_clutch_specialist",
+   "en": "Gearbox & clutch specialist",
+   "ar": "فني فتيس ودبرياج",
+   "desc": "Manual and automatic gearboxes, clutch, gear linkage.",
+   "categories": [
+    {
+     "en": "CLUTCH (MANUAL)",
+     "ar": "الدبرياج",
+     "jobs": [
+      {
+       "en": "Clutch kit replacement",
+       "ar": "تغيير طقم الدبرياج",
+       "intervalKm": 60000,
+       "intervalKmMax": 120000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "60,000 - 120,000 km depending on use",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Clutch disc",
+         "ar": "ديسك دبرياج",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Pressure plate",
+         "ar": "اسطوانة دبرياج",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Release bearing",
+         "ar": "بلية دبرياج",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Flywheel",
+         "ar": "حدافة",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Flywheel resurfacing",
+         "ar": "خراطة حدافة",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Gearbox oil",
+         "ar": "زيت فتيس",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Rear main seal",
+         "ar": "أويل سيل كرنك خلفي",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Clutch master / slave cylinder replacement",
+       "ar": "تغيير ماستر الدبرياج",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Clutch master cylinder",
+         "ar": "ماستر دبرياج علوي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Clutch slave cylinder",
+         "ar": "ماستر دبرياج سفلي",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Brake / clutch fluid",
+         "ar": "زيت فرامل",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Repair kit",
+         "ar": "طقم إصلاح ماستر",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Clutch cable replacement",
+       "ar": "تغيير سلك الدبرياج",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Clutch cable",
+         "ar": "سلك دبرياج",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Clutch fork replacement",
+       "ar": "تغيير فورشة الدبرياج",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Clutch fork",
+         "ar": "فورشة دبرياج",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "MANUAL GEARBOX",
+     "ar": "الفتيس المانيوال",
+     "jobs": [
+      {
+       "en": "Manual gearbox oil change",
+       "ar": "تغيير زيت الفتيس العادي",
+       "intervalKm": 60000,
+       "intervalKmMax": 100000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "60,000 - 100,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Manual gearbox oil",
+         "ar": "زيت فتيس",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Gear linkage / cables repair",
+       "ar": "إصلاح ضفيرة الفتيس",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Gear shift cables",
+         "ar": "ضفيرة فتيس",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Linkage bushings",
+         "ar": "جلب ذراع الفتيس",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Manual gearbox overhaul",
+       "ar": "توضيب الفتيس العادي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Synchro rings",
+         "ar": "نحاسات سرعات (سنكرو)",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Gearbox bearings",
+         "ar": "بلي فتيس",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Gearbox seals & gaskets",
+         "ar": "أويل سيلات وجوانات فتيس",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Gearbox oil",
+         "ar": "زيت فتيس",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "en": "AUTOMATIC / CVT GEARBOX",
+     "ar": "الفتيس الأوتوماتيك",
+     "jobs": [
+      {
+       "en": "Automatic transmission fluid change",
+       "ar": "تغيير زيت الفتيس الأوتوماتيك",
+       "intervalKm": 40000,
+       "intervalKmMax": 60000,
+       "intervalMonths": null,
+       "tracked": true,
+       "intervalText": "40,000 - 60,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "ATF / CVT fluid",
+         "ar": "زيت فتيس أوتوماتيك",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Transmission filter",
+         "ar": "فلتر فتيس",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Pan gasket",
+         "ar": "جوان كارتيرة الفتيس",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Automatic gearbox repair",
+       "ar": "إصلاح الفتيس الأوتوماتيك",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Valve body",
+         "ar": "بلف بودي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Solenoids",
+         "ar": "سولونويدات",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Torque converter",
+         "ar": "تورك",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Clutch packs / plates",
+         "ar": "طقم أسطوانات / شرائح",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Gaskets & seals kit",
+         "ar": "طقم جوانات وأويل سيلات",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Transmission control module repair",
+       "ar": "إصلاح كمبيوتر الفتيس",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "TCM",
+         "ar": "كمبيوتر الفتيس",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Transmission cooler hoses replacement",
+       "ar": "تغيير خراطيم تبريد الفتيس",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Cooler hoses",
+         "ar": "خراطيم تبريد فتيس",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "radiator_cooling_specialist",
+   "en": "Radiator & cooling specialist",
+   "ar": "فني رادياتير",
+   "desc": "Radiator, water pump, thermostat, hoses, fans, coolant.",
+   "categories": [
+    {
+     "en": "COOLING SYSTEM",
+     "ar": "دورة التبريد",
+     "jobs": [
+      {
+       "en": "Coolant change / flush",
+       "ar": "تغيير مياه الرادياتير وغسيل الدورة",
+       "intervalKm": 40000,
+       "intervalKmMax": null,
+       "intervalMonths": 24,
+       "tracked": true,
+       "intervalText": "Every 2 years / ~40,000 km",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Coolant",
+         "ar": "مياه رادياتير (سائل تبريد)",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Radiator flush",
+         "ar": "منظف رادياتير",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Distilled water",
+         "ar": "مياه مقطرة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Radiator repair / cleaning",
+       "ar": "تسليك / لحام الرادياتير",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Radiator cleaning",
+         "ar": "تسليك رادياتير",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Radiator welding",
+         "ar": "لحام رادياتير",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Radiator replacement",
+       "ar": "تغيير الرادياتير",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Radiator",
+         "ar": "رادياتير",
+         "aliases": [
+          "ردياتير",
+          "رديتر"
+         ]
+        },
+        {
+         "type": "part",
+         "en": "Radiator cap",
+         "ar": "غطا رادياتير",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Coolant",
+         "ar": "مياه رادياتير",
+         "aliases": [
+          "سائل تبريد",
+          "أنتيفريز"
+         ]
+        }
+       ]
+      },
+      {
+       "en": "Water pump replacement",
+       "ar": "تغيير طلمبة المياه",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "With timing belt or when leaking",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Water pump",
+         "ar": "طلمبة مياه",
+         "aliases": [
+          "طرمبة مياه"
+         ]
+        },
+        {
+         "type": "part",
+         "en": "Water pump gasket",
+         "ar": "جوان طلمبة",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Coolant",
+         "ar": "مياه رادياتير",
+         "aliases": [
+          "سائل تبريد",
+          "أنتيفريز"
+         ]
+        }
+       ]
+      },
+      {
+       "en": "Thermostat replacement",
+       "ar": "تغيير الترموستات",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Thermostat",
+         "ar": "ترموستات (بلف حرارة)",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Thermostat housing / gasket",
+         "ar": "بيت / جوان الترموستات",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Coolant",
+         "ar": "مياه رادياتير",
+         "aliases": [
+          "سائل تبريد",
+          "أنتيفريز"
+         ]
+        }
+       ]
+      },
+      {
+       "en": "Hoses replacement",
+       "ar": "تغيير خراطيم المياه",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Radiator hoses",
+         "ar": "خراطيم مياه (ليات)",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Hose clamps",
+         "ar": "أفيز / كلبسات",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Coolant",
+         "ar": "مياه رادياتير",
+         "aliases": [
+          "سائل تبريد",
+          "أنتيفريز"
+         ]
+        }
+       ]
+      },
+      {
+       "en": "Expansion tank replacement",
+       "ar": "تغيير قربة المياه",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Expansion tank",
+         "ar": "قربة مياه",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Tank cap",
+         "ar": "غطا قربة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Cooling fan repair",
+       "ar": "إصلاح مروحة الرادياتير",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Fan motor",
+         "ar": "موتور مروحة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Fan blade",
+         "ar": "ريشة مروحة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Fan switch / relay",
+         "ar": "بلف مروحة / ريلاي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Fan resistor",
+         "ar": "مقاومة مروحة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Heater core repair",
+       "ar": "إصلاح ردياتير الدفاية",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Heater core",
+         "ar": "ردياتير دفاية",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Heater hoses",
+         "ar": "خراطيم دفاية",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Overheating diagnosis",
+       "ar": "كشف سخونية الموتور",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Pressure test",
+         "ar": "اختبار ضغط الدورة",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Diagnosis",
+         "ar": "كشف",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "exhaust_specialist",
+   "en": "Exhaust specialist",
+   "ar": "فني شكمانات",
+   "desc": "Silencers, pipes, catalytic converter, welding.",
+   "categories": [
+    {
+     "en": "EXHAUST SYSTEM",
+     "ar": "الشكمان",
+     "jobs": [
+      {
+       "en": "Rear silencer replacement",
+       "ar": "تغيير علبة الشكمان الأخيرة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Rear silencer / muffler",
+         "ar": "علبة شكمان أخيرة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Exhaust hangers",
+         "ar": "كاوتش شكمان",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Clamp",
+         "ar": "أفيز شكمان",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Middle silencer replacement",
+       "ar": "تغيير العلبة الوسطانية",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Middle silencer",
+         "ar": "علبة وسطانية",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Front pipe / flex pipe replacement",
+       "ar": "تغيير الماسورة الأمامية / السوستة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Front pipe",
+         "ar": "ماسورة أمامية",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Flex pipe",
+         "ar": "سوستة شكمان",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Exhaust gasket",
+         "ar": "جوان شكمان",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Catalytic converter replacement / cleaning",
+       "ar": "تغيير / تنظيف الكاتلايزر",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Catalytic converter",
+         "ar": "كاتلايزر (الدبة)",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Cleaning",
+         "ar": "تنظيف كاتلايزر",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Exhaust manifold repair",
+       "ar": "إصلاح مانيفولد الشكمان",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Exhaust manifold",
+         "ar": "مانيفولد شكمان",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Manifold gasket",
+         "ar": "جوان مانيفولد",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Manifold studs",
+         "ar": "مسامير مانيفولد",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Exhaust welding / leak repair",
+       "ar": "لحام / تسريب الشكمان",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Welding",
+         "ar": "لحام",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Exhaust paste / bandage",
+         "ar": "معجون / شريط شكمان",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "air_conditioning_specialist",
+   "en": "Air conditioning specialist",
+   "ar": "فني تكييف",
+   "desc": "Refrigerant, compressor, condenser, evaporator, blower, cleaning.",
+   "categories": [
+    {
+     "en": "A/C SYSTEM",
+     "ar": "التكييف",
+     "jobs": [
+      {
+       "en": "Refrigerant recharge",
+       "ar": "شحن فريون",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "When cooling is weak",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Refrigerant R134a / R1234yf",
+         "ar": "فريون",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Compressor oil",
+         "ar": "زيت كمبروسر",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Leak test",
+         "ar": "كشف تسريب",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Compressor replacement",
+       "ar": "تغيير الكمبروسر",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Compressor",
+         "ar": "كمبروسر",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Receiver drier",
+         "ar": "دراير / فلتر تكييف",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Refrigerant",
+         "ar": "فريون",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Compressor oil",
+         "ar": "زيت كمبروسر",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "O-rings",
+         "ar": "أورينج",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Compressor clutch repair",
+       "ar": "إصلاح دبرياج الكمبروسر",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Compressor clutch",
+         "ar": "دبرياج كمبروسر",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Clutch bearing",
+         "ar": "بلية كمبروسر",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Clutch coil",
+         "ar": "ملف كمبروسر",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Condenser replacement",
+       "ar": "تغيير الكندنسر",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Condenser",
+         "ar": "كندنسر (رادياتير تكييف)",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Refrigerant",
+         "ar": "فريون",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Evaporator replacement",
+       "ar": "تغيير الثلاجة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Evaporator",
+         "ar": "ثلاجة (سربنتينة تكييف)",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Expansion valve",
+         "ar": "بلف تمدد (إكسبانشن)",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Refrigerant",
+         "ar": "فريون",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "A/C hoses replacement",
+       "ar": "تغيير خراطيم التكييف",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "A/C hose",
+         "ar": "خرطوم تكييف",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "O-rings",
+         "ar": "أورينج",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Refrigerant",
+         "ar": "فريون",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Blower motor repair",
+       "ar": "إصلاح البلاور",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Blower motor",
+         "ar": "موتور بلاور",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Blower resistor",
+         "ar": "ريوستات / مقاومة بلاور",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "A/C cleaning & sanitizing",
+       "ar": "تنظيف وتعقيم التكييف",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Yearly",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "A/C cleaner foam",
+         "ar": "سبراي تنظيف ثلاجة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Cabin filter",
+         "ar": "فلتر تكييف",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "A/C pressure switch / sensor",
+       "ar": "تغيير بلف ضغط التكييف",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "A/C pressure switch",
+         "ar": "بلف ضغط تكييف",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "machine_shop_engine_rebuilding",
+   "en": "Machine shop (engine rebuilding)",
+   "ar": "خراط (خراطة وعمرات)",
+   "desc": "Usually hired by the mechanic; appears as a machine shop line item.",
+   "categories": [
+    {
+     "en": "MACHINING",
+     "ar": "الخراطة",
+     "jobs": [
+      {
+       "en": "Cylinder head skimming",
+       "ar": "تسطيح وش السلندر",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Head skimming",
+         "ar": "تسطيح وش",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Valve seats & guides",
+       "ar": "عمل قواعد ودلايل",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Valve seats",
+         "ar": "قواعد",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Valve guides",
+         "ar": "دلايل",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Crankshaft grinding",
+       "ar": "خراطة الكرنك",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Crankshaft grinding",
+         "ar": "خراطة كرنك",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Cylinder boring / honing",
+       "ar": "تجليخ السلندرات",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Boring",
+         "ar": "تجليخ",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Flywheel / disc / drum machining",
+       "ar": "خراطة حدافة / طنابير",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Machining",
+         "ar": "خراطة",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "panel_beater_bodywork",
+   "en": "Panel beater (bodywork)",
+   "ar": "سمكري",
+   "desc": "Dents, panel repair and replacement, chassis straightening, rust.",
+   "categories": [
+    {
+     "en": "BODYWORK",
+     "ar": "السمكرة",
+     "jobs": [
+      {
+       "en": "Dent repair",
+       "ar": "تعديل خبطة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Dent repair",
+         "ar": "سمكرة / تعديل",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Body filler",
+         "ar": "معجون",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Paintless dent repair",
+       "ar": "تعديل بدون دوكو (شفط)",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "PDR",
+         "ar": "شفط خبطة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Panel replacement",
+       "ar": "تغيير قطعة صاج",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Fender",
+         "ar": "رفرف",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Door",
+         "ar": "باب",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Bonnet / hood",
+         "ar": "كبوت",
+         "aliases": [
+          "كابوت"
+         ]
+        },
+        {
+         "type": "part",
+         "en": "Boot lid",
+         "ar": "باب شنطة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Rear quarter panel",
+         "ar": "رفرف خلفي (الربع)",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Front panel / radiator support",
+         "ar": "صدر العربية",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Bumper reinforcement",
+         "ar": "عرضية الإكصدام",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Chassis straightening",
+       "ar": "عدل الشاسيه",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "After accidents",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Chassis straightening",
+         "ar": "عدل شاسيه",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Welding & rust repair",
+       "ar": "لحام وعلاج صدأ",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Welding",
+         "ar": "لحام",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Rust converter",
+         "ar": "محول صدأ",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Underbody coating",
+         "ar": "عزل شاسيه",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "paint_shop",
+   "en": "Paint shop",
+   "ar": "دوكو (دهان)",
+   "desc": "Painting, polishing, protection.",
+   "categories": [
+    {
+     "en": "PAINT & FINISHING",
+     "ar": "الدهان والتلميع",
+     "jobs": [
+      {
+       "en": "Partial paint (one panel)",
+       "ar": "دهان قطعة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Paint",
+         "ar": "بوية",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Primer",
+         "ar": "سلر / برايمر",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Body filler",
+         "ar": "معجون",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Clear coat",
+         "ar": "ورنيش",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Thinner",
+         "ar": "تنر",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Sandpaper",
+         "ar": "صنفرة",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Masking tape",
+         "ar": "شريط تغطية",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Full paint",
+       "ar": "دهان كامل",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Paint",
+         "ar": "بوية",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Primer",
+         "ar": "سلر",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Clear coat",
+         "ar": "ورنيش",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Thinner",
+         "ar": "تنر",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Sandpaper",
+         "ar": "صنفرة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Touch-up",
+       "ar": "لمسات / تصليح خدوش",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Touch-up paint",
+         "ar": "بوية تصليح",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Polishing",
+       "ar": "تلميع (بوليش)",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Polish / compound",
+         "ar": "بوليش",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Wax",
+         "ar": "واكس",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Ceramic / nano coating",
+       "ar": "نانو سيراميك",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Ceramic coating",
+         "ar": "نانو سيراميك",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Paint protection film (PPF)",
+       "ar": "فيلم حماية",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "PPF film",
+         "ar": "فيلم حماية",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "fibre_bumpers_airbags",
+   "en": "Fibre, bumpers & airbags",
+   "ar": "فايبر وإكصدامات وإير باج",
+   "desc": "Plastic/bumper repair and airbag system.",
+   "categories": [
+    {
+     "en": "BUMPERS & AIRBAGS",
+     "ar": "الإكصدامات والإير باج",
+     "jobs": [
+      {
+       "en": "Bumper repair",
+       "ar": "تصليح إكصدام",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Plastic welding",
+         "ar": "لحام فايبر",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Body filler",
+         "ar": "معجون",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Paint",
+         "ar": "بوية",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Bumper replacement",
+       "ar": "تغيير إكصدام",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Front bumper",
+         "ar": "إكصدام أمامي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Rear bumper",
+         "ar": "إكصدام خلفي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Bumper clips / brackets",
+         "ar": "كلبسات وكتائف إكصدام",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Grille",
+         "ar": "شبكة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Airbag replacement",
+       "ar": "تغيير إير باج",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Airbag",
+         "ar": "إير باج",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Clock spring",
+         "ar": "شريط الإير باج",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Airbag module",
+         "ar": "كمبيوتر الإير باج",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Programming",
+         "ar": "برمجة",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "auto_glass",
+   "en": "Auto glass",
+   "ar": "زجاج سيارات",
+   "desc": "Windshield, windows, mirrors, tint.",
+   "categories": [
+    {
+     "en": "GLASS",
+     "ar": "الزجاج",
+     "jobs": [
+      {
+       "en": "Windshield replacement",
+       "ar": "تغيير الزجاج الأمامي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Windshield",
+         "ar": "زجاج أمامي (بربريز)",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Windshield seal / moulding",
+         "ar": "كاوتش زجاج",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Urethane adhesive",
+         "ar": "لزق / سيلر زجاج",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Windshield chip repair",
+       "ar": "تصليح شرخ / نقرة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Resin",
+         "ar": "راتنج",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Rear glass replacement",
+       "ar": "تغيير الزجاج الخلفي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Rear glass",
+         "ar": "زجاج خلفي",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Adhesive",
+         "ar": "لزق زجاج",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Door glass replacement",
+       "ar": "تغيير زجاج باب",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Door glass",
+         "ar": "زجاج باب",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Glass run channel",
+         "ar": "كاوتش مجرى الزجاج",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Mirror glass replacement",
+       "ar": "تغيير زجاج المراية",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Mirror glass",
+         "ar": "زجاج مراية",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Side mirror (complete)",
+         "ar": "مراية كاملة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Window tint",
+       "ar": "فاميه",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Check local traffic rules",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Tint film",
+         "ar": "فيلم فاميه",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "locks_keys_central_locking",
+   "en": "Locks, keys & central locking",
+   "ar": "أبواب ومفاتيح وسنتر لوك",
+   "desc": "Locks, handles, keys, remotes, alarms, seals.",
+   "categories": [
+    {
+     "en": "LOCKS & KEYS",
+     "ar": "الأقفال والمفاتيح",
+     "jobs": [
+      {
+       "en": "Key copy",
+       "ar": "نسخ مفتاح",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Key blank",
+         "ar": "مفتاح خام",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Cutting",
+         "ar": "تقطيع",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Remote / alarm installation",
+       "ar": "تركيب ريموت / إنذار",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Alarm & remote kit",
+         "ar": "إنذار وريموت",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Door lock replacement",
+       "ar": "تغيير كالون",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Door lock",
+         "ar": "كالون",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Lock cylinder",
+         "ar": "سلندر كالون",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Door handle replacement",
+       "ar": "تغيير أوكرة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Outer door handle",
+         "ar": "أوكرة خارجي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Inner door handle",
+         "ar": "أوكرة داخلي",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Door hinges / checks",
+       "ar": "مفصلات وماسك الباب",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Door hinge",
+         "ar": "مفصلة باب",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Door check strap",
+         "ar": "ماسك باب",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Door seals replacement",
+       "ar": "تغيير كاوتش الأبواب",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Door seal",
+         "ar": "كاوتش باب",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Boot seal",
+         "ar": "كاوتش شنطة",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "upholstery",
+   "en": "Upholstery",
+   "ar": "سروجي (فرش)",
+   "desc": "Seats, headliner, carpets, steering wheel cover.",
+   "categories": [
+    {
+     "en": "INTERIOR TRIM",
+     "ar": "الفرش",
+     "jobs": [
+      {
+       "en": "Seat covers / reupholstery",
+       "ar": "فرش / تنجيد كراسي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Leather / fabric",
+         "ar": "جلد / قماش",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Seat foam",
+         "ar": "إسفنج",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Headliner repair",
+       "ar": "تنجيد السقف",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Headliner fabric",
+         "ar": "قماش سقف",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Spray adhesive",
+         "ar": "سبراي لزق",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Carpet replacement",
+       "ar": "تغيير الموكيت",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Carpet",
+         "ar": "موكيت",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Steering wheel cover",
+       "ar": "تلبيس الدركسيون",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Leather",
+         "ar": "جلد",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "instrument_cluster_specialist",
+   "en": "Instrument cluster specialist",
+   "ar": "فني عدادات",
+   "desc": "Cluster and gauge repairs. Do NOT offer odometer changes.",
+   "categories": [
+    {
+     "en": "GAUGES",
+     "ar": "العدادات",
+     "jobs": [
+      {
+       "en": "Instrument cluster repair",
+       "ar": "تصليح تابلوه العدادات",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Cluster repair",
+         "ar": "تصليح عدادات",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Cluster",
+         "ar": "تابلوه عدادات",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Speedometer cable replacement",
+       "ar": "تغيير سلك العداد",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Older cars",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Speedometer cable",
+         "ar": "سلك عداد",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Fuel / temperature gauge repair",
+       "ar": "تصليح عداد البنزين / الحرارة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Gauge",
+         "ar": "عداد",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "headlight_restoration",
+   "en": "Headlight restoration",
+   "ar": "تلميع وتعديل فوانيس",
+   "desc": "Headlight polishing, units, projectors, sealing.",
+   "categories": [
+    {
+     "en": "HEADLIGHTS & TAIL LIGHTS",
+     "ar": "الفوانيس",
+     "jobs": [
+      {
+       "en": "Headlight polishing",
+       "ar": "تلميع فوانيس",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Polish / UV coat",
+         "ar": "بوليش وطبقة حماية",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Headlight unit replacement",
+       "ar": "تغيير فانوس",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Headlight",
+         "ar": "فانوس أمامي",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Tail light",
+         "ar": "فانوس خلفي",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Projector installation",
+       "ar": "تركيب بروجكتور",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Projector",
+         "ar": "بروجكتور",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Headlight sealing (moisture)",
+       "ar": "تقفيل فانوس (رطوبة)",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Headlight sealant",
+         "ar": "سيلكون فوانيس",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "oil_filters_station",
+   "en": "Oil & filters station",
+   "ar": "محطة زيوت وفلاتر (مغير زيت)",
+   "desc": "Quick service: oil, filters, fluids, greasing.",
+   "categories": [
+    {
+     "en": "QUICK SERVICE",
+     "ar": "خدمة سريعة",
+     "jobs": [
+      {
+       "en": "Oil & filter change",
+       "ar": "تغيير زيت وفلتر",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "See Mechanic > Engine oil change",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Engine oil",
+         "ar": "زيت موتور",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Oil filter",
+         "ar": "فلتر زيت",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Drain plug washer",
+         "ar": "وردة طبة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Fluids check & top-up",
+       "ar": "كشف وتزويد سوائل",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Coolant",
+         "ar": "مياه رادياتير",
+         "aliases": [
+          "سائل تبريد",
+          "أنتيفريز"
+         ]
+        },
+        {
+         "type": "consumable",
+         "en": "Brake fluid",
+         "ar": "زيت فرامل",
+         "aliases": []
+        },
+        {
+         "type": "consumable",
+         "en": "Washer fluid",
+         "ar": "مياه مساحات",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Underbody greasing",
+       "ar": "تشحيم",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Grease",
+         "ar": "شحم",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "car_wash_detailing",
+   "en": "Car wash & detailing",
+   "ar": "مغسلة",
+   "desc": "Washing, interior cleaning, engine and underbody wash.",
+   "categories": [
+    {
+     "en": "CLEANING",
+     "ar": "النظافة",
+     "jobs": [
+      {
+       "en": "Exterior wash",
+       "ar": "غسيل خارجي",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Wash",
+         "ar": "غسيل",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Interior cleaning",
+       "ar": "تنظيف صالون",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Interior cleaning",
+         "ar": "تنظيف صالون",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Engine wash",
+       "ar": "غسيل موتور",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Engine wash",
+         "ar": "غسيل موتور",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Underbody wash",
+       "ar": "غسيل شاسيه",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Underbody wash",
+         "ar": "غسيل شاسيه",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Steam / sanitizing",
+       "ar": "تعقيم بالبخار",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Sanitizing",
+         "ar": "تعقيم",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "accessories",
+   "en": "Accessories",
+   "ar": "إكسسوارات",
+   "desc": "Screens, cameras, mats, covers.",
+   "categories": [
+    {
+     "en": "ACCESSORIES",
+     "ar": "الإكسسوارات",
+     "jobs": [
+      {
+       "en": "Multimedia screen installation",
+       "ar": "تركيب شاشة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Screen",
+         "ar": "شاشة",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Frame & wiring",
+         "ar": "إطار وضفيرة",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Reverse camera installation",
+       "ar": "تركيب كاميرا خلفية",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Camera",
+         "ar": "كاميرا",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Floor mats",
+       "ar": "دواسات",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Floor mats",
+         "ar": "دواسات",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Car cover",
+       "ar": "غطا عربية",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Car cover",
+         "ar": "غطا عربية",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Roof rack / tow hook",
+       "ar": "شنطة سقف / شنكل سحب",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Roof rack",
+         "ar": "شنطة سقف",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Tow hook",
+         "ar": "شنكل سحب",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "natural_gas_cng_conversion_center",
+   "en": "Natural gas (CNG) conversion center",
+   "ar": "مركز تحويل غاز طبيعي",
+   "desc": "Egypt-specific: CNG conversion and its periodic checks.",
+   "categories": [
+    {
+     "en": "CNG",
+     "ar": "الغاز الطبيعي",
+     "jobs": [
+      {
+       "en": "CNG conversion",
+       "ar": "تحويل العربية للغاز",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Conversion kit",
+         "ar": "طقم تحويل",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Gas cylinder",
+         "ar": "اسطوانة غاز",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Installation",
+         "ar": "تركيب",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "CNG periodic service",
+       "ar": "صيانة دورية للغاز",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Per conversion center schedule",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "part",
+         "en": "Gas filter",
+         "ar": "فلتر غاز",
+         "aliases": []
+        },
+        {
+         "type": "part",
+         "en": "Regulator repair kit",
+         "ar": "طقم إصلاح منظم (ريجيلاتور)",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Leak check",
+         "ar": "كشف تسريب",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Cylinder test",
+       "ar": "اختبار الاسطوانة",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Per regulation",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Hydrostatic test",
+         "ar": "اختبار اسطوانة",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "towing_roadside",
+   "en": "Towing & roadside",
+   "ar": "ونش وإنقاذ",
+   "desc": "Tow trucks and roadside help.",
+   "categories": [
+    {
+     "en": "ROADSIDE",
+     "ar": "الطريق",
+     "jobs": [
+      {
+       "en": "Tow truck",
+       "ar": "ونش",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Towing",
+         "ar": "ونش",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Jump start",
+       "ar": "تشغيل بطارية (كابلات)",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Jump start",
+         "ar": "تشغيل بطارية",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Fuel delivery",
+       "ar": "توصيل بنزين",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "consumable",
+         "en": "Fuel",
+         "ar": "بنزين",
+         "aliases": []
+        },
+        {
+         "type": "service",
+         "en": "Delivery",
+         "ar": "توصيل",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "inspection",
+   "en": "Inspection",
+   "ar": "فحص",
+   "desc": "Pre-purchase checks and general inspections.",
+   "categories": [
+    {
+     "en": "INSPECTION",
+     "ar": "الفحص",
+     "jobs": [
+      {
+       "en": "Pre-purchase inspection",
+       "ar": "فحص قبل الشراء",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Inspection",
+         "ar": "فحص",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "General check-up",
+       "ar": "كشف عام",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": null,
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Check-up",
+         "ar": "كشف",
+         "aliases": []
+        }
+       ]
+      },
+      {
+       "en": "Traffic inspection (licence renewal)",
+       "ar": "فحص المرور (تجديد الرخصة)",
+       "intervalKm": null,
+       "intervalKmMax": null,
+       "intervalMonths": null,
+       "tracked": false,
+       "intervalText": "Licence renewal",
+       "fuel": null,
+       "aliases": [],
+       "items": [
+        {
+         "type": "service",
+         "en": "Inspection fee",
+         "ar": "رسوم الفحص",
+         "aliases": []
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "dealer_authorized_service_center",
+   "en": "Dealer / authorized service center",
+   "ar": "توكيل / مركز خدمة معتمد",
+   "desc": "Can do any job: job picker shows all jobs.",
+   "showsAllJobs": true,
+   "categories": []
+  },
+  {
+   "key": "self_diy",
+   "en": "Self / DIY",
+   "ar": "أنا بنفسي",
+   "desc": "Owner did it: labor = 0 by default; job picker shows all jobs.",
+   "showsAllJobs": true,
+   "categories": []
+  },
+  {
+   "key": "other",
+   "en": "Other",
+   "ar": "أخرى",
+   "desc": "Free text specialist name.",
+   "showsAllJobs": false,
+   "categories": []
+  }
+ ],
+ "quickAddConsumables": [
+  {
+   "en": "Gasket maker / silicone",
+   "ar": "سليكون / لزق جوان"
+  },
+  {
+   "en": "Thread locker",
+   "ar": "لوكتايت (مثبت مسامير)"
+  },
+  {
+   "en": "Penetrating oil / rust remover spray (WD-40)",
+   "ar": "سبراي فك صدأ"
+  },
+  {
+   "en": "Throttle body / carb cleaner spray",
+   "ar": "سبراي تنظيف بوابة / كربراتير"
+  },
+  {
+   "en": "Brake cleaner spray",
+   "ar": "سبراي تنظيف فرامل"
+  },
+  {
+   "en": "Contact cleaner spray",
+   "ar": "سبراي تنظيف كهربا"
+  },
+  {
+   "en": "Injector cleaner additive",
+   "ar": "منظف بخاخات (إضافة للتانك)"
+  },
+  {
+   "en": "Radiator stop-leak",
+   "ar": "سد تسريب رادياتير"
+  },
+  {
+   "en": "Engine flush",
+   "ar": "غسيل موتور (فلاش)"
+  },
+  {
+   "en": "Grease",
+   "ar": "شحم"
+  },
+  {
+   "en": "Copper grease",
+   "ar": "شحم نحاسي"
+  },
+  {
+   "en": "CV joint grease",
+   "ar": "شحم كبالن"
+  },
+  {
+   "en": "Hose clamps",
+   "ar": "أفيز / كلبسات"
+  },
+  {
+   "en": "Cable ties",
+   "ar": "سلوك ربط (تيرابس)"
+  },
+  {
+   "en": "Electrical tape",
+   "ar": "شريط عازل"
+  },
+  {
+   "en": "Rags / shop towels",
+   "ar": "فوط / قماش"
+  },
+  {
+   "en": "Hand cleaner",
+   "ar": "منظف إيد"
+  },
+  {
+   "en": "Distilled water",
+   "ar": "مياه مقطرة"
+  },
+  {
+   "en": "Washer fluid",
+   "ar": "مياه مساحات"
+  },
+  {
+   "en": "Sandpaper",
+   "ar": "صنفرة"
+  },
+  {
+   "en": "Masking tape",
+   "ar": "شريط تغطية"
+  },
+  {
+   "en": "Coolant",
+   "ar": "مياه رادياتير"
+  },
+  {
+   "en": "Brake fluid",
+   "ar": "زيت فرامل"
+  },
+  {
+   "en": "Power steering fluid",
+   "ar": "زيت باور"
+  },
+  {
+   "en": "Engine oil",
+   "ar": "زيت موتور"
+  },
+  {
+   "en": "Gearbox oil",
+   "ar": "زيت فتيس"
+  },
+  {
+   "en": "ATF",
+   "ar": "زيت فتيس أوتوماتيك"
+  },
+  {
+   "en": "Differential oil",
+   "ar": "زيت دفرنس"
+  },
+  {
+   "en": "Refrigerant",
+   "ar": "فريون"
+  }
+ ],
+ "aliasGroups": [
+  {
+   "en": "Spark plugs",
+   "ar": [
+    "بوجيهات",
+    "بواجي",
+    "شمعات"
+   ]
+  },
+  {
+   "en": "Brake discs",
+   "ar": [
+    "طنابير",
+    "ديسكات",
+    "أقراص"
+   ]
+  },
+  {
+   "en": "Brake pads",
+   "ar": [
+    "تيل",
+    "فحمات",
+    "قماش فرامل"
+   ]
+  },
+  {
+   "en": "Radiator",
+   "ar": [
+    "رادياتير",
+    "ردياتير",
+    "رديتر"
+   ]
+  },
+  {
+   "en": "Timing belt",
+   "ar": [
+    "سير كاتينة",
+    "سير تيمن"
+   ]
+  },
+  {
+   "en": "Shock absorbers",
+   "ar": [
+    "مساعدين",
+    "مساعدات",
+    "ممتص صدمات"
+   ]
+  },
+  {
+   "en": "CV joint",
+   "ar": [
+    "كبلن",
+    "كبالن",
+    "كوبلن"
+   ]
+  },
+  {
+   "en": "CV boot",
+   "ar": [
+    "جراب كبلن",
+    "عكس"
+   ]
+  },
+  {
+   "en": "Coil spring",
+   "ar": [
+    "سوستة",
+    "ياي"
+   ]
+  },
+  {
+   "en": "Control arm",
+   "ar": [
+    "مقص",
+    "ذراع"
+   ]
+  },
+  {
+   "en": "Stabilizer link",
+   "ar": [
+    "مسمار ميزان",
+    "بيضة شمعدان"
+   ]
+  },
+  {
+   "en": "Steering wheel",
+   "ar": [
+    "دركسيون",
+    "طارة"
+   ]
+  },
+  {
+   "en": "Clutch",
+   "ar": [
+    "دبرياج",
+    "كلتش"
+   ]
+  },
+  {
+   "en": "Gearbox",
+   "ar": [
+    "فتيس",
+    "علبة سرعات",
+    "جيربوكس"
+   ]
+  },
+  {
+   "en": "Hood / bonnet",
+   "ar": [
+    "كبوت",
+    "كابوت"
+   ]
+  },
+  {
+   "en": "Bumper",
+   "ar": [
+    "إكصدام",
+    "اكصدام",
+    "صدام"
+   ]
+  },
+  {
+   "en": "Wheel alignment",
+   "ar": [
+    "ضبط زوايا",
+    "ميزان",
+    "وزن أذرعة"
+   ]
+  },
+  {
+   "en": "Wheel balancing",
+   "ar": [
+    "ترصيص"
+   ]
+  },
+  {
+   "en": "Ignition coil",
+   "ar": [
+    "بوبينة",
+    "كويل"
+   ]
+  },
+  {
+   "en": "Starter motor",
+   "ar": [
+    "مارش",
+    "سلف"
+   ]
+  },
+  {
+   "en": "Alternator",
+   "ar": [
+    "دينامو",
+    "دينمو"
+   ]
+  },
+  {
+   "en": "Thermostat",
+   "ar": [
+    "ترموستات",
+    "بلف حرارة"
+   ]
+  },
+  {
+   "en": "Water pump",
+   "ar": [
+    "طلمبة مياه",
+    "طرمبة مياه"
+   ]
+  },
+  {
+   "en": "Fuel pump",
+   "ar": [
+    "طرمبة بنزين",
+    "طلمبة بنزين"
+   ]
+  },
+  {
+   "en": "Labor",
+   "ar": [
+    "مصنعية",
+    "أجرة",
+    "أجرة يد"
+   ]
+  },
+  {
+   "en": "Catalytic converter",
+   "ar": [
+    "كاتلايزر",
+    "دبة"
+   ]
+  },
+  {
+   "en": "Exhaust",
+   "ar": [
+    "شكمان",
+    "عادم"
+   ]
+  },
+  {
+   "en": "Coolant",
+   "ar": [
+    "مياه رادياتير",
+    "سائل تبريد",
+    "أنتيفريز"
+   ]
+  },
+  {
+   "en": "Tyre",
+   "ar": [
+    "كاوتش",
+    "إطار",
+    "كفر"
+   ]
+  },
+  {
+   "en": "Rim",
+   "ar": [
+    "جنط",
+    "جنوط"
+   ]
+  }
+ ],
+ "lineItemTypes": [
+  {
+   "key": "part",
+   "en": "Part",
+   "ar": "قطعة غيار"
+  },
+  {
+   "key": "consumable",
+   "en": "Consumable",
+   "ar": "خامات / مستهلكات"
+  },
+  {
+   "key": "labor",
+   "en": "Labor",
+   "ar": "مصنعية / أجرة يد"
+  },
+  {
+   "key": "machine_shop",
+   "en": "Machine shop",
+   "ar": "خراطة"
+  },
+  {
+   "key": "diagnostic",
+   "en": "Diagnostic fee",
+   "ar": "كشف / فحص"
+  },
+  {
+   "key": "towing",
+   "en": "Towing / transport",
+   "ar": "ونش / نقل"
+  },
+  {
+   "key": "tip",
+   "en": "Tip",
+   "ar": "إكرامية / بقشيش"
+  },
+  {
+   "key": "other",
+   "en": "Other",
+   "ar": "أخرى"
+  }
+ ],
+ "systems": [
+  {
+   "key": "engine_oil",
+   "en": "Engine & oil",
+   "ar": "الموتور والزيت"
+  },
+  {
+   "key": "filters",
+   "en": "Filters",
+   "ar": "الفلاتر"
+  },
+  {
+   "key": "ignition",
+   "en": "Ignition",
+   "ar": "الإشعال"
+  },
+  {
+   "key": "fuel_injection",
+   "en": "Fuel & injection",
+   "ar": "البنزين والانجكشن"
+  },
+  {
+   "key": "cooling",
+   "en": "Cooling",
+   "ar": "التبريد"
+  },
+  {
+   "key": "electrical",
+   "en": "Electrical",
+   "ar": "الكهرباء"
+  },
+  {
+   "key": "sensors",
+   "en": "Sensors",
+   "ar": "الحساسات"
+  },
+  {
+   "key": "brakes",
+   "en": "Brakes",
+   "ar": "الفرامل"
+  },
+  {
+   "key": "suspension",
+   "en": "Suspension",
+   "ar": "العفشة"
+  },
+  {
+   "key": "steering",
+   "en": "Steering",
+   "ar": "الدركسيون"
+  },
+  {
+   "key": "drivetrain",
+   "en": "Drivetrain",
+   "ar": "نقل الحركة (كبالن وكردان)"
+  },
+  {
+   "key": "gearbox_clutch",
+   "en": "Gearbox & clutch",
+   "ar": "الفتيس والدبرياج"
+  },
+  {
+   "key": "exhaust",
+   "en": "Exhaust",
+   "ar": "الشكمان"
+  },
+  {
+   "key": "a_c_heating",
+   "en": "A/C & heating",
+   "ar": "التكييف والدفاية"
+  },
+  {
+   "key": "tyres_wheels",
+   "en": "Tyres & wheels",
+   "ar": "الكاوتش والجنوط"
+  },
+  {
+   "key": "body",
+   "en": "Body",
+   "ar": "الهيكل والسمكرة"
+  },
+  {
+   "key": "paint",
+   "en": "Paint",
+   "ar": "الدوكو"
+  },
+  {
+   "key": "glass",
+   "en": "Glass",
+   "ar": "الزجاج"
+  },
+  {
+   "key": "interior",
+   "en": "Interior",
+   "ar": "الصالون والفرش"
+  },
+  {
+   "key": "locks_keys",
+   "en": "Locks & keys",
+   "ar": "الأقفال والمفاتيح"
+  },
+  {
+   "key": "cleaning",
+   "en": "Cleaning",
+   "ar": "النظافة"
+  },
+  {
+   "key": "inspection",
+   "en": "Inspection",
+   "ar": "الفحص"
+  },
+  {
+   "key": "cng",
+   "en": "CNG",
+   "ar": "الغاز الطبيعي"
+  },
+  {
+   "key": "accessories",
+   "en": "Accessories",
+   "ar": "الإكسسوارات"
+  }
+ ],
+ "origins": [
+  {
+   "en": "Original / dealer (OEM)",
+   "ar": "أصلي / توكيل"
+  },
+  {
+   "en": "Korean",
+   "ar": "كوري"
+  },
+  {
+   "en": "Japanese",
+   "ar": "ياباني"
+  },
+  {
+   "en": "German",
+   "ar": "ألماني"
+  },
+  {
+   "en": "Turkish",
+   "ar": "تركي"
+  },
+  {
+   "en": "Taiwanese",
+   "ar": "تايواني"
+  },
+  {
+   "en": "Chinese",
+   "ar": "صيني"
+  },
+  {
+   "en": "Egyptian / local",
+   "ar": "مصري / محلي"
+  },
+  {
+   "en": "Other",
+   "ar": "أخرى"
+  }
+ ],
+ "conditions": [
+  {
+   "en": "New",
+   "ar": "جديد"
+  },
+  {
+   "en": "Used (scrapyard)",
+   "ar": "مستعمل / تشليح"
+  },
+  {
+   "en": "Imported used",
+   "ar": "استيراد مستعمل"
+  },
+  {
+   "en": "Rebuilt",
+   "ar": "مجدد / متوضب"
+  }
+ ],
+ "positions": [
+  {
+   "en": "Front left",
+   "ar": "أمامي شمال"
+  },
+  {
+   "en": "Front right",
+   "ar": "أمامي يمين"
+  },
+  {
+   "en": "Rear left",
+   "ar": "خلفي شمال"
+  },
+  {
+   "en": "Rear right",
+   "ar": "خلفي يمين"
+  },
+  {
+   "en": "Front (pair)",
+   "ar": "أمامي (جوز)"
+  },
+  {
+   "en": "Rear (pair)",
+   "ar": "خلفي (جوز)"
+  },
+  {
+   "en": "All four",
+   "ar": "الأربعة"
+  }
+ ],
+ "units": [
+  {
+   "en": "Piece",
+   "ar": "قطعة"
+  },
+  {
+   "en": "Set / kit",
+   "ar": "طقم"
+  },
+  {
+   "en": "Pair",
+   "ar": "جوز"
+  },
+  {
+   "en": "Litre",
+   "ar": "لتر"
+  },
+  {
+   "en": "Can / bottle",
+   "ar": "علبة"
+  },
+  {
+   "en": "Kg",
+   "ar": "كيلو"
+  },
+  {
+   "en": "Metre",
+   "ar": "متر"
+  }
+ ]
+}

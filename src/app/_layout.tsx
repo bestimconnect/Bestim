@@ -1,7 +1,7 @@
 import '@/global.css';
 
-import { Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
-import { Tajawal_400Regular, Tajawal_700Bold } from '@expo-google-fonts/tajawal';
+import { Poppins_300Light, Poppins_400Regular, Poppins_500Medium, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import { Tajawal_400Regular, Tajawal_500Medium, Tajawal_700Bold } from '@expo-google-fonts/tajawal';
 import { onlineManager } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
@@ -16,7 +16,6 @@ import { AppState, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 
-import { AppBarOverlay } from '@/components/AppBarOverlay';
 import { CarFlight } from '@/components/CarFlight';
 import { KeyboardDone } from '@/components/KeyboardDone';
 import { SplashOverlay } from '@/components/SplashOverlay';
@@ -24,7 +23,7 @@ import { Toast } from '@/components/Toast';
 import { Button, Text } from '@/components/ui';
 import { applyLanguage } from '@/lib/i18n';
 import { initMonitoring, reportError, wrapRoot } from '@/lib/monitoring';
-import { syncNotifications } from '@/lib/notifications';
+import { openedFromNotification, syncNotifications } from '@/lib/notifications';
 import { useOnline } from '@/lib/online';
 import { DAY, dehydrateOptions, persister, queryClient } from '@/lib/queryClient';
 import { sessionFromUrl, useSession } from '@/lib/session';
@@ -67,7 +66,7 @@ export default wrapRoot(function RootLayout() {
 
 function App() {
   const scheme = useScheme();
-  const [fontsLoaded] = useFonts({ Tajawal_400Regular, Tajawal_700Bold, Poppins_400Regular, Poppins_700Bold });
+  const [fontsLoaded] = useFonts({ Tajawal_400Regular, Tajawal_500Medium, Tajawal_700Bold, Poppins_300Light, Poppins_400Regular, Poppins_500Medium, Poppins_700Bold });
   const [hydrated, setHydrated] = useState(useSettings.persist.hasHydrated());
   const language = useSettings((s) => s.language);
   const pendingShareToken = useSettings((s) => s.pendingShareToken);
@@ -120,9 +119,11 @@ function App() {
       app.remove();
     };
   }, [ready, fullAccount]);
-  const tapped = useLastNotificationResponse()?.notification.request.content.data?.url;
+  // A tapped system notification (also one that opened the app from closed) is marked read and opens its screen, like a row in the list.
+  const tapped = useLastNotificationResponse();
   useEffect(() => {
-    if (ready && userId && typeof tapped === 'string') router.push(tapped as never);
+    if (!ready || !userId || !tapped) return;
+    openedFromNotification(tapped).then((url) => url && router.push(url as never));
   }, [ready, userId, tapped]);
 
   useEffect(() => {
@@ -159,18 +160,20 @@ function App() {
       <Stack screenOptions={{ headerShown: false }}>
         {/* Over the tabs, like a transparent modal: the page below (Home, My Cars) stays attached, so its car is there to fly back to. */}
         <Stack.Screen name="vehicle/[id]" options={{ presentation: 'transparentModal', animation: 'fade', animationDuration: 250 }} />
-        {/* Opened from the car page (a transparent modal) a plain push shows as an inset card. These pages go full screen; a full-screen modal hides the root green bar, so they draw their own (LOCAL_BAR in ui/Header). */}
-        {['part', 'update-odometer', 'edit-vehicle', 'car-360'].map((n) => <Stack.Screen key={n} name={n} options={{ presentation: 'fullScreenModal' }} />)}
-        <Stack.Screen name="capture/choose" options={sheetOptions} />
+        {/* Opened from the car page (a transparent modal) a plain push shows as an inset card. These pages go full screen; */}
+        {['part', 'edit-vehicle', 'car-360'].map((n) => <Stack.Screen key={n} name={n} options={{ presentation: 'fullScreenModal' }} />)}
+        {/* v2 logging sheets (flow 4): card-colour sheets over the page below */}
+        <Stack.Screen name="capture/voice" options={{ ...sheetOptions, sheetCornerRadius: 36, contentStyle: [themeVars[scheme], { backgroundColor: palette[scheme].white }] }} />
+        <Stack.Screen name="capture/review-all" options={{ ...sheetOptions, sheetAllowedDetents: [0.8, 0.95], sheetCornerRadius: 36, contentStyle: [themeVars[scheme], { backgroundColor: palette[scheme].white }] }} />
         <Stack.Screen name="part-logs" options={{ ...sheetOptions, sheetAllowedDetents: [0.6, 0.95] }} />
-        <Stack.Screen name="capture/index" options={{ ...sheetOptions, sheetAllowedDetents: [0.92] }} />
+        <Stack.Screen name="capture/index" options={{ ...sheetOptions, sheetAllowedDetents: [0.92], sheetCornerRadius: 36, contentStyle: [themeVars[scheme], { backgroundColor: palette[scheme].white }] }} />
+        <Stack.Screen name="update-odometer" options={{ ...sheetOptions, sheetCornerRadius: 36, contentStyle: [themeVars[scheme], { backgroundColor: palette[scheme].white }] }} />
         <Stack.Screen name="sheet" options={sheetOptions} />
         <Stack.Screen name="switch-vehicle" options={sheetOptions} />
         <Stack.Screen name="upgrade" options={sheetOptions} />
         <Stack.Screen name="pick" options={{ presentation: 'modal' }} />
         <Stack.Screen name="notify-permission" options={{ presentation: 'modal' }} />
       </Stack>
-      <AppBarOverlay />
       <CarFlight />
       <KeyboardDone />
       <Toast />

@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@/components/EmptyState';
 import { KeyboardDone } from '@/components/KeyboardDone';
 import { Field, Item } from '@/components/ui';
-import { PlainHeader } from '@/components/ui/Header';
+import { PageHeader } from '@/components/PageHeader';
 import { fold, matches } from '@/lib/search';
 import { usePick } from '@/lib/sheet';
 
@@ -30,9 +30,9 @@ export default function Pick() {
   };
 
   return (
-    <SafeAreaView className="flex-1 rounded-t-screen border-t border-line bg-sheet" edges={['top', 'bottom']}>
-      <View className="flex-1 gap-4 px-6 pt-6">
-        <PlainHeader title={title} />
+    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
+      <PageHeader title={title} />
+      <View className="flex-1 gap-4 px-6 pt-2">
         <Field label={t('pick.search')} value={query} onChangeText={setQuery} autoCorrect={false} returnKeyType="search" />
         <FlatList
           data={found}

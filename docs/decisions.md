@@ -1387,3 +1387,18 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 - **Huawei rejection (3 privacy errors):** consent is now an unticked checkbox the user ticks (blocks Create account and Google/Apple buttons); privacy label filled in the console; China mainland removed from the regions so no Chinese privacy text is needed.
 - **Apple 2.1 Information Needed:** answered with notes, demo account and a screen recording on a real iPhone (`docs/store/app-store-review-notes.md`); new build 5 replaces build 4 under version 1.0.0.
 - **Dashboard and website** pushed to production (PR 3, bestimconnect/Bestim-landing-page) with the plan cards and database-driven legal pages.
+
+### Q133 — App redesign direction (founder, 2026-11-19)
+- **Look:** calm and flat (grey canvas, soft white tiles, big thin numbers, floating nav pill + round voice button), no gradients. Keep the current lime/green palette (founder compared it with the Foundations amber/navy and chose lime). Car renders from `Car Types/` are the hero image.
+- **Structure:** 3 tabs (Car, Timeline, Money), voice button on every screen, account behind the avatar, no Cars tab. Reminders become the Timeline tab; maintenance plans are folded into Timeline items.
+- **Log:** voice sheet, manual sheet and a saved confirmation replace the chooser and the 3-step manual flow.
+- **First release (v1) ideas:** trust level on every record, predicted reminders, part-life bars, receipt photo on a log, buyer link that opens on the web, weekly odometer nudge. The buyer link shows history and score only, no prices or owner contact.
+- **Later:** workshop sign-off, licence scan, shared garage, widget/shortcut, monthly recap, Egypt-specific reminders (see `docs/IDEAS.md`).
+- Design order after Home: first run + add car, log sheets, Timeline, passport. Plan page: https://claude.ai/artifact/MqRqnN4oh7DsVgjjM3bK74 (private artifact). Screens are in Figma file `69ivy8SOlNYxeSTUxM00Km`, page "03 · Flows".
+
+### Q140 — Plus fan and Garage tab (founder, 2026-11-22)
+- The round button is now a **+** that fans out two buttons: voice (mic) and manual (pencil, the `/capture` sheet). Both keep the "first reading" prompt.
+- The nav has **4 tabs**: Home, Timeline, Money, Garage (the Cars list). This overrides Q133's "3 tabs, no Cars tab".
+
+### Q141 — Soft depth and tint (founder, 2026-11-23)
+- The app felt flat. Tiles now have a hairline plus a two-layer soft shadow (`shadows.ring`), the page is a touch darker (`#EBEBE8`) and cards pure white, and key Home tiles take a soft tint (oil: green/amber/rose by state, next service amber when due soon). No gradients. The + fan opens on a circular arc; nav tabs resize with a spring.

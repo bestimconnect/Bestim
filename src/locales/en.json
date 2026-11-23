@@ -7,6 +7,13 @@
     "details": "Car details"
   },
   "tabs": {
+    "timeline": "Timeline",
+    "money": "Money",
+    "menu": "Menu",
+    "garage": "Garage",
+    "manual": "Manual",
+    "voice": "Voice",
+    "manageCars": "Manage cars",
     "home": "Home",
     "vehicles": "Cars",
     "capture": "Log",
@@ -18,7 +25,8 @@
     "en": "English"
   },
   "splash": {
-    "promise": "Log maintenance by voice.\nKeep a history you can trust."
+    "promise": "Log maintenance by voice.\nKeep a history you can trust.",
+    "tag": "Your car history, by voice"
   },
   "auth": {
     "login": {
@@ -90,6 +98,44 @@
         "passwordMismatch": "Passwords do not match"
       },
       "backToLogin": "Back to sign in"
+    },
+    "v2": {
+      "signTitle": "Welcome back",
+      "signSub": "Sign in to your account",
+      "wrongBanner": "Wrong email or password. Try again.",
+      "wrongField": "That password is not right",
+      "signIn": "Sign in",
+      "email": "Email",
+      "password": "Password",
+      "password2": "Repeat password",
+      "newPassword": "New password",
+      "createTitle": "Create your account",
+      "createSub": "An email and a password, one minute.",
+      "weak": "Weak",
+      "good": "Good",
+      "strong": "Strong",
+      "rule": "At least 8 characters with a number",
+      "create": "Create account",
+      "have": "I already have an account",
+      "verifyTitle": "Check your email",
+      "verifySub": "We sent a confirmation link to",
+      "verifyOpen": "Open email app",
+      "verifyAgain": "Did not arrive? Send again",
+      "verifyIn": "in {{time}}",
+      "verifyChange": "Change email",
+      "forgotTitle": "Forgot your password?",
+      "forgotSub": "Enter your email and we send you a link to choose a new one.",
+      "forgotSend": "Send link",
+      "forgotSent": "Link sent. Check your email.",
+      "backSign": "Back to sign in",
+      "newTitle": "Choose a new password",
+      "newSub": "It does not have to differ from the old one.",
+      "newSave": "Save and sign in",
+      "nameTitle": "What is your name?",
+      "nameSub": "Shown on the car passport and in shared links.",
+      "name": "Name",
+      "next": "Next",
+      "addPhoto": "Add a photo"
     }
   },
   "onboarding": {
@@ -155,7 +201,8 @@
         "preview": "Your car will show up here",
         "sectionCar": "Your car",
         "sectionPlate": "Plate and colour",
-        "sectionMore": "More details (optional)"
+        "sectionMore": "More details (optional)",
+        "next": "Next"
       },
       "odometer": {
         "label": "Current odometer reading",
@@ -163,7 +210,50 @@
           "km": "km"
         },
         "later": "Don't have it now? You can add it later, before your first record."
+      },
+      "step": "{{n}} of 2",
+      "car": {
+        "title": "Your car",
+        "sub": "Pick the type, then the brand"
+      },
+      "odo": {
+        "title": "Car odometer",
+        "sub": "Type the number or scan the dial",
+        "scan": "Scan odometer",
+        "done": "Open my car",
+        "skip": "Skip"
       }
+    },
+    "lang": {
+      "title": "Choose your language",
+      "sub": "You can change it later from the menu.",
+      "continue": "Continue"
+    },
+    "welcome": {
+      "say": "I changed the oil at 48,000",
+      "saved": "Saved",
+      "oil": "Engine oil",
+      "brakes": "Brakes",
+      "tires": "Tires",
+      "in480": "in 480 km",
+      "in2100": "in 2,100 km",
+      "in6m": "in 6 months",
+      "ready": "Ready to sell",
+      "verified": "Verified",
+      "slides": [
+        {
+          "title": "Log your car service by voice",
+          "body": "Say what you did and Bestim records it in seconds."
+        },
+        {
+          "title": "Never forget a service again",
+          "body": "An alert before it is due, not months early."
+        },
+        {
+          "title": "Sell your car with confidence",
+          "body": "A verified car passport a buyer opens from a link."
+        }
+      ]
     }
   },
   "home": {
@@ -192,7 +282,6 @@
       "body": "Add your car, then log your first service. Everything will be ready for your next trip.",
       "cta": "Add my car"
     },
-    "kmL": "km/L",
     "perKm": "{{n}} EGP per km",
     "allGoodTitle": "All on schedule",
     "noParts": {
@@ -207,6 +296,24 @@
       "title": "Oil change",
       "sub": "In 800 km. We'll remind you before it's due.",
       "note": "Your real reminders appear after your first service."
+    },
+    "lPer100": "L/100 km",
+    "nextService": "Next service",
+    "oilLife": "Oil life",
+    "odometer": "Odometer",
+    "alerts": "Coming up",
+    "upToDate": "Updated",
+    "clear": {
+      "title": "All clear",
+      "body": "Nothing needs service right now.",
+      "next": "Next up"
+    },
+    "noRecords": {
+      "title": "No records yet",
+      "body": "Say it out loud: \"I changed the oil yesterday at 48,000\".",
+      "oil": "Oil",
+      "fuel": "Fuel",
+      "brakes": "Brakes"
     }
   },
   "tour": {
@@ -221,7 +328,7 @@
     "priorityTitle": "What needs you, in order",
     "priorityBody": "The most urgent services show first. Your real ones appear after your first record.",
     "expensesTitle": "Costs add up here",
-    "expensesBody": "Every record with a price lands in Expenses, by month and by type.",
+    "expensesBody": "Every record with a price lands in Money, by month and by type.",
     "captureTitle": "Say it, don't type it",
     "captureBody": "This green button logs anything. Tap it and say what you did to your car.",
     "try": "Say my first record",
@@ -235,6 +342,9 @@
     "last_few": "Last reading: {{value}} {{unit}} · {{count}} days ago",
     "last_other": "Last reading: {{value}} {{unit}} · {{count}} days ago",
     "lastToday": "Last reading: {{value}} {{unit}} · today",
+    "upd_one": "Updated {{count}} day ago",
+    "upd_other": "Updated {{count}} days ago",
+    "updToday": "Updated today",
     "cta": "Save reading",
     "since": "+{{value}} {{unit}} since last update",
     "swipe": "Swipe to adjust",
@@ -267,12 +377,13 @@
       "due": "Due now",
       "dueLabel": "Next service"
     },
-    "trend": "Recent readings",
     "nudge": "Adjust by {{n}}"
   },
   "vehicles": {
     "title": "My cars",
     "heading": "All your cars, together",
+    "detailsTitle": "Car details",
+    "deleteCar": "Delete car",
     "add": "Add car",
     "emptyTitle": "Your garage is empty",
     "emptyBody": "Add your car and keep its whole story in one place.",
@@ -321,6 +432,8 @@
       "ok": "On time"
     },
     "facts": {
+      "year": "Year",
+      "noHealth": "Add parts to see the car health.",
       "thisYear": "This year",
       "lastService": "Last service",
       "colour": "Colour",
@@ -351,13 +464,81 @@
       "label": "Chassis number (VIN)",
       "hint": "17 characters",
       "error": "It has 17 letters and digits"
-    }
+    },
+    "deleteShort": "Delete",
+    "editShort": "Edit"
   },
   "pick": {
     "search": "Search",
     "custom": "Not listed: use “{{text}}”",
     "empty": "No matches",
     "type": "Not on our list yet. Type the name and tap it below."
+  },
+  "tl": {
+    "up": "Coming up",
+    "done": "Done",
+    "eye": "Needs your eye",
+    "eyeTitle": "Odd odometer reading",
+    "eyeSub": "{{n}} {{u}} is below your last entry",
+    "review": "Review",
+    "overdue": "Overdue",
+    "thisMonth": "This month",
+    "later": "Later",
+    "nothingUp": "Nothing is due yet",
+    "nothingUpBody": "Log a service with a reminder and it shows up here.",
+    "late": "{{count}} days late",
+    "at": "At {{n}} {{u}}",
+    "inWeeks": "in about {{count}} weeks",
+    "inDays": "in {{count}} d.",
+    "soon": "this week",
+    "left": "Left",
+    "about": "about {{count}} weeks",
+    "every": "Every",
+    "everyV": "{{km}} {{u}} or {{m}} months",
+    "last": "Last done",
+    "markDone": "Done, log it",
+    "snooze": "Snooze",
+    "edit": "Edit schedule",
+    "editTitle": "Edit {{name}} schedule",
+    "byKm": "Every {{u}}",
+    "byMonths": "Or every months",
+    "days": "days",
+    "months": "months",
+    "save": "Save",
+    "saveFailed": "We couldn't save the schedule. Try again.",
+    "scheduleReason": "Schedule changed",
+    "life": "{{name}} life",
+    "lastChange": "Last change",
+    "nextChange": "Next change",
+    "history": "History",
+    "logChange": "Log a change",
+    "kmLeft": "{{n}} {{u}} left",
+    "overBy": "Over by {{n}} {{u}}",
+    "good": "Good",
+    "dueSoon": "Due soon",
+    "overdueWord": "Overdue",
+    "pace": "About {{count}} weeks at your pace ({{n}} {{u}}/day)",
+    "how": "How we count: {{used}} {{u}} used of {{total}} {{u}}. Updates with every odometer update.",
+    "snoozedUntil": "Snoozed until {{date}}",
+    "receipt": "Receipt",
+    "odometer": "Odometer",
+    "amendments": "Amendments",
+    "original": "The original",
+    "correctedOn": "Corrected on {{date}}",
+    "keep": "The original is always kept and shown to a buyer.",
+    "fix": "Correct this record",
+    "trust": {
+      "receipt": "Receipt",
+      "workshop": "Workshop signed",
+      "self": "Self-reported",
+      "matched": "Matched"
+    },
+    "predict": "Predict from my driving",
+    "predictSub": "The reminder moves with how fast you drive",
+    "remindBefore": "Remind me before",
+    "offlineTitle": "No internet",
+    "offlineBody": "You can log as usual; it syncs when you are back online.",
+    "waiting": "Waiting"
   },
   "parts": {
     "months": "{{m}} months",
@@ -472,7 +653,11 @@
       "why": "Why the change?",
       "originalStays": "The original stays visible next to the change.",
       "delete": "Delete",
-      "deleted": "Deleted"
+      "deleted": "Deleted",
+      "confirmTitle": "Delete this record?",
+      "confirmBody": "You can undo for a few seconds after deleting.",
+      "confirmYes": "Delete",
+      "confirmNo": "Cancel"
     },
     "choose": {
       "title": "New record",
@@ -573,7 +758,17 @@
       "noteBody": "Confirming doesn't remove the note from the record.",
       "correct": "Edit the reading",
       "ok": "The reading is correct",
-      "bodyLower": "This reading is {{diff}} km lower than the previous one. We saved the record with a note for you to review."
+      "bodyLower": "This reading is {{diff}} km lower than the previous one. We saved the record with a note for you to review.",
+      "odd": {
+        "read": "Recorded reading",
+        "unit": "km",
+        "lower": "{{diff}} km below the last record",
+        "jump": "{{diff}} km above the last record in {{days}} days",
+        "last": "Last record: {{n}} km",
+        "right": "The reading is right",
+        "mine": "Type it myself",
+        "again": "Photograph again"
+      }
     },
     "next": "Next maintenance after",
     "notes": "Notes",
@@ -653,10 +848,18 @@
     "topDay": "Highest day",
     "topMonth": "Highest month",
     "change": "Change",
+    "perKm": "Per km",
     "periodTotal": "Total",
     "earlier": "Earlier",
     "later": "Later",
-    "emptyPeriod": "No expenses in this period."
+    "emptyPeriod": "No expenses in this period.",
+    "sheet": {
+      "title": "New expense",
+      "amount": "Amount",
+      "reading": "{{n}} km",
+      "receipt": "Photo of the receipt",
+      "receiptSub": "Raises how well it is verified"
+    }
   },
   "plans": {
     "title": "Plans",
@@ -692,7 +895,12 @@
     "includes": "{{plan}} includes",
     "popular": "Most popular",
     "yourPlan": "Your plan",
-    "compare": "Compare plans",
+    "compare": {
+      "title": "Pick the plan that fits your car",
+      "sub": "Start free and upgrade whenever you like.",
+      "usage": "Usage",
+      "features": "Features"
+    },
     "usageCars": "Cars used",
     "isFeature": "This is a {{plan}} feature",
     "alsoGet": "With {{plan}} you also get",
@@ -706,7 +914,8 @@
       "trial": "Try {{plan}} free for {{n}} days",
       "subscribe": "Subscribe now",
       "unlock": "Subscribe now to unlock",
-      "notify": "Notify me when {{plan}} opens"
+      "notify": "Notify me when {{plan}} opens",
+      "trialShort": "{{n}} days free"
     },
     "welcome": {
       "badge": "Welcome to Bestim",
@@ -790,7 +999,9 @@
       "name": "Your name",
       "save": "Save",
       "saved": "Saved",
-      "failed": "Couldn't save. Try again."
+      "failed": "Couldn't save. Try again.",
+      "emailNote": "To change your email, contact us",
+      "header": "Profile"
     },
     "photo": {
       "title": "Profile photo",
@@ -798,12 +1009,27 @@
       "choose": "Choose from gallery",
       "remove": "Remove photo",
       "edit": "Change photo",
-      "failed": "Couldn't save the photo. Try again."
+      "failed": "Couldn't save the photo. Try again.",
+      "denied": "Allow camera access in Settings to take a photo."
     },
     "cars": "Cars: {{count}}",
     "group": {
       "preferences": "Preferences",
       "data": "Your data"
+    },
+    "on": "On",
+    "off": "Off",
+    "exportValue": "CSV · PDF · JSON",
+    "help": "Help and terms",
+    "legal": "Terms and privacy",
+    "appearance": {
+      "title": "Appearance and language",
+      "theme": "Appearance",
+      "light": "Light",
+      "dark": "Dark",
+      "rtl": "Direction changes with the language.",
+      "units": "Units",
+      "unitsValue": "Kilometres · EGP"
     }
   },
   "notifPrefs": {
@@ -873,10 +1099,49 @@
       "attached": "Attached",
       "unverified": "Unverified",
       "excluded": "The owner excluded {{n}} items (their content isn't shown)."
+    },
+    "intro": "Get a full copy of your car history.",
+    "format": "Format",
+    "period": "Period",
+    "includes": "Includes",
+    "now": "Export now",
+    "fmt": {
+      "pdf": "To print or share",
+      "csv": "For spreadsheets",
+      "json": "For backup"
+    },
+    "periods": {
+      "all": "All",
+      "year": "Last year",
+      "half": "Last 6 months"
     }
+  },
+  "passport": {
+    "title": "Car passport",
+    "sub": "Verified history, ready to share",
+    "ready": "Ready to sell",
+    "records": "records",
+    "verified": "Verified",
+    "receipt": "Receipt",
+    "matched": "Matches",
+    "workshop": "Workshop",
+    "self": "Self-logged",
+    "share": "Share with buyer",
+    "empty": "Add records to build the passport."
   },
   "share": {
     "header": "Share car history",
+    "buyerTitle": "Share with buyer",
+    "sees": "The buyer sees",
+    "see1": "The full history and how well each record is documented",
+    "see2": "The readiness score",
+    "see3": "Edits and the original",
+    "noApp": "The link works without the app",
+    "exp7": "7 days",
+    "exp30": "30 days",
+    "expNone": "No expiry",
+    "copy": "Copy link",
+    "copied": "Link copied",
     "title": "Its history goes with it",
     "body": "Share the logs, reminders and parts with the new owner.",
     "qr": "QR code",
@@ -909,7 +1174,11 @@
     "retryTitle": "Shall we try again?",
     "retryBody": "We couldn't load your data right now.",
     "retry": "Try again",
-    "home": "To Home"
+    "home": "To Home",
+    "add": "Add the car to my garage",
+    "viewOnly": "Just view it",
+    "copyNote": "We'll copy the history to your account; the original stays as it is.",
+    "fromOwner": "From {{name}}"
   },
   "feedback": {
     "error": {
@@ -945,28 +1214,39 @@
       "another": "Add another record"
     },
     "notify": {
-      "title": "Let us remind you on time",
-      "body": "We'll notify you when maintenance is near or overdue. You can change your preferences anytime.",
-      "enable": "Turn on notifications",
-      "later": "Later"
+      "title": "Let Bestim remind you",
+      "body": "We send an alert before service is due, not months early.",
+      "enable": "Turn on alerts",
+      "later": "Later",
+      "sample": "Engine oil",
+      "sampleSub": "in 480 km, book a slot"
     },
     "delete": {
       "export": "Export first",
-      "confirm": "Delete permanently"
+      "confirm": "Delete permanently",
+      "now": "Delete"
     },
     "deleteVehicle": {
       "header": "Delete car data",
       "title": "Delete car from your account?",
       "body": "Its records and schedules will be deleted. You cannot recover them.",
       "keep": "Keep car",
-      "error": "We couldn't delete the car. Try again."
+      "error": "We couldn't delete the car. Try again.",
+      "titleNamed": "Delete {{name}}?",
+      "confirmLabel": "Type the car name to confirm"
     },
     "deleteAccount": {
       "header": "Delete account",
       "title": "Delete your account permanently?",
       "body": "Your account and all your cars, records, reminders and expenses will be deleted. You won't be able to get them back.",
       "keep": "Keep my account",
-      "error": "We couldn't delete your account. Try again."
+      "error": "We couldn't delete your account. Try again.",
+      "confirm": "Delete my account",
+      "l1": "All cars and their records",
+      "l2": "Expenses and receipts",
+      "l3": "The car passport and shared links",
+      "confirmLabel": "Type “delete” to confirm",
+      "word": "delete"
     }
   },
   "toast": {
@@ -995,10 +1275,15 @@
   },
   "fuel": {
     "title": "Fuel consumption",
-    "kmPerLiter": "km per litre",
     "costPerKm": "EGP per km",
-    "hint": "Add litres and the reading to two full-tank fill-ups to see consumption",
-    "perFill": "{{n}} km/L"
+    "perFill": "{{n}} L/100 km",
+    "lPer100": "L per 100 km",
+    "gap": {
+      "noFills": "Add a fuel expense with the litres and the odometer reading to see consumption.",
+      "noLiters": "Your fuel expenses have no litres. Add the litres to each fill-up.",
+      "noReading": "Your fuel expenses have no odometer reading. Add the reading to each fill-up.",
+      "needMore": "Add at least two full-tank fill-ups, each with litres and an odometer reading, to see consumption."
+    }
   },
   "inbox": {
     "header": "Notifications",
@@ -1006,10 +1291,13 @@
     "yesterday": "Yesterday",
     "emptyTitle": "No notifications yet",
     "emptyBody": "Reminders about your car will show up here.",
+    "new": "New",
+    "earlier": "Earlier",
     "markAll": "Mark all as read",
     "unread": "New",
     "all": "All",
-    "unreadOnly": "Unread"
+    "unreadOnly": "Unread",
+    "nomore": "No more alerts"
   },
   "voiceQueue": {
     "savedBody": "Your recording is saved on this phone. We will write it up when you are back online, then you review it.",
@@ -1064,5 +1352,49 @@
       "hood": "Under the hood"
     },
     "showOther": "show other parts"
+  },
+  "logv2": {
+    "listen": "Listening",
+    "hint": "Say the type, odometer and cost",
+    "typeIn": "Type instead",
+    "tap": "Tap to record",
+    "readyBody": "Tap the microphone and start talking. We only listen after you tap.",
+    "typeInstead": "Type instead",
+    "foundOne": "Found one record",
+    "foundTwo": "Found two records",
+    "foundMany": "Found {{count}} records",
+    "self": "Self-reported",
+    "saveBoth": "Save both",
+    "redo": "Record again",
+    "heard": "I heard",
+    "answerVoice": "Answer by voice",
+    "pc1": "Understanding your recording",
+    "pc2": "Usually a few seconds",
+    "step1": "Uploading the recording",
+    "step2": "Turning it into text",
+    "step3": "Picking out the details",
+    "cancel": "Cancel",
+    "m1": "Bestim cannot hear you",
+    "m2": "Turn on the microphone in your device settings to record by voice.",
+    "m3": "Open settings",
+    "m4": "Type instead of voice",
+    "u1": "I did not catch that",
+    "u2": "Say the item and the number, for example:",
+    "ex1": "Changed the oil at 48,000",
+    "ex2": "Fuel 350 EGP",
+    "u3": "Try again",
+    "u4": "Type it in",
+    "done": "Done"
+  },
+  "restore": {
+    "title": "Welcome back",
+    "body": "Your account was deleted, but your data is still saved. {{n}} days left before it is gone for good.",
+    "days": "days",
+    "restore": "Restore my account",
+    "forever": "Delete it for good",
+    "notNow": "Not now",
+    "deletedTitle": "Recently deleted",
+    "deletedSub": "Deleted for good after 30 days.",
+    "deletedEmpty": "Nothing deleted"
   }
 }

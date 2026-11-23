@@ -19,9 +19,20 @@ const origin = new Map<string, Slot>(); // vehicle id → where the user opened 
 
 export const registerCar = (key: string, ref: RefObject<View | null>) => {
   views.set(key, ref);
+  // The car page's real picture is built after the flight starts: aim the flight at where it really sits (the guess in detailRect can be off a few points,
+  // which showed as a jump when the flying copy handed over). `from` stays the same object, so the animation keeps its progress.
+  if (key.startsWith('detail:')) requestAnimationFrame(() => retarget(key, ref));
   return () => {
     if (views.get(key) === ref) views.delete(key);
   };
+};
+
+const retarget = async (key: string, ref: RefObject<View | null>) => {
+  const f = useFlight.getState().flight;
+  if (!f?.to || !f.hide.includes(key)) return;
+  const to = await measure(ref);
+  const now = useFlight.getState().flight;
+  if (to && now?.from === f.from) useFlight.setState({ flight: { ...now, to } });
 };
 
 const measure = (ref?: RefObject<View | null>, slot?: Slot) =>

@@ -19,6 +19,7 @@ const withoutWorkKtx = (config) =>
 const withoutPush = (config) =>
   withEntitlementsPlist(config, (c) => {
     delete c.modResults['aps-environment'];
+    delete c.modResults['com.apple.developer.applesignin']; // a free Apple ID can't sign this either
     return c;
   });
 

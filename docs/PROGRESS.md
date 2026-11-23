@@ -177,3 +177,15 @@ A full pass for Google Play and Huawei AppGallery. Store texts and form answers:
 2. Android APK for testers (steps under "Open items").
 3. With the Apple Developer account: restore Apple sign-in (Q6), EAS iOS build → TestFlight, push keys.
 4. Briefs for screen builders: `docs/phase3-brief.md`, `phase4-brief.md`, `phase5-brief.md`. PM decisions continue at Q51.
+
+## v2 (branch `v2`, started 2026-11-20)
+- Plan: `design-v2/BUG-AUDIT-AND-SERVICES-SPEC.md`. Phase 0 (plan) approved.
+- **Phase 1 (data): files written, NOT pushed.** Migrations `20261121*` (schema, seeds via `scripts/v2-seed.mjs`, `save_visit` + health, soft delete, backfill); check script `supabase/verify/v2-phase1.sql`; data in `supabase/seed-data/`. Ran in PGlite only (no Docker here); RLS under real login tokens needs the anon-key check after an approved push.
+- Open: car health weighted vs lowest; oil-and-filter resets engine-oil tracker?; ambiguous system placements; `src/lib/parts.ts` must adopt "30% or less = Due soon"; odometer-suspicious flag and 24 h edit rule not yet carried to visits.
+- 2026-11-21 (v2 Phase 2 + 2.5): bug fixes with no new design (odometer, expenses sort, notifications read state and deep links, fuel, car transition, photo permissions) and the v2 shell and look: 3 tabs (Home / Timeline / Money), floating nav with lime voice button, flat tokens, logging flow, auth, onboarding, menu and settings, cars/passport/sharing, Update odometer as a bottom sheet, Add expense sheet, flat plan tour. v1 header, hero, green bar and Sheen code deleted. Design-system audit: `docs/design-system-audit.md`. First real-iPhone test found a blank voice review sheet (fixed: sheet is replaced, not stacked; list has a min height). Checked only by reading and on the phone by the founder, no simulator. Open: blurred sheet backdrop (needs expo-blur), typed delete confirm is UI only (soft delete not wired), Restore account and Recently deleted are UI only, Money period segment, "Couldn't save" sheet, hard-coded colours (see audit). Phases 3-6 not started.
+- 2026-11-22: + fan (voice / manual) and Garage tab added; Home bento, chart stripes, nav spacing and tab slide fixed to match the design. Not yet checked on the phone.
+- 2026-11-23: Nav spring animation, arc fan, soft depth + tint (Q141). Build to iPhone started; not yet checked on device.
+
+## 2026-11-23: animated splash + welcome drift (branch `splash-motion`)
+- `src/components/Wordmark.tsx` (logo, one clock `splashClock` in `src/lib/splashClock.ts`, paths in `src/lib/wordmarkPaths.ts` generated from design-v2/motion), `SplashOverlay.tsx` (5 s, tap-skip after 1.5 s, Reduce Motion path), `(onboarding)/intro.tsx` (custom swipe pager with Drift, dots, slide 1 enters at 4,750 ms).
+- Native splash = flat paper (#EBEBE8) in `app.json`. The app is forced light at OS level (`userInterfaceStyle`), so no native dark splash: a dark-theme user sees paper for the first instant before the dark JS splash.

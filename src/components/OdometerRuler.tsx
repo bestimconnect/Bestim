@@ -5,8 +5,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   cancelAnimation, runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withDecay, withTiming, type SharedValue,
 } from 'react-native-reanimated';
-
-import { Text } from '@/components/ui';
+import { useColors } from '@/lib/theme';
 
 const SEG_W = 80; // one labelled segment: 10 ticks
 const SIDE = 4; // labelled segments drawn each side of the reading: half a phone width plus room for a fast move
@@ -18,23 +17,15 @@ type Props = {
   /** Units per labelled segment: 1000 for km/mi, 100 for hours. Dragging lands on any whole number. */
   segment: number;
   max: number;
-  dark?: boolean;
 };
 
-// `dark` = on the dark cockpit card: lighter ticks and labels (the card stays dark in both themes).
-function Segment({ label, dark }: { label: string; dark?: boolean }) {
+// Flat ruler (v2): thin ticks, every fifth one longer and darker. No numbers: the big reading above says it.
+function Segment() {
   return (
     <>
       {TICKS.map((k) => (
-        <View
-          key={k}
-          className={`absolute top-0 ${k === 0 ? 'w-[2px]' : 'w-px'} ${dark ? (k === 0 ? 'bg-[#DCE6E0]' : 'bg-[#6F8379]') : 'bg-muted'}`}
-          style={{ left: k * (SEG_W / 10), height: k === 0 ? 34 : k === 5 ? 22 : 14, opacity: dark ? 1 : k === 0 ? 0.85 : k === 5 ? 0.5 : 0.28 }}
-        />
+        <View key={k} className={`absolute bottom-0 w-[2px] rounded-full ${k % 5 === 0 ? 'bg-muted' : 'bg-tick'}`} style={{ left: k * (SEG_W / 10), height: k % 5 === 0 ? 24 : 14 }} />
       ))}
-      <Text variant="caption" className={`absolute text-center ${dark ? '' : 'text-muted'}`} style={{ top: 42, left: -SEG_W / 2, width: SEG_W, fontFamily: 'Poppins_400Regular', ...(dark ? { color: '#9FB0A7' } : null) }}>
-        {label}
-      </Text>
     </>
   );
 }
@@ -43,7 +34,8 @@ function Segment({ label, dark }: { label: string; dark?: boolean }) {
  * Screen 25's ruler (decisions Q53, redrawn light in Q71): the reading sits under the fixed lime pointer and the
  * ruler slides under it. Drawn from the shared value, so it glides in step with the rolling number.
  */
-export function OdometerRuler({ shown, segment, max, dark }: Props) {
+export function OdometerRuler({ shown, segment, max }: Props) {
+  const c = useColors();
   const [width, setWidth] = useState(0);
   // Only the segments around the reading exist; `base` follows the reading one labelled step at a time.
   const [base, setBase] = useState(() => Math.floor(shown.get() / segment));
@@ -93,22 +85,20 @@ export function OdometerRuler({ shown, segment, max, dark }: Props) {
   return (
     <GestureDetector gesture={pan}>
       {/* direction ltr: numbers grow to the right in Arabic too (founder, decisions Q53). */}
-      <View className="h-[66px] overflow-hidden" style={{ direction: 'ltr' }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      <View className="h-[38px] overflow-hidden" style={{ direction: 'ltr' }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
         {width ? (
           <Animated.View className="absolute left-0 top-0 h-full" style={strip}>
             {Array.from({ length: SIDE * 2 + 1 }, (_, i) => first + i).map((i) =>
               i >= 0 && i * segment <= max ? (
-                <View key={i} className="absolute top-0" style={{ left: (i - first) * SEG_W }}>
-                  <Segment label={(i * segment).toLocaleString('en-US')} dark={dark} />
+                <View key={i} className="absolute top-0 h-full w-[80px]" style={{ left: (i - first) * SEG_W }}>
+                  <Segment />
                 </View>
               ) : null,
             )}
           </Animated.View>
         ) : null}
-        <View pointerEvents="none" className="absolute top-0 items-center" style={{ left: width / 2 - 5, width: 10 }}>
-          <View style={{ borderLeftWidth: 5, borderRightWidth: 5, borderTopWidth: 7, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: '#B4DB1F' }} />
-          <View className="h-[40px] w-[3px] rounded-full bg-lime" style={{ boxShadow: '0 0 8px 1px rgba(211,245,61,0.9)' }} />
-        </View>
+        {/* the centre marker: one flat lime bar, outlined in the ink colour so it shows on light and dark */}
+        <View pointerEvents="none" className="absolute bottom-0 h-[34px] w-[3px] rounded-full bg-lime" style={{ left: width / 2 - 1.5, boxShadow: `0 0 0 1.5px ${c.ink}` }} />
       </View>
     </GestureDetector>
   );

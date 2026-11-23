@@ -1,17 +1,20 @@
-import { I18nManager, View } from 'react-native';
-import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
+import { useState } from 'react';
+import { I18nManager, View, type TextStyle } from 'react-native';
+import Animated, { useAnimatedStyle, useDerivedValue, withTiming, type SharedValue } from 'react-native-reanimated';
 
 import { Text } from '@/components/ui';
+import { easeOut } from '@/lib/motion';
 
 // The big reading on the update-odometer screen: digits roll like a car's odometer (decisions Q71).
 // Everything moves on the UI thread from one shared value, so it stays in step with the ruler.
-const SIZES = { lg: { h: 60, w: 33, fs: 52, comma: 15 }, sm: { h: 34, w: 17, fs: 28, comma: 8 } }; // sm = inside the dial
+const SIZES = { lg: { h: 68, w: 33, fs: 54, comma: 14 }, sm: { h: 36, w: 16, fs: 26, comma: 8 } }; // sm = inside the dial
 const STRIP = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0]; // the trailing 0 is where 9 rolls over to
 
 type Dims = (typeof SIZES)['lg'];
 
 function Column({ shown, place, d: { h, w, fs }, color }: { shown: SharedValue<number>; place: number; d: Dims; color?: string }) {
-  const digit = { fontFamily: 'Poppins_700Bold', fontSize: fs, lineHeight: h, textAlign: 'center', ...(color ? { color } : null) } as const;
+  // Fixed boxes, so system text size must not grow the digits (that is what cut them off); tabular digits keep every one the same width.
+  const digit = { fontFamily: 'Poppins_300Light', fontSize: fs, lineHeight: h, height: h, width: w, textAlign: 'center', fontVariant: ['tabular-nums'], ...(color ? { color } : null) } as TextStyle;
   const style = useAnimatedStyle(() => {
     const v = Math.max(0, shown.value);
     // Units turn continuously. Each higher wheel only turns while the wheel below it goes from 9 to 0
@@ -22,8 +25,8 @@ function Column({ shown, place, d: { h, w, fs }, color }: { shown: SharedValue<n
   });
   return (
     <View style={{ width: w, height: h, overflow: 'hidden' }}>
-      <Animated.View style={style}>
-        {STRIP.map((n, i) => <Text key={i} variant="number" style={digit}>{n}</Text>)}
+      <Animated.View style={[{ height: h * STRIP.length }, style]}>
+        {STRIP.map((n, i) => <Text key={i} variant="number" allowFontScaling={false} style={digit}>{n}</Text>)}
       </Animated.View>
     </View>
   );
@@ -32,16 +35,24 @@ function Column({ shown, place, d: { h, w, fs }, color }: { shown: SharedValue<n
 /** `count` = how many digits to draw (the length of the current reading). `color` overrides the theme's ink. */
 export function RollingNumber({ shown, count, color, size = 'lg' }: { shown: SharedValue<number>; count: number; color?: string; size?: keyof typeof SIZES }) {
   const d = SIZES[size];
-  const places = Array.from({ length: Math.max(1, count) }, (_, i) => Math.max(1, count) - 1 - i);
+  const n = Math.max(1, count);
+  const places = Array.from({ length: n }, (_, i) => n - 1 - i);
+  const [avail, setAvail] = useState(0);
+  const natural = n * d.w + Math.floor((n - 1) / 3) * d.comma;
+  const scale = avail && avail < natural ? avail / natural : 1; // too wide for the card: shrink, never clip
+  // The digits follow the ruler a beat behind (about 250 ms, ease-out), so they stay readable while you drag.
+  const smooth = useDerivedValue(() => withTiming(shown.value, { duration: 250, easing: easeOut }));
   return (
-    // Numbers read left to right in Arabic too.
-    <View pointerEvents="none" className="items-center justify-center" style={{ flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row', height: d.h }}>
+    <View className="self-stretch items-center" style={{ height: d.h }} onLayout={(e) => setAvail(e.nativeEvent.layout.width)}>
+    {/* Numbers read left to right in Arabic too. */}
+    <View pointerEvents="none" className="items-center justify-center" style={{ width: natural, flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row', height: d.h, transform: [{ scale }] }}>
       {places.map((place) => (
         <View key={place} style={{ flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row' }}>
-          <Column shown={shown} place={place} d={d} color={color} />
-          {place > 0 && place % 3 === 0 ? <Text variant="number" style={{ fontFamily: 'Poppins_700Bold', fontSize: d.fs, lineHeight: d.h, textAlign: 'center', width: d.comma, ...(color ? { color } : null) }}>,</Text> : null}
+          <Column shown={smooth} place={place} d={d} color={color} />
+          {place > 0 && place % 3 === 0 ? <Text variant="number" allowFontScaling={false} style={{ fontFamily: 'Poppins_300Light', fontSize: d.fs, lineHeight: d.h, textAlign: 'center', width: d.comma, ...(color ? { color } : null) }}>,</Text> : null}
         </View>
       ))}
+    </View>
     </View>
   );
 }

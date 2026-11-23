@@ -8,10 +8,10 @@ import { PartRow } from '@/components/PartStatus';
 import { PlateView } from '@/components/Plate';
 import { Car3D } from '@/components/Car3D';
 import { LoadingState } from '@/components/EmptyState';
-import { Backdrop, Card, Chip, Header, Sheen, Text } from '@/components/ui';
+import { PageHeader } from '@/components/PageHeader';
+import { Card, Chip, Text } from '@/components/ui';
 import { frames360, groupOfPart, type Marker } from '@/lib/car360';
 import { STATE_COLOR } from '@/lib/health';
-import { useColors } from '@/lib/theme';
 import { useVehicle, useVehicleParts, vehicleName, type Part } from '@/lib/queries';
 
 const ORDER = { overdue: 0, soon: 1, ok: 2 } as const;
@@ -19,7 +19,6 @@ const ORDER = { overdue: 0, soon: 1, ok: 2 } as const;
 // The car on a turntable: drag to turn it, tap a dot to see that part.
 export default function Car360Screen() {
   const { t, i18n } = useTranslation();
-  const c = useColors();
   const { vehicleId } = useLocalSearchParams<{ vehicleId: string }>();
   const { vehicle } = useVehicle(vehicleId);
   const { parts } = useVehicleParts(vehicle);
@@ -45,11 +44,9 @@ export default function Car360Screen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
-      <Backdrop />
-      <Header title={vehicle ? vehicleName(vehicle) : ''} sub={vehicle ? `${vehicle.year}` : undefined} />
+      <PageHeader title={vehicle ? vehicleName(vehicle) : ''} sub={vehicle ? `${vehicle.year}` : undefined} />
       <ScrollView contentContainerClassName="gap-3 px-6 pb-10 pt-2" showsVerticalScrollIndicator={false}>
         <Card>
-          <Sheen color={c.teal} opacity={0.14} glow="tl" radius={1.2} />
           {frames ? <Car3D colors={colors} onGroup={(g) => setGroup((cur) => (cur === g ? null : g))} /> : <View style={{ aspectRatio: 4 / 3 }}><LoadingState /></View>}
         </Card>
         <View className="flex-row items-center justify-between gap-3">

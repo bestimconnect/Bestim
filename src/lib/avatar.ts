@@ -3,6 +3,8 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { supabase } from './supabase';
 
+export const DENIED = 'camera permission denied';
+
 /** The profile picture as a link the phone can show (the bucket is private, so the link is signed and short-lived). */
 export function useAvatarUrl(path: string | null | undefined) {
   return useQuery({
@@ -32,7 +34,7 @@ export function useAvatarActions(userId: string | undefined, current: string | n
     const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.6 };
     if (from === 'camera') {
       const ok = await ImagePicker.requestCameraPermissionsAsync();
-      if (!ok.granted) throw new Error('camera permission denied');
+      if (!ok.granted) throw new Error(DENIED);
     }
     const r = await (from === 'camera' ? ImagePicker.launchCameraAsync(opts) : ImagePicker.launchImageLibraryAsync(opts));
     if (r.canceled) return false;

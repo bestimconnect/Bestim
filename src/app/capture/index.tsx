@@ -3,16 +3,17 @@ import { format } from 'date-fns';
 import { ar as arLocale, enUS } from 'date-fns/locale';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Camera, ChevronDown, Mic, X } from 'lucide-react-native';
+import { Camera, ChevronDown, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, UIManager, View } from 'react-native';
+import { Platform, Pressable, ScrollView, UIManager, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { KeyboardDone } from '@/components/KeyboardDone';
-import { StepsBar } from '@/components/StepsBar';
+import { AddExpense } from '@/components/money/AddExpense';
+import { PartArt } from '@/components/PartArt';
 import { toast } from '@/components/Toast';
-import { Backdrop, Button, Card, Chip, Field, FooterBar, Header, IconTile, Note, PressableScale, Sheen, Text, Toggle } from '@/components/ui';
+import { Button, Card, Chip, Field, IconTile, Note, PressableScale, Text, Toggle } from '@/components/ui';
 import { blockFeature, useEntitlements } from '@/lib/entitlements';
 import { errorText } from '@/lib/errors';
 import { shouldAskNotifications } from '@/lib/notifications';
@@ -24,8 +25,7 @@ import { clean } from '@/lib/numberInput';
 import { cleanDetails, LOG_FIELDS, newLogId, SAVE_LOG_KEY, type SaveLogInput } from '@/lib/saveLog';
 import { pickOption } from '@/lib/sheet';
 import { supabase } from '@/lib/supabase';
-import { shadows, useColors } from '@/lib/theme';
-import { useLogDraft } from '@/stores/logDraft';
+import { useColors } from '@/lib/theme';
 import { useVoiceBatch } from '@/stores/voiceBatch';
 import type { ExpenseCategory } from '@/lib/voiceRecords';
 
@@ -49,15 +49,14 @@ const daysAgo = (n: number) => {
   return d.toLocaleDateString('en-CA'); // local date, never toISOString
 };
 
-export default function CaptureSheet() {
+function CaptureSheet() {
   const { t, i18n } = useTranslation();
   const c = useColors();
-  const { top, bottom } = useSafeAreaInsets();
+  const { bottom } = useSafeAreaInsets();
   const queryClient = useQueryClient();
-  const { serviceTypeId, vehicleId, logId, expenseId, batch, notice, guided, custom } = useLocalSearchParams<{ custom?: string; serviceTypeId?: string; vehicleId?: string; guided?: string; logId?: string; expenseId?: string; batch?: string; notice?: keyof typeof NOTICES }>();
+  const { serviceTypeId, vehicleId, logId, expenseId, batch, notice } = useLocalSearchParams<{ serviceTypeId?: string; vehicleId?: string; logId?: string; expenseId?: string; batch?: string; notice?: keyof typeof NOTICES }>();
   const [card] = useState(() => useVoiceBatch.getState().records.find((r) => r.key === batch)); // odometer cards are edited in the list itself
   const editing = !!(logId || expenseId || card);
-  const steps = !!guided && !editing; // opened as step 3 of the new-record flow: the item is already chosen
   const costKind = expenseId ? true : logId ? false : card ? card.kind === 'expense' : undefined; // a record keeps its kind
   const log = useLog(logId).data;
   const allSpent = useExpenses().data ?? [];
@@ -83,7 +82,7 @@ export default function CaptureSheet() {
   const [fullTank, setFullTank] = useState(true); // consumption is measured between full tanks (Q91)
   const [more, setMore] = useState(false);
   const [odo, setOdo] = useState('');
-  const [workshop, setWorkshop] = useState(custom && serviceTypeId?.startsWith('x:') ? custom : ''); // a typed-in cost name is kept as the note
+  const [workshop, setWorkshop] = useState('');
   const [details, setDetails] = useState<Record<string, string>>({});
   const [every, setEvery] = useState('');
   const [notes, setNotes] = useState('');
@@ -213,14 +212,7 @@ export default function CaptureSheet() {
     if (!r.canceled) setPhotoUri(r.assets[0].uri);
   };
 
-  const voice = () => {
-    useLogDraft.getState().reset({ vehicleId: vehicle?.id ?? null });
-    // replace() from a formSheet only closes the sheet on iOS, so close it, then push the full screen.
-    router.back();
-    router.push('/capture/voice');
-  };
-
-  const leave = () => (steps && router.canDismiss?.() ? router.dismiss(2) : router.back()); // step 3 closes the steps beneath it too
+  const leave = () => router.back();
   const refresh = () => refreshRecords(queryClient);
   const undoToast = (undo: () => PromiseLike<unknown> | void) =>
     toast(t('capture.quick.saved'), {
@@ -334,7 +326,7 @@ export default function CaptureSheet() {
       id: newLogId(),
       vehicleId: vehicle.id,
       serviceTypeId: service!.id,
-      title: custom?.trim() || name(service!),
+      title: name(service!),
       odometer: num(odo),
       cost: num(amount),
       serviceDate: date,
@@ -391,46 +383,41 @@ export default function CaptureSheet() {
   const saveButton = (
     <Button title={t('capture.quick.save')} onPress={submit} disabled={!valid} loading={busy || save.isPending} />
   );
+  const MORE = '__more';
+  const art = (id: string) => services.find((x) => x.id === id)?.name_en ?? costs.find((k) => expenseChip(k.expense_code!) === id)?.name_en;
+  const tiles = chips.slice(0, 5);
+  if (chip && !tiles.includes(chip)) tiles[4] = chip; // chosen from "More"
+  tiles.push(MORE);
   const form = (
     // A formSheet lays out one scroll view as its root; a header or footer beside it gets hidden under it.
-    // The full-screen steps page can pin the Save button in a FooterBar instead (below).
     <ScrollView
-      className={steps ? 'flex-1' : 'flex-1 rounded-t-screen border-t border-line bg-sheet'}
-      contentContainerClassName={steps ? 'gap-4 px-6' : 'gap-4 px-6 pt-8'}
-      contentContainerStyle={{ paddingBottom: steps ? 16 : bottom + 16, ...(steps ? { paddingTop: top } : null) }}
+      className="flex-1 bg-white"
+      contentContainerClassName="gap-2.5 px-5 pt-3"
+      contentContainerStyle={{ paddingBottom: bottom + 16 }}
       keyboardShouldPersistTaps="handled"
       automaticallyAdjustKeyboardInsets>
-      {steps ? (
-        <Header title={custom || (chip ? label(chip) : '')} sub={t('capture.new.stepOf', { n: 3 })} below={<StepsBar step={3} />} belowH={6} />
-      ) : (
-        <View className="flex-row items-center justify-between">
-          <Text variant="heading">{t(editing ? 'capture.quick.editTitle' : 'capture.newRecord')}</Text>
-          <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-11 w-11 items-center justify-center rounded-full bg-white" style={{ boxShadow: shadows.lift }}>
-            <X size={20} color={c.ink} />
-          </PressableScale>
-        </View>
-      )}
-        {notice && NOTICES[notice] ? <Note tone="info" text={t(NOTICES[notice])} /> : null}
-        {editing || steps ? null : (
-        <PressableScale
-          accessibilityRole="button"
-          onPress={voice}
-          className="h-14 flex-row items-center justify-center gap-3 overflow-hidden rounded-item bg-panel">
-          <Sheen opacity={0.08} />
-          <Mic size={22} color="#D3F53D" />
-          <Text variant="label" className="text-onpanel">{t('capture.quick.say')}</Text>
+      <View className="h-1 w-[38px] self-center rounded-full bg-tick" />
+      <View className="flex-row items-center justify-between">
+        <Text variant="heading">{t(editing ? 'capture.quick.editTitle' : 'capture.newRecord')}</Text>
+        <PressableScale accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} onPress={router.back} className="h-10 w-10 items-center justify-center rounded-full bg-paper">
+          <X size={18} color={c.ink} />
         </PressableScale>
-        )}
-        {editing || steps ? null : <Text variant="caption" className="text-muted">{t('capture.quick.mostUsed')}</Text>}
-        {steps ? null : <View className="flex-row flex-wrap gap-2">
-          {chips.map((id) => (
-            <Chip key={id} label={label(id)} selected={chip === id} onPress={() => choose(id)} />
-          ))}
-          <Chip label={t('capture.quick.more')} onPress={openMore} />
-        </View>}
+      </View>
+      {notice && NOTICES[notice] ? <Note tone="info" text={t(NOTICES[notice])} /> : null}
+      <View className="flex-row flex-wrap gap-[7px]">
+        {tiles.map((id) => (
+          <PressableScale key={id} accessibilityRole="button" accessibilityState={{ selected: chip === id }} onPress={id === MORE ? openMore : () => choose(id)} scale={0.97} className={`w-[31.5%] items-center rounded-[20px] pb-2 pt-1.5 ${chip === id ? 'bg-ink' : 'bg-paper'}`}>
+            <PartArt nameEn={id === MORE ? undefined : art(id)} size={40} />
+            <Text variant="caption" className={`text-[12.5px] ${chip === id ? 'text-paper' : 'text-ink'}`} numberOfLines={1}>{id === MORE ? t('capture.quick.more') : label(id)}</Text>
+          </PressableScale>
+        ))}
+      </View>
         {chip ? (
           <>
             <Card className="gap-4 p-4">
+              {fuel ? null : service ? (
+                <Field label={t('capture.manual.odometer')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" returnKeyType="done" placeholder={t('capture.manual.optional')} error={tooLow ? t('errors.lowerReading') : undefined} />
+              ) : null}
               <View className="flex-row gap-4">
                 <Field className="flex-1" label={t('expenses.amount')} value={amount} onChangeText={(v) => setAmount(clean(v, true))} keyboardType="decimal-pad" returnKeyType="done" placeholder="0" autoFocus />
                 {fuel ? <Field className="flex-1" label={t('expenses.liters')} value={liters} onChangeText={(v) => setLiters(clean(v, true))} keyboardType="decimal-pad" returnKeyType="done" placeholder={t('expenses.optional')} /> : null}
@@ -461,17 +448,20 @@ export default function CaptureSheet() {
                 </View>
                 {showPicker && Platform.OS === 'ios' ? <IosDatePicker date={date} onChange={(d) => setDate(d.toLocaleDateString('en-CA'))} locale={ar ? 'ar' : 'en'} /> : null}
               </View>
-              {steps && service?.has_reminder ? (
-                <Field
-                  label={t('capture.new.remind')}
-                  value={every}
-                  onChangeText={(v) => setEvery(clean(v))}
-                  keyboardType="number-pad"
-                  returnKeyType="done"
-                  placeholder={service.default_interval_km != null ? service.default_interval_km.toLocaleString('en-US') : t('capture.manual.optional')}
-                />
-              ) : null}
             </Card>
+            {service ? (
+              <PressableScale
+                accessibilityRole="button"
+                onPress={attach}
+                disabled={!connected}
+                className={`min-h-[60px] flex-row items-center gap-3 rounded-field bg-paper px-3.5 py-2.5 ${connected ? '' : 'opacity-50'}`}>
+                <IconTile icon={Camera} tone="sky" size={36} />
+                <View className="flex-1 gap-0.5">
+                  <Text variant="label" numberOfLines={2}>{t('capture.manual.attach')}</Text>
+                  <Text variant="caption" className="text-muted" numberOfLines={2}>{t(!connected ? 'toast.photoOffline' : photoUri ? 'capture.manual.attached' : 'capture.manual.attachSub')}</Text>
+                </View>
+              </PressableScale>
+            ) : null}
             <Card>
               <PressableScale accessibilityRole="button" accessibilityState={{ expanded: more }} onPress={() => setMore(!more)} scale={0.99} className="min-h-[56px] flex-row items-center justify-between gap-3 px-4">
                 <Text variant="label" className="shrink">{t('capture.quick.moreDetails')}</Text>
@@ -479,9 +469,6 @@ export default function CaptureSheet() {
               </PressableScale>
               {more ? (
                 <View className="gap-4 px-4 pb-4 pt-1">
-                  {fuel ? null : service ? (
-                    <Field label={t('capture.manual.odometer')} value={odo} onChangeText={(v) => setOdo(clean(v))} keyboardType="number-pad" returnKeyType="done" placeholder={t('capture.manual.optional')} error={tooLow ? t('errors.lowerReading') : undefined} />
-                  ) : null}
                   <Field
                     label={t(service ? 'capture.manual.workshop' : 'expenses.place')}
                     value={workshop}
@@ -498,7 +485,7 @@ export default function CaptureSheet() {
                       placeholder={t('capture.manual.optional')}
                     />
                   ))}
-                  {service?.has_reminder && !steps ? (
+                  {service?.has_reminder ? (
                     <Field
                       label={t('capture.manual.interval')}
                       value={every}
@@ -508,19 +495,6 @@ export default function CaptureSheet() {
                     />
                   ) : null}
                   {service ? <Field label={t('capture.manual.notes')} value={notes} onChangeText={setNotes} placeholder={t('capture.manual.optional')} multiline /> : null}
-                  {service ? (
-                    <PressableScale
-                      accessibilityRole="button"
-                      onPress={attach}
-                      disabled={!connected}
-                      className={`min-h-[60px] flex-row items-center gap-3 rounded-field bg-paper px-3 py-2 ${connected ? '' : 'opacity-50'}`}>
-                      <IconTile icon={Camera} tone="sky" size={36} />
-                      <View className="flex-1 gap-0.5">
-                        <Text variant="label" numberOfLines={2}>{t('capture.manual.attach')}</Text>
-                        <Text variant="caption" className="text-muted" numberOfLines={2}>{t(!connected ? 'toast.photoOffline' : photoUri ? 'capture.manual.attached' : 'capture.manual.attachSub')}</Text>
-                      </View>
-                    </PressableScale>
-                  ) : null}
                 </View>
               ) : null}
             </Card>
@@ -533,21 +507,21 @@ export default function CaptureSheet() {
           </>
         ) : null}
         {error ? <Note tone="warning" text={error} /> : null}
-        {steps ? null : saveButton}
+        {saveButton}
         {(logId || expenseId) && filled ? (
           <Pressable accessibilityRole="button" onPress={remove} className="h-11 items-center justify-center">
             <Text variant="label" className="text-danger">{t('capture.quick.delete')}</Text>
           </Pressable>
         ) : null}
-        {steps ? null : <KeyboardDone />}
+        <KeyboardDone />
     </ScrollView>
   );
 
-  return steps ? (
-    <KeyboardAvoidingView behavior="padding" className="flex-1 bg-paper">
-      <Backdrop />
-      {form}
-      <FooterBar>{saveButton}</FooterBar>
-    </KeyboardAvoidingView>
-  ) : form;
+  return form;
+}
+
+// ?mode=expense: the v2 "New expense" sheet (Money). Everything else is the full record sheet above.
+export default function Capture() {
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  return mode === 'expense' ? <AddExpense /> : <CaptureSheet />;
 }

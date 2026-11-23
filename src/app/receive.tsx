@@ -1,12 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Car, CloudOff } from 'lucide-react-native';
+import { Image } from 'expo-image';
+import { CloudOff } from 'lucide-react-native';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { EmptyState } from '@/components/EmptyState';
-import { Backdrop, Button, FooterBar, Group, Header, IconTile, Item, Text } from '@/components/ui';
+import { PageHeader } from '@/components/PageHeader';
+import { Num } from '@/components/home/Num';
+import { Button, Card, FooterBar, Text } from '@/components/ui';
+import { vehicleArt } from '@/lib/vehicleArt';
 import { supabase } from '@/lib/supabase';
 import { useSettings } from '@/stores/settingsStore';
 
@@ -44,8 +48,7 @@ export default function ReceiveScreen() {
   if (bad || share.isError)
     return (
       <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-        <Backdrop />
-        <View className="px-6"><Header title={t('receive.header')} /></View>
+          <PageHeader title={t('receive.header')} />
         <View className="flex-1 justify-center px-6">
           <EmptyState
             icon={CloudOff}
@@ -61,30 +64,31 @@ export default function ReceiveScreen() {
       </SafeAreaView>
     );
 
+  // v2 flow 7 #2 "shared with you": the car, who sent it, two facts, the copy note, then add or just look.
+  // ponytail: the strip also lists the records and shows km and workshops; get_share only returns the count, so those wait for the backend.
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <Backdrop />
-      <View className="px-6"><Header title={t('receive.header')} /></View>
-      <View className="flex-1 justify-center gap-6 px-6">
-        <View className="items-center gap-4">
-          <IconTile icon={Car} size={80} />
-          <Text variant="title" className="text-center">{t('receive.title')}</Text>
-        </View>
+      <PageHeader title={t('receive.header')} />
+      <View className="flex-1 gap-4 px-6 pt-2">
         {s ? (
-          <Group>
-            <Item icon={Car} title={`${s.make} ${s.model} ${s.year}`} subtitle={t('receive.sub', { n: s.log_count })} chevron={false} disabled />
-            <View className="min-h-[48px] flex-row items-center justify-between gap-3 px-3.5 py-3">
-              <Text variant="caption" className="text-muted">{t('receive.by')}</Text>
-              <Text variant="label" className="shrink" numberOfLines={1}>{s.shared_by_name || t('receive.fallbackName')}</Text>
+          <>
+            <View className="items-center"><Image source={vehicleArt(s.vehicle_type)} contentFit="contain" style={{ width: 260, height: 130 }} /></View>
+            <View className="gap-0.5">
+              <Text variant="title" numberOfLines={2}>{s.nickname?.trim() || `${s.make} ${s.model}`}</Text>
+              <Text variant="caption" className="text-muted">{t('receive.fromOwner', { name: s.shared_by_name || t('receive.fallbackName') })}</Text>
             </View>
-          </Group>
+            <View className="flex-row gap-3">
+              <Card className="flex-1 gap-1 p-4"><Num value={String(s.log_count)} size={26} /><Text variant="caption" className="text-muted">{t('passport.records')}</Text></Card>
+              <Card className="flex-1 gap-1 p-4"><Num value={String(s.year)} size={26} /><Text variant="caption" className="text-muted">{t('vehicles.facts.year')}</Text></Card>
+            </View>
+          </>
         ) : null}
-        {s?.removed_records ? <Text variant="caption" className="text-center text-muted">{t('share.removed', { n: s.removed_records })}</Text> : null}
-        <Text variant="body" className="text-center text-muted">{t('receive.body')}</Text>
+        {s?.removed_records ? <Text variant="caption" className="text-muted">{t('share.removed', { n: s.removed_records })}</Text> : null}
+        <Text variant="caption" className="text-muted">{t('receive.copyNote')}</Text>
       </View>
       <FooterBar inset={false}>
-        <Button title={t('receive.accept')} loading={accept.isPending || share.isPending} onPress={() => accept.mutate()} />
-        <Button title={t('receive.decline')} variant="ghost" onPress={home} />
+        <Button title={t('receive.add')} loading={accept.isPending || share.isPending} onPress={() => accept.mutate()} />
+        <Button title={t('receive.viewOnly')} variant="secondary" onPress={home} />
       </FooterBar>
     </SafeAreaView>
   );

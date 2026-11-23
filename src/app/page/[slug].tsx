@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -7,13 +8,18 @@ import { useTranslation } from 'react-i18next';
 import { CloudOff } from 'lucide-react-native';
 
 import { EmptyState, LoadingState } from '@/components/EmptyState';
-import { Backdrop, Card, Header, Text } from '@/components/ui';
+import { PageHeader } from '@/components/PageHeader';
+import { Segment } from '@/components/money/Segment';
+import { Text } from '@/components/ui';
 import { parseBody } from '@/lib/pageText';
 import { supabase } from '@/lib/supabase';
 
+const PAGES = ['terms', 'privacy', 'support', 'about'] as const;
+
 // Privacy, terms, support, about: the text is edited in the admin dashboard (site_pages) and cached for offline.
 export default function SitePageScreen() {
-  const { slug } = useLocalSearchParams<{ slug: string }>();
+  const { slug: first } = useLocalSearchParams<{ slug: string }>();
+  const [slug, setSlug] = useState(first);
   const { t, i18n } = useTranslation();
   const lang = i18n.language === 'en' ? 'en' : 'ar';
   const page = useQuery({
@@ -26,29 +32,30 @@ export default function SitePageScreen() {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-paper px-6" edges={['top', 'bottom']}>
-      <Backdrop />
-      <Header title={page.data?.title ?? ''} />
+    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
+      <PageHeader title={t('account.legal')} />
+      <View className="px-6 pt-1">
+        <Segment value={slug} onChange={setSlug} options={PAGES.map((p) => ({ value: p, label: t(`account.${p}`) }))} />
+      </View>
       {page.data ? (
-        <ScrollView contentContainerClassName="pb-8 pt-2" showsVerticalScrollIndicator={false}>
-          <Card className="gap-3 p-5">
-            {parseBody(page.data.body).map((b, i) =>
-              b.type === 'h' ? (
-                <Text key={i} variant="heading" className={i ? 'mt-3' : ''}>{b.text}</Text>
-              ) : b.type === 'p' ? (
-                <Text key={i} variant="body" className="leading-6 text-muted">{b.text}</Text>
-              ) : (
-                <View key={i} className="gap-2 ps-1">
-                  {b.items!.map((item) => (
-                    <View key={item} className="flex-row gap-2.5">
-                      <Text variant="body" className="w-3 leading-6 text-teal">•</Text>
-                      <Text variant="body" className="flex-1 leading-6 text-muted">{item}</Text>
-                    </View>
-                  ))}
-                </View>
-              ),
-            )}
-          </Card>
+        <ScrollView className="flex-1" contentContainerClassName="px-6 pb-8 pt-5" showsVerticalScrollIndicator={false}>
+          <Text variant="title" style={{ fontSize: 24, lineHeight: 32 }}>{page.data.title}</Text>
+          {parseBody(page.data.body).map((b, i) =>
+            b.type === 'h' ? (
+              <Text key={i} variant="heading" className="mt-5">{b.text}</Text>
+            ) : b.type === 'p' ? (
+              <Text key={i} variant="body" className="mt-3.5" style={{ fontSize: 14.5, lineHeight: 25 }}>{b.text}</Text>
+            ) : (
+              <View key={i} className="mt-3.5 gap-2 ps-1">
+                {b.items!.map((item) => (
+                  <View key={item} className="flex-row gap-2.5">
+                    <Text variant="body" className="w-3 text-muted" style={{ fontSize: 14.5, lineHeight: 25 }}>•</Text>
+                    <Text variant="body" className="flex-1" style={{ fontSize: 14.5, lineHeight: 25 }}>{item}</Text>
+                  </View>
+                ))}
+              </View>
+            ),
+          )}
         </ScrollView>
       ) : page.isPending ? (
         <LoadingState />

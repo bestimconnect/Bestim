@@ -3,14 +3,17 @@ import { ar, enUS } from 'date-fns/locale';
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
+import { ShieldCheck, Trash2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
+import { Num } from '@/components/home/Num';
 import { PartArt } from '@/components/PartArt';
+import { Ring } from '@/components/Ring';
 import { PlateView } from '@/components/Plate';
 import { Card, Chip, Group, Item, PressableScale, Section, Text } from '@/components/ui';
-import { consumption } from '@/lib/fuel';
+import { consumption, fuelGap } from '@/lib/fuel';
 import { carLog, type Kind } from '@/lib/carLog';
-import { STATE_COLOR } from '@/lib/health';
+import { carHealth, STATE_COLOR } from '@/lib/health';
 import { useExpenses, useFuelFills, useRecordCategories, useServiceTypes, type Log, type Part, type Vehicle } from '@/lib/queries';
 import { hasReading } from '@/lib/reading';
 import { useColors } from '@/lib/theme';
@@ -32,53 +35,66 @@ const openPart = (vehicleId: string, serviceTypeId: string) => router.push({ pat
 
 const nm = (lang: string, x: { name_ar: string; name_en: string }) => (lang === 'ar' ? x.name_ar : x.name_en);
 
-/** Overview: facts about the car only (no parts): picture, plate, odometer, and a few numbers. */
-export function OverviewTab({ vehicle, logs, unit }: { vehicle: Vehicle; logs: Log[]; unit: string }) {
-  const { t, i18n } = useTranslation();
-  const expenses = (useExpenses().data ?? []).filter((e) => e.vehicle_id === vehicle.id);
-  const fuel = consumption(useFuelFills(vehicle.id).data ?? []);
-  const year = String(new Date().getFullYear());
-  const spent = expenses.filter((e) => e.expense_date.startsWith(year)).reduce((s, e) => s + Number(e.amount), 0);
-  const last = logs[0];
+/** A read-only info tile (v2): small label, a big thin number or word. Editing happens only from the pencil at the top of the page. */
+function Tile({ label, value, unit, children, className = '' }: { label: string; value?: string; unit?: string; children?: ReactNode; className?: string }) {
+  return (
+    <Card className={`min-h-[92px] flex-1 gap-1 p-4 ${className}`}>
+      <Text variant="caption" className="text-muted">{label}</Text>
+      {value != null ? <Num value={value} unit={unit} size={30} /> : null}
+      {children}
+    </Card>
+  );
+}
+
+/** Overview: facts about the car (all read-only), the health ring and fuel use tiles, passport link and delete. */
+export function OverviewTab({ vehicle, parts, unit }: { vehicle: Vehicle; logs?: Log[]; parts: Part[]; unit: string }) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const fills = useFuelFills(vehicle.id).data ?? [];
+  const fuel = consumption(fills);
+  const health = carHealth(parts);
+  const hColor = health.score == null ? c.line : health.late ? STATE_COLOR.overdue : health.soon ? STATE_COLOR.soon : STATE_COLOR.ok;
   const days = vehicle.odometer_updated_at ? differenceInCalendarDays(new Date(), parseISO(vehicle.odometer_updated_at)) : null;
-  const locale = i18n.language === 'ar' ? ar : enUS;
-  const facts: [string, string][] = [
-    [t('vehicles.facts.thisYear'), `${n(spent)} ${t('vehicles.currency')}`],
-    [t('fuel.title'), fuel ? `${fuel.average.kmPerLiter.toLocaleString('en-US', { maximumFractionDigits: 1 })} ${t('fuel.kmPerLiter')}` : '—'],
-    [t('vehicles.facts.lastService'), last ? format(parseISO(last.service_date), 'd MMM yyyy', { locale }) : '—'],
-    [t('vehicles.facts.colour'), vehicle.color ? t(`vehicles.color.${vehicle.color}`, vehicle.color) : '—'],
-  ];
   return (
     <>
-      <Card className="gap-4 p-4">
-        {vehicle.plate_number?.trim() ? <View className="flex-row"><PlateView plate={vehicle.plate_number} /></View> : null}
-        <View className="flex-row items-end justify-between gap-3">
-          <View className="flex-1 gap-0.5">
-            <Text variant="caption" className="text-muted">{t('vehicles.odometer', { unit })}</Text>
-            <Text variant="number" style={{ fontSize: 34, lineHeight: 42 }}>{hasReading(vehicle) ? n(vehicle.current_odometer) : '—'}</Text>
-            <Text variant="caption" className="text-muted">{days == null ? t('odometer.first') : days === 0 ? t('vehicles.facts.updatedToday') : t('vehicles.facts.updated', { count: days })}</Text>
-          </View>
-          <PressableScale
-            accessibilityRole="button"
-            onPress={() => router.push({ pathname: '/update-odometer', params: { vehicleId: vehicle.id } })}
-            className="h-11 justify-center rounded-full bg-lime px-5">
-            <Text variant="label" className="text-[#222E29]">{t('home.update')}</Text>
-          </PressableScale>
-        </View>
-      </Card>
-      {[facts.slice(0, 2), facts.slice(2)].map((row, i) => (
-        <View key={i} className="flex-row gap-3">
-          {row.map(([label, value]) => (
-            <Card key={label} className="flex-1 gap-1 p-4">
-              <Text variant="caption" className="text-muted">{label}</Text>
-              <Text variant="label" numberOfLines={1}>{value}</Text>
-            </Card>
-          ))}
-        </View>
-      ))}
-      <Card className="gap-1 p-4" onPress={() => router.push({ pathname: '/edit-vehicle', params: { id: vehicle.id } })}>
-        <Text variant="caption" className="text-muted">{t('vehicles.vin.label')}</Text>
-        <Text variant="label" selectable={!!vehicle.vin}>{vehicle.vin || '—'}</Text>
+      <View className="flex-row gap-3">
+        <Tile label={t('vehicles.facts.year')} value={String(vehicle.year)} />
+        <Tile label={t('vehicles.odometer', { unit })} value={hasReading(vehicle) ? n(vehicle.current_odometer) : '—'}>
+          <Text variant="caption" className="text-muted" numberOfLines={1}>{days == null ? t('odometer.first') : days === 0 ? t('vehicles.facts.updatedToday') : t('vehicles.facts.updated', { count: days })}</Text>
+        </Tile>
+      </View>
+      {/* Read-only on purpose (VIN, plate): details are edited only from the pencil at the top. */}
+      <View className="flex-row gap-3">
+        <Tile label={t('vehicles.vin.label')}>
+          <Text variant="label" selectable={!!vehicle.vin} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{vehicle.vin || '—'}</Text>
+        </Tile>
+        <Tile label={t('plate.label')}>
+          {vehicle.plate_number?.trim() ? <View className="flex-row"><PlateView plate={vehicle.plate_number} size="sm" /></View> : <Text variant="label">—</Text>}
+        </Tile>
+      </View>
+      <View className="flex-row gap-3">
+        <Tile label={t('fuel.title')} value={fuel ? fuel.average.lPer100.toLocaleString('en-US', { maximumFractionDigits: 1 }) : undefined} unit={fuel ? t('fuel.lPer100') : undefined}>
+          {fuel ? null : <Text variant="caption" className="text-muted">{t(`fuel.gap.${fuelGap(fills)}`)}</Text>}
+        </Tile>
+        <Tile label={t('vehicles.dash.health')}>
+          {health.score != null ? (
+            <View className="flex-row items-center gap-3">
+              <Ring value={health.score / 100} color={hColor} size={52} label={String(health.score)} />
+              <Text variant="caption" className="flex-1 text-muted">{t('vehicles.dash.counts', { late: health.late, soon: health.soon })}</Text>
+            </View>
+          ) : (
+            <Text variant="caption" className="text-muted">{t('vehicles.facts.noHealth')}</Text>
+          )}
+        </Tile>
+      </View>
+      {/* ponytail: the passport row is not in the v2 strip (it is reached from the menu there); kept so the passport stays one tap away. */}
+      <Group>
+        <Item icon={ShieldCheck} title={t('passport.title')} subtitle={t('passport.sub')} onPress={() => router.push({ pathname: '/passport' as never, params: { id: vehicle.id } })} />
+      </Group>
+      {/* v2: a white card, the label in danger red and a blush circle with the bin, no chevron. */}
+      <Card onPress={() => router.push({ pathname: '/delete-vehicle', params: { vehicleId: vehicle.id } })} accessibilityRole="button" className="min-h-[60px] flex-row items-center gap-3 !rounded-row px-4 py-3">
+        <Text variant="label" className="flex-1 text-danger">{t('vehicles.deleteCar')}</Text>
+        <View className="h-11 w-11 items-center justify-center rounded-full bg-blush"><Trash2 size={18} color={c.danger} strokeWidth={1.8} /></View>
       </Card>
     </>
   );

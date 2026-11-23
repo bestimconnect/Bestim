@@ -1,9 +1,6 @@
-import { useLocalSearchParams } from 'expo-router';
+import { PlanCompare } from '@/components/PlanCompare';
 
-import { PlanPager } from '@/components/PlanPager';
-
-// A plan's own page, swipe for the others. Opened from the plans list; `page` = the plan id to start on.
+// Old per-plan page: the compare screen shows every plan, so this is the same screen.
 export default function PlanPage() {
-  const { page } = useLocalSearchParams<{ page?: string }>();
-  return <PlanPager start={page} />;
+  return <PlanCompare />;
 }

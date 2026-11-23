@@ -10,6 +10,7 @@ type Settings = {
   theme: Theme; // chosen in Account settings; first-run flows are always light
   skipSplash: boolean; // one-shot: set just before the language reload so the splash animation does not replay
   currentVehicleId: string | null; // Home's vehicle + the one new logs go to; null = the primary vehicle
+  langPicked: boolean; // the language screen (first run) was passed once
   notifyAsked: boolean; // screen 45 is shown once (Q39)
   pendingShareToken: string | null; // a share link opened while signed out; used after sign-in (Q44)
   planTourSeen: string | null; // user id the plans tour (/welcome) was shown to
@@ -18,7 +19,7 @@ type Settings = {
   setLanguage: (l: Language) => void;
   setTheme: (t: Theme) => void;
   setCurrentVehicle: (id: string | null) => void;
-  set: (patch: Partial<Pick<Settings, 'notifyAsked' | 'pendingShareToken' | 'skipSplash' | 'planTourSeen' | 'tourSeen' | 'expensesAll'>>) => void;
+  set: (patch: Partial<Pick<Settings, 'langPicked' | 'notifyAsked' | 'pendingShareToken' | 'skipSplash' | 'planTourSeen' | 'tourSeen' | 'expensesAll'>>) => void;
 };
 
 export const useSettings = create<Settings>()(
@@ -28,6 +29,7 @@ export const useSettings = create<Settings>()(
       theme: 'light',
       skipSplash: false,
       currentVehicleId: null,
+      langPicked: false,
       notifyAsked: false,
       pendingShareToken: null,
       planTourSeen: null,

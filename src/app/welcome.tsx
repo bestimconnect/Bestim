@@ -1,6 +1,6 @@
-import { PlanPager } from '@/components/PlanPager';
+import { PlanCompare } from '@/components/PlanCompare';
 
-// First-login tour (decisions Q121): the welcome, then each plan. Opened once per account from Home.
+// First-login tour (decisions Q121): every plan on one screen. Opened once per account from Home.
 export default function Welcome() {
-  return <PlanPager first />;
+  return <PlanCompare first />;
 }

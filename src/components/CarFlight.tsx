@@ -21,7 +21,7 @@ export function CarFlight() {
     p.set(withTiming(1, { duration: 500, easing: Easing.bezier(0.4, 0, 0.2, 1) }, (done) => done && runOnJS(clear)()));
     const t = setTimeout(clear, 1500); // if the animation never reports back, give the pictures back
     return () => clearTimeout(t);
-  }, [flight]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [flight?.from]); // eslint-disable-line react-hooks/exhaustive-deps -- only a new flight restarts it; a retargeted `to` keeps the progress
   const style = useAnimatedStyle(() => {
     const f = flight;
     if (!f?.to) return {};

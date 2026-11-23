@@ -2,26 +2,21 @@ import type { LucideIcon } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
-import { Button, IconTile, Text } from '@/components/ui';
+import { Button, Empty } from '@/components/ui';
 import { useColors } from '@/lib/theme';
 
 type Tone = 'mint' | 'sky' | 'amber' | 'blush';
+const circle = { mint: 'lime', sky: 'neutral', amber: 'soon', blush: 'late' } as const;
 
-/** One look for "nothing here", "couldn't load" and "no results": a tinted icon tile with a soft light, a title, one line, an optional button. */
-export function EmptyState({ icon: Icon, tone = 'mint', title, body, action, onAction, children }: {
+/** "Nothing here", "couldn't load", "no results": the v2 state (components/ui Empty) with an optional button. */
+export function EmptyState({ icon, tone = 'mint', title, body, action, onAction, children }: {
   icon: LucideIcon; tone?: Tone; title: string; body?: string; action?: string; onAction?: () => void; children?: ReactNode;
 }) {
-  const c = useColors();
   return (
-    <View className="items-center gap-5 px-6 py-10">
-      <IconTile icon={Icon} tone={tone} size={80} color={tone === 'blush' ? c.danger : c.teal} />
-      <View className="gap-1.5 self-stretch">
-        <Text variant="heading" className="text-center">{title}</Text>
-        {body ? <Text variant="body" className="text-center text-muted">{body}</Text> : null}
-      </View>
+    <Empty icon={icon} tone={circle[tone]} title={title} body={body}>
       {action && onAction ? <Button title={action} onPress={onAction} className="self-stretch" /> : null}
       {children}
-    </View>
+    </Empty>
   );
 }
 

@@ -1,22 +1,29 @@
 import { router } from 'expo-router';
 import { Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
-import { ActivityIndicator, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Backdrop, Button, FooterBar, Header, IconTile, Note, PressableScale, Text } from '@/components/ui';
+import { PageHeader } from '@/components/PageHeader';
+import { Button, Field, FooterBar, IconTile, Note, Text } from '@/components/ui';
 import { useColors } from '@/lib/theme';
 
-// Screen 46 layout, PNG 46/تأكيد حذف السيارة — shared by delete-vehicle (Q36) and delete-account (Q34).
-type Props = { header: string; title: string; name?: string; body: string; keep: string; error: string; onDelete: () => Promise<void> };
+// v2 flow 13 "confirm delete": the delete button stays off until the user types the word (the car's name). Shared by delete-vehicle (Q36).
+// TODO(phase 1/5): the strip also shows a green "kept 30 days, restore from Recently deleted" note. The soft-delete functions exist in
+// supabase/migrations/20261121110000_v2_soft_delete.sql but are not in the generated types yet; until the app calls soft_delete_vehicle
+// the delete is permanent, so the body text says so and the note is not shown.
+type Props = { header: string; title: string; name?: string; body: string; keep: string; error: string; confirmLabel: string; word: string; onDelete: () => Promise<void> };
 
-export function DeleteConfirm({ header, title, name, body, keep, error, onDelete }: Props) {
+export function DeleteConfirm({ header, title, name, body, keep, error, confirmLabel, word, onDelete }: Props) {
   const { t } = useTranslation();
   const c = useColors();
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [typed, setTyped] = useState('');
+  const match = !!word.trim() && typed.trim().toLowerCase() === word.trim().toLowerCase();
   const run = async () => {
+    if (!match) return;
     setBusy(true);
     setFailed(false);
     try {
@@ -28,26 +35,19 @@ export function DeleteConfirm({ header, title, name, body, keep, error, onDelete
   };
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <Backdrop />
-      <Header title={header} />
-      <ScrollView className="flex-1" contentContainerClassName="grow justify-center gap-5 px-6">
+      <PageHeader title={header} />
+      <ScrollView className="flex-1" contentContainerClassName="grow gap-4 px-6 pb-4 pt-6" keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <View className="items-center"><IconTile icon={Trash2} tone="blush" size={72} color={c.danger} /></View>
         <Text variant="title" className="text-center">{title}</Text>
         {name ? <Text variant="label" className="text-center text-muted">{name}</Text> : null}
-        <Text variant="body" className="text-center text-muted">{body}</Text>
-        <Button title={t('feedback.delete.export')} variant="secondary" onPress={() => router.push('/account/export')} />
+        <Text variant="body" className="px-2 text-center text-muted">{body}</Text>
+        <Field label={confirmLabel} value={typed} onChangeText={setTyped} autoCapitalize="none" autoCorrect={false} />
         {failed ? <Note tone="warning" text={error} /> : null}
       </ScrollView>
       <FooterBar inset={false}>
-        <Button title={keep} onPress={router.back} />
-        {/* the destructive action: outlined, set apart from the safe primary above */}
-        <PressableScale
-          accessibilityRole="button"
-          disabled={busy}
-          onPress={run}
-          className="mt-2 h-14 flex-row items-center justify-center rounded-[18px] border border-danger">
-          {busy ? <ActivityIndicator color={c.danger} /> : <Text variant="label" className="text-danger" numberOfLines={1}>{t('feedback.delete.confirm')}</Text>}
-        </PressableScale>
+        <Button title={t('feedback.delete.now')} variant="danger" loading={busy} disabled={!match} onPress={run} />
+        <Button title={t('feedback.delete.export')} variant="soft" onPress={() => router.push('/account/export')} />
+        <Button title={keep} variant="link" onPress={router.back} />
       </FooterBar>
     </SafeAreaView>
   );

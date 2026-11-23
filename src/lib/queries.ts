@@ -244,9 +244,7 @@ export function useFuelFills(vehicleId: string | undefined) {
         .from('expenses')
         .select('id, amount, liters, odometer_reading, full_tank')
         .eq('vehicle_id', vehicleId!)
-        .eq('category', 'fuel')
-        .not('liters', 'is', null)
-        .not('odometer_reading', 'is', null);
+        .eq('category', 'fuel'); // incl. rows without litres or reading: fuelGap() tells the owner what is missing
       if (error) throw error;
       return data;
     },
