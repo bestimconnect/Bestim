@@ -1,38 +1,31 @@
 import { router } from 'expo-router';
 import type { RefObject } from 'react';
-import { Dimensions, I18nManager, type View } from 'react-native';
-import { initialWindowMetrics } from 'react-native-safe-area-context';
+import { Dimensions, type View } from 'react-native';
 import { create } from 'zustand';
 
-// The tapped car flies from where it was (Home, My Cars) into the car-details header and back (decisions Q108).
-// CarPhoto registers its picture under `<slot>:<vehicleId>`; the overlay (components/CarFlight) draws the one flying copy
-// while the real pictures stay hidden for the length of the flight.
+// The tapped car's card grows into the car page and shrinks back (decisions Q108, Q143). CarPhoto registers its picture under
+// `<slot>:<vehicleId>` and My Cars its card under `card:<vehicleId>`. The animation itself (components/CarFlight) lives inside the
+// car page: that page is a native layer above the app, so anything drawn outside it gets covered halfway through.
 export type Rect = { x: number; y: number; width: number; height: number };
-type Flight = { vehicleType: string; from: Rect; to: Rect | null; hide: string[] };
+export type Flight = { vehicleType: string; card: Rect; photo: Rect; to: Rect | null; hide: string[] };
 export type Slot = 'home' | 'list' | 'detail';
 type Car = { id: string; vehicle_type: string };
 
-export const useFlight = create<{ flight: Flight | null }>(() => ({ flight: null }));
+/** `landed`: the page finished opening, so its heavier body can be built. */
+export const useFlight = create<{ flight: Flight | null; landed: boolean }>(() => ({ flight: null, landed: false }));
 
 const views = new Map<string, RefObject<View | null>>();
 const origin = new Map<string, Slot>(); // vehicle id → where the user opened its details from
+let closer: ((next: Flight | null) => void) | null = null;
+export const setCloser = (f: typeof closer) => {
+  closer = f;
+};
 
 export const registerCar = (key: string, ref: RefObject<View | null>) => {
   views.set(key, ref);
-  // The car page's real picture is built after the flight starts: aim the flight at where it really sits (the guess in detailRect can be off a few points,
-  // which showed as a jump when the flying copy handed over). `from` stays the same object, so the animation keeps its progress.
-  if (key.startsWith('detail:')) requestAnimationFrame(() => retarget(key, ref));
   return () => {
     if (views.get(key) === ref) views.delete(key);
   };
-};
-
-const retarget = async (key: string, ref: RefObject<View | null>) => {
-  const f = useFlight.getState().flight;
-  if (!f?.to || !f.hide.includes(key)) return;
-  const to = await measure(ref);
-  const now = useFlight.getState().flight;
-  if (to && now?.from === f.from) useFlight.setState({ flight: { ...now, to } });
 };
 
 const measure = (ref?: RefObject<View | null>, slot?: Slot) =>
@@ -46,27 +39,27 @@ const measure = (ref?: RefObject<View | null>, slot?: Slot) =>
     });
   });
 
-/** Where the car sits in the car page's header (measured on an iPhone 16: 21 from the side, 57 below the safe area, 128x64). The flight starts at the tap and aims here, so it never waits for the page to be built. */
-const detailRect = (): Rect => {
-  const { width } = Dimensions.get('window');
-  const w = 128;
-  return { x: I18nManager.isRTL ? 21 : width - 21 - w, y: (initialWindowMetrics?.insets.top ?? 0) + 57, width: w, height: 64 };
-};
+const measureSource = (id: string, slot: Slot) => Promise.all([measure(views.get(`${slot}:${id}`), slot), measure(views.get(`card:${id}`))]);
 
-/** Open the car's details (`tab` picks the segment). With `fly` and a measured picture the car flies; otherwise it is a plain push. */
+/** Open the car's details (`tab` picks the segment). With `fly` and a measured picture the card grows; otherwise the page just fades in. */
 export async function openDetails(car: Car, slot: Slot, { tab, fly = true }: { tab?: string; fly?: boolean } = {}) {
-  const from = fly ? await measure(views.get(`${slot}:${car.id}`), slot) : null;
+  const [photo, card] = fly ? await measureSource(car.id, slot) : [null, null];
   origin.set(car.id, slot);
-  if (from) useFlight.setState({ flight: { vehicleType: car.vehicle_type, from, to: detailRect(), hide: [`${slot}:${car.id}`, `detail:${car.id}`] } });
+  useFlight.setState({
+    // Only the page's own picture hides: the growing card covers the original, so it never blinks.
+    flight: photo ? { vehicleType: car.vehicle_type, card: (slot === 'list' && card) || photo, photo, to: null, hide: [`detail:${car.id}`] } : null,
+  });
   router.push({ pathname: '/vehicle/[id]', params: tab ? { id: car.id, tab } : { id: car.id } });
 }
 
-/** Back from the details: the car flies home when the page it came from is still there. */
-export async function closeDetails(car: Car) {
-  const slot = origin.get(car.id);
-  if (slot) {
-    const [from, to] = await Promise.all([measure(views.get(`detail:${car.id}`)), measure(views.get(`${slot}:${car.id}`), slot)]);
-    if (from && to) useFlight.setState({ flight: { vehicleType: car.vehicle_type, from, to, hide: [`detail:${car.id}`, `${slot}:${car.id}`] } });
+/** Back from the details: the same animation in reverse, when the card it came from is still there. */
+export async function closeDetails(car?: Car) {
+  const slot = car && origin.get(car.id);
+  let next: Flight | null = null;
+  if (car && slot) {
+    const [to, [photo, card]] = await Promise.all([measure(views.get(`detail:${car.id}`)), measureSource(car.id, slot)]);
+    if (to && photo) next = { vehicleType: car.vehicle_type, card: (slot === 'list' && card) || photo, photo, to, hide: [`detail:${car.id}`] };
   }
-  router.back();
+  if (closer) closer(next);
+  else router.back();
 }

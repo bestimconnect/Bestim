@@ -41,6 +41,8 @@ export const shadows = {
   // Q141 (founder, 2026-11-23): the flat ring became soft depth: a hairline, a tight contact shadow and a soft lift.
   ring: '0 0 0 1px rgba(0,0,0,0.04), 0 1px 2px rgba(16,24,20,0.06), 0 10px 22px -8px rgba(16,24,20,0.16)',
   pill: '0 8px 24px rgba(0,0,0,0.08)',
+  // Founder (2026-11-23): the nav's edge must stay visible over white cards.
+  navPill: '0 0 0 1px rgba(0,0,0,0.07), 0 0 16px rgba(16,24,20,0.16), 0 6px 20px rgba(16,24,20,0.12)',
   fab: '0 8px 24px rgba(0,0,0,0.18)',
   // Figma effect styles (Elevation/*) by their design-system names, plus the selected segment's lift (`.sg span.on`).
   hair: '0 0 0 1px rgba(0,0,0,0.03)',

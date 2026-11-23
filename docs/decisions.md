@@ -1402,3 +1402,12 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 
 ### Q141 — Soft depth and tint (founder, 2026-11-23)
 - The app felt flat. Tiles now have a hairline plus a two-layer soft shadow (`shadows.ring`), the page is a touch darker (`#EBEBE8`) and cards pure white, and key Home tiles take a soft tint (oil: green/amber/rose by state, next service amber when due soon). No gradients. The + fan opens on a circular arc; nav tabs resize with a spring.
+
+### Q142 — Calm nav motion, visible nav edge (founder, 2026-11-23)
+- The nav tabs and the + menu no longer bounce: short, soft fades and a small drift only.
+- The nav pill has a soft shadow all around so its edge stays visible over white cards.
+
+### Q143 — The car card grows into the car page (founder, 2026-11-23)
+- Opening a car: the card grows to full screen while the car moves to its place without fading. Back runs the same animation in reverse. Replaces the Q108 flight and page fade.
+- The animation lives inside the car page (`components/CarFlight`), because that page is a native layer that covers anything drawn outside it.
+- On the car page, back is at the start of the row: top right in Arabic, top left in English.

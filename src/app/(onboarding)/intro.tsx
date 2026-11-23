@@ -1,121 +1,28 @@
-import { Image } from 'expo-image';
 import { Redirect, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ArrowLeft, ArrowRight, Check, Mic, ShieldCheck } from 'lucide-react-native';
 import { useState } from 'react';
 import { I18nManager, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { cancelAnimation, Easing, interpolateColor, type SharedValue, runOnJS, useAnimatedReaction, useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import Animated, { cancelAnimation, Easing, type SharedValue, runOnJS, useAnimatedReaction, useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { PressableScale, Text } from '@/components/ui';
+import { palette } from '@/lib/palette';
 import { splashClock } from '@/lib/splashClock';
-import { vehicleArt } from '@/lib/vehicleArt';
 import { useSettings } from '@/stores/settingsStore';
 
-// Three welcome slides (v2): Voice on lime, Reminders on dark green, Selling on teal. Big words, dots, Next / Skip.
-// Slide copy and the little scenes are the design's (design-v2 `wsl`). Skip and Get started go to Sign in.
-const LIME = '#D3F53D';
-const INK = '#222E29';
-const TEAL = '#08736F';
-const DARK_TEXT = '#171B19';
-const LIGHT_TEXT = '#F5F7F5';
-const SLIDES = [
-  { bg: LIME, fg: DARK_TEXT, sub: 'rgba(23,27,25,0.68)', dots: [DARK_TEXT, 'rgba(23,27,25,0.22)'], btn: INK, onBtn: LIME, mark: require('@/assets/images/logo-mark.png') },
-  { bg: INK, fg: LIGHT_TEXT, sub: 'rgba(245,247,245,0.72)', dots: [LIME, 'rgba(255,255,255,0.28)'], btn: LIME, onBtn: DARK_TEXT, mark: require('@/assets/images/logo-mark-inverse.png') },
-  { bg: TEAL, fg: LIGHT_TEXT, sub: 'rgba(245,247,245,0.72)', dots: [LIME, 'rgba(255,255,255,0.28)'], btn: LIME, onBtn: DARK_TEXT, mark: require('@/assets/images/logo-mark-inverse.png') },
-] as const;
-const SOFT = '0 12px 26px rgba(0,0,0,0.18)';
-
-/** A row of small bars, `on` of them filled (the design's ticks). Always left to right. */
-function Ticks({ on, total = 12, height, color }: { on: number; total?: number; height: number; color: string }) {
-  return (
-    <View className="flex-row items-end gap-1" style={{ direction: 'ltr', height }}>
-      {Array.from({ length: total }, (_, k) => (
-        <View key={k} className="flex-1 rounded-[2px]" style={{ height, backgroundColor: k < on ? color : '#E3E6E3' }} />
-      ))}
-    </View>
-  );
-}
-
-// A fixed 9x9 pattern standing in for the QR code (decoration only).
-const QR = ['111111101', '100000101', '101110101', '101110100', '101110111', '100000010', '111111101', '000100110', '110101011'];
-
-function Scene({ n }: { n: number }) {
-  const { t } = useTranslation();
-  const w = (k: string) => t(`onboarding.welcome.${k}`);
-  const rtl = I18nManager.isRTL;
-  if (n === 0)
-    return (
-      <>
-        <Image source={vehicleArt('sedan')} contentFit="contain" style={{ position: 'absolute', top: 50, start: '-8%', width: '116%', aspectRatio: 2 }} />
-        <View className="absolute end-1.5 top-2 flex-row items-center gap-[9px] rounded-[22px] rounded-es-[6px] bg-white px-4 py-3" style={{ boxShadow: '0 10px 26px rgba(0,0,0,0.12)' }}>
-          <View className="h-[30px] w-[30px] items-center justify-center rounded-full" style={{ backgroundColor: INK }}>
-            <Mic size={15} color={LIME} strokeWidth={2} />
-          </View>
-          <Text className="!text-[14.5px] text-[#171B19]">{w('say')}</Text>
-        </View>
-        <View className="absolute bottom-[26px] start-0.5 flex-row items-center gap-[7px] rounded-full px-3.5 py-[9px]" style={{ backgroundColor: INK }}>
-          <Check size={15} color={LIME} strokeWidth={2} />
-          <Text className="!text-[13px] text-[#D3F53D]">{w('saved')}</Text>
-        </View>
-      </>
-    );
-  if (n === 1) {
-    const rows = [
-      { name: w('oil'), when: w('in480'), on: 3, color: '#E0A23A', shift: 0 },
-      { name: w('brakes'), when: w('in2100'), on: 8, color: '#4C9A4A', shift: -14 },
-      { name: w('tires'), when: w('in6m'), on: 10, color: '#4C9A4A', shift: 10 },
-    ];
-    return (
-      <View className="gap-[11px] pt-3.5">
-        {rows.map((r) => (
-          <View key={r.name} className="rounded-[24px] bg-white px-4 py-3.5" style={{ boxShadow: SOFT, transform: [{ translateX: r.shift * (rtl ? -1 : 1) }] }}>
-            <View className="flex-row items-center justify-between">
-              <Text className="!text-[14.5px] text-[#171B19]">{r.name}</Text>
-              <Text className="!text-[13px] text-[#6A746E]">{r.when}</Text>
-            </View>
-            <View className="mt-[9px]"><Ticks on={r.on} height={22} color={r.color} /></View>
-          </View>
-        ))}
-      </View>
-    );
-  }
-  return (
-    <>
-      <View className="mx-2.5 mt-1.5 rounded-[30px] bg-white p-[18px]" style={{ boxShadow: '0 16px 34px rgba(0,0,0,0.22)' }}>
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center gap-1.5">
-            <ShieldCheck size={16} color="#4C9A4A" strokeWidth={2} />
-            <Text className="!text-[13px] text-[#4C9A4A]">{w('verified')}</Text>
-          </View>
-          <Text className="!text-[13px] text-[#6A746E]">{w('ready')}</Text>
-        </View>
-        <View className="mt-3 flex-row items-center gap-3.5">
-          <View className="flex-1">
-            <Text variant="number" className="!text-[54px] !leading-[60px] text-[#171B19]">{'86'}<Text variant="number" className="!text-[20px] text-[#171B19]">%</Text></Text>
-            <View className="mt-2.5"><Ticks on={10} height={24} color="#4C9A4A" /></View>
-          </View>
-          <View className="h-[92px] w-[92px] justify-between rounded-[10px] border border-[#E3E6E3] p-1.5" style={{ direction: 'ltr' }}>
-            {QR.map((row, y) => (
-              <View key={y} className="flex-1 flex-row">
-                {[...row].map((d, x) => <View key={x} className="flex-1" style={{ backgroundColor: d === '1' ? '#171B19' : 'transparent' }} />)}
-              </View>
-            ))}
-          </View>
-        </View>
-      </View>
-      <Image source={vehicleArt('sedan')} contentFit="contain" style={{ width: '92%', aspectRatio: 2, marginTop: 18, marginHorizontal: '4%' }} />
-    </>
-  );
-}
-
-// Slide change = style A "Drift" (design-v2/motion): cross-fade plus a small drift in the reading direction (mirrored in Arabic).
-// Four values follow the same page position (0..2): fade 650 ms, picture 900 ms, text 900 ms after a 90 ms delay, dots 450 ms.
-// A swipe moves all of them with the finger, then they settle on the target with those durations. Only opacity and translateX move
-// (the dots also change width, as designed). Reduce Motion: 250 ms cross-fade, no drift, dots jump.
+// The three welcome slides, content and layout from the approved design (design-v2/motion, Bestim Splash):
+// the app ground, one picture and one text block per slide, centred dots, a wide button, "I have an account".
+// Slide change = style A "Drift": cross-fade plus a small drift in the reading direction (mirrored in Arabic).
+// Separate page positions (0..2): fade 650 ms, picture 900 ms, text 900 ms after 90 ms, dots 450 ms.
+// A swipe moves them with the finger, then they settle. Reduce Motion: 250 ms cross-fade, no drift, dots jump.
 const DRIFT = Easing.bezier(0.2, 0.7, 0.2, 1);
+const WAVE = [14, 26, 40, 22, 54, 34, 18, 46, 60, 30, 16, 42, 28, 12];
+const CARD_SHADOW = { boxShadow: '0 1px 0 rgba(0,0,0,0.06)' };
+type Colors = (typeof palette)['light'];
+type Pos = { fade: SharedValue<number>; pic: SharedValue<number>; txt: SharedValue<number>; tfade: SharedValue<number>; dot: SharedValue<number> };
+
 const clamp1 = (x: number) => {
   'worklet';
   return Math.min(1, Math.max(-1, x));
@@ -124,73 +31,107 @@ const near = (pos: number, i: number) => {
   'worklet';
   return Math.max(0, 1 - Math.abs(pos - i)); // 1 on its own slide, 0 a slide away
 };
-type Pos = { fade: SharedValue<number>; pic: SharedValue<number>; txt: SharedValue<number>; tfade: SharedValue<number>; dot: SharedValue<number> };
 
-function Slide({ n, pos, dir, still, top, height, text }: { n: number; pos: Pos; dir: number; still: boolean; top: number; height: number; text: { title: string; body: string } }) {
-  const s = SLIDES[n];
+function Saved({ label, c }: { label: string; c: Colors }) {
+  return (
+    <View className="flex-row items-center gap-2">
+      <View className="h-6 w-6 items-center justify-center rounded-full" style={{ backgroundColor: c.ok }}>
+        <Text className="!text-[13px]" style={{ color: c.paper }}>✓</Text>
+      </View>
+      <Text variant="label" className="!text-[15px]" style={{ color: c.ok }}>{label}</Text>
+    </View>
+  );
+}
+
+function Picture({ n, c }: { n: number; c: Colors }) {
+  const { t } = useTranslation();
+  const w = (k: string) => t(`onboarding.welcome.${k}`);
+  if (n === 0)
+    return (
+      <View className="w-full items-center gap-4">
+        <View className="rounded-[20px] px-[18px] py-3.5" style={[{ backgroundColor: c.white }, CARD_SHADOW]}>
+          <Text className="!text-[16px]" style={{ color: c.ink }}>{w('say')}</Text>
+        </View>
+        <View className="h-[84px] flex-row items-center gap-[5px]" style={{ direction: 'ltr' }}>
+          {WAVE.map((h, j) => <View key={j} className="w-[7px] rounded-full" style={{ height: h * 1.3, backgroundColor: j % 5 === 0 ? c.lime : c.ink }} />)}
+        </View>
+        <Saved label={w('saved')} c={c} />
+      </View>
+    );
+  if (n === 1) {
+    const rows = [{ name: w('oil'), when: w('in480'), on: 2 }, { name: w('brakes'), when: w('in2100'), on: 6 }, { name: w('tires'), when: w('in6m'), on: 9 }];
+    return (
+      <View className="w-full gap-3.5">
+        {rows.map((r) => (
+          <View key={r.name} className="rounded-[20px] px-[18px] py-4" style={[{ backgroundColor: c.white }, CARD_SHADOW]}>
+            <View className="mb-2.5 flex-row justify-between">
+              <Text variant="label" className="!text-[15px]" style={{ color: c.ink }}>{r.name}</Text>
+              <Text className="!text-[14px]" style={{ color: c.muted }}>{r.when}</Text>
+            </View>
+            <View className="flex-row gap-1" style={{ direction: 'ltr' }}>
+              {Array.from({ length: 12 }, (_, q) => <View key={q} className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: q < r.on ? (r.on < 4 ? c.soon : c.ink) : c.tick }} />)}
+            </View>
+          </View>
+        ))}
+      </View>
+    );
+  }
+  return (
+    <View className="w-full gap-4 rounded-[26px] p-5" style={[{ backgroundColor: c.white }, CARD_SHADOW]}>
+      <View className="flex-row items-center justify-between">
+        <Text className="!text-[15px]" style={{ color: c.muted }}>{w('passport')}</Text>
+        <View className="rounded-full px-3 py-1" style={{ backgroundColor: c.lime }}>
+          <Text variant="label" className="!text-[13px]" style={{ color: c.onlime }}>{w('ready')}</Text>
+        </View>
+      </View>
+      <View className="flex-row items-baseline" style={{ direction: 'ltr', alignSelf: 'flex-start' }}>
+        <Text variant="number" className="!text-[56px] !leading-[62px]" style={{ color: c.ink }}>92</Text>
+        <Text className="!text-[18px]" style={{ color: c.muted }}>/100</Text>
+      </View>
+      <View className="h-2 rounded-full" style={{ width: '86%', backgroundColor: c.tick }} />
+      <View className="h-2 rounded-full" style={{ width: '62%', backgroundColor: c.tick }} />
+      <Saved label={w('verified')} c={c} />
+    </View>
+  );
+}
+
+function Slide({ n, pos, dir, still, c, current }: { n: number; pos: Pos; dir: number; still: boolean; c: Colors; current: boolean }) {
+  const { t } = useTranslation();
   const pic = useAnimatedStyle(() => ({ opacity: near(pos.fade.get(), n), transform: [{ translateX: still ? 0 : dir * 60 * clamp1(n - pos.pic.get()) }] }));
   const txt = useAnimatedStyle(() => ({ opacity: near(pos.tfade.get(), n), transform: [{ translateX: still ? 0 : dir * 22 * clamp1(n - pos.txt.get()) }] }));
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <Animated.View style={[{ paddingTop: top }, pic]}>
-        <View className="px-[22px] pt-3.5" style={{ height: 34 + 14 }}>
-          <Image source={s.mark} contentFit="contain" style={{ width: 45, height: 34 }} />
-        </View>
-        <View className="mx-[22px] mt-4" style={{ height: Math.min(400, Math.max(330, height * 0.4)) }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          <Scene n={n} />
-        </View>
+    <View style={[StyleSheet.absoluteFill, { paddingHorizontal: 24, pointerEvents: 'none' }]} accessibilityElementsHidden={!current} importantForAccessibility={current ? 'auto' : 'no-hide-descendants'}>
+      <Animated.View className="flex-1 items-center justify-center" style={pic} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        <Picture n={n} c={c} />
       </Animated.View>
-      <Animated.View className="px-6" style={[{ marginTop: 16 }, txt]}>
-        <Text variant="title" className="!text-[29px] !leading-[36px]" style={{ color: s.fg }}>{text.title}</Text>
-        <Text className="mt-2.5 !text-[15px] !leading-[24px]" style={{ color: s.sub }}>{text.body}</Text>
+      <Animated.View className="pb-1 pt-2" style={txt}>
+        <Text variant="title" className="!text-[26px] !leading-[36px]" style={{ color: c.ink }}>{t(`onboarding.welcome.slides.${n}.title`)}</Text>
+        <Text className="mt-1.5 !text-[16px] !leading-[25px]" style={{ color: c.muted }}>{t(`onboarding.welcome.slides.${n}.body`)}</Text>
       </Animated.View>
     </View>
   );
 }
 
-function Dot({ i, pos }: { i: number; pos: Pos }) {
+function Dot({ i, pos, c }: { i: number; pos: Pos; c: Colors }) {
   const style = useAnimatedStyle(() => {
     const a = near(pos.dot.get(), i);
-    const p = pos.fade.get();
-    const on = interpolateColor(p, [0, 1, 2], SLIDES.map((s) => s.dots[0]));
-    const off = interpolateColor(p, [0, 1, 2], SLIDES.map((s) => s.dots[1]));
-    return { width: 7 + 17 * a, backgroundColor: a > 0.5 ? on : off };
+    return { width: 7 + 17 * a, backgroundColor: a > 0.5 ? c.ink : c.tick };
   });
-  return <Animated.View className="h-2 rounded-full" style={style} />;
-}
-
-/** One label of the button ("Next" / "Get started" with its arrow), shown while its slide is the current one. */
-function Label({ n, pos, label, Arrow }: { n: number; pos: Pos; label: string; Arrow: typeof ArrowRight }) {
-  const s = SLIDES[n];
-  const style = useAnimatedStyle(() => ({ opacity: near(pos.fade.get(), n) }));
-  return (
-    <Animated.View className="absolute flex-row items-center gap-2" style={style}>
-      <Text variant="label" className="!text-[15px]" style={{ color: s.onBtn }}>{label}</Text>
-      <Arrow size={17} color={s.onBtn} strokeWidth={2} />
-    </Animated.View>
-  );
-}
-
-function SkipLabel({ n, pos, label }: { n: number; pos: Pos; label: string }) {
-  const style = useAnimatedStyle(() => ({ opacity: near(pos.fade.get(), n) }));
-  return (
-    <Animated.View className="absolute" style={style}>
-      <Text className="!text-[14px]" style={{ color: SLIDES[n].sub }}>{label}</Text>
-    </Animated.View>
-  );
+  return <Animated.View className="h-[7px] rounded-full" style={style} />;
 }
 
 export default function IntroScreen() {
   const { t } = useTranslation();
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const { top, bottom } = useSafeAreaInsets();
   const langPicked = useSettings((s) => s.langPicked);
+  const theme = useSettings((s) => s.theme);
+  const c = palette[theme];
   const still = useReducedMotion();
   const [index, setIndex] = useState(0);
   const dir = I18nManager.isRTL ? -1 : 1;
-  const Arrow = I18nManager.isRTL ? ArrowLeft : ArrowRight;
 
-  // Page position, one value per property (they all start one slide "before" the first, so slide 1 enters).
+  // They all start one slide "before" the first, so slide 1 enters.
   const pos: Pos = { fade: useSharedValue(-1), pic: useSharedValue(-1), txt: useSharedValue(-1), tfade: useSharedValue(-1), dot: useSharedValue(-1) };
   const target = useSharedValue(0);
   const started = useSharedValue(false);
@@ -219,7 +160,9 @@ export default function IntroScreen() {
   );
   useAnimatedReaction(
     () => Math.min(2, Math.max(0, Math.round(pos.fade.get()))),
-    (i, prev) => i !== prev && runOnJS(setIndex)(i),
+    (i, prev) => {
+      if (i !== prev) runOnJS(setIndex)(i);
+    },
   );
 
   const pan = Gesture.Pan()
@@ -238,41 +181,51 @@ export default function IntroScreen() {
       goto(Math.min(2, Math.max(0, Math.min(base.get() + 1, Math.max(base.get() - 1, Math.round(base.get() + moved))))));
     });
 
-  const ground = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(pos.fade.get(), [0, 1, 2], SLIDES.map((s) => s.bg)) }));
-  const button = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(pos.fade.get(), [0, 1, 2], SLIDES.map((s) => s.btn)) }));
+  const nextLabel = useAnimatedStyle(() => ({ opacity: 1 - Math.min(1, Math.max(0, pos.fade.get() - 1)) }));
+  const startLabel = useAnimatedStyle(() => ({ opacity: Math.min(1, Math.max(0, pos.fade.get() - 1)) }));
+  const chrome = useAnimatedStyle(() => ({ opacity: Math.min(1, pos.fade.get() + 1) }));
 
   if (!langPicked) return <Redirect href="/language" />;
   const open = () => router.push('/login');
-  const next = t('onboarding.next');
-  const start = t('onboarding.start');
+  const safe = Math.max(bottom, 18);
 
   return (
-    <Animated.View className="flex-1" style={ground}>
-      <StatusBar style={index === 0 ? 'dark' : 'light'} />
+    <View className="flex-1" style={{ backgroundColor: c.paper }}>
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <GestureDetector gesture={pan}>
-        <View className="flex-1">
-          {[0, 1, 2].map((n) => (
-            <Slide key={n} n={n} pos={pos} dir={dir} still={still} top={top} height={height} text={{ title: t(`onboarding.welcome.slides.${n}.title`), body: t(`onboarding.welcome.slides.${n}.body`) }} />
-          ))}
+        <View className="flex-1" style={{ paddingTop: top + 52, paddingBottom: safe + 146 }}>
+          <View className="flex-1">
+            {[0, 1, 2].map((n) => <Slide key={n} n={n} pos={pos} dir={dir} still={still} c={c} current={n === index} />)}
+          </View>
         </View>
       </GestureDetector>
-      {/* Stays still while the slides move; only the label and colours cross-fade. */}
-      <PressableScale accessibilityRole="button" onPress={open} className="absolute min-h-11 items-end justify-center" style={{ top: top + 9, end: 22, minWidth: 60 }}>
-        {[0, 1, 2].map((n) => <SkipLabel key={n} n={n} pos={pos} label={t('onboarding.skip')} />)}
-        <Text className="!text-[14px] opacity-0">{t('onboarding.skip')}</Text>
-      </PressableScale>
-      <View className="absolute inset-x-6 flex-row items-center justify-between" style={{ bottom: bottom + 34 }}>
-        <View className="flex-row gap-[7px]">{[0, 1, 2].map((i) => <Dot key={i} i={i} pos={pos} />)}</View>
-        <PressableScale accessibilityRole="button" onPress={() => (target.get() >= 2 ? open() : goto(target.get() + 1))}>
-          <Animated.View className="h-14 items-center justify-center rounded-full px-[26px]" style={button}>
-            <View className="flex-row items-center gap-2 opacity-0">
-              <Text variant="label" className="!text-[15px]">{start.length > next.length ? start : next}</Text>
-              <Arrow size={17} color="transparent" />
-            </View>
-            {[0, 1, 2].map((n) => <Label key={n} n={n} pos={pos} label={n === 2 ? start : next} Arrow={Arrow} />)}
+      {/* Stays still while the slides move; only the button label cross-fades. */}
+      <Animated.View className="absolute" style={[{ top: top + 6, end: 14 }, chrome]}>
+        <PressableScale accessibilityRole="button" onPress={open} className="min-h-11 justify-center px-2.5">
+          <Text className="!text-[15px]" style={{ color: c.muted }}>{t('onboarding.skip')}</Text>
+        </PressableScale>
+      </Animated.View>
+      <Animated.View className="absolute inset-x-6 items-center" style={[{ bottom: safe }, chrome]}>
+        <View className="mb-6 flex-row justify-center gap-[7px]" style={{ direction: 'ltr' }}>
+          {[0, 1, 2].map((i) => <Dot key={i} i={i} pos={pos} c={c} />)}
+        </View>
+        <PressableScale
+          accessibilityRole="button"
+          accessibilityLabel={t(index === 2 ? 'onboarding.start' : 'onboarding.next')}
+          onPress={() => (target.get() >= 2 ? open() : goto(target.get() + 1))}
+          className="h-14 w-full items-center justify-center rounded-full"
+          style={{ backgroundColor: c.btn }}>
+          <Animated.View className="absolute" style={nextLabel}>
+            <Text variant="label" className="!text-[16px]" style={{ color: c.onbtn }}>{t('onboarding.next')}</Text>
+          </Animated.View>
+          <Animated.View className="absolute" style={startLabel}>
+            <Text variant="label" className="!text-[16px]" style={{ color: c.onbtn }}>{t('onboarding.start')}</Text>
           </Animated.View>
         </PressableScale>
-      </View>
-    </Animated.View>
+        <PressableScale accessibilityRole="button" onPress={open} className="mt-1 min-h-11 justify-center px-3">
+          <Text className="!text-[15px]" style={{ color: c.muted }}>{t('onboarding.welcome.have')}</Text>
+        </PressableScale>
+      </Animated.View>
+    </View>
   );
 }
