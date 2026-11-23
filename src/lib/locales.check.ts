@@ -4,8 +4,23 @@ import assert from 'node:assert/strict';
 import { globSync, readFileSync } from 'node:fs';
 
 const flat = (o: object, p = ''): string[] => Object.entries(o).flatMap(([k, v]) => (v && typeof v === 'object' ? flat(v, `${p}${k}.`) : [`${p}${k}`]));
-const ar = new Set(flat(JSON.parse(readFileSync('src/locales/ar.json', 'utf8'))));
-const en = new Set(flat(JSON.parse(readFileSync('src/locales/en.json', 'utf8'))));
+const arAll = flat(JSON.parse(readFileSync('src/locales/ar.json', 'utf8')));
+const enAll = flat(JSON.parse(readFileSync('src/locales/en.json', 'utf8')));
+// Plural forms differ per language (Arabic has six): compare the base key, then check each language has the forms it needs.
+const PLURAL = /_(zero|one|two|few|many|other)$/;
+const base = (k: string) => k.replace(PLURAL, '');
+const ar = new Set(arAll.map(base));
+const en = new Set(enAll.map(base));
+const forms = (all: string[]) => {
+  const m = new Map<string, Set<string>>();
+  for (const k of all) if (PLURAL.test(k)) m.set(base(k), (m.get(base(k)) ?? new Set()).add(k.match(PLURAL)![1]));
+  return m;
+};
+// A missing plural form shows the raw key on screen (Arabic 11–99 needs `many`, 0 needs `zero`).
+for (const [lang, need] of [['ar', ['zero', 'one', 'two', 'few', 'many', 'other']], ['en', ['one', 'other']]] as const) {
+  const missing = [...forms(lang === 'ar' ? arAll : enAll)].flatMap(([k, have]) => need.filter((f) => !have.has(f)).map((f) => `${k}_${f}`));
+  assert.deepEqual(missing, [], `${lang}.json plural forms missing`);
+}
 
 assert.deepEqual([...ar].filter((k) => !en.has(k)), [], 'keys missing from en.json');
 assert.deepEqual([...en].filter((k) => !ar.has(k)), [], 'keys missing from ar.json');

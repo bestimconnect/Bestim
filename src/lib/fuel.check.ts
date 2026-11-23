@@ -1,7 +1,7 @@
 // Run: node --experimental-strip-types src/lib/fuel.check.ts
 import assert from 'node:assert/strict';
 
-import { consumption } from './fuel.ts';
+import { consumption, fuelGap } from './fuel.ts';
 
 const fill = (odometer_reading: number | null, liters: number | null, amount: number, full_tank = true, id?: string) => ({ odometer_reading, liters, amount, full_tank, id });
 
@@ -12,14 +12,14 @@ assert.equal(consumption([fill(1000, 40, 400), fill(1400, null, 400), fill(null,
 // Out of order on purpose: 1000 → 1400 (30 L, 300 EGP) → 1900 (40 L, 480 EGP).
 const c = consumption([fill(1900, 40, 480), fill(1000, 40, 400), fill(1400, 30, 300)])!;
 assert.equal(c.pairs, 2);
-assert.deepEqual(c.latest, { kmPerLiter: 500 / 40, costPerKm: 480 / 500 });
-assert.deepEqual(c.average, { kmPerLiter: (400 / 30 + 500 / 40) / 2, costPerKm: (300 / 400 + 480 / 500) / 2 });
+assert.deepEqual(c.latest, { kmPerLiter: 500 / 40, lPer100: 8, costPerKm: 480 / 500 });
+assert.deepEqual(c.average, { kmPerLiter: (400 / 30 + 500 / 40) / 2, lPer100: (7.5 + 8) / 2, costPerKm: (300 / 400 + 480 / 500) / 2 });
 
 // A partial fill-up adds its litres and money to the next full tank's figure; it never closes a pair itself.
 // 1000 full → 1200 partial (10 L, 100) → 1600 full (20 L, 220): 600 km on 30 L, 320 EGP.
 const p = consumption([fill(1000, 40, 400, true, 'a'), fill(1200, 10, 100, false, 'b'), fill(1600, 20, 220, true, 'c')])!;
 assert.equal(p.pairs, 1);
-assert.deepEqual(p.latest, { kmPerLiter: 600 / 30, costPerKm: 320 / 600 });
+assert.deepEqual(p.latest, { kmPerLiter: 600 / 30, lPer100: 5, costPerKm: 320 / 600 });
 assert.deepEqual([...p.byFill.keys()], ['c']);
 
 // Partial fill-ups before the first full tank don't count; ending on a partial gives no figure yet.
@@ -30,5 +30,14 @@ assert.equal(consumption([{ odometer_reading: 1000, liters: 40, amount: 400 }, {
 
 // Same reading twice (a pair with no distance) is ignored.
 assert.equal(consumption([fill(1000, 40, 400), fill(1000, 35, 350)]), null);
+
+// L/100 km: 500 km on 40 L = 8.
+assert.equal(consumption([fill(1000, 40, 400), fill(1500, 40, 480)])!.latest.lPer100, 8);
+
+// Why there is no figure yet.
+assert.equal(fuelGap([]), 'noFills');
+assert.equal(fuelGap([fill(1000, null, 400)]), 'noLiters');
+assert.equal(fuelGap([fill(null, 40, 400), fill(null, 30, 300)]), 'noReading');
+assert.equal(fuelGap([fill(1000, 40, 400)]), 'needMore');
 
 console.log('fuel ok');

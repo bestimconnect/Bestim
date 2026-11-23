@@ -1,7 +1,7 @@
 import { addMonths, format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { CalendarCheck, Check } from 'lucide-react-native';
+import { Check } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useEffect } from 'react';
 import { View } from 'react-native';
@@ -9,11 +9,11 @@ import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Item, Rise, Text } from '@/components/ui';
+import { PartArt } from '@/components/PartArt';
+import { Button, Card, FooterBar, Rise, Text } from '@/components/ui';
 import { openCapture } from '@/lib/reading';
 import { POP } from '@/lib/motion';
-import { useVehicle, useProfile } from '@/lib/queries';
-import { useColors } from '@/lib/theme';
+import { useProfile, useServiceTypes, useVehicle } from '@/lib/queries';
 
 type Params = {
   kind?: 'log' | 'batch'; // batch = several records from one voice recording (Q67)
@@ -30,12 +30,12 @@ type Params = {
   queued?: string; // a voice recording kept for later (Q93)
 };
 
-// Screen 43 (log saved) — PNG 43/نجاح حفظ السجل (Q40).
+// Log saved, v2 (design-v2 flow 4 #5): a lime check, the title, and the next date card with the part picture.
 export default function Success() {
   const { t, i18n } = useTranslation();
-  const c = useColors();
   const p = useLocalSearchParams<Params>();
   const { vehicle } = useVehicle(p.vehicleId);
+  const service = (useServiceTypes().data ?? []).find((x) => x.id === p.serviceTypeId);
   const first = useProfile().data?.full_name?.trim().split(/\s+/)[0];
 
   // The one place with a celebration (decisions Q57): the badge pops, the lines rise, one success vibration.
@@ -76,33 +76,36 @@ export default function Success() {
   const another = () => openCapture({ vehicleId: p.vehicleId });
 
   return (
-    <SafeAreaView className="flex-1 bg-paper px-6" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
       <Stack.Screen options={{ gestureEnabled: false }} />
-      <View className="flex-1 justify-center gap-6">
-        <Animated.View entering={POP} className="h-20 w-20 items-center justify-center self-center rounded-full bg-mint">
-          <Check size={36} color={c.teal} />
+      <View className="flex-1 justify-center gap-4 px-5">
+        <Animated.View entering={POP} className="h-24 w-24 items-center justify-center self-center rounded-full bg-lime">
+          <Check size={44} color="#171B19" strokeWidth={2.4} />
         </Animated.View>
         <Rise index={1}>
-        <Text variant="title" className="text-center">
-          {t(first ? 'feedback.success.logTitle' : 'feedback.success.logTitleNoName', { name: first })}
-        </Text>
+          <Text variant="title" className="text-center">
+            {t(first ? 'feedback.success.logTitle' : 'feedback.success.logTitleNoName', { name: first })}
+          </Text>
         </Rise>
-        <Rise index={2}><Text variant="body" className="text-center text-muted">{body}</Text></Rise>
+        <Rise index={2}><Text variant="caption" className="text-center text-muted">{body}</Text></Rise>
         {next ? (
           <Rise index={3}>
-          <Item
-            icon={CalendarCheck}
-            title={t('feedback.success.nextTitle')}
-            subtitle={next}
-            onPress={() => p.vehicleId && p.serviceTypeId && router.push({ pathname: '/part', params: { vehicleId: p.vehicleId, serviceTypeId: p.serviceTypeId } })}
-          />
+            <Card
+              className="flex-row items-center gap-3 p-4"
+              onPress={() => p.vehicleId && p.serviceTypeId && router.push({ pathname: '/part', params: { vehicleId: p.vehicleId, serviceTypeId: p.serviceTypeId } })}>
+              <View className="flex-1 gap-1">
+                <Text variant="label" className="text-[15px]">{t('feedback.success.nextTitle')}</Text>
+                <Text variant="caption" className="text-muted">{next}</Text>
+              </View>
+              <PartArt nameEn={service?.name_en} size={46} />
+            </Card>
           </Rise>
         ) : null}
       </View>
-      <View className="gap-2 pb-4">
-        <Button title={t('feedback.success.another')} onPress={another} />
-        <Button title={t('feedback.success.home')} variant="secondary" onPress={home} />
-      </View>
+      <FooterBar inset={false}>
+        <Button title={t('logv2.done')} onPress={home} />
+        <Button title={t('feedback.success.another')} variant="ghost" onPress={another} />
+      </FooterBar>
     </SafeAreaView>
   );
 }

@@ -1,22 +1,22 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { Mail } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { Linking, Platform, Pressable, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { shadows } from '@/lib/theme';
+import { Linking, Platform, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { useColors } from '@/lib/theme';
 import { toast } from '@/components/Toast';
-import { Button, Header, Text } from '@/components/ui';
+import { AuthScreen, TextLink } from '@/components/auth/AuthKit';
+import { Button, Text } from '@/components/ui';
 import { errorText } from '@/lib/errors';
+import { EMAIL_LINK } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 
-// Screen 50 — Check your email, Figma 167:57182 (ar-light) / 167:64828 (en-light).
+// v2 confirm email (design-v2 flow 9, screen 2): lime mail circle, open the mail app, resend with a countdown.
 export default function VerifyEmailScreen() {
   const { t } = useTranslation();
-  const c = useColors();
   const { email } = useLocalSearchParams<{ email?: string }>();
-  const [wait, setWait] = useState(0); // seconds until "Send it again" works
+  const [wait, setWait] = useState(60); // seconds until "Send it again" works (the link was just sent)
   const [sending, setSending] = useState(false);
   useEffect(() => {
     if (wait <= 0) return;
@@ -32,38 +32,31 @@ export default function VerifyEmailScreen() {
   const resend = async () => {
     if (!email) return;
     setSending(true);
-    const { error } = await supabase.auth.resend({ type: 'signup', email });
+    const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: EMAIL_LINK } });
     setSending(false);
     if (error) return toast(errorText(error));
     setWait(60);
     toast(t('auth.verifyEmail.sent'));
   };
 
+  const mmss = `${Math.floor(wait / 60)}:${String(wait % 60).padStart(2, '0')}`;
   return (
-    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <View className="px-6 pt-3">
-        <Header title="" back />
+    <AuthScreen
+      footer={
+        <>
+          <Button title={t('auth.v2.verifyOpen')} onPress={openMail} />
+          {email ? (
+            <Button variant="secondary" title={wait > 0 ? `${t('auth.v2.verifyAgain')} · ${t('auth.v2.verifyIn', { time: mmss })}` : t('auth.v2.verifyAgain')} loading={sending} disabled={wait > 0} onPress={resend} />
+          ) : null}
+          <TextLink title={t('auth.v2.verifyChange')} onPress={() => router.back()} />
+        </>
+      }>
+      <View className="mt-11 h-[104px] w-[104px] items-center justify-center self-center rounded-full bg-lime" style={{ boxShadow: shadows.ring }}>
+        <Mail size={44} color="#171B19" strokeWidth={1.8} />
       </View>
-      <View className="flex-1 items-center gap-3.5 px-6 pt-10">
-        <View className="h-20 w-20 items-center justify-center rounded-full bg-sky">
-          <Mail size={36} color={c.teal} />
-        </View>
-        <Text variant="title" className="text-center">{t('auth.verifyEmail.title')}</Text>
-        <Text className="text-center text-muted">
-          {email ? t('auth.verifyEmail.subtitleWithEmail', { email }) : t('auth.verifyEmail.subtitle')}
-        </Text>
-        <View className="w-full gap-1 rounded-field bg-sky p-4">
-          <Text variant="label">{t('auth.verifyEmail.resendTitle')}</Text>
-          <Text variant="caption" className="text-muted">{t('auth.verifyEmail.resendBody')}</Text>
-        </View>
-      </View>
-      <View className="gap-3 px-6 pb-6">
-        <Button title={t('auth.verifyEmail.openMail')} onPress={openMail} />
-        {email ? <Button variant="secondary" title={t('auth.verifyEmail.sendAgain')} loading={sending} disabled={wait > 0} onPress={resend} /> : null}
-        <Pressable accessibilityRole="link" onPress={() => router.replace('/login')} className="h-11 items-center justify-center">
-          <Text variant="label" className="text-teal">{t('auth.common.backToLogin')}</Text>
-        </Pressable>
-      </View>
-    </SafeAreaView>
+      <Text variant="title" className="mt-7 text-center" style={{ letterSpacing: -0.5 }}>{t('auth.v2.verifyTitle')}</Text>
+      <Text className="mt-2 text-center text-muted" style={{ fontSize: 15, lineHeight: 24 }}>{t('auth.v2.verifySub')}</Text>
+      {email ? <Text className="text-center" style={{ fontSize: 15, lineHeight: 24, writingDirection: 'ltr' }}>{email}</Text> : null}
+    </AuthScreen>
   );
 }

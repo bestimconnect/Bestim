@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   graphql_public: {
     Tables: {
@@ -39,21 +39,107 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_id: string | null
+          created_at: string
+          detail: Json | null
+          id: number
+          target: string | null
+        }
+        Insert: {
+          action: string
+          admin_id?: string | null
+          created_at?: string
+          detail?: Json | null
+          id?: never
+          target?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string | null
+          created_at?: string
+          detail?: Json | null
+          id?: never
+          target?: string | null
+        }
+        Relationships: []
+      }
+      admins: {
+        Row: {
+          created_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_usage_log: {
+        Row: {
+          created_at: string
+          id: number
+          kind: string
+          ms: number | null
+          ok: boolean
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          kind: string
+          ms?: number | null
+          ok: boolean
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          kind?: string
+          ms?: number | null
+          ok?: boolean
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       car_makes: {
         Row: {
           id: string
+          is_active: boolean
+          logo_path: string | null
           name_ar: string
           name_en: string
           sort: number
         }
         Insert: {
           id?: string
+          is_active?: boolean
+          logo_path?: string | null
           name_ar: string
           name_en: string
           sort?: number
         }
         Update: {
           id?: string
+          is_active?: boolean
+          logo_path?: string | null
           name_ar?: string
           name_en?: string
           sort?: number
@@ -64,6 +150,8 @@ export type Database = {
         Row: {
           body_type: string
           id: string
+          image_path: string | null
+          is_active: boolean
           make_id: string
           name_ar: string
           name_en: string
@@ -71,6 +159,8 @@ export type Database = {
         Insert: {
           body_type: string
           id?: string
+          image_path?: string | null
+          is_active?: boolean
           make_id: string
           name_ar: string
           name_en: string
@@ -78,6 +168,8 @@ export type Database = {
         Update: {
           body_type?: string
           id?: string
+          image_path?: string | null
+          is_active?: boolean
           make_id?: string
           name_ar?: string
           name_en?: string
@@ -385,6 +477,45 @@ export type Database = {
           },
         ]
       }
+      plans: {
+        Row: {
+          created_at: string
+          desc_ar: string
+          desc_en: string
+          entitlements: Json
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name_ar: string
+          name_en: string
+          sort: number
+        }
+        Insert: {
+          created_at?: string
+          desc_ar?: string
+          desc_en?: string
+          entitlements?: Json
+          id: string
+          is_active?: boolean
+          is_default?: boolean
+          name_ar: string
+          name_en: string
+          sort?: number
+        }
+        Update: {
+          created_at?: string
+          desc_ar?: string
+          desc_en?: string
+          entitlements?: Json
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name_ar?: string
+          name_en?: string
+          sort?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -545,6 +676,10 @@ export type Database = {
           has_reminder: boolean
           icon: string
           id: string
+          image_late: string | null
+          image_ok: string | null
+          image_soon: string | null
+          is_active: boolean
           is_system: boolean
           name_ar: string
           name_en: string
@@ -559,6 +694,10 @@ export type Database = {
           has_reminder?: boolean
           icon?: string
           id?: string
+          image_late?: string | null
+          image_ok?: string | null
+          image_soon?: string | null
+          is_active?: boolean
           is_system?: boolean
           name_ar: string
           name_en: string
@@ -573,6 +712,10 @@ export type Database = {
           has_reminder?: boolean
           icon?: string
           id?: string
+          image_late?: string | null
+          image_ok?: string | null
+          image_soon?: string | null
+          is_active?: boolean
           is_system?: boolean
           name_ar?: string
           name_en?: string
@@ -584,6 +727,45 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "record_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_plans: {
+        Row: {
+          expires_at: string | null
+          plan_id: string
+          source: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          expires_at?: string | null
+          plan_id: string
+          source?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          expires_at?: string | null
+          plan_id?: string
+          source?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_plans_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_plans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -639,12 +821,40 @@ export type Database = {
           },
         ]
       }
+      vehicle_types: {
+        Row: {
+          id: string
+          image_path: string | null
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          sort: number
+        }
+        Insert: {
+          id: string
+          image_path?: string | null
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          sort?: number
+        }
+        Update: {
+          id?: string
+          image_path?: string | null
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          sort?: number
+        }
+        Relationships: []
+      }
       vehicles: {
         Row: {
           car_model_id: string | null
           color: string | null
           created_at: string
           current_odometer: number
+          daily_km_hint: number | null
           id: string
           is_primary: boolean
           make: string
@@ -666,6 +876,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           current_odometer?: number
+          daily_km_hint?: number | null
           id?: string
           is_primary?: boolean
           make: string
@@ -687,6 +898,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           current_odometer?: number
+          daily_km_hint?: number | null
           id?: string
           is_primary?: boolean
           make?: string
@@ -749,18 +961,89 @@ export type Database = {
           },
         ]
       }
+      widget_keys: {
+        Row: {
+          created_at: string
+          id: string
+          key_hash: string
+          last_used_at: string | null
+          platform: string
+          user_id: string
+          window_start: string
+          window_uses: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key_hash: string
+          last_used_at?: string | null
+          platform: string
+          user_id: string
+          window_start?: string
+          window_uses?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_hash?: string
+          last_used_at?: string | null
+          platform?: string
+          user_id?: string
+          window_start?: string
+          window_uses?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "widget_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       accept_share: { Args: { token: string }; Returns: string }
+      admin_overview: { Args: never; Returns: Json }
+      admin_role: { Args: never; Returns: string }
+      admin_set_user_plan: {
+        Args: { p_expires: string; p_plan: string; p_user: string }
+        Returns: undefined
+      }
+      admin_type_usage: {
+        Args: never
+        Returns: {
+          models: number
+          type: string
+          vehicles: number
+        }[]
+      }
+      admin_user_detail: { Args: { p_user: string }; Returns: Json }
+      admin_user_list: {
+        Args: { p_limit: number; p_offset: number; p_search: string }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          last_sign_in_at: string
+          logs: number
+          total: number
+          vehicles: number
+        }[]
+      }
       bump_scan_usage: { Args: never; Returns: number }
       bump_voice_usage: { Args: never; Returns: number }
+      can_edit_catalog: { Args: never; Returns: boolean }
       correct_log: {
         Args: { changes: Json; log_id: string; reason: string }
         Returns: undefined
       }
+      create_widget_key: { Args: { p_platform: string }; Returns: string }
       delete_my_account: { Args: never; Returns: undefined }
       get_share: {
         Args: { token: string }
@@ -779,8 +1062,32 @@ export type Database = {
           year: number
         }[]
       }
+      has_role: { Args: { roles: string[] }; Returns: boolean }
+      is_admin: { Args: never; Returns: boolean }
+      log_ai_usage: {
+        Args: { p_kind: string; p_ms: number; p_ok: boolean }
+        Returns: undefined
+      }
+      my_entitlements: { Args: never; Returns: Json }
+      my_feature: { Args: { p_key: string }; Returns: boolean }
+      my_limit: { Args: { p_key: string }; Returns: number }
       owns_log: { Args: { l: string }; Returns: boolean }
       owns_vehicle: { Args: { v: string }; Returns: boolean }
+      plan_entitlements: { Args: { p_user: string }; Returns: Json }
+      require_admin: { Args: never; Returns: undefined }
+      require_pii_admin: { Args: never; Returns: undefined }
+      revoke_widget_keys: { Args: never; Returns: undefined }
+      widget_action: {
+        Args: {
+          p_action: string
+          p_key: string
+          p_km?: number
+          p_service?: string
+          p_title?: string
+          p_vehicle: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

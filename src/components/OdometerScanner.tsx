@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button, Text } from '@/components/ui';
 import { candidates, decide, NO_READS, pickOutlier, pickReading, type Reads } from '@/lib/odometerScan';
+import { showUpgrade } from '@/lib/entitlements';
 import { supabase } from '@/lib/supabase';
 
 const WINDOW_H = 120; // the camera window: a wide strip, the shape of an odometer display
@@ -92,13 +93,14 @@ function Shell({ onClose, corner, footer, children }: { onClose: () => void; cor
   return (
     <View className="absolute inset-0 bg-panel px-6" style={{ paddingTop: top + 12, paddingBottom: bottom + 16 }}>
       <StatusBar style="light" />
-      <View className="flex-row items-center justify-between">
-        <Pressable accessibilityRole="button" accessibilityLabel={t('odometer.scan.close')} hitSlop={12} onPress={onClose} className="h-11 w-11 items-center justify-center rounded-full" style={{ backgroundColor: GLASS }}>
-          <X size={20} color="#F5F7F5" />
+      <View className="flex-1 justify-center gap-5">{children}</View>
+      {/* Under the frame, in thumb reach (not in the top corners). */}
+      <View className="flex-row items-center justify-center gap-4 pb-4 pt-2">
+        <Pressable accessibilityRole="button" accessibilityLabel={t('odometer.scan.close')} hitSlop={12} onPress={onClose} className="h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: GLASS }}>
+          <X size={22} color="#F5F7F5" />
         </Pressable>
         {corner}
       </View>
-      <View className="flex-1 justify-center gap-5">{children}</View>
       {footer}
     </View>
   );
@@ -228,6 +230,7 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
         const { data, error } = await supabase.functions.invoke('read-odometer', { body: { image_base64: await still(photo) } });
         if (__DEV__) console.log(`odometer AI: ${Date.now() - asked} ms`, error ? `error ${error.context?.status ?? error.message}` : data);
         const status = error?.context?.status;
+        if (status === 429) showUpgrade('limit', null, null, 'scans_per_day');
         if (status === 403 || status === 429) return void (stop = true); // switched off, or today's limit: no retry
         const n: unknown = data?.reading;
         const reading = typeof n === 'number' && Number.isInteger(n) ? (current == null ? n : pick([String(n)]) ?? n) : null;
@@ -268,7 +271,7 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
     <Shell
       onClose={onClose}
       corner={
-        <View className="flex-row gap-2">
+        <View className="flex-row gap-4">
           {/* Q97: closer for small LCD digits. */}
           <Pressable
             accessibilityRole="button"
@@ -276,7 +279,7 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
             accessibilityState={{ selected: zoom === 1 }}
             hitSlop={12}
             onPress={() => setZoom(zoom ? 0 : 1)}
-            className={`h-11 w-11 items-center justify-center rounded-full ${zoom ? 'bg-lime' : ''}`}
+            className={`h-12 w-12 items-center justify-center rounded-full ${zoom ? 'bg-lime' : ''}`}
             style={zoom ? undefined : { backgroundColor: GLASS }}>
             <ZoomIn size={20} color={zoom ? '#222E29' : '#F5F7F5'} />
           </Pressable>
@@ -287,7 +290,7 @@ function Live({ device, current, jump = 0, unit, confirmLabel, onConfirm, onType
               accessibilityState={{ selected: torch }}
               hitSlop={12}
               onPress={() => setTorch(!torch)}
-              className={`h-11 w-11 items-center justify-center rounded-full ${torch ? 'bg-lime' : ''}`}
+              className={`h-12 w-12 items-center justify-center rounded-full ${torch ? 'bg-lime' : ''}`}
               style={torch ? undefined : { backgroundColor: GLASS }}>
               <Flashlight size={20} color={torch ? '#222E29' : '#F5F7F5'} />
             </Pressable>

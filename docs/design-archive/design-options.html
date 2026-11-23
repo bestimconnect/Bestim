@@ -1,0 +1,399 @@
+<title>Bestim Design Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Tajawal:wght@400;700&display=swap">
+<style>
+/* Layout: a header with a picks summary, then one section per screen area; each section shows three phone mockups side by side. */
+:root{
+  --bg:#EEF1EE; --fg:#222E29; --muted:#5B6860; --line:#D5DCD6; --card:#FFFFFF;
+  --lime:#D3F53D; --panel:#222E29; --teal:#08736F; --onpanel:#F5F7F5;
+  --app-paper:#F5F7F5; --app-card:#FFFFFF; --app-line:#DEE5DF; --app-ink:#222E29;
+  --pick:#08736F;
+  --display:'Poppins','Tajawal',system-ui,sans-serif; --body:'Tajawal','Poppins',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B100D; --fg:#E8EEEA; --muted:#93A39A; --line:#26332B; --card:#131A16;
+  --panel:#212E27; --app-paper:#0E1411; --app-card:#171F1B; --app-line:#2C3A32; --app-ink:#F2F5F3; --pick:#3ECFC0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B100D; --fg:#E8EEEA; --muted:#93A39A; --line:#26332B; --card:#131A16;
+  --panel:#212E27; --app-paper:#0E1411; --app-card:#171F1B; --app-line:#2C3A32; --app-ink:#F2F5F3; --pick:#3ECFC0; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font:700 28px/1.15 var(--display);margin:0;text-wrap:balance}
+h2{font:700 20px/1.2 var(--display);margin:0 0 4px;text-wrap:balance}
+p{margin:0}
+.lead{color:var(--muted);max-width:60ch}
+.picks{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.picks output{flex:1;min-width:200px;font-size:13px;color:var(--muted)}
+.picks button{font:600 13px var(--display);background:var(--pick);color:#fff;border:0;border-radius:10px;padding:8px 14px;cursor:pointer}
+.picks button:focus-visible,.opt:focus-visible{outline:3px solid var(--pick);outline-offset:2px}
+section{display:flex;flex-direction:column;gap:16px}
+.sub{color:var(--muted);font-size:14px;max-width:70ch}
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:10px;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px;min-width:0}
+.opt[aria-pressed="true"]{border-color:var(--pick)}
+.opt .cap{display:flex;gap:10px;align-items:flex-start}
+.opt .tag{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line);font:700 13px var(--display)}
+.opt[aria-pressed="true"] .tag{background:var(--pick);color:#fff}
+.opt b{font:600 14px var(--display);display:block}
+.opt small{color:var(--muted);font-size:13px;line-height:1.4;display:block}
+
+/* mock phone */
+.ph{position:relative;width:100%;max-width:230px;margin:0 auto;height:400px;background:var(--app-paper);border:1px solid var(--app-line);border-radius:26px;overflow:hidden;color:var(--app-ink);font-size:11px}
+.ph *{min-width:0}
+.ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sb{height:26px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 18px 2px;font:600 9px var(--display)}
+.green{background:var(--panel);color:var(--onpanel)}
+.back{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.15);display:grid;place-items:center;flex:none}
+.card{background:var(--app-card);border-radius:12px;padding:9px;margin:0 10px 8px;display:flex;gap:8px;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.car{width:34px;height:20px;border-radius:7px;background:var(--app-line);flex:none}
+.ln{height:6px;border-radius:3px;background:var(--app-line)}
+.pill{border-radius:99px;padding:3px 9px;font:600 9px var(--display)}
+.lime{background:var(--lime);color:#222E29}
+.seg{display:flex;background:rgba(255,255,255,.14);border-radius:99px;padding:2px}
+.seg span{flex:1;text-align:center;padding:4px 0;border-radius:99px;font:600 9px var(--display)}
+.seg .on{background:var(--lime);color:#222E29}
+.ttl{font:700 14px var(--display)}
+.dim{opacity:.65}
+
+/* tab bar */
+.tabs{position:absolute;left:10px;right:10px;bottom:12px;height:50px;border-radius:20px;background:var(--panel);display:flex;align-items:center;padding:0 6px;color:#93A39A}
+.tabs>div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:600 8px var(--display);height:100%;position:relative}
+.tabs .fab{flex:none;width:40px;height:40px;border-radius:50%;background:var(--lime);color:#222E29;margin-top:-22px;border:3px solid var(--panel);flex-direction:row}
+.tabs .on{color:var(--lime)}
+.tabs.b>div.on{flex:2;flex-direction:row;gap:5px;background:var(--lime);color:#222E29;height:34px;border-radius:99px;margin:0 2px}
+.tabs.c>div.on::before{content:"";position:absolute;top:0;width:22px;height:3px;border-radius:0 0 3px 3px;background:var(--lime)}
+.dot{width:4px;height:4px;border-radius:50%;background:var(--lime);position:absolute;bottom:5px}
+
+/* refresh */
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid rgba(211,245,61,.25);border-top-color:var(--lime);animation:sp .9s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.drive{position:relative;width:100%;height:20px;border-bottom:2px dashed rgba(255,255,255,.3)}
+.drive svg{position:absolute;bottom:0;left:0;animation:dr 2.2s ease-in-out infinite}
+@keyframes dr{0%{left:6%}50%{left:62%}100%{left:6%}}
+.dots{display:flex;gap:5px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--lime);animation:pu 1s ease-in-out infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes pu{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.spin,.drive svg,.dots i{animation:none}}
+
+/* km */
+.num{font:700 26px var(--display);letter-spacing:.5px;text-align:center}
+.ruler{height:26px;margin:0 0 4px;background:repeating-linear-gradient(90deg,var(--app-line) 0 1px,transparent 1px 8px);position:relative;border-bottom:1px solid var(--app-line)}
+.ruler::after{content:"";position:absolute;left:50%;top:0;width:3px;height:100%;margin-left:-1px;background:var(--lime);border-radius:2px}
+.win{display:flex;gap:2px;justify-content:center}
+.win i{font:700 18px var(--display);font-style:normal;background:#101713;color:var(--lime);width:22px;text-align:center;border-radius:5px;padding:4px 0;border:1px solid rgba(211,245,61,.35)}
+
+/* camera */
+.cam{background:#1A221E;color:#F5F7F5}
+.frame{margin:0 16px;height:70px;border:2px solid var(--lime);border-radius:14px;background:repeating-linear-gradient(135deg,#2a352f 0 8px,#222c27 8px 16px);display:grid;place-items:center;font:700 16px var(--display);color:var(--lime)}
+.round{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;flex:none}
+.round.on{background:var(--lime);color:#222E29}
+
+/* plates */
+.plateBox{display:grid;gap:10px;padding:14px;place-items:center;height:100%;align-content:center}
+.pl{direction:rtl;font-family:'Tajawal',sans-serif;font-weight:700}
+.p1{border:2px solid #222E29;border-radius:9px;background:#fff;overflow:hidden;color:#222E29}
+.p1 .s{background:var(--teal);color:#fff;font-size:8px;text-align:center;padding:1px 0}
+.p1 .n{display:flex;gap:9px;padding:2px 12px;font-size:20px;align-items:center}
+.p1 .n u{width:1px;height:20px;background:#DEE5DF}
+.p2{border:2px solid var(--app-ink);border-radius:10px;padding:5px 12px;display:flex;gap:10px;align-items:center;font-size:20px;background:var(--app-card)}
+.p2 em{font:700 8px var(--display);font-style:normal;writing-mode:vertical-rl;color:var(--muted);letter-spacing:1px;transform:rotate(180deg)}
+.p3{background:#222E29;color:var(--lime);border-radius:10px;padding:5px 14px;display:flex;gap:12px;align-items:center;font-size:20px;border-bottom:3px solid var(--lime)}
+.p3 u{width:1px;height:18px;background:rgba(211,245,61,.4)}
+.sm{transform:scale(.62);transform-origin:left center}
+.rowp{display:flex;align-items:center;gap:8px}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-car" viewBox="0 0 24 24"><path d="M5 16l1.5-5h11L19 16M3 16h18v3H3zM7 19v2M17 19v2"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l2-3h12M16 14h2"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></symbol>
+  <symbol id="i-zoom" viewBox="0 0 24 24"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-5-5M11 8v6M8 11h6"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20l1-5L16 4l4 4L9 19z"/></symbol>
+  <symbol id="dial" viewBox="0 0 120 70"><path d="M14 62A46 46 0 0 1 106 62" fill="none" stroke="#93A39A" stroke-opacity=".45" stroke-width="4" stroke-linecap="round"/><path d="M60 62L82 30" stroke="#D3F53D" stroke-width="4" stroke-linecap="round"/><circle cx="60" cy="62" r="5" fill="#D3F53D"/></symbol>
+</svg>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:10px">
+    <h1>Bestim design options</h1>
+    <p class="lead">Three ideas for every screen you asked to redesign. Tap the one you prefer in each row. Your picks collect in the bar below, so you can copy them and send them back.</p>
+  </header>
+
+  <div class="picks" role="status">
+    <output id="sum">No picks yet</output>
+    <button id="copy" type="button">Copy picks</button>
+  </div>
+
+  <section data-g="topbar">
+    <div><h2>1. Green top bar</h2><p class="sub">Shown on every page: back button, title and the page's main switch. It shrinks smoothly when you leave Home.</p></div>
+    <div class="set">
+      <button class="opt" data-g="topbar" data-v="A" aria-pressed="false">
+        <div class="ph">
+          <div class="green"><div class="sb"><span>9:41</span><span>●●●</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 12px 12px;border-radius:0 0 22px 22px"><span class="back"><svg class="ic"><use href="#i-back"/></svg></span><span class="ttl">My cars</span></div></div>
+          <div style="height:10px"></div>
+          <div class="card"><span class="car"></span><div style="flex:1;display:grid;gap:4px"><div class="ln" style="width:60%"></div><div class="ln" style="width:40%"></div></div></div>
+          <div class="card"><span class="car"></span><div style="flex:1;display:grid;gap:4px"><div class="ln" style="width:70%"></div><div class="ln" style="width:35%"></div></div></div>
+        </div>
+        <div class="cap"><span class="tag">A</span><div><b>Slim bar</b><small>Back and title in one row. Closest to today's Home bar, just shorter.</small></div></div>
+      </button>
+      <button class="opt" data-g="topbar" data-v="B" aria-pressed="false">
+        <div class="ph">
+          <div class="green" style="border-radius:0 0 28px 28px"><div class="sb"><span>9:41</span><span>●●●</span></div>
+            <div style="padding:6px 12px 14px;display:grid;gap:8px">
+              <div style="display:flex;justify-content:space-between"><span class="back"><svg class="ic"><use href="#i-back"/></svg></span><span class="back"><svg class="ic"><use href="#i-pencil"/></svg></span></div>
+              <div><div class="ttl">Car details</div><div class="dim" style="font-size:10px">Car · 2020 · Sedan</div></div>
+            </div></div>
+          <div style="height:12px"></div>
+          <div class="card"><div style="flex:1;display:grid;gap:4px"><div class="ln" style="width:50%"></div><div class="ln" style="width:80%"></div></div></div>
+          <div class="card"><div style="flex:1;display:grid;gap:4px"><div class="ln" style="width:65%"></div><div class="ln" style="width:30%"></div></div></div>
+        </div>
+        <div class="cap"><span class="tag">B</span><div><b>Bar with context line</b><small>Page title plus a small line under it (car name, month). Actions sit on the first row.</small></div></div>
+      </button>
+      <button class="opt" data-g="topbar" data-v="C" aria-pressed="false">
+        <div class="ph">
+          <div class="green" style="border-radius:0 0 28px 28px"><div class="sb"><span>9:41</span><span>●●●</span></div>
+            <div style="padding:6px 12px 14px;display:grid;gap:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center"><span class="pill lime">+ Add</span></div>
+              <div class="ttl" style="font-size:20px">Expenses</div>
+              <div class="seg"><span class="on">Month</span><span>Year</span><span>All</span></div>
+            </div></div>
+          <div style="height:12px"></div>
+          <div class="card"><div style="flex:1;display:grid;gap:4px"><div class="ln" style="width:55%"></div><div class="ln" style="width:75%"></div></div></div>
+        </div>
+        <div class="cap"><span class="tag">C</span><div><b>Big title and switch inside</b><small>Large title with the page's main switch built into the green. Tallest, most like Home.</small></div></div>
+      </button>
+    </div>
+  </section>
+
+  <section data-g="tabs">
+    <div><h2>2. Bottom bar</h2><p class="sub">Icons perfectly aligned, with a short vibration when you tap a tab. Reminders is replaced by Expenses.</p></div>
+    <div class="set">
+      <button class="opt" data-g="tabs" data-v="A" aria-pressed="false">
+        <div class="ph"><div style="padding:40px 12px;display:grid;gap:8px"><div class="card" style="margin:0"><div class="ln" style="flex:1"></div></div><div class="card" style="margin:0"><div class="ln" style="flex:1;width:70%"></div></div></div>
+          <div class="tabs">
+            <div class="on"><svg class="ic"><use href="#i-home"/></svg>Home<span class="dot"></span></div>
+            <div><svg class="ic"><use href="#i-car"/></svg>Cars</div>
+            <div class="fab"><svg class="ic"><use href="#i-plus"/></svg></div>
+            <div><svg class="ic"><use href="#i-wallet"/></svg>Expenses</div>
+            <div><svg class="ic"><use href="#i-user"/></svg>Account</div>
+          </div></div>
+        <div class="cap"><span class="tag">A</span><div><b>Dot under active icon</b><small>Labels always visible. A lime dot marks where you are.</small></div></div>
+      </button>
+      <button class="opt" data-g="tabs" data-v="B" aria-pressed="false">
+        <div class="ph"><div style="padding:40px 12px;display:grid;gap:8px"><div class="card" style="margin:0"><div class="ln" style="flex:1"></div></div><div class="card" style="margin:0"><div class="ln" style="flex:1;width:70%"></div></div></div>
+          <div class="tabs b">
+            <div class="on"><svg class="ic"><use href="#i-home"/></svg>Home</div>
+            <div><svg class="ic"><use href="#i-car"/></svg></div>
+            <div class="fab"><svg class="ic"><use href="#i-plus"/></svg></div>
+            <div><svg class="ic"><use href="#i-wallet"/></svg></div>
+            <div><svg class="ic"><use href="#i-user"/></svg></div>
+          </div></div>
+        <div class="cap"><span class="tag">B</span><div><b>Active tab as a lime pill</b><small>Only the current tab shows its name, so icons get more room and never crowd.</small></div></div>
+      </button>
+      <button class="opt" data-g="tabs" data-v="C" aria-pressed="false">
+        <div class="ph"><div style="padding:40px 12px;display:grid;gap:8px"><div class="card" style="margin:0"><div class="ln" style="flex:1"></div></div><div class="card" style="margin:0"><div class="ln" style="flex:1;width:70%"></div></div></div>
+          <div class="tabs c">
+            <div><svg class="ic"><use href="#i-home"/></svg>Home</div>
+            <div class="on"><svg class="ic"><use href="#i-car"/></svg>Cars</div>
+            <div class="fab"><svg class="ic"><use href="#i-plus"/></svg></div>
+            <div><svg class="ic"><use href="#i-wallet"/></svg>Expenses</div>
+            <div><svg class="ic"><use href="#i-user"/></svg>Account</div>
+          </div></div>
+        <div class="cap"><span class="tag">C</span><div><b>Lime line on the top edge</b><small>Quiet and flat: a short lime tab on the bar's top edge, icon turns lime.</small></div></div>
+      </button>
+    </div>
+  </section>
+
+  <section data-g="refresh">
+    <div><h2>3. Pull to refresh (Android)</h2><p class="sub">The green area itself stretches and shows Bestim's own loader, like on iPhone, instead of the system spinner floating over the content.</p></div>
+    <div class="set">
+      <button class="opt" data-g="refresh" data-v="A" aria-pressed="false">
+        <div class="ph">
+          <div class="green" style="border-radius:0 0 28px 28px;padding-bottom:16px"><div class="sb"><span>9:41</span><span>●●●</span></div>
+            <div class="ttl" style="padding:6px 14px">Home</div>
+            <div style="display:grid;place-items:center;height:92px"><div class="spin"></div></div></div>
+          <div style="height:12px"></div><div class="card"><div class="ln" style="flex:1"></div></div><div class="card"><div class="ln" style="flex:1;width:60%"></div></div>
+        </div>
+        <div class="cap"><span class="tag">A</span><div><b>Lime ring</b><small>Green stretches, a lime ring spins in the middle. Simple, same as iPhone.</small></div></div>
+      </button>
+      <button class="opt" data-g="refresh" data-v="B" aria-pressed="false">
+        <div class="ph">
+          <div class="green" style="border-radius:0 0 28px 28px;padding-bottom:16px"><div class="sb"><span>9:41</span><span>●●●</span></div>
+            <div class="ttl" style="padding:6px 14px">Home</div>
+            <div style="display:grid;gap:8px;place-items:center;height:92px;padding:0 20px;align-content:center">
+              <div class="drive"><svg class="ic" style="color:var(--lime);width:26px;height:26px"><use href="#i-car"/></svg></div>
+              <span class="dim" style="font-size:10px">Updating your cars…</span></div></div>
+          <div style="height:12px"></div><div class="card"><div class="ln" style="flex:1"></div></div><div class="card"><div class="ln" style="flex:1;width:60%"></div></div>
+        </div>
+        <div class="cap"><span class="tag">B</span><div><b>Car on the road</b><small>A small car drives along a dashed road while it loads. More playful, on brand.</small></div></div>
+      </button>
+      <button class="opt" data-g="refresh" data-v="C" aria-pressed="false">
+        <div class="ph">
+          <div class="green" style="border-radius:0 0 28px 28px;padding-bottom:16px"><div class="sb"><span>9:41</span><span>●●●</span></div>
+            <div class="ttl" style="padding:6px 14px">Home</div>
+            <div style="display:grid;place-items:center;height:92px;align-content:center;gap:10px">
+              <div class="dots"><i></i><i></i><i></i></div></div></div>
+          <div style="height:12px"></div><div class="card"><div class="ln" style="flex:1"></div></div><div class="card"><div class="ln" style="flex:1;width:60%"></div></div>
+        </div>
+        <div class="cap"><span class="tag">C</span><div><b>Three pulsing dots</b><small>The lightest option. Dots pulse in the stretched green, nothing else moves.</small></div></div>
+      </button>
+    </div>
+  </section>
+
+  <section data-g="km">
+    <div><h2>4. Update kilometers page</h2><p class="sub">Free number picking, an illustration of where the odometer is, and no jump when typing. Here is the layout.</p></div>
+    <div class="set">
+      <button class="opt" data-g="km" data-v="A" aria-pressed="false">
+        <div class="ph">
+          <div class="green" style="border-radius:0 0 22px 22px"><div class="sb"><span>9:41</span><span>●●●</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 12px 10px"><span class="back"><svg class="ic"><use href="#i-back"/></svg></span><span class="ttl">Update odometer</span></div></div>
+          <div style="padding:10px;display:grid;gap:6px">
+            <div class="green" style="border-radius:14px;padding:6px 10px;text-align:center"><svg viewBox="0 0 120 70" style="width:100px;height:58px"><use href="#dial"/></svg><div class="pill" style="border:1px solid var(--lime);color:var(--lime);display:inline-block;margin-top:-6px">250,500</div></div>
+            <div class="dim" style="text-align:center;font-size:9px">Usually under the speedometer</div>
+            <div class="num">250,500</div><div class="ruler"></div>
+            <div class="card green" style="margin:0"><span class="round on" style="width:26px;height:26px"><svg class="ic"><use href="#i-cam"/></svg></span><b style="font:600 10px var(--display)">Read with camera</b></div>
+          </div>
+        </div>
+        <div class="cap"><span class="tag">A</span><div><b>Dashboard picture on top</b><small>The speedometer with the odometer window highlighted, then number and ruler.</small></div></div>
+      </button>
+      <button class="opt" data-g="km" data-v="B" aria-pressed="false">
+        <div class="ph">
+          <div class="green" style="border-radius:0 0 22px 22px"><div class="sb"><span>9:41</span><span>●●●</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 12px 10px"><span class="back"><svg class="ic"><use href="#i-back"/></svg></span><span class="ttl">Update odometer</span></div></div>
+          <div style="padding:14px 10px;display:grid;gap:8px">
+            <div class="dim" style="font-size:9px;text-align:center">Last reading 250,500 km · 13 days ago</div>
+            <div class="num" style="font-size:32px">250,453</div>
+            <div class="ruler"></div>
+            <div class="card" style="margin:0;border:1px dashed var(--app-line);box-shadow:none"><svg viewBox="0 0 120 70" style="width:44px;height:26px;background:var(--panel);border-radius:6px"><use href="#dial"/></svg><div style="flex:1;font-size:9px">Where is the odometer? <b>Tap to see</b></div></div>
+            <div class="pill lime" style="text-align:center;padding:9px">Save reading</div>
+          </div>
+        </div>
+        <div class="cap"><span class="tag">B</span><div><b>Number first, picture on tap</b><small>Cleaner page. The dashboard picture opens only when someone asks "where is it?".</small></div></div>
+      </button>
+      <button class="opt" data-g="km" data-v="C" aria-pressed="false">
+        <div class="ph">
+          <div class="green" style="border-radius:0 0 26px 26px;padding-bottom:12px"><div class="sb"><span>9:41</span><span>●●●</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 12px 6px"><span class="back"><svg class="ic"><use href="#i-back"/></svg></span><span class="ttl">Update odometer</span></div>
+            <div style="text-align:center"><svg viewBox="0 0 120 70" style="width:130px;height:76px"><use href="#dial"/></svg>
+              <div class="win" style="margin-top:-8px"><i>2</i><i>5</i><i>0</i><i>4</i><i>5</i><i>3</i></div>
+              <div class="dim" style="font-size:9px;margin-top:6px">This window on your dashboard</div></div></div>
+          <div style="padding:10px;display:grid;gap:8px"><div class="ruler"></div><div class="dim" style="text-align:center;font-size:9px">← Swipe to adjust →</div>
+            <div class="card" style="margin:0"><span class="round on" style="width:26px;height:26px"><svg class="ic"><use href="#i-cam"/></svg></span><b style="font:600 10px var(--display)">Read with camera</b></div>
+            <div class="pill lime" style="text-align:center;padding:9px">Save reading</div></div>
+        </div>
+        <div class="cap"><span class="tag">C</span><div><b>The number is the dashboard</b><small>Your reading sits inside the odometer window of the picture, like the real car.</small></div></div>
+      </button>
+    </div>
+  </section>
+
+  <section data-g="camcard">
+    <div><h2>5. "Read with camera" button</h2><p class="sub">The card that opens the camera on the kilometers page.</p></div>
+    <div class="set">
+      <button class="opt" data-g="camcard" data-v="A" aria-pressed="false">
+        <div class="ph" style="height:210px"><div style="padding:60px 10px;display:grid">
+          <div class="card green" style="margin:0;padding:12px"><span class="round on"><svg class="ic" style="width:18px;height:18px"><use href="#i-cam"/></svg></span><div style="flex:1"><b style="font:600 12px var(--display);display:block">Read with camera</b><span class="dim" style="font-size:9px">Point it at the number</span></div></div></div></div>
+        <div class="cap"><span class="tag">A</span><div><b>Dark card, lime camera</b><small>Cleaned-up version of today's row. Dark so it stands out from the page.</small></div></div>
+      </button>
+      <button class="opt" data-g="camcard" data-v="B" aria-pressed="false">
+        <div class="ph" style="height:210px"><div style="padding:46px 14px;display:grid">
+          <div style="border:2px dashed var(--teal);border-radius:16px;padding:14px;display:grid;gap:6px;place-items:center;text-align:center;position:relative">
+            <svg class="ic" style="width:26px;height:26px;color:var(--teal)"><use href="#i-cam"/></svg><b style="font:600 12px var(--display)">Scan your odometer</b><span style="font-size:9px;color:var(--muted)">Hold the phone over the number</span></div></div></div>
+        <div class="cap"><span class="tag">B</span><div><b>Scan frame</b><small>A dashed viewfinder box that says what will happen. Tap anywhere inside.</small></div></div>
+      </button>
+      <button class="opt" data-g="camcard" data-v="C" aria-pressed="false">
+        <div class="ph" style="height:210px"><div style="padding:60px 14px;display:grid;gap:8px">
+          <div class="pill lime" style="display:flex;gap:8px;align-items:center;justify-content:center;padding:12px;font-size:12px"><svg class="ic"><use href="#i-cam"/></svg>Scan with camera</div>
+          <div style="text-align:center;font-size:9px;color:var(--muted)">or type or swipe above</div></div></div>
+        <div class="cap"><span class="tag">C</span><div><b>Full-width lime button</b><small>Most direct. One clear action, with the other ways to enter the number as a hint.</small></div></div>
+      </button>
+    </div>
+  </section>
+
+  <section data-g="camctl">
+    <div><h2>6. Camera screen buttons</h2><p class="sub">Close, zoom and flashlight moved from the top corners to where a thumb reaches.</p></div>
+    <div class="set">
+      <button class="opt" data-g="camctl" data-v="A" aria-pressed="false">
+        <div class="ph cam"><div style="padding:80px 0 0;text-align:center;display:grid;gap:14px"><div style="font:700 11px var(--display);padding:0 14px">Put the digits inside the frame</div><div class="frame">250,453</div></div>
+          <div style="position:absolute;left:0;right:0;bottom:34px;display:flex;gap:16px;justify-content:center">
+            <span class="round"><svg class="ic"><use href="#i-x"/></svg></span><span class="round"><svg class="ic"><use href="#i-zoom"/></svg></span><span class="round on"><svg class="ic"><use href="#i-bolt"/></svg></span></div></div>
+        <div class="cap"><span class="tag">A</span><div><b>Row under the frame</b><small>Three round buttons centred at the bottom, easy for either thumb.</small></div></div>
+      </button>
+      <button class="opt" data-g="camctl" data-v="B" aria-pressed="false">
+        <div class="ph cam"><div style="padding:80px 0 0;text-align:center;display:grid;gap:14px"><div style="font:700 11px var(--display);padding:0 14px">Put the digits inside the frame</div><div class="frame">250,453</div></div>
+          <div style="position:absolute;left:10px;right:10px;bottom:14px;background:rgba(255,255,255,.12);border-radius:20px;padding:10px;display:grid;gap:8px">
+            <div style="display:flex;gap:6px"><span class="pill lime" style="flex:1;text-align:center">1x</span><span class="pill" style="flex:1;text-align:center;background:rgba(255,255,255,.14)">Zoom</span><span class="pill" style="flex:1;text-align:center;background:rgba(255,255,255,.14)">Light</span></div>
+            <div class="pill" style="text-align:center;background:rgba(255,255,255,.14);padding:8px">Close camera</div></div></div>
+        <div class="cap"><span class="tag">B</span><div><b>Bottom panel with labels</b><small>A glass panel holds zoom, light and close as labelled pills. Biggest, clearest targets.</small></div></div>
+      </button>
+      <button class="opt" data-g="camctl" data-v="C" aria-pressed="false">
+        <div class="ph cam"><div style="padding:80px 0 0;text-align:center;display:grid;gap:14px"><div style="font:700 11px var(--display);padding:0 14px">Put the digits inside the frame</div><div class="frame" style="margin-right:60px">250,453</div></div>
+          <div style="position:absolute;right:10px;bottom:40px;display:grid;gap:10px">
+            <span class="round"><svg class="ic"><use href="#i-zoom"/></svg></span><span class="round on"><svg class="ic"><use href="#i-bolt"/></svg></span><span class="round"><svg class="ic"><use href="#i-x"/></svg></span></div></div>
+        <div class="cap"><span class="tag">C</span><div><b>Thumb rail on the side</b><small>A vertical stack on the right edge, low on the screen. Frame stays wide and central.</small></div></div>
+      </button>
+    </div>
+  </section>
+
+  <section data-g="plate">
+    <div><h2>7. License plate</h2><p class="sub">Egyptian style: Arabic letters on the right, numbers on the left. Shown in the car header, list and switcher.</p></div>
+    <div class="set">
+      <button class="opt" data-g="plate" data-v="A" aria-pressed="false">
+        <div class="ph" style="height:210px"><div class="plateBox">
+          <div class="pl p1" style="transform:scale(1.15)"><div class="s">مصر · EGYPT</div><div class="n"><span>أ ب ج</span><u></u><span>١٢٣٤</span></div></div>
+          <div class="rowp"><span class="car"></span><div class="pl p1 sm" style="margin-left:-20px"><div class="s">مصر</div><div class="n"><span>أ ب ج</span><u></u><span>١٢٣٤</span></div></div></div></div></div>
+        <div class="cap"><span class="tag">A</span><div><b>White plate, teal strip</b><small>Closest to a real Egyptian plate. Country strip on top, white body.</small></div></div>
+      </button>
+      <button class="opt" data-g="plate" data-v="B" aria-pressed="false">
+        <div class="ph" style="height:210px"><div class="plateBox">
+          <div class="pl p2" style="transform:scale(1.15)"><em>EGYPT</em><span>أ ب ج</span><span style="width:1px;height:20px;background:var(--app-line)"></span><span>١٢٣٤</span></div>
+          <div class="rowp"><span class="car"></span><div class="pl p2 sm" style="margin-left:-20px"><span>أ ب ج</span><span>١٢٣٤</span></div></div></div></div>
+        <div class="cap"><span class="tag">B</span><div><b>Outline only</b><small>Thin outline, no fill, follows light and dark. Most minimal, still reads as a plate.</small></div></div>
+      </button>
+      <button class="opt" data-g="plate" data-v="C" aria-pressed="false">
+        <div class="ph" style="height:210px"><div class="plateBox">
+          <div class="pl p3" style="transform:scale(1.15)"><span>أ ب ج</span><u></u><span>١٢٣٤</span></div>
+          <div class="rowp"><span class="car"></span><div class="pl p3 sm" style="margin-left:-20px"><span>أ ب ج</span><u></u><span>١٢٣٤</span></div></div></div></div>
+        <div class="cap"><span class="tag">C</span><div><b>Bestim dark plate</b><small>Dark green with lime digits and a lime base line. Looks like Bestim, less like a real plate.</small></div></div>
+      </button>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var names={topbar:'Top bar',tabs:'Bottom bar',refresh:'Pull to refresh',km:'Kilometers page',camcard:'Camera button',camctl:'Camera buttons',plate:'License plate'};
+  var picks={};
+  try{picks=JSON.parse(localStorage.getItem('bestim-picks')||'{}')||{}}catch(e){}
+  var sum=document.getElementById('sum');
+  function text(){
+    var out=Object.keys(names).filter(function(k){return picks[k]}).map(function(k){return names[k]+': '+picks[k]});
+    return out.length?out.join(' · '):'';
+  }
+  function paint(){
+    document.querySelectorAll('.opt').forEach(function(b){b.setAttribute('aria-pressed',String(picks[b.dataset.g]===b.dataset.v))});
+    var t=text();sum.textContent=t||'No picks yet';
+  }
+  document.querySelectorAll('.opt').forEach(function(b){
+    b.addEventListener('click',function(){
+      picks[b.dataset.g]=b.dataset.v;
+      try{localStorage.setItem('bestim-picks',JSON.stringify(picks))}catch(e){}
+      paint();
+    });
+  });
+  document.getElementById('copy').addEventListener('click',function(){
+    var t=text()||'No picks yet';
+    var done=function(){var c=document.getElementById('copy');c.textContent='Copied';setTimeout(function(){c.textContent='Copy picks'},1500)};
+    if(navigator.clipboard)navigator.clipboard.writeText(t).then(done,function(){});
+  });
+  paint();
+})();
+</script>

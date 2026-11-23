@@ -51,7 +51,20 @@ export type Vehicle = {
 };
 /** A recording (base64 + the app's mime type) or the text of what was said. */
 export type Said = { audio: string; mime: string } | { text: string };
-export type Answer = { transcript?: string; records?: unknown[] };
+export type Answer = { transcript?: string; records?: unknown[]; usage?: Usage };
+
+/** What the call cost in tokens (Gemini's usage block). Thinking tokens are billed as output. Never throws: usage is a log, not the answer. */
+export type Usage = { model: string; input: number; audio: number; output: number };
+export function usageOf(out: { usage?: Record<string, unknown> }, model: string): Usage | undefined {
+  const u = out.usage;
+  if (!u || typeof u.total_input_tokens !== 'number') return undefined;
+  const modal = Array.isArray(u.input_tokens_by_modality) ? (u.input_tokens_by_modality as Record<string, unknown>[]) : [];
+  const audio = modal
+    .filter((m) => /audio/i.test(String(m.modality)))
+    .reduce((n, m) => n + (Number(m.token_count ?? m.tokens ?? m.count) || 0), 0);
+  return { model, input: u.total_input_tokens, audio, output: (Number(u.total_output_tokens) || 0) + (Number(u.total_thought_tokens) || 0) };
+}
+
 
 const vehicleName = (v: Vehicle) => [v.nickname, v.make, v.model].filter(Boolean).join(' ');
 
@@ -154,7 +167,7 @@ export async function gemini(said: Said, system: string, key: string, model = GE
     .flatMap((s: { content?: { type: string; text?: string }[] }) => s.content ?? [])
     .map((c: { type: string; text?: string }) => (c.type === 'text' ? c.text ?? '' : ''))
     .join('');
-  return parse('gemini', answer, out.status);
+  return { ...parse('gemini', answer, out.status), usage: usageOf(out, model) };
 }
 
 /** Two calls for a recording (write it down, then read the text), one for text. */

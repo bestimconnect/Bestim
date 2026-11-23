@@ -12,7 +12,7 @@ const KEYS: Record<string, string> = {
 };
 
 /** What to show when something fails: our own words in the user's language, never the server's raw English (Q81). */
-export function errorText(e: unknown, fallback: 'errors.generic' | 'errors.google' = 'errors.generic'): string {
+export function errorText(e: unknown, fallback: 'errors.generic' | 'errors.google' | 'errors.apple' = 'errors.generic'): string {
   const { code, message, name } = (e ?? {}) as { code?: string; message?: string; name?: string };
   if (name === 'AuthRetryableFetchError' || /network|failed to fetch/i.test(message ?? '')) return i18n.t('errors.network');
   if (/lower_reading/.test(message ?? '')) return i18n.t('errors.lowerReading'); // the database's own refusals arrive in the message

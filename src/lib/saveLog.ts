@@ -1,3 +1,4 @@
+import { upgradeOnLimitError } from './entitlements';
 import { supabase } from './supabase';
 
 // Saving a maintenance log lives here (not in the review screen) so it can be a TanStack mutation default:
@@ -24,6 +25,7 @@ export function cleanDetails(typed: Record<string, string>, allowed: string[]) {
 }
 
 export type SaveLogInput = {
+  id?: string; // made once per save press: a retry after a lost answer finds the same row instead of adding a second one
   vehicleId: string;
   serviceTypeId: string | null;
   title: string;
@@ -40,6 +42,9 @@ export type SaveLogInput = {
   details?: Record<string, string | number>; // optional so a log queued offline by an older build still saves
   photoUri: string | null;
 };
+
+/** A random v4-style id for the idempotency key (not a secret, Math.random is enough). */
+export const newLogId = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => ((c === 'x' ? Math.random() * 16 : (Math.random() * 4) | 8) | 0).toString(16));
 
 export const SAVE_LOG_KEY = ['saveLog'] as const;
 
@@ -60,6 +65,7 @@ export async function saveLog(d: SaveLogInput) {
   const { data: log, error } = await supabase
     .from('maintenance_logs')
     .insert({
+      ...(d.id ? { id: d.id } : {}),
       vehicle_id: d.vehicleId,
       service_type_id: d.serviceTypeId,
       title: d.title,
@@ -78,6 +84,15 @@ export async function saveLog(d: SaveLogInput) {
     })
     .select('id, status')
     .single();
-  if (error) throw error;
+  if (error) {
+    if (photos.length) await supabase.storage.from('receipts').remove(photos); // best effort: nothing was saved by this try, so no orphan photo
+    if (error.code === '23505' && d.id) {
+      // The first try did reach the server (the answer was lost): hand back that row.
+      const { data: again } = await supabase.from('maintenance_logs').select('id, status').eq('id', d.id).single();
+      if (again) return again;
+    }
+    upgradeOnLimitError(error); // the plan's log limit: explain it, the caller still sees the failure
+    throw error;
+  }
   return log;
 }

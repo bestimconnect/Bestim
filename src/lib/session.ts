@@ -1,15 +1,50 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Session } from '@supabase/supabase-js';
+import { onlineManager } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
 import { supabase } from './supabase';
 
+const storageKey = `sb-${new URL(process.env.EXPO_PUBLIC_SUPABASE_URL!).hostname.split('.')[0]}-auth-token`;
+
+/**
+ * Offline, an expired access token can't be refreshed, so getSession() says null even though the login is still
+ * saved. Supabase only deletes the saved login when the server rejects it, so a saved one means "still signed in".
+ */
+async function load(): Promise<Session | null> {
+  // Offline, getSession() keeps retrying the refresh for many seconds (splash stuck), so give it 1.5 s.
+  const wait = new Promise<null>((done) => setTimeout(() => done(null), 1500));
+  const session = await Promise.race([supabase.auth.getSession().then(({ data }) => data.session), wait]);
+  if (session) return session;
+  try {
+    const saved = JSON.parse((await AsyncStorage.getItem(storageKey)) ?? 'null') as Session | null;
+    return saved?.user && saved.refresh_token ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
 /** undefined = still loading, null = signed out. */
+// Where email links (confirm, reset, change email) reopen the app. Sent with every request instead of relying on the
+// project's Site URL (which is the website now: the Claude connector's sign-in page lives there).
+// Must also be listed under Authentication > URL Configuration > Redirect URLs as exactly `bestim://`.
+export const EMAIL_LINK = 'bestim://';
+
 export function useSession() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
-    return () => data.subscription.unsubscribe();
+    const refresh = () => load().then(setSession);
+    refresh();
+    // Back online: get the real (refreshed) session instead of the saved one.
+    const offOnline = onlineManager.subscribe((online) => online && refresh());
+    const { data } = supabase.auth.onAuthStateChange((e, s) =>
+      // offline, supabase reports "no session" at start-up because it could not refresh: keep the saved login
+      setSession((prev) => (e === 'INITIAL_SESSION' && !s && !onlineManager.isOnline() ? prev : s)),
+    );
+    return () => {
+      offOnline();
+      data.subscription.unsubscribe();
+    };
   }, []);
   return session;
 }

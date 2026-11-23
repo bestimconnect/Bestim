@@ -1,0 +1,52 @@
+<title>Bestim Card Groups</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Tajawal:wght@400;700&display=swap">
+<style>
+/* Layout: the Account list in three grouping styles, then the same idea on two other pages so it can become the rule for the whole app. */
+:root{--bg:#EEF1EE;--fg:#222E29;--muted:#5B6860;--line:#D5DCD6;--card:#FFFFFF;--lime:#D3F53D;--panel:#222E29;--onpanel:#F5F7F5;--teal:#08736F;--ap:#F5F7F5;--ac:#FFFFFF;--al:#DEE5DF;--ai:#222E29;--am:#5B6860;--mint:#E4F3D9;--pick:#08736F;--display:'Poppins','Tajawal',system-ui,sans-serif;--body:'Tajawal','Poppins',system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B100D;--fg:#E8EEEA;--muted:#93A39A;--line:#26332B;--card:#131A16;--panel:#212E27;--ap:#0E1411;--ac:#171F1B;--al:#2C3A32;--ai:#F2F5F3;--am:#93A39A;--mint:#1E3326;--pick:#3ECFC0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B100D;--fg:#E8EEEA;--muted:#93A39A;--line:#26332B;--card:#131A16;--panel:#212E27;--ap:#0E1411;--ac:#171F1B;--al:#2C3A32;--ai:#F2F5F3;--am:#93A39A;--mint:#1E3326;--pick:#3ECFC0;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1{font:700 28px/1.15 var(--display);margin:0}p{margin:0}.lead{color:var(--muted);max-width:68ch}
+.picks{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}.picks output{flex:1;min-width:200px;font-size:13px;color:var(--muted)}.picks button{font:600 13px var(--display);background:var(--pick);color:#fff;border:0;border-radius:10px;padding:8px 14px;cursor:pointer}
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:10px;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px;min-width:0}.opt:focus-visible,.picks button:focus-visible{outline:3px solid var(--pick);outline-offset:2px}.opt[aria-pressed="true"]{border-color:var(--pick)}
+.cap{display:flex;gap:10px;align-items:flex-start}.tag{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line);font:700 13px var(--display)}.opt[aria-pressed="true"] .tag{background:var(--pick);color:#fff}.cap b{font:600 14px var(--display);display:block}.cap small{color:var(--muted);font-size:13px;line-height:1.4;display:block}
+.ph{width:100%;max-width:250px;margin:0 auto;height:540px;background:var(--ap);border:1px solid var(--al);border-radius:26px;overflow:hidden;color:var(--ai);font-size:10px;display:flex;flex-direction:column}.ph *{min-width:0}
+.gb{background:var(--panel);color:var(--onpanel);border-radius:0 0 22px 22px;padding:0 12px 12px;flex:none}.sb{height:26px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 6px 3px;font:600 9px var(--display)}.t2{font:700 18px var(--display);padding-top:4px}
+.body{padding:10px;display:flex;flex-direction:column;gap:9px;flex:1;overflow:hidden}
+.h{font:700 10px var(--display)}.m{color:var(--am);font-size:9px}.cr{display:flex;gap:8px;align-items:center}.sp{flex:1}
+.ico{width:24px;height:24px;border-radius:8px;background:var(--mint);flex:none}.chev{color:var(--am)}
+.tg{width:26px;height:15px;border-radius:99px;background:var(--al);position:relative;flex:none}.tg::after{content:"";position:absolute;left:2px;top:2px;width:11px;height:11px;border-radius:50%;background:#fff}
+.grp{font:700 9px var(--display);color:var(--am);letter-spacing:.4px;margin:4px 4px 0}
+/* A: one grouped card with hairlines */
+.A .box{background:var(--ac);border-radius:16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}.A .rw{display:flex;gap:9px;align-items:center;padding:10px 11px}.A .rw+.rw{border-top:1px solid var(--al);margin-inline-start:44px;padding-inline-start:0}.A .rw+.rw{margin-inline-start:0;padding-inline-start:11px;position:relative}.A .rw+.rw::before{content:"";position:absolute;top:-1px;inset-inline:44px 0;border-top:1px solid var(--al)}.A .rw+.rw{border-top:0}
+/* B: soft tinted rows, no shadow, rounded group */
+.B .box{background:var(--mint);border-radius:18px;padding:3px;display:grid;gap:3px}.B .rw{display:flex;gap:9px;align-items:center;padding:10px 11px;background:var(--ac);border-radius:15px}.B .rw:first-child{border-radius:15px 15px 6px 6px}.B .rw:last-child{border-radius:6px 6px 15px 15px}.B .rw:only-child{border-radius:15px}.B .rw:not(:first-child):not(:last-child){border-radius:6px}
+.B .ico{background:var(--ap)}
+/* C: flat outlined group, icon as plain line glyph */
+.C .box{border:1.5px solid var(--al);border-radius:16px;overflow:hidden;background:transparent}.C .rw{display:flex;gap:9px;align-items:center;padding:11px}.C .rw+.rw{border-top:1.5px solid var(--al)}.C .ico{background:transparent;border:1.5px solid var(--al);border-radius:50%}
+.pill{display:inline-block;border-radius:99px;padding:3px 9px;font:600 9px var(--display);background:var(--al)}
+</style>
+<div class="wrap">
+<header style="display:flex;flex-direction:column;gap:10px"><h1>Grouped cards</h1>
+<p class="lead">Today every row is its own big card, so a list looks heavy and the eye has nothing to group. Three ways to make related rows one block. Whichever you pick becomes the rule for every list in the app: Account, Parts, Logs, Expenses, notifications.</p></header>
+<div class="picks" role="status"><output id="sum">No pick yet</output><button id="copy" type="button">Copy pick</button></div>
+<div class="set" id="set"></div>
+</div>
+<script>
+(function(){
+var SB='<div class="sb"><span>9:41</span><span>●●●</span></div>';
+var rw=function(t,s,tg){return '<div class="rw"><span class="ico"></span><div class="sp"><div class="h">'+t+'</div>'+(s?'<div class="m">'+s+'</div>':'')+'</div>'+(tg?'<span class="tg"></span>':'<span class="chev">›</span>')+'</div>'};
+var page=function(c){return '<div class="ph '+c+'"><div class="gb">'+SB+'<div class="t2">Account</div></div><div class="body"><div class="grp">PREFERENCES</div><div class="box">'+rw('Language','English')+rw('Currency','EGP')+rw('Dark mode','Easy on the eyes at night',1)+'</div><div class="grp">YOUR DATA</div><div class="box">'+rw('Notifications','Choose what suits you')+rw('Export your history','PDF, CSV or JSON')+rw('Share car history','Move it to the new owner')+'</div><div class="grp">ACCOUNT</div><div class="box">'+rw('Sign out')+'</div></div></div>'};
+var O=[['One grouped card, hairlines','Related rows share one white card, split by thin lines that start after the icon. Small grey section labels name each group. The calmest and most familiar.','A'],['Soft tray with rounded rows','A pale green tray holds the rows as separate little cards with tiny gaps and rounded ends. Friendlier and more Bestim, still clearly a group.','B'],['Flat outline group','No shadows or fills: one outlined block with lines between rows and outlined icons. Light and modern, best in dark mode.','C']];
+document.getElementById('set').innerHTML=O.map(function(o){return '<button class="opt" data-v="'+o[2]+'" aria-pressed="false">'+page(o[2])+'<div class="cap"><span class="tag">'+o[2]+'</span><div><b>'+o[0]+'</b><small>'+o[1]+'</small></div></div></button>'}).join('');
+var v='';try{v=localStorage.getItem('bestim-groups')||''}catch(e){}
+var sum=document.getElementById('sum'),set=document.getElementById('set');
+function paint(){set.querySelectorAll('.opt').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.v===v))});sum.textContent=v?'Grouped cards: '+v:'No pick yet'}
+set.addEventListener('click',function(e){var b=e.target.closest('.opt');if(!b)return;v=b.dataset.v;try{localStorage.setItem('bestim-groups',v)}catch(x){};paint()});
+document.getElementById('copy').addEventListener('click',function(){var c=this;if(navigator.clipboard)navigator.clipboard.writeText(sum.textContent).then(function(){c.textContent='Copied';setTimeout(function(){c.textContent='Copy pick'},1500)},function(){})});
+paint()})();
+</script>

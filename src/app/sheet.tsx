@@ -1,10 +1,10 @@
 import { router } from 'expo-router';
-import { X } from 'lucide-react-native';
+import { Camera, Image as ImageIcon, Trash2, X } from 'lucide-react-native';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Button, PressableScale, Text } from '@/components/ui';
+import { Button, Card, IconCircle, PressableScale, Text } from '@/components/ui';
 import { useSheet, type SheetAction } from '@/lib/sheet';
 import { useColors } from '@/lib/theme';
 
@@ -20,6 +20,30 @@ export default function Sheet() {
     router.back();
     a.onPress?.();
   };
+
+  // v2 flow 13 "photo source": icon-circle rows (camera, library, red bin) and a quiet cancel, no close button. Recognised by its title
+  // because lib/sheet.ts (the SheetAction type) is shared with the confirm sheets.
+  if (title === t('account.photo.title') && !body) {
+    return (
+      <View className="gap-2.5 rounded-t-screen bg-sheet px-6 pt-6" style={{ paddingBottom: bottom + 16 }}>
+        <Text variant="heading" className="pb-1">{title}</Text>
+        {choices.map((a, i) => {
+          const bad = a.style === 'destructive';
+          return (
+            <Card key={i} onPress={() => run(a)} className="min-h-[70px] flex-row items-center gap-3 !rounded-row px-3.5 py-[13px]">
+              <IconCircle icon={bad ? Trash2 : i === 0 ? Camera : ImageIcon} tone={bad ? 'late' : 'neutral'} size={44} />
+              <Text variant="label" className={`flex-1 ${bad ? 'text-danger' : ''}`}>{a.text}</Text>
+            </Card>
+          );
+        })}
+        {cancel ? (
+          <PressableScale accessibilityRole="button" onPress={() => run(cancel)} className="min-h-11 items-center justify-center">
+            <Text className="text-muted" style={{ fontSize: 14 }}>{cancel.text}</Text>
+          </PressableScale>
+        ) : null}
+      </View>
+    );
+  }
 
   return (
     <View className="gap-4 rounded-t-screen border-t border-line bg-sheet px-6 pt-6" style={{ paddingBottom: bottom + 16 }}>

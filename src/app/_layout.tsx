@@ -1,7 +1,7 @@
 import '@/global.css';
 
-import { Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
-import { Tajawal_400Regular, Tajawal_700Bold } from '@expo-google-fonts/tajawal';
+import { Poppins_300Light, Poppins_400Regular, Poppins_500Medium, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import { Tajawal_400Regular, Tajawal_500Medium, Tajawal_700Bold } from '@expo-google-fonts/tajawal';
 import { onlineManager } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
@@ -16,13 +16,16 @@ import { AppState, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 
+import { CarFlight } from '@/components/CarFlight';
 import { KeyboardDone } from '@/components/KeyboardDone';
 import { SplashOverlay } from '@/components/SplashOverlay';
 import { Toast } from '@/components/Toast';
 import { Button, Text } from '@/components/ui';
 import { applyLanguage } from '@/lib/i18n';
-import { syncNotifications } from '@/lib/notifications';
-import { DAY, persister, queryClient } from '@/lib/queryClient';
+import { initMonitoring, reportError, wrapRoot } from '@/lib/monitoring';
+import { openedFromNotification, syncNotifications } from '@/lib/notifications';
+import { useOnline } from '@/lib/online';
+import { DAY, dehydrateOptions, persister, queryClient } from '@/lib/queryClient';
 import { sessionFromUrl, useSession } from '@/lib/session';
 import { useProfile } from '@/lib/queries';
 import { palette } from '@/lib/palette';
@@ -31,14 +34,16 @@ import { processVoiceQueue } from '@/lib/voiceSend';
 import { useSettings } from '@/stores/settingsStore';
 
 SplashScreen.preventAutoHideAsync();
+initMonitoring();
 
 /** Shown instead of a blank screen when a screen crashes (Q81). expo-router picks this export up by name. */
-export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   const { t } = useTranslation();
   const scheme = useScheme();
   useEffect(() => {
     SplashScreen.hideAsync();
-  }, []);
+    reportError(error, 'screen crash');
+  }, [error]);
   return (
     <View className="flex-1 justify-center gap-4 bg-paper p-6" style={themeVars[scheme]}>
       <Text variant="title">{t('errorScreen.title')}</Text>
@@ -48,20 +53,20 @@ export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
   );
 }
 
-export default function RootLayout() {
+export default wrapRoot(function RootLayout() {
   return (
     <PersistQueryClientProvider
       client={queryClient}
-      persistOptions={{ persister, maxAge: 7 * DAY }}
+      persistOptions={{ persister, maxAge: 7 * DAY, dehydrateOptions }}
       onSuccess={() => queryClient.resumePausedMutations()}>
       <App />
     </PersistQueryClientProvider>
   );
-}
+});
 
 function App() {
   const scheme = useScheme();
-  const [fontsLoaded] = useFonts({ Tajawal_400Regular, Tajawal_700Bold, Poppins_400Regular, Poppins_700Bold });
+  const [fontsLoaded] = useFonts({ Tajawal_400Regular, Tajawal_500Medium, Tajawal_700Bold, Poppins_300Light, Poppins_400Regular, Poppins_500Medium, Poppins_700Bold });
   const [hydrated, setHydrated] = useState(useSettings.persist.hasHydrated());
   const language = useSettings((s) => s.language);
   const pendingShareToken = useSettings((s) => s.pendingShareToken);
@@ -71,7 +76,9 @@ function App() {
   const [splashDone, setSplashDone] = useState(false); // lives here, not in the overlay: the tree unmounts while a new sign-in loads
   const oldGuest = useRef<string | null>(null); // the guest sent to /register already, so a refetch doesn't pull them back from /login
   const endSplash = useCallback(() => setSplashDone(true), []);
-  const ready = fontsLoaded && hydrated && session !== undefined && (!userId || !profile.isPending);
+  const online = useOnline();
+  // Offline the profile query is paused, not failed: don't make the splash wait for it (Home shows its offline state).
+  const ready = fontsLoaded && hydrated && session !== undefined && (!userId || !profile.isPending || !online);
 
   useEffect(() => useSettings.persist.onFinishHydration(() => setHydrated(true)), []);
 
@@ -112,9 +119,11 @@ function App() {
       app.remove();
     };
   }, [ready, fullAccount]);
-  const tapped = useLastNotificationResponse()?.notification.request.content.data?.url;
+  // A tapped system notification (also one that opened the app from closed) is marked read and opens its screen, like a row in the list.
+  const tapped = useLastNotificationResponse();
   useEffect(() => {
-    if (ready && userId && typeof tapped === 'string') router.push(tapped as never);
+    if (!ready || !userId || !tapped) return;
+    openedFromNotification(tapped).then((url) => url && router.push(url as never));
   }, [ready, userId, tapped]);
 
   useEffect(() => {
@@ -136,7 +145,7 @@ function App() {
   }, [ready, language, userId, profile.data, session?.user.is_anonymous]);
 
   if (!ready) return null;
-  // Bottom sheets: the capture chooser (13) and the confirm sheet (Q55) and switch vehicle (Q56).
+  // Bottom sheets: the say-it / type-it chooser (13), the confirm sheet (Q55), switch vehicle (Q56) and the upgrade sheet (Q121).
   const sheetOptions: ComponentProps<typeof Stack.Screen>['options'] = {
     presentation: 'formSheet',
     sheetAllowedDetents: 'fitToContents',
@@ -149,12 +158,23 @@ function App() {
     <View className="flex-1 bg-paper" style={themeVars[scheme]}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="capture/index" options={{ ...sheetOptions, sheetAllowedDetents: [0.92] }} />
+        {/* Over the tabs, like a transparent modal: the page below (Home, My Cars) stays attached, so its car is there to fly back to. */}
+        <Stack.Screen name="vehicle/[id]" options={{ presentation: 'transparentModal', animation: 'fade', animationDuration: 250 }} />
+        {/* Opened from the car page (a transparent modal) a plain push shows as an inset card. These pages go full screen; */}
+        {['part', 'edit-vehicle', 'car-360'].map((n) => <Stack.Screen key={n} name={n} options={{ presentation: 'fullScreenModal' }} />)}
+        {/* v2 logging sheets (flow 4): card-colour sheets over the page below */}
+        <Stack.Screen name="capture/voice" options={{ ...sheetOptions, sheetCornerRadius: 36, contentStyle: [themeVars[scheme], { backgroundColor: palette[scheme].white }] }} />
+        <Stack.Screen name="capture/review-all" options={{ ...sheetOptions, sheetAllowedDetents: [0.8, 0.95], sheetCornerRadius: 36, contentStyle: [themeVars[scheme], { backgroundColor: palette[scheme].white }] }} />
+        <Stack.Screen name="part-logs" options={{ ...sheetOptions, sheetAllowedDetents: [0.6, 0.95] }} />
+        <Stack.Screen name="capture/index" options={{ ...sheetOptions, sheetAllowedDetents: [0.92], sheetCornerRadius: 36, contentStyle: [themeVars[scheme], { backgroundColor: palette[scheme].white }] }} />
+        <Stack.Screen name="update-odometer" options={{ ...sheetOptions, sheetCornerRadius: 36, contentStyle: [themeVars[scheme], { backgroundColor: palette[scheme].white }] }} />
         <Stack.Screen name="sheet" options={sheetOptions} />
         <Stack.Screen name="switch-vehicle" options={sheetOptions} />
+        <Stack.Screen name="upgrade" options={sheetOptions} />
         <Stack.Screen name="pick" options={{ presentation: 'modal' }} />
         <Stack.Screen name="notify-permission" options={{ presentation: 'modal' }} />
       </Stack>
+      <CarFlight />
       <KeyboardDone />
       <Toast />
       {splashDone ? null : <SplashOverlay onDone={endSplash} />}

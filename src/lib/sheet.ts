@@ -13,11 +13,13 @@ export function sheet(title: string, body?: string, actions: SheetAction[] = [])
   router.push('/sheet');
 }
 
-export const useVehiclePick = create<{ currentId: string | null; onPick: (id: string) => void }>(() => ({ currentId: null, onPick: () => {} }));
+export type AllCarsChoice = { active: boolean; onPick: () => void };
+export const useVehiclePick = create<{ currentId: string | null; onPick: (id: string) => void; all?: AllCarsChoice }>(() => ({ currentId: null, onPick: () => {} }));
 
 /** The switch-vehicle sheet (decisions Q56): pictures, a tick on the current one, a dot on overdue ones. */
-export function pickVehicle(currentId: string | null, onPick: (id: string) => void) {
-  useVehiclePick.setState({ currentId, onPick });
+/** `all` adds an "All cars" row on top (Expenses only). */
+export function pickVehicle(currentId: string | null, onPick: (id: string) => void, all?: AllCarsChoice) {
+  useVehiclePick.setState({ currentId, onPick, all });
   router.push('/switch-vehicle');
 }
 

@@ -1,0 +1,104 @@
+<title>Bestim Car Details Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Tajawal:wght@400;700&display=swap">
+<style>
+/* Layout: three full phone mockups of the car details page side by side; a picker bar sticks to the top. */
+:root{--bg:#EEF1EE;--fg:#222E29;--muted:#5B6860;--line:#D5DCD6;--card:#FFFFFF;--lime:#D3F53D;--panel:#222E29;--onpanel:#F5F7F5;--teal:#08736F;--ok:#8FC21E;--soon:#E8A317;--late:#E0455F;--ap:#F5F7F5;--ac:#FFFFFF;--al:#DEE5DF;--ai:#222E29;--am:#5B6860;--pick:#08736F;--display:'Poppins','Tajawal',system-ui,sans-serif;--body:'Tajawal','Poppins',system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B100D;--fg:#E8EEEA;--muted:#93A39A;--line:#26332B;--card:#131A16;--panel:#212E27;--ap:#0E1411;--ac:#171F1B;--al:#2C3A32;--ai:#F2F5F3;--am:#93A39A;--pick:#3ECFC0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B100D;--fg:#E8EEEA;--muted:#93A39A;--line:#26332B;--card:#131A16;--panel:#212E27;--ap:#0E1411;--ac:#171F1B;--al:#2C3A32;--ai:#F2F5F3;--am:#93A39A;--pick:#3ECFC0;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1{font:700 28px/1.15 var(--display);margin:0}h2{font:700 19px var(--display);margin:0}p{margin:0}.lead{color:var(--muted);max-width:68ch}
+.picks{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.picks output{flex:1;min-width:200px;font-size:13px;color:var(--muted)}.picks button{font:600 13px var(--display);background:var(--pick);color:#fff;border:0;border-radius:10px;padding:8px 14px;cursor:pointer}
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:10px;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px;min-width:0}
+.opt:focus-visible,.picks button:focus-visible{outline:3px solid var(--pick);outline-offset:2px}.opt[aria-pressed="true"]{border-color:var(--pick)}
+.cap{display:flex;gap:10px;align-items:flex-start}.tag{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line);font:700 13px var(--display)}.opt[aria-pressed="true"] .tag{background:var(--pick);color:#fff}
+.cap b{font:600 14px var(--display);display:block}.cap small{color:var(--muted);font-size:13px;line-height:1.4;display:block}
+.ph{width:100%;max-width:260px;margin:0 auto;height:560px;background:var(--ap);border:1px solid var(--al);border-radius:28px;overflow:hidden;color:var(--ai);font-size:10px;display:flex;flex-direction:column}
+.ph *{min-width:0}
+.gb{background:var(--panel);color:var(--onpanel);border-radius:0 0 24px 24px;padding:0 14px 14px;display:flex;flex-direction:column;gap:10px;flex:none}
+.sb{height:28px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 6px 3px;font:600 9px var(--display)}
+.row{display:flex;align-items:center;gap:8px}.sp{flex:1}
+.bk{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.15);display:grid;place-items:center;flex:none}
+.t1{font:700 14px/1.2 var(--display)}.t2{font:700 19px/1.15 var(--display)}.s1{font-size:9px;opacity:.7}
+.seg{display:flex;background:rgba(255,255,255,.14);border-radius:99px;padding:3px;gap:2px}.seg span{flex:1;text-align:center;padding:5px 0;border-radius:99px;font:600 9px var(--display)}.seg .on{background:var(--lime);color:#222E29}
+.plate{background:#fff;color:#222E29;border:2px solid #222E29;border-radius:5px;overflow:hidden;display:inline-block;font:700 10px 'Tajawal',sans-serif}.plate i{display:block;background:#08736F;color:#fff;font:700 6px var(--display);text-align:center;font-style:normal}.plate b{display:block;padding:0 8px;text-align:center}
+.art{width:70px;height:36px;border-radius:9px;background:rgba(255,255,255,.2);flex:none}
+.glass{background:rgba(255,255,255,.12);border-radius:14px;padding:8px 10px}
+.num{font:700 22px var(--display)}
+.win{display:flex;gap:2px}.win i{font:700 15px var(--display);font-style:normal;background:#101713;color:var(--lime);width:18px;text-align:center;border-radius:4px;padding:3px 0;border:1px solid rgba(211,245,61,.3)}
+.body{padding:10px;display:flex;flex-direction:column;gap:7px;flex:1;overflow:hidden}
+.card{background:var(--ac);border-radius:13px;padding:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)}.cr{display:flex;gap:7px;align-items:center}
+.h{font:700 10px var(--display)}.m{color:var(--am);font-size:9px}
+.ring{--p:80;--c:var(--ok);width:46px;height:46px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p)*1%),var(--al) 0);display:grid;place-items:center;flex:none}.ring::before{content:"";width:35px;height:35px;border-radius:50%;background:var(--ac);grid-area:1/1}.ring b{grid-area:1/1;z-index:1;font:700 11px var(--display)}
+.late{--c:var(--late)}.soon{--c:var(--soon)}
+.pb{height:5px;border-radius:3px;background:var(--al);overflow:hidden;flex:1}.pb i{display:block;height:100%;background:var(--ok)}.pb.late i{background:var(--late)}
+.ico{width:24px;height:24px;border-radius:8px;background:var(--al);flex:none}
+.chip{border-radius:99px;padding:4px 9px;font:600 9px var(--display);background:var(--al);white-space:nowrap}.chip.on{background:var(--panel);color:var(--onpanel)}
+.fab{display:flex;gap:7px;padding:8px 10px 12px;border-top:1px solid var(--al);background:var(--ap)}.fab .b{flex:1;text-align:center;padding:10px;border-radius:12px;font:700 10px var(--display);background:var(--lime);color:#222E29}.fab .g{width:38px;border-radius:12px;background:var(--ac);border:1px solid var(--al)}
+.spark{height:30px}.note{display:flex;gap:6px;align-items:center}
+</style>
+
+<div class="wrap">
+<header style="display:flex;flex-direction:column;gap:10px"><h1>Car details: three designs</h1>
+<p class="lead">Same page, three ideas. Each one answers your two points: the plate gets a better home, and the kilometers card becomes the star of the Overview. Tap the one to build. Figures are examples.</p></header>
+<div class="picks" role="status"><output id="sum">No pick yet</output><button id="copy" type="button">Copy pick</button></div>
+
+<div class="set">
+<button class="opt" data-v="A" aria-pressed="false"><div class="ph">
+ <div class="gb"><div class="sb"><span>9:41</span><span>●●●</span></div>
+  <div class="row"><span class="bk">‹</span><span class="sp"></span><span class="bk">✎</span></div>
+  <div class="row"><div class="sp"><div class="t2">Car</div><div class="s1">2020 · Sedan</div></div><div class="art"></div></div>
+  <div class="seg"><span class="on">Overview</span><span>Log</span><span>Reminders</span></div></div>
+ <div class="body">
+  <div class="card" style="display:grid;gap:7px"><div class="cr"><div class="sp"><div class="m">Odometer</div><div class="num">250,500 <span class="m">km</span></div></div><div class="plate"><i>EGYPT · مصر</i><b>أ ب ج ١٢٣٤</b></div></div>
+   <div class="cr"><div class="pb"><i style="width:70%"></i></div><span class="m">Updated 13 days ago</span></div></div>
+  <div class="cr"><div class="card sp cr"><div class="ring late" style="--p:68"><b>68</b></div><div><div class="h">Health</div><div class="m">3 late · 2 soon</div></div></div></div>
+  <div class="card" style="display:grid;gap:3px"><div class="m">Spending · 6 months</div><div class="h">1,800 EGP</div></div>
+  <div class="chip on" style="align-self:flex-start">All parts</div>
+  <div class="card cr"><span class="ico"></span><div class="sp"><div class="h">Wipers</div></div><span class="h" style="color:var(--late)">Late</span></div>
+ </div>
+ <div class="fab"><div class="b">+ Add a record</div><div class="g"></div></div></div>
+ <div class="cap"><span class="tag">A</span><div><b>Plate inside the KM card</b><small>One strong card: odometer, the plate on its side and when it was last updated. Header stays clean: car, year, switch.</small></div></div></button>
+
+<button class="opt" data-v="B" aria-pressed="false"><div class="ph">
+ <div class="gb"><div class="sb"><span>9:41</span><span>●●●</span></div>
+  <div class="row"><span class="bk">‹</span><span class="sp"></span><span class="bk">✎</span></div>
+  <div class="row" style="justify-content:space-between;align-items:flex-end"><div><div class="t2">Car</div><div class="s1">2020 · Sedan</div></div><div class="plate"><i>EGYPT · مصر</i><b>أ ب ج ١٢٣٤</b></div></div>
+  <div class="art" style="width:100%;height:50px"></div>
+  <div class="glass"><div class="row"><div class="sp"><div class="s1">Odometer</div><div class="win"><i>2</i><i>5</i><i>0</i><i>5</i><i>0</i><i>0</i></div></div><div style="text-align:end"><div class="s1">Updated</div><div class="h">13 days ago</div></div></div></div>
+  <div class="seg"><span class="on">Overview</span><span>Log</span><span>Reminders</span></div></div>
+ <div class="body">
+  <div class="cr"><div class="card sp" style="display:grid;place-items:center;gap:3px"><div class="ring late" style="--p:68"><b>68</b></div><div class="m">Health</div></div><div class="card sp" style="display:grid;gap:3px"><div class="m">This year</div><div class="num" style="font-size:16px">1,800</div><div class="m">EGP</div></div></div>
+  <div class="card"><div class="m">Distance · 6 months</div><svg class="spark" viewBox="0 0 100 30" width="100%" preserveAspectRatio="none"><polyline fill="none" stroke="#08736F" stroke-width="2" points="0,26 25,22 50,16 75,10 100,4"/></svg></div>
+  <div class="card cr"><span class="ico"></span><div class="sp"><div class="h">Wipers</div></div><span class="h" style="color:var(--late)">Late</span></div>
+ </div>
+ <div class="fab"><div class="b">+ Add a record</div><div class="g"></div></div></div>
+ <div class="cap"><span class="tag">B</span><div><b>Plate in the header, odometer window</b><small>The plate sits beside the name like on a real car. The odometer is drawn as the dashboard window (your update screen look).</small></div></div></button>
+
+<button class="opt" data-v="C" aria-pressed="false"><div class="ph">
+ <div class="gb"><div class="sb"><span>9:41</span><span>●●●</span></div>
+  <div class="row"><span class="bk">‹</span><div class="sp t1">Car · 2020</div><span class="bk">✎</span></div>
+  <div class="seg"><span class="on">Overview</span><span>Log</span><span>Reminders</span></div></div>
+ <div class="body">
+  <div class="card" style="display:grid;gap:8px"><div class="cr"><div class="art" style="background:var(--al);width:84px;height:44px"></div><div class="sp" style="display:grid;gap:4px"><div class="plate" style="justify-self:start"><i>EGYPT · مصر</i><b>أ ب ج ١٢٣٤</b></div><div class="m">Sedan · 2020</div></div></div>
+   <div class="cr" style="align-items:flex-end"><div class="sp"><div class="m">Odometer</div><div class="num">250,500 <span class="m">km</span></div></div><div class="chip" style="background:var(--lime);color:#222E29">Update</div></div></div>
+  <div class="cr"><div class="card sp cr"><div class="ring late" style="--p:68"><b>68</b></div><div><div class="h">Health</div><div class="m">3 late</div></div></div><div class="card sp" style="display:grid;gap:2px"><div class="m">This year</div><div class="h">1,800 EGP</div></div></div>
+  <div class="card cr"><span class="ico"></span><div class="sp"><div class="h">Wipers</div><div class="m">Late</div></div></div>
+  <div class="card cr"><span class="ico"></span><div class="sp"><div class="h">Coolant check</div><div class="m">Late</div></div></div>
+ </div>
+ <div class="fab"><div class="b">+ Add a record</div><div class="g"></div></div></div>
+ <div class="cap"><span class="tag">C</span><div><b>Slim green bar, identity card below</b><small>The green bar keeps only back, title, edit and the switch. A white card holds the car picture, plate and odometer with its Update button.</small></div></div></button>
+</div>
+</div>
+<script>
+(function(){var v='';try{v=localStorage.getItem('bestim-cd-pick')||''}catch(e){}
+var sum=document.getElementById('sum');
+function paint(){document.querySelectorAll('.opt').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.v===v))});sum.textContent=v?'Car details: '+v:'No pick yet'}
+document.querySelectorAll('.opt').forEach(function(b){b.addEventListener('click',function(){v=b.dataset.v;try{localStorage.setItem('bestim-cd-pick',v)}catch(e){};paint()})});
+document.getElementById('copy').addEventListener('click',function(){var c=this;if(navigator.clipboard)navigator.clipboard.writeText(sum.textContent).then(function(){c.textContent='Copied';setTimeout(function(){c.textContent='Copy pick'},1500)},function(){})});
+paint()})();
+</script>

@@ -1,13 +1,15 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { Plus } from 'lucide-react-native';
+import { Plus, SearchX } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { EmptyState } from '@/components/EmptyState';
 import { KeyboardDone } from '@/components/KeyboardDone';
-import { Field, Header, Item, Text } from '@/components/ui';
+import { Field, Item } from '@/components/ui';
+import { PageHeader } from '@/components/PageHeader';
 import { fold, matches } from '@/lib/search';
 import { usePick } from '@/lib/sheet';
 
@@ -28,9 +30,9 @@ export default function Pick() {
   };
 
   return (
-    <SafeAreaView className="flex-1 rounded-t-screen border-t border-line bg-sheet" edges={['top', 'bottom']}>
-      <View className="flex-1 gap-4 px-6 pt-6">
-        <Header title={title} />
+    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
+      <PageHeader title={title} />
+      <View className="flex-1 gap-4 px-6 pt-2">
         <Field label={t('pick.search')} value={query} onChangeText={setQuery} autoCorrect={false} returnKeyType="search" />
         <FlatList
           data={found}
@@ -38,13 +40,14 @@ export default function Pick() {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           initialNumToRender={12}
-          contentContainerClassName="gap-2 pb-6"
+          contentContainerClassName="gap-2"
+          contentContainerStyle={{ paddingBottom: 120 }}
           renderItem={({ item }) => (
             <View style={{ paddingStart: query ? 0 : (item.depth ?? 0) * 16 }}>
               <Item title={item.label} subtitle={item.hint} chevron={false} onPress={() => pick(item.id, item.label)} />
             </View>
           )}
-          ListEmptyComponent={allowCustom && typed ? null : <Text variant="body" className="text-muted">{t(allowCustom ? 'pick.type' : 'pick.empty')}</Text>}
+          ListEmptyComponent={allowCustom && typed ? null : <EmptyState icon={SearchX} title={t(allowCustom ? 'pick.type' : 'pick.empty')} />}
           ListFooterComponent={
             allowCustom && typed && isNew ? <Item icon={Plus} title={t('pick.custom', { text: typed })} chevron={false} onPress={() => pick(null, typed)} /> : null
           }

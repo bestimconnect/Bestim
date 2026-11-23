@@ -1,6 +1,6 @@
 # Bestim: Build Progress
 
-Updated 2026-10-11. Read this first in any new session. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
+Updated 2026-11-04. Read this first in any new session. **Current state (2026-11-04):** phases 1 to 5 are built, plus plans, widgets, All-cars, the licence-card Account and the new tab header; the final production check is in `RELEASE-READINESS.md` (Round 3). Phase 6 (store release) waits on the founder's list there. The notes below are the original build log and some parts (tab list, guest-mode wording) are older than the code. The spec is `docs/BESTIM-TECH-PLAN.md`, the product decisions are in `docs/decisions.md`, and the conventions are in `CLAUDE.md`.
 
 ## Phase status
 
@@ -11,7 +11,7 @@ Updated 2026-10-11. Read this first in any new session. The spec is `docs/BESTIM
 | 3 · Core features | Home (06/07/36), vehicles (08/09), parts (11/12), capture (13–17), history (10/18/19/20/39) | ✅ Done |
 | 4 · Reminders & expenses | Reminders (21/22/38), update odometer (25), expenses (23/24/40) | ✅ Done |
 | 5 · Account & polish | Account (26), notification prefs (28), export (27), share/receive (41/42), feedback (43–48), on-device reminders, offline, delete vehicle/account | ✅ Built (QA gaps below) |
-| 6 · Release | Needs the Apple Developer account: Sign in with Apple, server push, TestFlight, Android Google key, universal links, store submission | ⏭ Next |
+| 6 · Release | Store setup, Apple Developer account, real-phone tests, first builds: see the founder checklist in `RELEASE-READINESS.md` | ⏭ In progress (founder steps) |
 
 ## App flow (decisions Q8)
 Splash (native, then `SplashOverlay`: the logo builds itself in about 2 s, Q104) → Onboarding (`(onboarding)/intro`, 3 swipeable slides, "Next" / "Get started" button, "Skip" top corner; shown every time the app opens signed out; no guest mode, nothing is usable without an account, Q103) → Sign in (link to Create account; "Continue with Google" is the last element on both account screens)  → Your profile (32) if the name is empty → Add car (saves the car, sets `onboarding_completed`) → Home (tabs). An old guest session from a test build is sent once to Create account and keeps its car. Q87, Q98–Q104.
@@ -21,7 +21,7 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 - **UI kit** (`src/components/ui/`): Text, Button, Field, Card, Item, Header, Note, Divider, Progress, Choice (`className` for the track), Metric, GoogleIcon. Also `Hero`, `TourSlide`, `TabBar`, `PartMetric` in `src/components/`.
 - **Data hooks** (`src/lib/queries.ts`): vehicles, current vehicle, logs, log, service types, parts (`useVehicleParts` + `needsAttention`), snoozes, expenses. Part status math: `src/lib/parts.ts` (pure, checked by `npm run check`). Voice: see "Voice logging" below.
 - **Flow stores:** `settingsStore` (language, theme, skipSplash, currentVehicleId), `vehicleDraft` (onboarding / `?mode=extra` add vehicle), `logDraft` (capture → review → save, and corrections).
-- **Tabs:** Home, Vehicles (stack: 08 → 09), Reminders (21), Account (Phase 5 placeholder with an Expenses row; stack → 23). The center + opens the capture sheet (13).
+- **Tabs (current):** Home, Cars, Expenses, Account (no Reminders tab; the bell opens notifications). The center + opens the capture sheet (13). Every tab has a car pill; Expenses can show "All cars". Account starts with the licence card.
 - **No guest mode (Q103):** signed out, only the welcome, sign-in and create-account screens are reachable. The only guest-aware code left: the gate in `src/app/_layout.tsx` sends an old anonymous session to Create account, `register.tsx` upgrades it in place (`updateUser`), and `signInWithGoogle` in `src/lib/auth.ts` links Google to it.
 - **DB** (migrations in `supabase/migrations/`):
   - odometer trigger (flags suspicious readings as needs_review and moves the vehicle odometer, decisions Q9/Q20);
@@ -78,10 +78,20 @@ The gate lives in `src/app/_layout.tsx`. `profiles.onboarding_completed` = "firs
 **Guest mode removed (Q103, later the same day):** the welcome screen has "Create account" and "Sign in"; the "save your car" card on Home, the feature-gate screen, the guest delete-data path and every guest check in the tabs and screens are gone. Not run by anyone yet: the whole door (sign in, Google from either screen, create account, an old guest session being taken to Create account), Part F and row G2 of the retest sheet.
 
 **To do outside the code:**
-- Turn off anonymous sign-ins in the Supabase dashboard (Authentication → Sign In / Providers), once old test builds are no longer in use.
+- Anonymous sign-ins: off on the live project and in `supabase/config.toml` (2026-10-29).
 - The website's privacy, terms and delete-account pages and the store answers (Apple privacy labels, Google data safety) still describe guest mode and need rewording.
 
+## Round of 2026-10-22 (Q108–Q112)
+Founder's test list, done and tried on the iPhone 16 simulator (not on Android yet):
+- **Motion (Q108):** tab cross-fade, tab bar fade, car page fade, the tapped car flies into the car page and back (`lib/carFlight.ts`, `components/CarFlight.tsx`).
+- **Refresh (Q109):** normal system spinner again.
+- **Odometer (Q110):** cockpit layout; dial is drawn in code until the Gemini picture exists (`docs/gemini-odometer-prompt.md`).
+- **Expenses (Q111):** Month / Year line chart, swipe through all history.
+- **Small fixes (Q112):** VIN "—", My Cars cards without the status line, Logs filter keeps its layout.
+- **Design mock-ups** the founder chose from (transitions, odometer, refresh, expenses) were built as artifacts; the chosen ones are described in the decisions.
+
 ## Open items
+- **From the 2026-10-22 round:** the 3D dial picture for the odometer page (Gemini prompt in `docs/gemini-odometer-prompt.md`); Android not tried for the car-flight, fades and swipe chart; iOS swipe-back on the car page; the green top bar may still feel late (see Q108); an empty VIN was not seen on screen (both test cars have one).
 - **Not verified yet (QA):**
   - English/LTR layout of the Phase 3–5 screens;
   - light mode of the Phase 5 screens (they were reviewed in dark);
@@ -117,6 +127,8 @@ A full pass for Google Play and Huawei AppGallery. Store texts and form answers:
 - The email-link flow end to end (needs the live settings above).
 
 ## Environment & gotchas (learned the hard way)
+- **Simulator build (2026-10-22):** `pod install` fails with a Unicode error unless the shell has `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8`. The dev build installs as `com.bestim.app.dev` (an old `com.bestim.app` may also be on the simulator: launching that one gives "Cannot find native module" errors). After a code change that touches navigation, relaunch the app: a hot reload keeps the old navigation state.
+- **Car page is a root route** (`/vehicle/[id]`, Q108), not inside the Vehicles tab stack.
 - `.env` is **git-ignored** and holds EXPO_PUBLIC_SUPABASE_URL/ANON_KEY, EXPO_PUBLIC_GOOGLE_WEB/IOS_CLIENT_ID and SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET. A new machine or cloud session must recreate it.
 - Supabase project ref `wlepubflnjcguosicuak`. `supabase link` is needed on a new machine. Schema changes go through migrations only.
 - **Email links must be opened on the phone that asked for them** (sign-up, reset password): the link carries a one-time code and the phone holds the other half. A link opened on another phone lands on Sign in with a plain notice.
@@ -165,3 +177,15 @@ A full pass for Google Play and Huawei AppGallery. Store texts and form answers:
 2. Android APK for testers (steps under "Open items").
 3. With the Apple Developer account: restore Apple sign-in (Q6), EAS iOS build → TestFlight, push keys.
 4. Briefs for screen builders: `docs/phase3-brief.md`, `phase4-brief.md`, `phase5-brief.md`. PM decisions continue at Q51.
+
+## v2 (branch `v2`, started 2026-11-20)
+- Plan: `design-v2/BUG-AUDIT-AND-SERVICES-SPEC.md`. Phase 0 (plan) approved.
+- **Phase 1 (data): files written, NOT pushed.** Migrations `20261121*` (schema, seeds via `scripts/v2-seed.mjs`, `save_visit` + health, soft delete, backfill); check script `supabase/verify/v2-phase1.sql`; data in `supabase/seed-data/`. Ran in PGlite only (no Docker here); RLS under real login tokens needs the anon-key check after an approved push.
+- Open: car health weighted vs lowest; oil-and-filter resets engine-oil tracker?; ambiguous system placements; `src/lib/parts.ts` must adopt "30% or less = Due soon"; odometer-suspicious flag and 24 h edit rule not yet carried to visits.
+- 2026-11-21 (v2 Phase 2 + 2.5): bug fixes with no new design (odometer, expenses sort, notifications read state and deep links, fuel, car transition, photo permissions) and the v2 shell and look: 3 tabs (Home / Timeline / Money), floating nav with lime voice button, flat tokens, logging flow, auth, onboarding, menu and settings, cars/passport/sharing, Update odometer as a bottom sheet, Add expense sheet, flat plan tour. v1 header, hero, green bar and Sheen code deleted. Design-system audit: `docs/design-system-audit.md`. First real-iPhone test found a blank voice review sheet (fixed: sheet is replaced, not stacked; list has a min height). Checked only by reading and on the phone by the founder, no simulator. Open: blurred sheet backdrop (needs expo-blur), typed delete confirm is UI only (soft delete not wired), Restore account and Recently deleted are UI only, Money period segment, "Couldn't save" sheet, hard-coded colours (see audit). Phases 3-6 not started.
+- 2026-11-22: + fan (voice / manual) and Garage tab added; Home bento, chart stripes, nav spacing and tab slide fixed to match the design. Not yet checked on the phone.
+- 2026-11-23: Nav spring animation, arc fan, soft depth + tint (Q141). Build to iPhone started; not yet checked on device.
+
+## 2026-11-23: animated splash + welcome drift (branch `splash-motion`)
+- `src/components/Wordmark.tsx` (logo, one clock `splashClock` in `src/lib/splashClock.ts`, paths in `src/lib/wordmarkPaths.ts` generated from design-v2/motion), `SplashOverlay.tsx` (5 s, tap-skip after 1.5 s, Reduce Motion path), `(onboarding)/intro.tsx` (custom swipe pager with Drift, dots, slide 1 enters at 4,750 ms).
+- Native splash = flat paper (#EBEBE8) in `app.json`. The app is forced light at OS level (`userInterfaceStyle`), so no native dark splash: a dark-theme user sees paper for the first instant before the dark JS splash.

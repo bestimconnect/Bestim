@@ -9,10 +9,10 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 
 import { PartArt } from '@/components/PartArt';
-import { PressableScale, Text } from '@/components/ui';
+import { Card, PressableScale, Text } from '@/components/ui';
 import type { Part } from '@/lib/queries';
 import { lifeFraction, type PartStatus as Status } from '@/lib/parts';
-import { shadows, useColors } from '@/lib/theme';
+import { useColors } from '@/lib/theme';
 
 type ColorSet = ReturnType<typeof useColors>;
 type State = 'ok' | 'soon' | 'overdue' | 'snoozed' | 'none';
@@ -48,7 +48,7 @@ export function PartBadge({ part, name, unit, onPress }: { part: Part; name: str
       accessibilityLabel={`${name}, ${late ? t('partStatus.overdue') : pct}, ${partSub(t, part, unit)}`}
       scale={0.96}
       onPress={onPress}
-      className="w-[76px] items-center gap-1">
+      className="w-[96px] items-center gap-1">
       <View className="h-[62px] w-[62px] items-center justify-center">
         <Svg width={62} height={62} style={{ position: 'absolute' }}>
           <Circle cx={31} cy={31} r={R} stroke={c.line} strokeWidth={5} fill="none" />
@@ -58,7 +58,7 @@ export function PartBadge({ part, name, unit, onPress }: { part: Part; name: str
           <PartArt nameEn={part.serviceType.name_en} size={32} state={art} />
         </View>
       </View>
-      <Text variant="label" numberOfLines={2} className="h-8 text-center !text-[12px] !leading-[16px]">{name}</Text>
+      <Text variant="label" numberOfLines={2} className="min-h-[32px] self-stretch text-center !text-[12px] !leading-[16px]">{name}</Text>
       <Text variant="label" className={`!text-[13px] !leading-[18px] ${word}`}>{late ? t('partStatus.overdue') : pct}</Text>
     </PressableScale>
   );
@@ -70,20 +70,17 @@ export function PartRow({ part, name, unit, onPress }: { part: Part; name: strin
   const c = useColors();
   const { snoozed, late, art, word, pct } = look(c, part);
   return (
-    <PressableScale
-      accessibilityRole="button"
+    <Card
       accessibilityLabel={`${name}, ${snoozed ? t('partStatus.snoozed') : late ? t('partStatus.overdue') : pct}, ${partSub(t, part, unit)}`}
-      scale={0.98}
       onPress={onPress}
-      className="flex-row items-center gap-3 rounded-[18px] bg-white px-3 py-2"
-      style={{ boxShadow: shadows.soft }}>
+      className="min-h-[56px] flex-row items-center gap-3 px-3.5 py-2.5">
       <PartArt nameEn={part.serviceType.name_en} size={28} state={art} />
       <View className="flex-1">
         <Text variant="label" numberOfLines={1}>{name}</Text>
         <Text variant="caption" numberOfLines={1} className="text-muted">{partSub(t, part, unit)}</Text>
       </View>
       {snoozed ? <Moon size={18} color={c.muted} /> : <Text variant="label" className={word}>{late ? t('partStatus.overdue') : pct}</Text>}
-    </PressableScale>
+    </Card>
   );
 }
 

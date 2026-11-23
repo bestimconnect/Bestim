@@ -21,6 +21,20 @@ Notifications.setNotificationHandler({
   handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: false, shouldSetBadge: false }),
 });
 
+/** A notification the OS showed while the app was open: move it into the list now instead of at the next sync. */
+Notifications.addNotificationReceivedListener(() => useInbox.getState().deliver());
+
+/** The user tapped a notification: make sure it is in the list, mark it read, return its screen (Q92). Null when it carries none. */
+export async function openedFromNotification(response: Notifications.NotificationResponse) {
+  const inbox = useInbox;
+  if (!inbox.persist.hasHydrated()) await inbox.persist.rehydrate();
+  inbox.getState().deliver();
+  const { identifier, content } = response.notification.request;
+  inbox.getState().items.filter((i) => i.id.startsWith(`${identifier}@`)).forEach((i) => inbox.getState().markRead(i.id));
+  const url = content.data?.url;
+  return typeof url === 'string' ? url : null;
+}
+
 export async function notificationsAllowed() {
   return (await Notifications.getPermissionsAsync()).granted;
 }
@@ -56,7 +70,8 @@ export async function syncNotifications() {
     // Notifications page (Q92): what was scheduled and is now past has been shown, so it joins the list.
     if (!user) return useInbox.getState().clear(); // signed out: the list belongs to that account
     useInbox.getState().deliver();
-    useInbox.getState().setScheduled([]);
+    // Not wiped here: if anything below fails or returns early (offline, no permission) the pending alerts stay and are still
+    // delivered when their time passes. Only the final setScheduled() replaces them. (Wiping early was why alerts vanished.)
     await ensureChannel();
     if (!(await notificationsAllowed())) return;
 

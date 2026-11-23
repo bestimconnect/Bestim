@@ -2,13 +2,16 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router } from 'expo-router';
-import { Gauge, Receipt, Wrench, X } from 'lucide-react-native';
+import { ArrowRight, Banknote, CalendarDays, Gauge, Mic, Settings2, X, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Field, Header, Item, Note, Text } from '@/components/ui';
+import { EmptyState } from '@/components/EmptyState';
+import { PartArt } from '@/components/PartArt';
+import { TextLink } from '@/components/VoiceSheet';
+import { Button, Card, Field, IconTile, Note, Text } from '@/components/ui';
 import { shouldAskNotifications } from '@/lib/notifications';
 import { useServiceTypes, useVehicles } from '@/lib/queries';
 import { saveLog } from '@/lib/saveLog';
@@ -18,15 +21,14 @@ import { useLogDraft } from '@/stores/logDraft';
 import { dropVoice } from '@/lib/voiceSend';
 import { useVoiceBatch, type BatchRecord } from '@/stores/voiceBatch';
 
-// Review what one voice recording produced: a card per record, edit or remove, then save them all
-// (decisions Q58–Q69). No design PNG: built from the existing review (15) and item components.
+// Review what one voice recording produced (v2 sheet, design-v2 flow 4 #2): a card per record with its chips and trust label,
+// edit or remove, then save them all (decisions Q58–Q69).
 const n = (v: number) => v.toLocaleString('en-US');
-const ICONS = { maintenance: Wrench, expense: Receipt, odometer: Gauge };
-const TONES = { maintenance: 'mint', expense: 'sky', odometer: 'paper' } as const;
 
 export default function ReviewAll() {
   const { t, i18n } = useTranslation();
   const c = useColors();
+  const { bottom } = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const { transcript, records, update, remove } = useVoiceBatch();
   const vehicles = useVehicles().data ?? [];
@@ -56,13 +58,14 @@ export default function ReviewAll() {
         ? r.category ? t(`expenses.chip.${r.category}`) : t('capture.batch.unclearExpense')
         : t('capture.batch.odometerTitle');
   // Q59: only what was said; a missing part is left out, never shown as "not mentioned".
-  const subtitle = (r: BatchRecord) =>
+  const chips = (r: BatchRecord): { icon: LucideIcon; text: string }[] =>
     (r.kind === 'maintenance'
-      ? [r.odometer != null ? reading(r, r.odometer) : null, r.cost != null ? money(r.cost) : null, day(r.date)]
+      ? [r.odometer != null && { icon: Gauge, text: reading(r, r.odometer) }, r.cost != null && { icon: Banknote, text: money(r.cost) }, { icon: CalendarDays, text: day(r.date) }]
       : r.kind === 'expense'
-        ? [r.amount != null ? money(r.amount) : null, r.liters != null ? t('capture.batch.liters', { value: n(r.liters) }) : null, r.odometer != null ? reading(r, r.odometer) : null, r.place || null, day(r.date)]
-        : [reading(r, r.reading)]
-    ).filter(Boolean).join(' · ');
+        ? [r.amount != null && { icon: Banknote, text: money(r.amount) }, r.liters != null && { icon: Banknote, text: t('capture.batch.liters', { value: n(r.liters) }) }, r.odometer != null && { icon: Gauge, text: reading(r, r.odometer) }, r.place && { icon: Banknote, text: r.place }, { icon: CalendarDays, text: day(r.date) }]
+        : [{ icon: Gauge, text: reading(r, r.reading) }]
+    ).filter((x): x is { icon: LucideIcon; text: string } => !!x);
+  const artName = (r: BatchRecord) => (r.kind === 'maintenance' ? typeOf(r)?.name_en : r.kind === 'expense' && r.category === 'fuel' ? 'Fuel' : undefined);
 
   // What stops a card from being saved as it is (Q61). A lower reading is never written silently (Q9).
   const problem = (r: BatchRecord) => {
@@ -147,55 +150,57 @@ export default function ReviewAll() {
 
   // Q62/Q63: nothing left to save. Start clean, on the same vehicle.
   const restart = (source: 'voice' | 'manual') => {
-    if (source === 'voice') return router.replace('/capture/voice');
     router.back(); // a sheet is closed with back(); this screen sits on the home screen
+    if (source === 'voice') return router.push('/capture/voice');
     router.push({ pathname: '/capture', params: { vehicleId: useLogDraft.getState().vehicleId ?? undefined } });
   };
 
+  const foundKey = records.length === 1 ? 'logv2.foundOne' : records.length === 2 ? 'logv2.foundTwo' : 'logv2.foundMany';
   return (
-    <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
-      <ScrollView contentContainerClassName="gap-4 p-6" keyboardShouldPersistTaps="handled" className="flex-1" automaticallyAdjustKeyboardInsets>
-        <Header title={t('capture.batch.header')} />
-        <Text variant="title">{t(records.length ? 'capture.batch.title' : 'capture.batch.emptyTitle')}</Text>
-        {transcript ? (
-          <View className="gap-2 rounded-item bg-sky p-4">
-            <Text variant="label">{t('capture.batch.transcript')}</Text>
-            <Text variant="caption" className="text-muted">«{transcript}»</Text>
-          </View>
-        ) : null}
+    <View className="flex-1 bg-white">
+      <ScrollView contentContainerClassName="gap-2.5 px-5 pb-4 pt-3" keyboardShouldPersistTaps="handled" className="flex-1" style={{ flexGrow: 1, flexShrink: 1, minHeight: 240 }}>
+        <View className="h-1 w-[38px] self-center rounded-full bg-tick" />
+        {records.length ? <Text variant="heading" className="mb-0.5 mt-0.5">{t(foundKey, { count: records.length })}</Text> : null}
+        {transcript ? <Text variant="caption" className="text-muted">«{transcript}»</Text> : null}
         {partial ? <Note tone="warning" text={t('capture.batch.partialFail', partial)} /> : null}
         {records.length === 0 ? (
-          <Text className="text-muted">{t(understood ? 'capture.batch.emptyBody' : 'capture.batch.nothingUnderstood')}</Text>
+          <View className="-mx-5">
+            <EmptyState icon={Mic} tone={understood ? 'mint' : 'amber'} title={t('capture.batch.emptyTitle')} body={t(understood ? 'capture.batch.emptyBody' : 'capture.batch.nothingUnderstood')} />
+          </View>
         ) : null}
         {records.map((r) => {
           const vehicle = vehicleOf(r);
           const issue = problem(r);
           return (
-            <View key={r.key} className="gap-1.5">
-              <Text variant="caption" className="px-1 text-muted">
-                {t(`capture.batch.kind.${r.kind}`)}
-                {vehicles.length > 1 && vehicle ? ` · ${vehicle.nickname || `${vehicle.make} ${vehicle.model}`}` : ''}
-              </Text>
-              <Item
-                icon={ICONS[r.kind]}
-                tone={TONES[r.kind]}
-                title={title(r)}
-                subtitle={subtitle(r)}
-                onPress={() => edit(r)}
-                aside={
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('capture.batch.remove')}
-                    hitSlop={10}
-                    onPress={() => remove(r.key)}
-                    className="h-9 w-9 items-center justify-center rounded-full bg-paper">
-                    <X size={16} color={c.muted} />
-                  </Pressable>
-                }
-              />
-              {r.kind === 'maintenance' && r.notes ? (
-                <Text variant="caption" className="px-1 text-muted">{t('capture.batch.notes', { notes: r.notes })}</Text>
+            <Card key={r.key} className="gap-2.5 px-4 py-3.5">
+              <View className="flex-row items-center gap-2.5">
+                {r.kind === 'odometer' ? <IconTile icon={Gauge} size={34} /> : <PartArt nameEn={artName(r)} size={34} />}
+                <View className="flex-1">
+                  <Text variant="label" className="text-[15px]" numberOfLines={1}>{title(r)}</Text>
+                  {vehicles.length > 1 && vehicle ? <Text variant="caption" className="text-muted" numberOfLines={1}>{vehicle.nickname || `${vehicle.make} ${vehicle.model}`}</Text> : null}
+                </View>
+                <Pressable accessibilityRole="button" accessibilityLabel={t('capture.batch.tapHint')} hitSlop={6} onPress={() => edit(r)} className="h-[34px] w-[34px] items-center justify-center rounded-full bg-paper">
+                  <Settings2 size={15} color={c.ink} />
+                </Pressable>
+                <Pressable accessibilityRole="button" accessibilityLabel={t('capture.batch.remove')} hitSlop={6} onPress={() => remove(r.key)} className="h-[34px] w-[34px] items-center justify-center rounded-full bg-paper">
+                  <X size={15} color={c.muted} />
+                </Pressable>
+              </View>
+              <View className="flex-row flex-wrap gap-[7px]">
+                {chips(r).map((x, i) => (
+                  <View key={i} className="flex-row items-center gap-1.5 rounded-full bg-paper px-3 py-2">
+                    <x.icon size={13} color={c.muted} strokeWidth={1.8} />
+                    <Text variant="caption" className="text-[12.5px]">{x.text}</Text>
+                  </View>
+                ))}
+              </View>
+              {r.kind !== 'odometer' ? (
+                <View className="flex-row items-center gap-1.5 self-start rounded-full bg-paper px-2.5 py-1">
+                  <View className="h-[7px] w-[7px] rounded-full bg-muted" />
+                  <Text variant="caption" className="text-[11.5px] text-muted">{t('logv2.self')}</Text>
+                </View>
               ) : null}
+              {r.kind === 'maintenance' && r.notes ? <Text variant="caption" className="text-muted">{t('capture.batch.notes', { notes: r.notes })}</Text> : null}
               {r.kind === 'odometer' && editing === r.key ? (
                 <Field
                   label={t('capture.batch.odometerTitle')}
@@ -210,31 +215,32 @@ export default function ReviewAll() {
                   <Text variant="caption">{issue}</Text>
                 </View>
               ) : r.error ? (
-                <Text variant="caption" className="px-1 text-danger">{r.error}</Text>
+                <Text variant="caption" className="text-danger">{r.error}</Text>
               ) : null}
-            </View>
+            </Card>
           );
         })}
-        {records.length ? <Text variant="caption" className="text-muted">{t('capture.batch.tapHint')}</Text> : null}
       </ScrollView>
-      <View className="gap-2 px-6 pb-4 pt-2">
+      <View className="gap-1 px-5 pt-1" style={{ paddingBottom: bottom + 8 }}>
         {records.length ? (
           <>
             {blocked ? <Note tone="alert" text={blocked} /> : null}
             <Button
-              title={records.length === 1 ? t('capture.batch.saveOne') : t('capture.batch.saveMany', { count: records.length })}
+              title={records.length === 1 ? t('capture.batch.saveOne') : records.length === 2 ? t('logv2.saveBoth') : t('capture.batch.saveMany', { count: records.length })}
+              icon={<ArrowRight size={17} color={c.onbtn} strokeWidth={2} style={{ transform: [{ scaleX: arabic ? -1 : 1 }] }} />}
               onPress={() => save.mutate()}
               disabled={!!blocked}
               loading={save.isPending}
             />
+            <TextLink title={t('logv2.redo')} onPress={() => restart('voice')} />
           </>
         ) : (
           <>
             <Button title={t('capture.batch.emptyAgain')} onPress={() => restart('voice')} />
-            <Button variant="secondary" title={t('capture.batch.emptyManual')} onPress={() => restart('manual')} />
+            <TextLink title={t('capture.batch.emptyManual')} onPress={() => restart('manual')} />
           </>
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -8,7 +8,7 @@
 // VOICE_DAILY_LIMIT to change the daily limit.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-import { AUDIO_MIME, gemini, instructions, openai, OPENAI_FILE, type Said } from './understand.ts';
+import { AUDIO_MIME, gemini, instructions, openai, OPENAI_FILE, type Said, type Usage } from './understand.ts';
 
 const OPENAI = Deno.env.get('VOICE_PROVIDER') === 'openai';
 const DAILY_LIMIT = Number(Deno.env.get('VOICE_DAILY_LIMIT')) || 30; // recordings per user per day (Cairo time); a bad value must never mean "no limit"
@@ -21,22 +21,25 @@ const json = (body: unknown, status = 200) =>
 Deno.serve(async (req) => {
   const t0 = Date.now();
   if (req.method !== 'POST') return json({ error: 'method' }, 405);
+  // ponytail: a missing content-length passes (refusing it could reject real phones if the gateway streams the body); the gateway caps body size too.
   if (Number(req.headers.get('content-length') ?? 0) > MAX_AUDIO_B64 + 10_000) return json({ error: 'too_large' }, 413);
 
   const auth = req.headers.get('Authorization') ?? '';
   const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
     global: { headers: { Authorization: auth } },
   });
-  // Everything that does not depend on anything else, at once: who is asking, what they sent, their cars, our service names.
+  // Who is asking comes first: the body (up to ~4 MB) is only read for a signed-in, non-guest user.
+  const { data: { user } } = await supabase.auth.getUser(auth.replace(/^Bearer /i, ''));
+  if (!user) return json({ error: 'unauthorized' }, 401);
+  if (user.is_anonymous) return json({ error: 'guest' }, 403); // guests could mint accounts to dodge the daily limit
+
+  // Then everything that does not depend on anything else, at once: what they sent, their cars, our service names.
   // The reads use the user's own token, so RLS decides what they may see.
-  const [{ data: { user } }, body, vehicles, services] = await Promise.all([
-    supabase.auth.getUser(auth.replace(/^Bearer /i, '')),
+  const [body, vehicles, services] = await Promise.all([
     req.json().catch(() => null),
     supabase.from('vehicles').select('id, user_id, make, model, year, nickname, vehicle_type, odometer_unit, current_odometer'),
     supabase.from('service_types').select('name_en').not('category_id', 'is', null), // retired services are not offered
   ]);
-  if (!user) return json({ error: 'unauthorized' }, 401);
-  if (user.is_anonymous) return json({ error: 'guest' }, 403); // guests could mint accounts to dodge the daily limit
 
   const audio = typeof body?.audio_base64 === 'string' ? body.audio_base64 : '';
   const typed = typeof body?.transcript === 'string' ? body.transcript.trim().slice(0, MAX_TRANSCRIPT) : '';
@@ -52,18 +55,30 @@ Deno.serve(async (req) => {
   // Count before spending: a failed AI call still counts, so retries can't be used to hammer the API.
   const used = await supabase.rpc('bump_voice_usage');
   if (used.error) return json({ error: 'server' }, 500);
-  if (used.data > DAILY_LIMIT) return json({ error: 'limit' }, 429);
+  const plan = await supabase.rpc('my_limit', { p_key: 'voice_per_day' }); // the plan's own limit, never above the built-in one
+  const limit = plan.data == null ? DAILY_LIMIT : Math.min(DAILY_LIMIT, plan.data);
+  if (used.data > limit) return json({ error: 'limit' }, 429);
 
   // The phone's own text is the fallback when there is no recording (simulator, older Android).
   const said: Said = audio ? { audio, mime: body.mime } : { text: typed };
   // OpenAI cannot read the raw AAC some Android phones record (understand.ts), so those recordings go to Gemini.
   const useOpenai = OPENAI && (!audio || Object.hasOwn(OPENAI_FILE, body.mime));
   const t1 = Date.now();
+  // The dashboard's AI usage log (admin_foundation migration). It must never break a recording, so errors are swallowed.
+  const logUse = async (ok: boolean, u?: Usage) => {
+    try {
+      const base = { p_kind: 'voice', p_ok: ok, p_ms: Date.now() - t1 };
+      // With token counts when we have them; if the database is not updated yet, fall back to the plain row.
+      const r = u ? await supabase.rpc('log_ai_usage', { ...base, p_model: u.model, p_in: u.input, p_audio: u.audio, p_out: u.output }) : { error: true };
+      if (r.error) await supabase.rpc('log_ai_usage', base);
+    } catch { /* ignore */ }
+  };
   try {
     const system = instructions(own, services.data.map((s) => s.name_en), vehicleId, body.lang === 'en' ? 'en' : 'ar');
     const out = useOpenai
       ? await openai(said, system, Deno.env.get('OPENAI_API_KEY')!, Deno.env.get('OPENAI_MODEL') || undefined)
       : await gemini(said, system, Deno.env.get('GEMINI_API_KEY')!, Deno.env.get('GEMINI_MODEL') || undefined);
+    await logUse(true, out.usage);
     return json({
       transcript: String(out.transcript ?? typed).slice(0, MAX_TRANSCRIPT),
       records: out.records ?? [],
@@ -71,6 +86,7 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error('voice', e instanceof Error ? e.message : e);
+    await logUse(false);
     return json({ error: 'ai' }, 502);
   }
 });

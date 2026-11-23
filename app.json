@@ -9,7 +9,44 @@
     "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/images/icon.png",
-      "bundleIdentifier": "com.bestim.app"
+      "bundleIdentifier": "com.bestim.app",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Bestim turns what you say into a record, using Google AI.",
+        "NSMicrophoneUsageDescription": "Bestim uses the microphone so you can log maintenance by voice.",
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleAllowMixedLocalizations": true
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "C617.1",
+              "0A2A.1",
+              "3B52.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "E174.1",
+              "85F4.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "35F9.1"
+            ]
+          }
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -39,9 +76,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#222E29",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 140
+          "backgroundColor": "#EBEBE8"
         }
       ],
       "expo-localization",
@@ -58,8 +93,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Bestim attaches receipt photos to your records.",
-          "cameraPermission": "Bestim uses the camera to read your odometer."
+          "photosPermission": "Bestim uses your photos for your profile picture and for receipts on your records.",
+          "cameraPermission": "Bestim uses the camera to read your odometer and to take your profile picture or a receipt photo."
         }
       ],
       [
@@ -88,6 +123,9 @@
         "projectId": "cc85a709-e5b5-4a8a-b127-9253a5366010"
       }
     },
-    "owner": "bestim-connect"
+    "owner": "bestim-connect",
+    "locales": {
+      "ar": "./assets/native-locales/ar.json"
+    }
   }
 }

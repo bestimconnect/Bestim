@@ -1227,3 +1227,178 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 **Update (2026-10-12, mock-up):** Home and car-page part rows are "design 1" (tinted drawing square, name with the percentage or Late, life bar); Reminders is a two-column grid of "design 2" picture tiles; the fill never drops below a fifth of the drawing and the empty part is tinted in the state colour.
 
 **Update (2026-10-13, style 6):** the part pictures are now rendered pictures ("style 6") in three status colours (lime, amber, red), sized in proportion to their card (a small card gets a small picture). Home shows ring badges, Reminders a grouped list (needs attention / on time / snoozed), the service page a dashboard arc. The tank fill is gone. Masters in `../assets/parts-3d/style 6/`.
+
+### Q108: Screens move smoothly; the tapped car flies into the car page (founder, 2026-10-22)
+**Decision:** Tabs cross-fade, the tab bar fades in and out, and the car page fades in instead of sliding. Tapping the car on Home (or on a My Cars card) makes that car fly from where it was into the car page header, and fly back on the back button. The 360° view moves to the small "360°" badge on the picture. Home's "View all" and fuel row open the page without the flight.
+**Why:** The founder found switching between pages laggy, with pieces showing up before others. Of three animated ideas he chose "Car grows" (the other two were "Glide" and "Slide + stagger").
+**Spec for dev:** `lib/carFlight.ts` (measures each car picture, registered by `CarPhoto slot=home|list|detail`) and `components/CarFlight.tsx` (the one flying copy, in the root layout; it only moves and scales, on the UI thread). The flight starts at the tap and aims at a fixed spot in the car-page header (`detailRect`, measured on an iPhone 16), so it never waits for the page to build; check that spot if the header layout changes. The car page is a root screen (`app/vehicle/[id].tsx`, `transparentModal` + fade) so the page under it (Home or My Cars) stays alive and the car can fly back. Tabs use `animation: 'fade'`; Expenses is built at launch. Traps found: RN mirrors `left` in right-to-left, so the overlay converts physical x; Home's pager reports its car a page off sideways, so Home's x is centred in code.
+**Known gap:** the fade means iOS swipe-back probably does not work on the car page; the back button does. The green top bar (`AppBarOverlay`) still animates after the page mounts; if it still feels late on a phone, drive it from the route instead of from effects.
+**Replaces:** Q57's "tab switching never moves" and "system transitions".
+
+### Q109: Pull to refresh stays the normal spinner (founder, 2026-10-22)
+**Decision:** The car-on-a-road animation in the green bar is removed. Every screen shows the system spinner (lime on Home). The founder looked at three car ideas (spinning wheel, fuel gauge, check-engine light) and chose to keep the normal one. The three ideas are kept in `../docs/IDEAS.md`; none is built.
+**Spec for dev:** `components/Refresh.tsx` (`useRefresh(offset, tint)`); the `useRefreshing` store is gone.
+
+### Q110: Update-odometer page is a dark "cockpit" with a 3D dial (founder, 2026-10-22)
+**Decision:** One dark card holds the back button and title, a big dial with the rolling digits inside it, a "+N km since last" chip, and the ruler. Below it: when the last reading was, then "Read with camera" and Save. The needle sweeps 240° over the 1,500 km driven since the last saved reading (red chip beyond that). Saving, the lower-reading block, typing and the camera scan are unchanged.
+**Why:** The founder wanted the page in the same 3D look as the parts and cars. Of three layouts he chose "B · Cockpit".
+**Spec for dev:** `components/OdometerDial.tsx` (face in code for now; the needle is a separate overlay, so the face can become the 3D picture in one line). The picture is made by hand in Gemini with `docs/gemini-odometer-prompt.md` (no needle, no digits, light and dark), then cut out like the parts. **Open: the picture does not exist yet.**
+
+### Q111: Expenses are Month or Year, with a line chart you swipe (founder, 2026-10-22)
+**Decision:** Only two toggles, Month and Year (no "All"). Month draws one point per day, Year one per month, as a smooth line on the dark block with a dot you can tap or drag. Swipe the chart (or use the arrows) to move between months or years, through all the history. Under it: average, highest and change vs the previous period, then the breakdown and the list for that period. The chart keeps time running left to right even in Arabic: swipe right = earlier.
+**Why:** Of three designs the founder chose "C · Line + tiles".
+**Spec for dev:** `components/ExpenseChart.tsx`, `lib/expensePeriods.ts` (+ check). `useExpenses` now loads the whole history (one request, up to 1,000 rows; a heavy user's oldest rows would drop off, noted in the code). Side effect: the car page's "Total paid" and Logs list now cover all history instead of the last 6 months or the year.
+
+### Q112: Small fixes from the founder's test (founder, 2026-10-22)
+**Decision:** (1) An empty VIN on the car page shows "—" like the other empty fields. (2) My Cars cards lose the status line under the car; the health ring is the only indicator (Home's "all on schedule" row stays). (3) On the car's Logs tab, a filter with no results keeps the total and chips and says "No matches" (before, the whole tab was replaced by "No records" and you could not get back to "All").
+**Spec for dev:** `components/CarTabs.tsx` (`LogsTab`), `app/(tabs)/vehicles/index.tsx`.
+
+### Q115: Widget buttons act on their own, through a limited "widget key" (founder, 2026-10-23)
+**Decision:** On the widgets (iPhone and Android) these work without opening the app: **raise the km** (chips +10 / +50 / +100, then Save), **mark the next service done**, **snooze a reminder for a week**, and **switch car** (arrows, only when there is more than one car). Voice, scan odometer, fuel and expense still open the app (they need the microphone, the camera or typing). The widget cannot lower the km (corrections stay in the app) and cannot add more than 5,000 km at once.
+**How it stays safe:** a widget still holds no login. After sign-in the app asks the server for a random "widget key" that can do only those three things for that owner's cars and cannot read anything. The server stores only its hash; a new sign-in replaces the key; sign-out wipes it from the phone; 60 actions per hour per key; a service can be marked done only once per day from the widget (a double tap cannot write two records).
+**Why:** the founder wanted a good experience without opening the app for every action. A shared login was rejected: two apps refreshing the same login can sign the owner out.
+**Spec for dev:** migration `20261023120000_widget_keys.sql` (table `widget_keys`, functions `create_widget_key`, `revoke_widget_keys`, `widget_action`; reviewed by Opus). iPhone: a patch to `expo-widgets` (`patches/expo-widgets+57.0.27.patch`, applied by `patch-package` on install) lets a button make one server call; re-check it on every `expo-widgets` upgrade. Android: the button runs in the app's background code and calls the same function. After a save the widget updates itself at once; the health score and the part pictures refresh the next time the app opens.
+**Open:** the key is not revoked on the server at sign-out (the phone has already lost the session); the next sign-in replaces it.
+
+### Q116: Release-readiness pass: what is by design, what changed (founder: "go auto", 2026-10-29)
+**Decision:** (1) Home's "this month" card is for the **selected car**; the Expenses tab is **all cars** (that is why the totals differ). No change. (2) The reminder interval in the add-record form is the service type's default unless the owner's previous record for that part set its own; the part page shows the owner's own interval. No change. (3) Count wording no longer uses plurals ("Cars: 2", "Maintenance records: 5", "Records removed from this history: 1"), so it reads right in Arabic and English for any number. (4) Expenses list dates follow the app language. (5) Account deletion also removes profile photos. (6) New migration file `20261029090000_release_hardening_2.sql` (written, **not pushed yet**): only owner / admin / support admins can open users' emails and records; a password change cancels widget keys; per-account row caps (25 cars, 10,000 records, 10,000 expenses); four indexes.
+**Why:** pre-production security review and simulator QA (`docs/RELEASE-READINESS.md`).
+**Open:** pushing the migration to the live database waits for the founder's yes; Android, iPhone and Huawei real-phone checks; store steps.
+
+### Q117: Subscription plans: a plan is limits plus switches in the database (founder, 2026-10-30)
+**Decision:** Up to 3 plans, edited in the dashboard. Each holds numeric limits (cars, records, voice per day, scans per day) and on/off features (receipt photos, share history, export, widgets). One plan is the default for everyone; until payments exist that is Pro, so nobody is limited. Placeholder Basic numbers are to be set by the founder. No prices anywhere yet (consistent with Q-no-prices). At a limit the app shows a sheet with a "See plans" screen and "Upgrades open soon".
+**Payments:** Paymob cannot be the in-app method (Apple 3.1.1 / Google billing). Later: Apple and Google billing for mobile (via a service like RevenueCat) writing `user_plans`; Paymob for web checkout and Connect. Egyptian cards on store billing must be tested.
+**Spec for dev:** migration `20261030090000_plans.sql` (written, **not pushed yet**); app `src/lib/entitlements.ts`, `src/app/plans.tsx`; dashboard `plans` page.
+**Open:** founder sets the real Basic limits; Arabic wording of the plan strings needs review.
+
+### Q118: Store listings: Arabic stays the default language, English is added as a translation (founder, 2026-10-30)
+**Decision:** On Google Play, the App Store and Huawei AppGallery the default (primary) listing language is Arabic, with English added as a translation. A phone set to English shows the English listing automatically; other languages show the Arabic one. (English-as-default was considered the same day and dropped.)
+**Spec for dev:** texts in `docs/store/listing-text.md`. The English listing must be added in each console, or English phones see the Arabic text.
+
+### Q119: Odometer page: simple and light, number + swipe meter + camera (founder, 2026-11-02)
+**Decision:** The update-odometer page keeps only: the reading in big digits (tap to type), the swipe meter in the middle fading out at both sides, the round camera button right under it, a small "last reading" line, and Save at the bottom. The dial and the "+N km" chip are removed. A reading lower than the last one still disables Save with the red line (unchanged). Supersedes the dial layout of Q108 and the layout part of Q53/Q71 (ruler, three input ways, haptics stay).
+**Why:** the founder wanted it minimal and light.
+**Spec for dev:** `src/app/update-odometer.tsx` (the `EdgeFade` helper draws a page-coloured gradient over each end with `react-native-svg`); `components/OdometerDial.tsx` deleted. Known limit: a very fast flick can outrun the ruler's redraw for a moment (the number stays right).
+
+### Q120: Legal and business pages are data, edited in the dashboard (founder, 2026-11-02)
+**Decision:** Privacy, Terms, Support, Delete-account and About are rows of `site_pages` (Arabic + English). The dashboard edits them; the website and the app both read them. The app shows them in its own screen `src/app/page/[slug].tsx` (cached for offline) instead of opening the browser. Slugs are fixed (the stores link to some); rows can be edited and hidden, not added or deleted. Reading is public; only owner, admin and content can write; edits are logged.
+**Why:** the text must change without a code release, and the app had no About page.
+**Spec for dev:** migration `20261102090000_site_pages.sql`; text format parsed by `src/lib/pageText.ts` (app) and `bestim-landing/src/lib/pages.ts` (site, same parser); dashboard `/dashboard/pages`. Trap met: the public (anon) role may not call `can_edit_catalog()`, so its read policy cannot use it.
+**Open:** About wording is a draft for the founder; the privacy/terms text still describes guest mode (see PROGRESS).
+
+### Q121: Subscription experience revamp: one journey, admin controls every feature (founder, 2026-11-03)
+**Decision:** The founder picked a mix of three designs (from the "Plans Lab" artifact). (1) **My plan** (Account → My plan): usage bar, one card per plan with the popular one highlighted, compare table. (2) **Plan pages**: one plan per screen, swipe between them (`/plan`). (3) **Locked features** show a lock with the plan name (Account → Export, Share). Tapping one opens a sheet: "This is a Pro feature", what else Pro gives, the price, and **Subscribe now to unlock**; hitting a limit opens the same sheet. (4) **First login**: a one-time welcome (`/welcome`) that swipes through the plans, then a slim plan strip on Home (plan, cars used, Upgrade, or "trial · N days left"). (5) **Admin** gets one matrix page: every plan's name, description, price, trial days, visible, most-popular, default, plus every limit and switch per plan, plus per-feature lock rules (show locked or hide, with an Arabic and English message). (6) **Website** gets three plan cards that read the same table.
+**Prices and payments:** prices are empty until the founder sets them; an empty paid price shows "Coming soon" in the app and on the site, price 0 is "Free". There is no payment provider yet, so Subscribe saves the user's interest (`plan_interest`) and says subscriptions open soon; a trial (a plan's `trial_days` above 0, once per account, via `start_trial()`) really starts. The website rule "no prices or plans" (2026-10-02) is replaced by: plan cards are allowed, no other prices.
+**Proposed features** (yearly insights, custom reminders, verified sale report, family garage, priority support) are switches only: saved by the dashboard, ignored by the app and website until each is built.
+**Spec for dev:** migration `20261103090000_plans_v2.sql` (plans: `is_popular`, `price_monthly`, `price_yearly`, `trial_days`; tables `feature_locks`, `plan_interest`; `start_trial()`; anon can read active plans). App: `src/lib/entitlements.ts`, `src/components/PlanPager.tsx`, `PlanStrip.tsx`, `LockChip.tsx`, `src/app/{plans,plan,welcome,upgrade}.tsx`. Dashboard: `/dashboard/plans` matrix + `savePlans`. Website: `src/components/sections/Plans.tsx`, `src/lib/plans.ts`.
+**Open:** the migration was applied by the founder on 2026-11-03 and verified with the public key. Today everyone is on the default plan (Pro), so nobody sees a lock until the default is changed to Basic or a user is put on Basic. Prices, trial length (14 days is a suggestion) and the Subscribe action need the founder's decision.
+
+### Q122 — Update odometer page, layout B (founder, 2026-11-03)
+**Decision:** the page was too empty, so: one white card holding the new reading, a "+N since last update" tag and the swipe meter; under it three facts (distance since the last update, daily average over the last 90 days, distance to the next service, "Due now" when a part is late); the camera is a round button beside Save at the bottom. Supersedes the Q71 layout (meter + number + camera under it).
+**Spec for dev:** `src/app/update-odometer.tsx`, facts in `src/lib/odometerFacts.ts` (checked by `odometerFacts.check.ts`), strings `odometer.facts.*`. No database change; facts are hidden for a car's first reading (nothing to compare against).
+
+
+### Q123 — App polish pass: slim bar, same-colour gradients (founder, 2026-11-03)
+**Decision:** the green header was ~160pt of flat colour holding one word, so: the bar is one row (back button + title, 24pt title that shrinks to fit), 100pt instead of 160pt; pages with a sub-line or tabs keep a taller bar. Gradients are one hue at two opacities only (green panel lighter/darker, mint, a faint lime glow at ≤ 22%), never a second colour. Empty, loading and error pages use one shared look instead of bare text.
+**Spec for dev:** `src/components/ui/Sheen.tsx` (SVG gradient, no expo-linear-gradient so no native change), `src/components/HeroBlock.tsx`, `src/components/EmptyState.tsx` (`EmptyState`, `LoadingState`), bar in `AppBarOverlay.tsx` + `rowHeight()` in `lib/appBar.ts`. `Header` is a spacer that does NOT include the status-bar inset, so screens still need the top safe area once. A fit-to-contents sheet cannot size a ScrollView (switch-vehicle scrolls only past 4 cars).
+**Not verified:** English/LTR pass, iPhone SE size (no SE simulator installed), dark theme, Android.
+
+### Q124 — Depth + component system pass, round two (founder, 2026-11-03)
+**Decision:** every page now sits on a faint same-hue gradient (`Backdrop`: teal tint from the top, a lime glow in the corner; dark = a white lift + teal glow) and every card has the same look (`Card`: hairline edge, contact shadow + soft lift, a faint shade). One set of parts replaces the hand-made cards: `Card`, `IconTile`, `Section` (title + "View all"), `Chip`, `FooterBar` (pinned action area), `Button` (56pt, pressed and disabled states, `ghost`, `sm`), `Field` (focus ring), `Toggle`, `Choice`, `Item`/`Group`. Radii 12 / 16 / 18 (rows) / 28 (big cards); page gutter 24; 12 inside groups, 24 between sections. The odometer page is the quality bar: the swipe ruler sits in a recessed window (clean rounded ends, no edge fade), plus a −10/−1/+1/+10 fine-tune row (press and hold repeats), a recent-readings chart, and the three facts in one card; Save + camera pinned in a `FooterBar`. Cars, car overview and "what to add" tiles use side-by-side `flex-1` cards (a `%` width leaves the grid inset).
+**Spec for dev:** `src/components/ui/*` (new: Backdrop, Card, IconTile, Section, Chip, FooterBar; `Metric.tsx` deleted), `src/components/OdometerExtras.tsx` (Nudge, Trend). `Card flat` drops the shade for opaque pictures. The part page is `fullScreenModal` (it draws its own header); update-odometer, edit-vehicle and car-360 (opened from the car page, a transparent modal) are `fullScreenModal` too; a native modal hides the root green bar, so they draw their own (`LocalBar` in `ui/Header`, listed in `LOCAL_BAR`) and pad the pinned footer with the hook-based bottom inset. Plural keys (`_one/_two/_few/_other`) now exist for the two "days ago" lines; the parity check needs the same keys in both languages. A new simulator device needs the founder's one-time access grant before it can be tapped.
+**Verified:** iPhone 16, Arabic light (Home, Cars, car pages, part, Expenses, Account, Plans, capture, switch sheet), English light, dark (Account, Cars, Home, Expenses). **Not verified:** iPhone SE size (device "Bestim SE" created, not driven), login/register/onboarding screens, Android.
+
+
+### Q125 — First-run clarity (founder feedback, 2026-11-03)
+**Problem:** a PM friend tried the app: "it's cool but I don't get what it does". Causes found: only 3 skippable slides explain it; the splash line ("Take care of your car. And go.") is abstract and differs from the website; after sign-up comes a car form, a pricing tour, then a blocking odometer chore; the centre + button has no hint; Home never mentions voice, reminders or history until data exists.
+**Decision:** (1) **One promise everywhere**, identical to the website hero: "Log maintenance by voice. Keep a history you can trust." Used on the splash, the login card, the store short description and the website. The old tagline is **dropped** (abstract; two lines saying different things is what confused people). (2) A new **slide 1 "what Bestim is"** with four pillars; the three existing slides (voice, reminders, history) stay as slides 2-4. (3) Home shows a **"Start in 3 steps" card** until the first record exists, and Home's title follows the state: no reading / reading but no records / has records (unchanged). (4) A **one-time coach mark** points at the + button the first time Home shows "reading but no records", and the + button keeps its visible label (`tabs.capture`: Log / سجّل). (5) The voice screen shows three **"try saying" examples**. (6) An empty "Today's priority" shows a clearly marked **example** reminder. (7) The **plan tour (/welcome) moves to after the first saved record**, not right after sign-up: when the user first lands back on Home after saving their first record (record count 0 to 1; wait until the save sheet is closed, show once). Existing users with at least one record who never saw it get it once on the next Home open. Until then the slim plan strip on Home is enough. The blocking "add your odometer" popup is replaced by step 2 of the card (the odometer stays optional until the first record, as the current "add it later" text already says).
+**Why:** the user must see the point of the app (say it, it is saved, you are reminded, you can share it) before being asked for anything, and be asked for pricing only after they got value.
+**Spec for dev:** strings below replace or add to `splash.tagline` (rename the key to `splash.promise` and use two lines), `onboarding.intro.what.*` (new), `home.start.*` (new), `home.title*` (new), `home.coach.*` (new), `capture.voice.try*` (new), `home.example.*` (new); the login card and website footer/hero use the same promise strings (website hero already matches, keep). Tone: slides, card and coach use Egyptian wording like the existing slides; the promise stays in the website's plain Arabic so it is word for word the same everywhere. State logic: (a) no car odometer reading yet, (b) reading exists and zero records, (c) at least one record.
+
+| key | en | ar |
+|---|---|---|
+| splash.promise (line 1 / line 2) | Log maintenance by voice. / Keep a history you can trust. | سجّل صيانة سيارتك بصوتك. / واحتفظ بتاريخ يستحق الثقة. |
+| store.short (Play/App Store, one line) | Log car maintenance by voice. Keep a history you can trust. | سجّل صيانة سيارتك بصوتك. واحتفظ بتاريخ يستحق الثقة. |
+| onboarding.intro.what.title | Your car's logbook,\nthat writes itself. | دفتر عربيتك،\nبيتكتب لوحده. |
+| onboarding.intro.what.body | Tell Bestim what you did to your car. It keeps the history, reminders and costs for you. | قول لبستيم عملت إيه في عربيتك، وهو يحتفظ بالسجل والمواعيد والمصاريف. |
+| onboarding.intro.what.pillar.say | Say it | قولها بصوتك |
+| onboarding.intro.what.pillar.reminders | Reminders | تذكيرات |
+| onboarding.intro.what.pillar.expenses | Expenses | مصاريف |
+| onboarding.intro.what.pillar.share | Share when you sell | شاركها وقت البيع |
+| home.start.title | Start in 3 steps | ابدأ في 3 خطوات |
+| home.start.step1 | Add your car | أضف عربيتك |
+| home.start.step2 | Enter the odometer | اكتب قراءة العداد |
+| home.start.step3 | Say your first service | قول أول صيانة |
+| home.start.example | “Changed the oil at 125,000 for 1,200” | «غيّرت الزيت عند 125,000 بـ 1,200» |
+| home.titleNoReading (a) | Enter your odometer to begin | اكتب قراءة العداد وابدأ |
+| home.titleNoRecords (b) | Now say your first service | دلوقتي قول أول صيانة |
+| home.title (c, existing) | Ready for the next step? | جاهز للخطوة القادمة؟ |
+| home.coach | Tap here and say what you did | اضغط هنا وقول عملت إيه في عربيتك |
+| capture.voice.tryTitle | Try saying | جرّب تقول |
+| capture.voice.try1 | “Changed the oil at 125,000 for 1,200” | «غيّرت الزيت عند 125,000 بـ 1,200» |
+| capture.voice.try2 | “Filled up 30 litres for 450” | «موّلت بنزين 30 لتر بـ 450» |
+| capture.voice.try3 | “New front brake pads, 2,500” | «غيّرت تيل الفرامل الأمامي بـ 2,500» |
+| home.example.badge | Example | مثال |
+| home.example.title | Oil change | تغيير الزيت |
+| home.example.sub | In 800 km. We'll remind you before it's due. | بعد 800 كم. هنفكّرك قبل الميعاد. |
+| home.example.note | Your real reminders appear after your first service. | تذكيراتك الحقيقية بتظهر بعد أول صيانة تسجّلها. |
+
+**Open:** the founder to confirm the Arabic wording by ear; the old splash tagline is removed from the app (the website footer line "Your car's history, trusted and effortless." is unchanged); check that the 2,500 brake-pad example is understood by the voice function (`process-voice-log`) before shipping.
+
+**Built (2026-11-03), where it differs from the plan above:** the + button has no always-visible label (the one-time pointer above it is the explanation; the lime button keeps its accessibility label "Log"); the "add your odometer" sheet that opens when you tap + without a reading is kept as a safety net (records still need a reading), and the Home card now offers the same step earlier. The plan tour opens once, as soon as the car has its first record. Intro now has 4 slides; the splash/login line is `splash.promise` on two lines.
+
+### Q126 — Compact top bar and dark icon tiles (founder feedback, 2026-11-03)
+**Decision:** every tab has the same green bar: title on one side, the notifications bell (unread dot) on the other, about 127pt on an iPhone 16 (15%), no extras in it. The month/year switch and "+" (Expenses) and the car summary (Cars) moved into the page. Home's green block is shorter (car photo 100pt, no empty dots row, slimmer reading card: about 44% of the screen, was 48%). In dark, icon tiles no longer get the white sheen (it turned them grey); they are the tone colour with a hairline edge in the icon colour, and the neutral tile is a faint white lift instead of a hole darker than its card.
+**Spec for dev:** `ui/BellButton`, `ui/IconTile` (dark branch), tab screens pass `right={<BellButton />}`; `GetStarted`, `lib/firstRun.ts` (Q125).
+
+### Q127 — First-run spotlight tour replaces the "Start in 3 steps" card (founder, 2026-11-03)
+**Decision:** the founder chose "Idea 4" from the onboarding concepts: instead of a card, a **spotlight tour on the real Home**, shown once on the first open of Home for a car that has no records yet. Welcome card ("Take a 30-second tour", Start / Skip), then four stops that light up the real thing and dim the rest: the odometer card, "Today's priority", the Expenses tab, the green + button. Last stop's button ("Say my first record") ends the tour and opens the capture chooser; "Not now" ends it. Skip is available throughout. It never repeats (`settings.tourSeen`).
+**Replaces in Q125:** point (3) (the "Start in 3 steps" card and state-specific Home titles; Home keeps `home.title`) and point (4) (the one-time coach mark above +; its `home.coach` key and `coachSeen` setting are gone). The rest of Q125 stands (promise line, intro slides, voice examples, example reminder, plan tour after the first record).
+**Not done:** the concept's "sample car before sign-up" and the tour's tap-the-mic simulation (the real capture screen is the practice). The Home layout choice is still open; the tour measures the real screen so it works with any layout.
+**Spec for dev:** `lib/tour.ts` (target registry, `useTourTarget`), `components/Tour.tsx` (overlay, rendered in `(tabs)/_layout.tsx`), targets set in `(tabs)/index.tsx` and `TabBar.tsx`; strings `tour.*`.
+
+### Q128 — Car pill header on every tab (founder, 2026-11-03)
+**Decision:** the founder chose "header option 3": the green top bar is gone from the four tabs. Every tab starts with a **car pill** (small car picture, "Toyota Hilux · 2023", a chevron when there are 2+ cars; tapping it opens the existing car switcher) and the **bell**, then the page title large. Home keeps its green hero with the pill and bell floating on it (the greeting line is dropped, the title stays). Expenses, Cars and Account sit on the light page with a white pill and bell. Sub-pages keep the green bar.
+**Every tab follows the pill:** Home, Expenses (now filtered to that car: it used to total all cars), Account. Cars still lists every car (the pill shows which one is current). No "All cars" choice for now.
+**Replaces in Q126:** the compact green bar with a bell on every tab. **Also added:** Account > "Replay the tour" shows the Q127 tour again on Home.
+**Spec for dev:** `components/CarPill.tsx`, `components/TabHeader.tsx`, `BellButton tone="paper"`, `(tabs)/index.tsx` hero row, `(tabs)/expenses.tsx` car filter; strings `account.tour`, `account.tourSub`.
+
+### Q129 — "All cars" in the Expenses pill; Account has no pill or title (founder, 2026-11-03)
+- On Expenses only, with two or more cars, the pill's picker has an "All cars" row on top (totals every car together; the fuel card, which is per car, is hidden). The choice is a separate flag (`expensesAll`), so Home, the + button and new records keep using the single car picked. Picking a car from the sheet turns "All cars" off. Replaces the "not added" part of Q128.
+- Account no longer shows the car pill or the big title, only the bell (the page is about the person, not a car).
+
+### Q130 — Account starts with a driver-licence card, one look per plan (founder, 2026-11-03)
+- Account has no bell or title; the first thing is a driver-licence style card (`components/LicenceCard.tsx`): square photo, name, email, member since, the plan in a "class" box, a chip for each car's plate (up to 3, then "+N"), a Bestim ID taken from the account id, a small seal. The Notifications settings row stays in Preferences.
+- Look follows the plan: Basic = light card (dark in dark mode), Pro = dark green with lime, Max = lime foil. Any unknown plan uses the Basic look.
+- A corner **Edit** button opens `account/edit`: name and photo (email is shown, not editable, since changing it goes through sign-in). The old "Change photo" row on the card is gone.
+- Design: the "Account page" boards in the layout-concepts artifact.
+
+### Q131 — Final production check (founder, 2026-11-04)
+- Founder asked for a last check that the app is production-ready and free of the usual "vibe-coded" problems. Result and the full founder checklist: `RELEASE-READINESS.md` (Round 3).
+- **Crash reporting: Sentry, free plan** (founder: "if sentry is free I want to add it"). On only when `EXPO_PUBLIC_SENTRY_DSN` is set; no personal data (emails and URL queries masked, no screenshots or replays). Needs the founder's Sentry account; store privacy forms say "crash logs".
+- **Database fixes are written as a migration file only, not pushed** (founder: "Write the fixes, don't push"). Untested (no Docker here): test after the push, list in `RELEASE-READINESS.md`.
+- Edge functions: caller is checked before the upload is read; a missing `content-length` stays allowed (refusing it could reject real phones).
+- Plural rules: i18next needs `Intl.PluralRules`, which Hermes lacks, so the app polyfills it (`@formatjs/intl-pluralrules`, Arabic and English). Arabic needs all six forms; `locales.check.ts` enforces it.
+- Left as is on purpose: `review-all` saves (it removes saved cards, so a retry cannot duplicate), `expo-web-browser` / `react-native-web` / `react-dom` (not used directly but cheap, owned by Expo tooling), the 64 unused locale keys.
+
+
+### Q132 — Team tracker, Claude connector and store fixes (founder, 2026-11-12)
+- **Connector:** until the new builds are live in all three stores (Site URL must stay `bestim://`), admins connect Claude with a **personal key** (Plan A): made on Team > Connect, shown once, only the hash stored, revocable, 300 calls an hour, stops working when its owner stops being an admin. It runs the same `team_*` functions as that admin through `team_mcp()` (migration `20261112130000_team_keys.sql`) and the Edge Function `team-mcp`. The sign-in-button version (Plan B, Supabase OAuth server) replaces it once the Site URL can move to the website.
+- **Huawei rejection (3 privacy errors):** consent is now an unticked checkbox the user ticks (blocks Create account and Google/Apple buttons); privacy label filled in the console; China mainland removed from the regions so no Chinese privacy text is needed.
+- **Apple 2.1 Information Needed:** answered with notes, demo account and a screen recording on a real iPhone (`docs/store/app-store-review-notes.md`); new build 5 replaces build 4 under version 1.0.0.
+- **Dashboard and website** pushed to production (PR 3, bestimconnect/Bestim-landing-page) with the plan cards and database-driven legal pages.
+
+### Q133 — App redesign direction (founder, 2026-11-19)
+- **Look:** calm and flat (grey canvas, soft white tiles, big thin numbers, floating nav pill + round voice button), no gradients. Keep the current lime/green palette (founder compared it with the Foundations amber/navy and chose lime). Car renders from `Car Types/` are the hero image.
+- **Structure:** 3 tabs (Car, Timeline, Money), voice button on every screen, account behind the avatar, no Cars tab. Reminders become the Timeline tab; maintenance plans are folded into Timeline items.
+- **Log:** voice sheet, manual sheet and a saved confirmation replace the chooser and the 3-step manual flow.
+- **First release (v1) ideas:** trust level on every record, predicted reminders, part-life bars, receipt photo on a log, buyer link that opens on the web, weekly odometer nudge. The buyer link shows history and score only, no prices or owner contact.
+- **Later:** workshop sign-off, licence scan, shared garage, widget/shortcut, monthly recap, Egypt-specific reminders (see `docs/IDEAS.md`).
+- Design order after Home: first run + add car, log sheets, Timeline, passport. Plan page: https://claude.ai/artifact/MqRqnN4oh7DsVgjjM3bK74 (private artifact). Screens are in Figma file `69ivy8SOlNYxeSTUxM00Km`, page "03 · Flows".
+
+### Q140 — Plus fan and Garage tab (founder, 2026-11-22)
+- The round button is now a **+** that fans out two buttons: voice (mic) and manual (pencil, the `/capture` sheet). Both keep the "first reading" prompt.
+- The nav has **4 tabs**: Home, Timeline, Money, Garage (the Cars list). This overrides Q133's "3 tabs, no Cars tab".
+
+### Q141 — Soft depth and tint (founder, 2026-11-23)
+- The app felt flat. Tiles now have a hairline plus a two-layer soft shadow (`shadows.ring`), the page is a touch darker (`#EBEBE8`) and cards pure white, and key Home tiles take a soft tint (oil: green/amber/rose by state, next service amber when due soon). No gradients. The + fan opens on a circular arc; nav tabs resize with a spring.

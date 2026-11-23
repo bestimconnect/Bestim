@@ -1,7 +1,7 @@
 -- Demo data for the landing page screenshots (bestim-landing/public/screens).
 --
 -- Adds ONE demo vehicle (Toyota Hilux 2023) with a year of services and expenses to the test
--- account below. The account's other vehicles are not touched.
+-- account whose email is set below (`demo_email`). The account's other vehicles are not touched.
 -- Safe to re-run: the data is created once (the vehicle is recognised by its VIN marker); every
 -- run then rewrites the demo text in `lang`, so the same data can be captured in both languages.
 -- It also sets that test profile's display name (شادي / Shady) to match the language.
@@ -12,12 +12,15 @@
 -- This is data, not schema: it is NOT a migration and must never go in supabase/migrations/.
 do $$
 declare
-  uid  constant uuid := 'f8fa7881-d1c0-4f19-9891-19e73e6102d8'; -- the test account ("shady")
-  lang constant text := 'ar';                                   -- 'ar' or 'en'
+  demo_email constant text := 'shadygamal845@gmail.com';          -- the test account's email (sign it up in the app first)
+  uid  uuid;
+  lang constant text := 'en';                                   -- 'ar' or 'en'
   ar   constant boolean := lang = 'ar';
   vid  uuid;
   x    record;
 begin
+  select id into uid from auth.users where email = demo_email;
+  if uid is null then raise exception 'No account with email %: sign up in the app first, then set demo_email above', demo_email; end if;
   select id into vid from public.vehicles where user_id = uid and vin = 'DEMO-LANDING';
 
   if vid is null then
@@ -82,7 +85,7 @@ begin
       (vid, uid, 'fuel',         2400, '2026-08-16'),
       (vid, uid, 'fuel',         2200, '2026-09-15'),
       (vid, uid, 'parking',       150, '2026-09-22'),
-      (vid, uid, 'fuel',         1150, '2026-10-01');
+      (vid, uid, 'fuel',         1150, current_date);  -- today, so "this month" is not empty whenever the shots are taken
 
     update public.vehicles set current_odometer = 134550 where id = vid;
   end if;
