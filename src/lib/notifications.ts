@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 
 import i18n from './i18n';
 import { latestPerType, partStatus, type Unit } from './parts';
@@ -31,7 +31,7 @@ Notifications.addNotificationReceivedListener(() => {
 /** Admin messages (Q147) are saved in the database, so they reach the bell even when the phone alert was off or missed. Newest 20, language picked here. */
 async function fetchAnnouncements() {
   try {
-    const { data } = await supabase.from('announcements').select('id, title_ar, title_en, body_ar, body_en, created_at').order('created_at', { ascending: false }).limit(20);
+    const { data } = await supabase.from('announcements').select('id, title_ar, title_en, body_ar, body_en, action, action_value, created_at').order('created_at', { ascending: false }).limit(20);
     const en = i18n.language === 'en';
     useInbox.getState().add(
       (data ?? []).map((a) => ({
@@ -39,7 +39,7 @@ async function fetchAnnouncements() {
         kind: 'announcement' as const,
         title: en && a.title_en ? a.title_en : a.title_ar,
         body: en && a.body_en ? a.body_en : a.body_ar,
-        url: '/notifications',
+        url: a.action !== 'none' && a.action_value ? a.action_value : '/notifications', // info only: the row just opens the list
         at: a.created_at,
       })),
     );
@@ -55,6 +55,12 @@ export async function openedFromNotification(response: Notifications.Notificatio
   inbox.getState().items.filter((i) => i.id.startsWith(`${identifier}@`)).forEach((i) => inbox.getState().markRead(i.id));
   const url = content.data?.url;
   return typeof url === 'string' ? url : null;
+}
+
+/** Where a tapped notification or bell row goes: an https link opens the browser, a path opens that screen. */
+export function openTarget(url: string, push: (path: string) => void) {
+  if (/^https:\/\//.test(url)) Linking.openURL(url).catch(() => {});
+  else push(url);
 }
 
 export async function notificationsAllowed() {

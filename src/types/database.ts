@@ -547,9 +547,9 @@ export type Database = {
         Relationships: []
       }
       announcements: {
-        Row: { id: string; title_ar: string; title_en: string | null; body_ar: string; body_en: string | null; audience: string; sent_by: string | null; push_sent: number; push_failed: number; created_at: string }
-        Insert: { id?: string; title_ar: string; title_en?: string | null; body_ar: string; body_en?: string | null; audience?: string; sent_by?: string | null; push_sent?: number; push_failed?: number; created_at?: string }
-        Update: { id?: string; title_ar?: string; title_en?: string | null; body_ar?: string; body_en?: string | null; audience?: string; sent_by?: string | null; push_sent?: number; push_failed?: number; created_at?: string }
+        Row: { id: string; title_ar: string; title_en: string | null; body_ar: string; body_en: string | null; audience: string; sent_by: string | null; push_sent: number; push_failed: number; action: string; action_value: string | null; created_at: string }
+        Insert: { id?: string; title_ar: string; title_en?: string | null; body_ar: string; body_en?: string | null; audience?: string; sent_by?: string | null; push_sent?: number; push_failed?: number; action?: string; action_value?: string | null; created_at?: string }
+        Update: { id?: string; title_ar?: string; title_en?: string | null; body_ar?: string; body_en?: string | null; audience?: string; sent_by?: string | null; push_sent?: number; push_failed?: number; action?: string; action_value?: string | null; created_at?: string }
         Relationships: []
       }
       announcement_users: {
