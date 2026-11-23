@@ -2,6 +2,7 @@ import { useRefresh } from '@/components/Refresh';
 import { format, parseISO } from 'date-fns';
 import { ar, enUS } from 'date-fns/locale';
 import { router, type Href } from 'expo-router';
+import { openTarget } from '@/lib/notifications';
 import { BellRing, FileCheck, Gauge, Megaphone, Mic, ShieldCheck, type LucideIcon } from 'lucide-react-native';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -37,7 +38,8 @@ export default function NotificationsScreen() {
   ].filter((g) => g.items.length);
   const open = (item: InboxItem) => {
     markRead(item.id);
-    router.push(target(item));
+    if (item.kind === 'announcement' && item.url === '/notifications') return; // info only: reading it is enough
+    openTarget(item.url, () => router.push(target(item)));
   };
   const art = (item: InboxItem) => {
     const Icon = ICONS[item.kind];

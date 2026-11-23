@@ -1436,3 +1436,8 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 - **Every message is also saved** (`announcements`) and shown in the app's Notifications bell, so users with phone alerts off still see it. Sent through Expo's push service from a dashboard server action (no new edge function). Users who turned notifications off get no phone alert.
 - Tokens live in `push_tokens` (registered after the OS permission is granted, removed on sign-out, deleted when Expo reports the app is gone). Each send is written to the admin log (`send_push`).
 - Needs: migration `20261124090000_push.sql`; APNs key uploaded to EAS and a build WITHOUT `PERSONAL_TEAM`; Android needs Firebase `google-services.json` + FCM v1 key (not set up).
+
+### Q148 — Push: tap action and delivery check (PM decision, 2026-11-23)
+- Each admin message carries an action: **info only** (default, a tap just opens the bell), **open a screen** (fixed list: Home, Services, Money, Garage, Notifications, Upgrade) or **open an https link** (browser). Same action in the bell copy.
+- "Sent 1 / failed 0" only means Expo accepted the message. The dashboard history now has **Check delivery**, which reads Expo's receipts (Apple/Google result, ~15 min later) and shows the real error. Messages are sent with high priority. Migration `20261125090000_push_actions.sql`.
+- A closed app getting nothing is normally the Apple push key missing in EAS (`eas credentials`), not code.

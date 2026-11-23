@@ -22,7 +22,7 @@ import { Toast } from '@/components/Toast';
 import { Button, Text } from '@/components/ui';
 import { applyLanguage } from '@/lib/i18n';
 import { initMonitoring, reportError, wrapRoot } from '@/lib/monitoring';
-import { openedFromNotification, syncNotifications } from '@/lib/notifications';
+import { openedFromNotification, openTarget, syncNotifications } from '@/lib/notifications';
 import { useOnline } from '@/lib/online';
 import { DAY, dehydrateOptions, persister, queryClient } from '@/lib/queryClient';
 import { sessionFromUrl, useSession } from '@/lib/session';
@@ -122,7 +122,7 @@ function App() {
   const tapped = useLastNotificationResponse();
   useEffect(() => {
     if (!ready || !userId || !tapped) return;
-    openedFromNotification(tapped).then((url) => url && router.push(url as never));
+    openedFromNotification(tapped).then((url) => url && openTarget(url, (path) => router.push(path as never)));
   }, [ready, userId, tapped]);
 
   useEffect(() => {
