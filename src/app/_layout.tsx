@@ -138,7 +138,8 @@ function App() {
       else if (session?.user.is_anonymous) {
         if (oldGuest.current !== userId) router.replace('/register');
         oldGuest.current = userId;
-      } else if (profile.data && !profile.data.full_name.trim()) router.replace('/profile-setup'); // Q7
+      } else if (profile.data?.deleted_at) router.replace('/restore-account'); // soft-deleted account: offer restore (flow 13 #7)
+      else if (profile.data && !profile.data.full_name.trim()) router.replace('/profile-setup'); // Q7
       else if (profile.data && !profile.data.onboarding_completed) router.replace('/add-vehicle');
     }
   }, [ready, language, userId, profile.data, session?.user.is_anonymous]);
@@ -170,6 +171,7 @@ function App() {
         <Stack.Screen name="sheet" options={sheetOptions} />
         <Stack.Screen name="switch-vehicle" options={sheetOptions} />
         <Stack.Screen name="upgrade" options={sheetOptions} />
+        <Stack.Screen name="add-record" options={{ presentation: 'modal' }} />
         <Stack.Screen name="pick" options={{ presentation: 'modal' }} />
         <Stack.Screen name="notify-permission" options={{ presentation: 'modal' }} />
       </Stack>

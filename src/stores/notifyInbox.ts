@@ -6,7 +6,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 // `scheduled` holds what syncNotifications() asked the OS to show; once its time has passed it moves to `items`.
 // Server push (Phase 6) can add to `items` the same way.
 
-export type InboxKind = 'soon' | 'overdue' | 'odometer' | 'weekly' | 'voice' | 'licence' | 'insurance' | 'record'; // `url` is the screen the row opens: /part?..., /log/<id>, /vehicle/<id>, /update-odometer
+export type InboxKind = 'soon' | 'overdue' | 'odometer' | 'weekly' | 'voice' | 'licence' | 'insurance' | 'record' | 'announcement'; // `url` is the screen the row opens: /part?..., /log/<id>, /vehicle/<id>, /update-odometer
 export type InboxItem = { id: string; kind: InboxKind; title: string; body: string; url: string; at: string; read: boolean };
 
 const MAX_ITEMS = 100;

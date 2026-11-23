@@ -1411,3 +1411,28 @@ The user speaks freely; an AI returns a list of records (maintenance, expenses, 
 - Opening a car: the card grows to full screen while the car moves to its place without fading. Back runs the same animation in reverse. Replaces the Q108 flight and page fade.
 - The animation lives inside the car page (`components/CarFlight`), because that page is a native layer that covers anything drawn outside it.
 - On the car page, back is at the start of the row: top right in Arabic, top left in English.
+
+### Q144 — Flow 11 scope (PM decision, 2026-11-23)
+- **Alerts read state stays on the phone** (persisted, so alerts no longer vanish, #14). Alerts are made on the phone by local reminders, so there is no server list to sync. Move it to the database only when server push exists (Phase 6). List is now New (unread) then Earlier (read), as designed.
+- **"All records" = the Timeline tab** (Done filter), reached from the bottom nav. `/history` stays as an alias for old links. No new screen.
+- **"Pick a part" search** over the 2,047-part catalog is built once, as the Flow 12 "Search a part" screen on the Flow 14 local catalog, not twice.
+- Fixed colours on the scanner and lime icons are kept (camera overlay and text-on-lime are allowed by the colour rules).
+
+### Q145 — Flow 12 scope and where Services lives (PM decision, 2026-11-23)
+- **Services is a pushed page `/services`, not a fifth tab** (the nav already has four tabs and the voice button). Entry: a "Services" chip under the Timeline segments. It has two views: Tracked (by system, health %, km left, tick bar, from `tracked_health`) and Visits (filter by specialist, or by a searched part).
+- **The 5-step add flow is not built twice.** Flow 14 replaces it with the one ladder (job + total + Save, then details, then another job). Flow 12 builds the screens both flows share: Visit details, Search a part (`search_catalog`, online) and Browse all parts. The picker's action is the caller's (`usePartSearch.onPick`): Services filters visits to it, Flow 14 starts a record with it.
+- "Mark done" / "Log this" / the fan Manual button keep opening the old form until Flow 14 repoints them.
+- Client "Due soon" now also triggers at 30% health or less, matching the server's `item_health`. Car health stays the plain average in the client until the ring uses `car_health` (weighted, open question for Ahmed).
+
+### Q146 — Flow 14 manual entry defaults (PM decision, 2026-11-23; Ahmed to confirm)
+- **A record with only a total cost is valid.** Stored as labor 0 (save_visit needs one labor line per job) plus one "other" line holding the total.
+- **Default specialist = the job's `specialist_key` from the catalog; suggested items = `job_types.suggested_items`.** A picked part with no job becomes a custom job with specialist "other". Both stay editable. Ahmed can change the catalog values later.
+- **One ladder replaces Manual (flow 4) and the 5 steps (flow 12):** find, quick form (job + total + Save), Add details, Add another job. Fuel and other running costs stay on the old form, linked from the start screen.
+- **Catalog on the phone** (`lib/catalog.ts`): refetched only when `catalog_meta.version` changes (migration `20261123090000_catalog_version.sql`, applied by the founder); weekly fallback if the version can't be read.
+- Not yet: voice on the shared draft (needs `process-voice-log` redeploy); save_visit has no idempotency key.
+
+### Q147 — Admin push notifications (PM decision, 2026-11-23)
+- **Admin dashboard → Notifications** (owner/admin only): Arabic title and text required, English optional (English-language users fall back to Arabic), audience = all users (confirm box shows the user count) or selected users (search by name or email, up to 500).
+- **Every message is also saved** (`announcements`) and shown in the app's Notifications bell, so users with phone alerts off still see it. Sent through Expo's push service from a dashboard server action (no new edge function). Users who turned notifications off get no phone alert.
+- Tokens live in `push_tokens` (registered after the OS permission is granted, removed on sign-out, deleted when Expo reports the app is gone). Each send is written to the admin log (`send_push`).
+- Needs: migration `20261124090000_push.sql`; APNs key uploaded to EAS and a build WITHOUT `PERSONAL_TEAM`; Android needs Firebase `google-services.json` + FCM v1 key (not set up).

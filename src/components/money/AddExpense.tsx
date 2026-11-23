@@ -1,7 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ar as arLocale, enUS } from 'date-fns/locale';
-import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Calendar, Camera, Gauge, X } from 'lucide-react-native';
 import { useState } from 'react';
@@ -14,6 +13,7 @@ import { toast } from '@/components/Toast';
 import { Button, Note, OptionPill, PressableScale, Text } from '@/components/ui';
 import { blockFeature, useEntitlements } from '@/lib/entitlements';
 import { errorText } from '@/lib/errors';
+import { pickPhoto } from '@/lib/photo';
 import { clean } from '@/lib/numberInput';
 import { useOnline } from '@/lib/online';
 import { useCurrentVehicle, useVehicle } from '@/lib/queries';
@@ -68,8 +68,8 @@ export function AddExpense() {
 
   const attach = async () => {
     if (blockFeature(ent, 'receipt_photos')) return;
-    const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
-    if (!r.canceled) setPhoto(r.assets[0].uri);
+    const uri = await pickPhoto();
+    if (uri) setPhoto(uri);
   };
 
   const save = async () => {

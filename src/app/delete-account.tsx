@@ -7,37 +7,25 @@ import { useTranslation } from 'react-i18next';
 
 import { PageHeader } from '@/components/PageHeader';
 import { toast } from '@/components/Toast';
-import { revokeApple, signOut } from '@/lib/auth';
-import { useSession } from '@/lib/session';
+import { signOut } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { shadows, useColors } from '@/lib/theme';
 import { Field, Note, PressableScale, Text } from '@/components/ui';
 
-// Delete account (Q34), v2 flow 10 #5 + flow 13: the user types the word to confirm. TODO(phase 1/5): 30-day recovery (soft_delete_my_account) once the app calls it.
+// Delete account (Q34), v2 flow 10 #5 + flow 13: the user types the word to confirm; 30-day recovery.
 // The screen 46 layout. The root gate lands on Welcome after signOut().
 export default function DeleteAccount() {
   const { t } = useTranslation();
   const c = useColors();
-  const userId = useSession()?.user.id;
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const [typed, setTyped] = useState('');
   const match = typed.trim().toLowerCase() === t('feedback.deleteAccount.word').toLowerCase();
 
+  // Soft delete: the account is kept 30 days; signing in again offers "restore" (restore-account).
+  // ponytail: Apple's token is revoked only when the account is deleted for good (purgeAccount), so the 30-day purge job must call it too.
   const remove = async () => {
-    if (!userId) throw new Error('no user');
-    await revokeApple(); // before anything is deleted: if the user cancels Apple's prompt, nothing is lost
-    // Receipt and profile photos go first, a page at a time, until each folder is empty: nothing of the user may stay behind.
-    for (const bucket of ['receipts', 'avatars']) {
-      for (;;) {
-        const { data: files, error } = await supabase.storage.from(bucket).list(userId);
-        if (error) throw error;
-        if (!files?.length) break;
-        const { data: removed, error: removeError } = await supabase.storage.from(bucket).remove(files.map((f) => `${userId}/${f.name}`));
-        if (removeError || !removed?.length) throw removeError ?? new Error(`${bucket} not removed`);
-      }
-    }
-    const { error } = await supabase.rpc('delete_my_account');
+    const { error } = await supabase.rpc('soft_delete_my_account');
     if (error) throw error;
     await signOut();
     toast(t('toast.accountDeleted'));
