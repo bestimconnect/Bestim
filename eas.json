@@ -36,7 +36,10 @@
         "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "142425271367-lhncgl8hjfvvrffsjb3qqrml0c13ua48.apps.googleusercontent.com",
         "EXPO_PUBLIC_SENTRY_DSN": "https://98dc0ac0fd296a35a7c6de3a4bdb80b1@o4512373487042560.ingest.de.sentry.io/4512373610643536"
       },
-      "autoIncrement": true
+      "autoIncrement": true,
+      "ios": {
+        "image": "macos-tahoe-26.6-xcode-27.2"
+      }
     },
     "huawei": {
       "extends": "production",
