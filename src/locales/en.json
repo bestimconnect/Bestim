@@ -240,6 +240,8 @@
       "in6m": "in 6 months",
       "ready": "Ready to sell",
       "verified": "Verified",
+      "passport": "Car passport",
+      "have": "I have an account",
       "slides": [
         {
           "title": "Log your car service by voice",

@@ -16,7 +16,6 @@ import { AppState, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 
-import { CarFlight } from '@/components/CarFlight';
 import { KeyboardDone } from '@/components/KeyboardDone';
 import { SplashOverlay } from '@/components/SplashOverlay';
 import { Toast } from '@/components/Toast';
@@ -158,8 +157,8 @@ function App() {
     <View className="flex-1 bg-paper" style={themeVars[scheme]}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
-        {/* Over the tabs, like a transparent modal: the page below (Home, My Cars) stays attached, so its car is there to fly back to. */}
-        <Stack.Screen name="vehicle/[id]" options={{ presentation: 'transparentModal', animation: 'fade', animationDuration: 250 }} />
+        {/* Over the tabs, like a transparent modal: the page below (Home, My Cars) stays attached. The page runs its own open/close animation (components/CarFlight). */}
+        <Stack.Screen name="vehicle/[id]" options={{ presentation: 'transparentModal', animation: 'none', gestureEnabled: false }} />
         {/* Opened from the car page (a transparent modal) a plain push shows as an inset card. These pages go full screen; */}
         {['part', 'edit-vehicle', 'car-360'].map((n) => <Stack.Screen key={n} name={n} options={{ presentation: 'fullScreenModal' }} />)}
         {/* v2 logging sheets (flow 4): card-colour sheets over the page below */}
@@ -174,7 +173,6 @@ function App() {
         <Stack.Screen name="pick" options={{ presentation: 'modal' }} />
         <Stack.Screen name="notify-permission" options={{ presentation: 'modal' }} />
       </Stack>
-      <CarFlight />
       <KeyboardDone />
       <Toast />
       {splashDone ? null : <SplashOverlay onDone={endSplash} />}

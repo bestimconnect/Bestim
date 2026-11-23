@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { Car, Plus } from 'lucide-react-native';
+import { useEffect, useRef } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +14,7 @@ import { Ring } from '@/components/Ring';
 import { EmptyState, LoadingState } from '@/components/EmptyState';
 import { Backdrop, Button, Card, Rise, Text } from '@/components/ui';
 import { TabHeader } from '@/components/TabHeader';
-import { openDetails } from '@/lib/carFlight';
+import { openDetails, registerCar } from '@/lib/carFlight';
 import { carHealth, STATE_COLOR } from '@/lib/health';
 import { blockLimit, useEntitlements } from '@/lib/entitlements';
 import { useVehicleParts, useVehicles, vehicleName, type Vehicle } from '@/lib/queries';
@@ -29,7 +30,10 @@ function CarCard({ vehicle: v }: { vehicle: Vehicle }) {
   const health = carHealth(parts);
   const color = health.score == null ? c.line : health.late ? STATE_COLOR.overdue : health.soon ? STATE_COLOR.soon : STATE_COLOR.ok;
   const unit = t(`vehicles.unit.${v.odometer_unit}`);
+  const box = useRef<View>(null); // the card the car page grows out of
+  useEffect(() => registerCar(`card:${v.id}`, box), [v.id]);
   return (
+    <View ref={box} collapsable={false}>
     <Card flat onPress={() => openDetails(v, 'list')} className="flex-row items-center gap-3 p-4">
       <View className="min-w-0 flex-1 gap-3">
         <View className="gap-0.5">
@@ -45,6 +49,7 @@ function CarCard({ vehicle: v }: { vehicle: Vehicle }) {
       </View>
       <CarPhoto vehicle={v} width={136} height={76} slot="list" onPress={() => openDetails(v, 'list')} />
     </Card>
+    </View>
   );
 }
 

@@ -4,7 +4,7 @@ import { Banknote, Car, Clock, House, Mic, PencilLine, Plus, X, type LucideIcon 
 import { useEffect, useState } from 'react';
 import type { SharedValue } from 'react-native-reanimated';
 import { I18nManager, Keyboard, Modal, Platform, Pressable, View } from 'react-native';
-import Animated, { FadeIn, FadeOut, interpolate, LinearTransition, useAnimatedStyle, useSharedValue, withDelay, withSpring } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeOut, LinearTransition, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -17,6 +17,7 @@ import { Text } from './ui/Text';
 const icons: Record<string, LucideIcon> = { index: House, timeline: Clock, expenses: Banknote, garage: Car };
 const labels: Record<string, string> = { index: 'home', timeline: 'timeline', expenses: 'money', garage: 'garage' };
 const ON_LIME = '#171B19';
+const CALM = Easing.out(Easing.cubic); // founder: nav motion stays small and quiet, no bounce
 
 /** Space to leave under scrolling content so the floating nav never covers it. */
 export function useTabBarSpace() {
@@ -49,7 +50,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
       exiting={FadeOut.duration(120)}
       className="absolute flex-row items-center gap-2.5"
       style={{ bottom: Math.max(bottom, 16), start: 18, end: 18 }}>
-      <View className="h-16 flex-1 flex-row items-center gap-1 rounded-full bg-nav p-1.5" style={{ boxShadow: shadows.pill }}>
+      <View className="h-16 flex-1 flex-row items-center gap-1 rounded-full bg-nav p-1.5" style={{ boxShadow: shadows.navPill }}>
         {state.routes.map((route, i) => {
           const focused = state.index === i;
           const Icon = icons[route.name];
@@ -65,18 +66,19 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
               key={route.key}
               ref={route.name === 'expenses' ? expensesTarget : undefined}
               collapsable={false}
-              layout={LinearTransition.springify().damping(20).stiffness(190)}
+              layout={LinearTransition.duration(220).easing(CALM)}
               style={{ flex: focused ? 2.3 : 1 }}>
               <PressableScale
+                scale={0.98}
                 onPress={onPress}
                 accessibilityRole="tab"
                 accessibilityLabel={label}
                 accessibilityState={{ selected: focused }}
                 className="h-[50px] w-full flex-row items-center justify-center gap-1.5 overflow-hidden rounded-full">
-                {focused ? <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(120)} className="absolute inset-0 rounded-full bg-lime" /> : null}
+                {focused ? <Animated.View entering={FadeIn.duration(160)} exiting={FadeOut.duration(100)} className="absolute inset-0 rounded-full bg-lime" /> : null}
                 <Icon size={21} color={focused ? ON_LIME : c.ink} strokeWidth={focused ? 2.2 : 1.6} fill={focused && route.name === 'index' ? ON_LIME : 'none'} />
                 {focused ? (
-                  <Animated.View entering={FadeIn.duration(200).delay(60)} exiting={FadeOut.duration(80)} className="shrink">
+                  <Animated.View entering={FadeIn.duration(160)} exiting={FadeOut.duration(80)} className="shrink">
                     <Text variant="label" className="!text-[13px] text-[#171B19]" numberOfLines={1}>{label}</Text>
                   </Animated.View>
                 ) : null}
@@ -87,7 +89,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
       </View>
       <View ref={captureTarget} collapsable={false}>
       <PressableScale
-        scale={0.92}
+        scale={0.97}
         onPress={() => setOpen(true)}
         accessibilityRole="button"
         accessibilityLabel={t('tabs.capture')}
@@ -104,13 +106,14 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
 const R = 96; // fan radius
 const ARC = [30, 78]; // degrees above the horizontal, bending toward the screen centre
 
-/** One fan action: springs from the + out to its slot on the arc. */
+/** One fan action: fades in at its slot on the arc with a small drift outward. */
 function FanItem({ Icon, label, onPress, lime, deg, i, rtl, go }: { Icon: LucideIcon; label: string; onPress: () => void; lime: boolean; deg: number; i: number; rtl: boolean; go: SharedValue<number> }) {
   const dx = Math.cos((deg * Math.PI) / 180) * R * (rtl ? 1 : -1); // the + sits at the screen's start in RTL (left), end in LTR (right)
   const dy = -Math.sin((deg * Math.PI) / 180) * R;
   const style = useAnimatedStyle(() => {
     const p = go.value;
-    return { opacity: interpolate(p, [0, 0.5, 1], [0, 1, 1]), transform: [{ translateX: dx * p }, { translateY: dy * p }, { scale: 0.4 + 0.6 * p }] };
+    const reach = 0.9 + 0.1 * p;
+    return { opacity: p, transform: [{ translateX: dx * reach }, { translateY: dy * reach }, { scale: 0.97 + 0.03 * p }] };
   });
   return (
     <Animated.View className="absolute items-center" style={[{ width: 76, bottom: 2, start: -6 }, style]}>
@@ -124,13 +127,13 @@ function FanItem({ Icon, label, onPress, lime, deg, i, rtl, go }: { Icon: Lucide
   );
 }
 
-/** The + fan: a dimmed layer; the two ways to log spring out on a quarter circle around the button. In a Modal so taps anywhere outside close it. */
+/** The + fan: a dimmed layer; the two ways to log fade in on a quarter circle around the button. In a Modal so taps anywhere outside close it. */
 function Fan({ open, onClose, bottom }: { open: boolean; onClose: () => void; bottom: number }) {
   const { t } = useTranslation();
   const rtl = I18nManager.isRTL;
   const go = useSharedValue(0);
   useEffect(() => {
-    go.value = open ? withDelay(40, withSpring(1, { damping: 13, stiffness: 150 })) : 0;
+    go.value = withTiming(open ? 1 : 0, { duration: open ? 200 : 120, easing: CALM });
   }, [open, go]);
   const turn = useAnimatedStyle(() => ({ transform: [{ rotate: `${go.value * 45}deg` }] }));
   const pick = (f: () => void) => () => {
@@ -148,7 +151,7 @@ function Fan({ open, onClose, bottom }: { open: boolean; onClose: () => void; bo
         <View className="flex-1" pointerEvents="none" />
         <View className="h-16 w-16" pointerEvents="box-none">
           {items.map((it, i) => <FanItem key={it.label} {...it} i={i} rtl={rtl} go={go} />)}
-          <PressableScale scale={0.92} onPress={onClose} accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} className="h-16 w-16 items-center justify-center rounded-full bg-lime" style={{ boxShadow: shadows.fab }}>
+          <PressableScale scale={0.97} onPress={onClose} accessibilityRole="button" accessibilityLabel={t('capture.quick.close')} className="h-16 w-16 items-center justify-center rounded-full bg-lime" style={{ boxShadow: shadows.fab }}>
             <Animated.View style={turn}><Plus size={28} color={ON_LIME} strokeWidth={2} /></Animated.View>
           </PressableScale>
         </View>
